@@ -82,6 +82,45 @@ black. This is the horror made *geographic*, and it gives the session its stakes
 - A city that **Falls** can be **taken over by the Hollow Choir** — trading one hub for a
   cult stronghold.
 
+## Anatomy of a city (it is more than a coordinate)
+
+`settlements.json` is only the **placement index** ("city X at (x,z)"). A city in-game is
+four layers:
+
+| Layer | What | Where |
+|---|---|---|
+| **Location** | name + real `(x,z)` | `settlements.json` (baked) |
+| **Buildings** | the actual blocks: streets, walls, a landmark | **structure templates** (`.nbt`) or code |
+| **State** | Thriving → Uneasy → Besieged → Fallen | **server world state**, keyed by settlement id |
+| **Services** | trade, inn, healer, quests | entities / interactions in the structure |
+
+### Placement is not vanilla
+
+Vanilla places structures by **biome + random spacing**; it cannot pin a structure to exact
+coordinates. Cities must therefore be placed explicitly:
+
+- a **custom `Structure`** whose position is the curated coordinate (with a structure set
+  that does not random-spread), or
+- a **decorator step** in the Earth generator that stamps each curated city during chunk
+  generation.
+
+Either way the Earth generator must first **wire the structure system**
+(`createState` / `ChunkGeneratorStructureState`) — it currently does not, so *no*
+structures generate yet.
+
+### Scale
+
+At 2 blocks/pixel a real 50 km city is ~25 blocks across, so a city is an **abstracted
+district** — a compact cluster with a landmark, walls/gates and service NPCs — not a
+reproduction. Terrain (coast, river, desert) picks the flavour: harbour, river, inland,
+oasis.
+
+### State storage
+
+Settlement state is **world state** keyed by settlement id, not per-player and not in the
+world file's blocks: a `SavedData` map `{settlementId → state}`. Map markers read it; the
+structure itself does not need to change unless it Falls (then it is corrupted/abandoned).
+
 ## Multiplayer & sessions
 
 - Settlement state is **world state** (shared), not per-player.
