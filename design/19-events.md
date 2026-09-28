@@ -16,6 +16,10 @@ corruption of the area/players and the number of open rifts.
 | `hollow_call` | The Hollow Call | `Claimed` corruption | The Horror "calls"; forced night event | one night |
 | `cleansing_dawn` | Cleansing Dawn | After `close_rift` | Corruption recedes; sanity recovers | one dawn |
 
+Several events also **change the world map** (add/remove/recolour markers) — settlements
+falling, rifts opening, cults taking over. Those are listed in
+[`22-map-and-knowledge.md`](22-map-and-knowledge.md#map-change-events).
+
 ## Design notes
 
 - Events are **data-driven**: trigger, weight, effect, duration, cooldown.

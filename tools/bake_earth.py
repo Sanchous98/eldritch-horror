@@ -39,12 +39,28 @@ DEFAULT_ELEVATION = (
     "grid_registered/georeferenced_tiff/ETOPO1_Bed_g_geotiff.zip"
 )
 DEFAULT_KOPPEN = "https://figshare.com/ndownloader/files/12407516"
+DEFAULT_PLACES = (
+    "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/"
+    "master/geojson/ne_10m_populated_places_simple.geojson"
+)
+
+# --- Curated cities: the ~24 real cities the game actually features (see design/21). ---
+CURATED_CITIES = [
+    "London", "Paris", "Rome", "Istanbul", "Cairo", "Lagos", "Nairobi", "Cape Town",
+    "Moscow", "Delhi", "Mumbai", "Shanghai", "Beijing", "Tokyo", "Seoul", "Bangkok",
+    "Jakarta", "Sydney", "New York", "Los Angeles", "Mexico City", "Rio de Janeiro",
+    "Buenos Aires", "Lima",
+]
+CURATED_MARKER = "curated"
 
 HERE = os.path.dirname(__file__)
 CACHE = os.path.join(HERE, ".cache")
 OUT_DIR = os.path.abspath(os.path.join(
     HERE, "..", "src", "main", "resources", "assets", "eldritch_horror", "map"))
 ELEV_OFFSET = 12000  # store elevation+offset as unsigned 16-bit
+
+# World extent, matching EarthMap: 2:1, 2 blocks/pixel, 16384 x 8192.
+BLOCKS_PER_DEGREE = 16384 / 360.0
 
 
 def cache_path(source, default_name):
@@ -159,6 +175,92 @@ def bake_koppen(w, h, force, source):
 
 
 # ------------------------------------------------------------------ helpers
+def world_x(lon):
+    return round(lon * BLOCKS_PER_DEGREE)
+
+
+def world_z(lat):
+    return round(-lat * BLOCKS_PER_DEGREE)
+
+
+def bake_places(force, source, min_pop):
+    """Bake real settlements into a JSON list (world coords, tier by population)."""
+    import math
+
+    out = os.path.join(OUT_DIR, "settlements.json")
+    if os.path.exists(out) and not force:
+        print(f"skip (exists): {out}")
+        return
+    data = fetch_geojson(source)
+    places = []
+    for feat in data["features"]:
+        p = feat["properties"]
+        name = p.get("name")
+        if not name:
+            continue
+        lon = p.get("longitude", feat["geometry"]["coordinates"][0])
+        lat = p.get("latitude", feat["geometry"]["coordinates"][1])
+        if abs(lat) > 75:      # poles: skip (map is compressed at the edges)
+            continue
+        try:
+            pop = int(p.get("pop_max") or 0)
+        except (TypeError, ValueError):
+            pop = 0
+        # Natural Earth has duplicate rows; dedupe by name+coords.
+        slug = "".join(c if c.isalnum() else "_" for c in name.lower()).strip("_")[:40]
+        wx, wz = world_x(float(lon)), world_z(float(lat))
+        places.append({
+            "id": f"{slug}_{wx}_{wz}",   # coordinates guarantee uniqueness
+            "name": name,
+            "lat": round(float(lat), 4),
+            "lon": round(float(lon), 4),
+            "x": wx,
+            "z": wz,
+            "population": pop,
+        })
+
+    # De-duplicate on rounded coordinates, and keep only places above the floor.
+    seen = set()
+    unique = []
+    for p in places:
+        if p["population"] < min_pop:
+            continue
+        k = (p["x"], p["z"])
+        if k in seen:
+            continue
+        seen.add(k)
+        unique.append(p)
+
+    # For each curated name keep only the largest-population entry; demote the rest.
+    curated_best = {}
+    for p in unique:
+        if p["name"] in CURATED_CITIES:
+            if p["name"] not in curated_best or p["population"] > curated_best[p["name"]]["population"]:
+                curated_best[p["name"]] = p
+    for p in unique:
+        if p["name"] in CURATED_CITIES and curated_best.get(p["name"]) is not p:
+            p["tier"] = "town"
+        elif p["name"] in CURATED_CITIES:
+            p["tier"] = CURATED_MARKER
+        else:
+            p["tier"] = "town"
+
+    # Ensure every curated city resolved (fail loudly if a name is wrong/missing).
+    found = {p["name"] for p in unique if p["tier"] == CURATED_MARKER}
+    missing = [c for c in CURATED_CITIES if c not in found]
+    if missing:
+        print(f"WARNING: curated cities not found in source: {missing}")
+
+    unique.sort(key=lambda p: (p["tier"] != CURATED_MARKER, -p["population"]))
+    os.makedirs(OUT_DIR, exist_ok=True)
+    with open(out, "w") as f:
+        json.dump({"settlements": unique,
+                   "curated": CURATED_CITIES,
+                   "blocks_per_degree": BLOCKS_PER_DEGREE}, f, indent=1)
+    print(f"wrote {out} ({len(unique)} places; {len(found)}/{len(CURATED_CITIES)} curated "
+          f"cities; floor {min_pop})")
+
+
 def fetch_geojson(source):
     if os.path.exists(source):
         with open(source) as f:
@@ -184,10 +286,13 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--elevation-src", default=DEFAULT_ELEVATION)
     ap.add_argument("--koppen-src", default=DEFAULT_KOPPEN)
+    ap.add_argument("--places-src", default=DEFAULT_PLACES)
+    ap.add_argument("--min-pop", type=int, default=100000,
+                    help="population at/above which a place is a city")
     args = ap.parse_args()
 
     h = args.width // 2
-    layers = ["landmask", "elevation", "koppen"] if args.layers == "all" \
+    layers = ["landmask", "elevation", "koppen", "places"] if args.layers == "all" \
         else [s.strip() for s in args.layers.split(",")]
 
     for layer in layers:
@@ -198,6 +303,8 @@ def main():
             bake_elevation(args.width, h, args.force, args.elevation_src)
         elif layer == "koppen":
             bake_koppen(args.width, h, args.force, args.koppen_src)
+        elif layer == "places":
+            bake_places(args.force, args.places_src, args.min_pop)
         else:
             sys.exit(f"unknown layer: {layer}")
 

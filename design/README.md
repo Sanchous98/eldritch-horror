@@ -39,6 +39,8 @@ is the complete specification.
 20. [18-bosses.md](18-bosses.md) — boss encounters.
 21. [19-events.md](19-events.md) — ambient and world events.
 22. [20-map.md](20-map.md) — biomes, dimensions, structures.
+23. [21-settlements.md](21-settlements.md) — cities and towns (real Earth coordinates).
+24. [22-map-and-knowledge.md](22-map-and-knowledge.md) — the world map and map-change events.
 
 ## The one-paragraph summary
 

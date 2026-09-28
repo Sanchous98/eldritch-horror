@@ -47,7 +47,8 @@ They expand from rifts and altars as the corruption field grows and recede after
 | `order_vault` | Order Vault | `observatory_plateau` | Tomes, silver, cleansing services |
 | `cult_stronghold` | Cult Stronghold | Overworld, generated | Faction base; worship; shops |
 | `rift_scar` | Rift Scar | `ashen_waste` | A stable opening; corruption source |
-| `veil_gate` | Veil Gate | Deep rifts | Two-way travel anchor |
+| `rift_gate` | Veil Gate | Deep rifts | Two-way travel anchor |
+| `settlement` | Settlement | Land, temperate/coastal (real city coords) | Civilian hub: trade, inn, quests — see [`21-settlements.md`](21-settlements.md) |
 
 ### Ritual Altar Site (pattern, tier 1)
 
