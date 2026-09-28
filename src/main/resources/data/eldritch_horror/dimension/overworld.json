@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:overworld",
+  "generator": {
+    "type": "eldritch_horror:earth",
+    "biomes": [
+      "minecraft:jungle",
+      "minecraft:savanna",
+      "minecraft:desert",
+      "minecraft:plains",
+      "minecraft:forest",
+      "minecraft:birch_forest",
+      "minecraft:taiga",
+      "minecraft:snowy_taiga",
+      "minecraft:snowy_plains",
+      "minecraft:ice_spikes",
+      "minecraft:ocean",
+      "minecraft:deep_ocean",
+      "minecraft:beach"
+    ]
+  }
+}

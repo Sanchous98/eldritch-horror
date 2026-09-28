@@ -66,6 +66,20 @@ Artifacts land in `build/` on your host, owned by you (the image matches your `U
 > mounted path is read from *that* machine, not yours. Run the dev container against a
 > local daemon (or clone the repo on the remote host first).
 
+### Dev server (connect your own client)
+
+Run a dedicated server in the container and join it from your normal Minecraft client
+(Minecraft **26.3**):
+
+```sh
+docker compose --profile server up server
+# then: Multiplayer -> Direct Connect -> localhost:25565
+```
+
+The port is published (`SERVER_PORT` overrides 25565). The world and logs land in `run/`
+in the repo. The Earth map is server-side, so the server generates it — your client needs
+nothing special. Stop with Ctrl-C.
+
 ### Dev client (needs a display + GPU)
 
 `runClient` opens a window, so it needs X11/Wayland and a GPU — on Linux:

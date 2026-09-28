@@ -7,6 +7,7 @@ import com.sanchous98.eldritchhorror.registry.ModEffects;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModItems;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import com.sanchous98.eldritchhorror.registry.ModWorldGen;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -50,6 +51,8 @@ public final class EldritchHorror {
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModEffects.MOB_EFFECTS.register(modEventBus);
         ModSounds.SOUND_EVENTS.register(modEventBus);
+        ModWorldGen.CHUNK_GENERATORS.register(modEventBus);
+        ModWorldGen.BIOME_SOURCES.register(modEventBus);
 
         // Config.
         modContainer.registerConfig(Type.COMMON, ModConfig.SPEC);

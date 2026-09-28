@@ -45,6 +45,25 @@ services:
     tty: true
 
   # ---------------------------------------------------------------------------
+  # Dedicated dev server — connect with your normal Minecraft client on 1.21.11/26.3.
+  #
+  #   docker compose --profile server up server
+  #   # then in your client: Multiplayer -> Direct Connect -> localhost:25565
+  #
+  # The server runs `./gradlew runServer`, which builds the mod and starts NeoForge.
+  # World/data live in ./run (bind-mounted via the repo mount). Port is published.
+  # ---------------------------------------------------------------------------
+  server:
+    profiles: ["server"]
+    extends:
+      service: dev
+    command: ["./gradlew", "runServer", "--no-daemon", "--console=plain"]
+    ports:
+      - "${SERVER_PORT:-25565}:25565"
+    stdin_open: true
+    tty: true
+
+  # ---------------------------------------------------------------------------
   # Dev client with a GPU + X11/Wayland display (Linux only).
   #
   #   xhost +si:localuser:$(id -un)   # allow the container to use your display

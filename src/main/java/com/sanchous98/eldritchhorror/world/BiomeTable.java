@@ -1,65 +1,97 @@
 package com.sanchous98.eldritchhorror.world;
 
-import java.util.Map;
+import java.util.List;
 
 /**
- * Maps a Köppen–Geiger class index (as baked in {@code koppen_<W>x<H>.png}) to a vanilla
- * biome id. Class indices and names follow Beck et al. 2018 (1 = Af … 30 = EF); 0 = ocean.
+ * Köppen–Geiger class index → vanilla biome id. Class indices and names follow Beck et al.
+ * 2018 (1 = Af … 30 = EF); index 0 = ocean/unclassified.
  *
- * <p>Pure and Minecraft-independent; the generator resolves the returned id against the
- * biome registry. Extend freely — this table is the single source of truth for the mapping.
+ * <p>{@link #BIOMES} is index-aligned with the class number (entry 0 is a placeholder) so
+ * the generator can look a class up directly, and the whole table is serialisable into the
+ * biome source codec (the biome-source can then resolve ids without a live registry).
+ *
+ * <p>Pure and Minecraft-independent; extend freely — this table is the single source of truth.
  */
 public final class BiomeTable {
-    private static final Map<Integer, String> LAND = Map.ofEntries(
-            Map.entry(1, "minecraft:jungle"),          // Af  tropical rainforest
-            Map.entry(2, "minecraft:jungle"),          // Am  tropical monsoon
-            Map.entry(3, "minecraft:savanna"),         // Aw  tropical savannah
-            Map.entry(4, "minecraft:desert"),          // BWh hot desert
-            Map.entry(5, "minecraft:desert"),          // BWk cold desert
-            Map.entry(6, "minecraft:savanna"),         // BSh hot steppe
-            Map.entry(7, "minecraft:plains"),          // BSk cold steppe
-            Map.entry(8, "minecraft:plains"),          // Csa Mediterranean hot
-            Map.entry(9, "minecraft:plains"),          // Csb Mediterranean warm
-            Map.entry(10, "minecraft:plains"),         // Csc Mediterranean cold
-            Map.entry(11, "minecraft:forest"),         // Cwa monsoon hot
-            Map.entry(12, "minecraft:forest"),         // Cwb monsoon warm
-            Map.entry(13, "minecraft:forest"),         // Cwc monsoon cold
-            Map.entry(14, "minecraft:forest"),         // Cfa humid subtropical
-            Map.entry(15, "minecraft:birch_forest"),   // Cfb oceanic
-            Map.entry(16, "minecraft:birch_forest"),   // Cfc subpolar oceanic
-            Map.entry(17, "minecraft:taiga"),          // Dsa
-            Map.entry(18, "minecraft:taiga"),          // Dsb
-            Map.entry(19, "minecraft:taiga"),          // Dsc
-            Map.entry(20, "minecraft:snowy_taiga"),    // Dsd
-            Map.entry(21, "minecraft:taiga"),          // Dwa
-            Map.entry(22, "minecraft:taiga"),          // Dwb
-            Map.entry(23, "minecraft:snowy_taiga"),    // Dwc
-            Map.entry(24, "minecraft:snowy_taiga"),    // Dwd
-            Map.entry(25, "minecraft:taiga"),          // Dfa
-            Map.entry(26, "minecraft:taiga"),          // Dfb
-            Map.entry(27, "minecraft:snowy_taiga"),    // Dfc
-            Map.entry(28, "minecraft:snowy_taiga"),    // Dfd
-            Map.entry(29, "minecraft:snowy_plains"),   // ET  tundra
-            Map.entry(30, "minecraft:ice_spikes")      // EF  frost
+
+    /** Index-aligned with the Köppen class (0 unused placeholder, 1..30 per Beck 2018). */
+    public static final List<String> BIOMES = List.of(
+            "minecraft:ocean",         // 0  placeholder (ocean handled separately)
+            "minecraft:jungle",        // 1  Af  tropical rainforest
+            "minecraft:jungle",        // 2  Am  tropical monsoon
+            "minecraft:savanna",       // 3  Aw  tropical savannah
+            "minecraft:desert",        // 4  BWh hot desert
+            "minecraft:desert",        // 5  BWk cold desert
+            "minecraft:savanna",       // 6  BSh hot steppe
+            "minecraft:plains",        // 7  BSk cold steppe
+            "minecraft:plains",        // 8  Csa Mediterranean hot
+            "minecraft:plains",        // 9  Csb Mediterranean warm
+            "minecraft:plains",        // 10 Csc Mediterranean cold
+            "minecraft:forest",        // 11 Cwa monsoon hot
+            "minecraft:forest",        // 12 Cwb monsoon warm
+            "minecraft:forest",        // 13 Cwc monsoon cold
+            "minecraft:forest",        // 14 Cfa humid subtropical
+            "minecraft:birch_forest",  // 15 Cfb oceanic
+            "minecraft:birch_forest",  // 16 Cfc subpolar oceanic
+            "minecraft:taiga",         // 17 Dsa
+            "minecraft:taiga",         // 18 Dsb
+            "minecraft:taiga",         // 19 Dsc
+            "minecraft:snowy_taiga",   // 20 Dsd
+            "minecraft:taiga",         // 21 Dwa
+            "minecraft:taiga",         // 22 Dwb
+            "minecraft:snowy_taiga",   // 23 Dwc
+            "minecraft:snowy_taiga",   // 24 Dwd
+            "minecraft:taiga",         // 25 Dfa
+            "minecraft:taiga",         // 26 Dfb
+            "minecraft:snowy_taiga",   // 27 Dfc
+            "minecraft:snowy_taiga",   // 28 Dfd
+            "minecraft:snowy_plains",  // 29 ET  tundra
+            "minecraft:ice_spikes"     // 30 EF  frost
     );
+
+    /** Fallback for unclassified land. */
+    public static final String DEFAULT_LAND = "minecraft:plains";
+
+    /**
+     * The distinct biome ids the source may return, in a stable order. This is the set that
+     * gets resolved to holders and listed as possible biomes.
+     */
+    public static final List<String> SOURCE_BIOMES = sourceBiomes();
 
     private BiomeTable() {
     }
 
-    /** @return a vanilla biome id for the class, or {@code null} for ocean/unknown. */
-    public static String land(int koppenClass) {
-        return LAND.get(koppenClass);
+    private static List<String> sourceBiomes() {
+        java.util.LinkedHashSet<String> set = new java.util.LinkedHashSet<>(BIOMES.subList(1, BIOMES.size()));
+        set.add("minecraft:ocean");
+        set.add("minecraft:deep_ocean");
+        set.add("minecraft:beach");
+        set.add(DEFAULT_LAND);
+        return List.copyOf(set);
     }
 
-    /** Biome id for a column: ocean by depth, else the Köppen mapping with a coast override. */
+    /** @return a vanilla biome id for a Köppen class (1..30); never null. */
+    public static String land(int koppenClass) {
+        if (koppenClass <= 0 || koppenClass >= BIOMES.size()) {
+            return DEFAULT_LAND;
+        }
+        return BIOMES.get(koppenClass);
+    }
+
+    /**
+     * Biome id for a surface column.
+     *
+     * @param koppenClass  Köppen class from the baked layer (0 = ocean/unclassified)
+     * @param land         whether the column is land
+     * @param depthBelowSea how far the surface is below sea level, in blocks (0 for land)
+     */
     public static String forColumn(int koppenClass, boolean land, int depthBelowSea) {
         if (!land) {
+            if (depthBelowSea <= 1) {
+                return "minecraft:beach";
+            }
             return depthBelowSea > 30 ? "minecraft:deep_ocean" : "minecraft:ocean";
         }
-        if (depthBelowSea == 0 && koppenClass == 0) {
-            return "minecraft:beach"; // coast not classified
-        }
-        String biome = land(koppenClass);
-        return biome != null ? biome : "minecraft:plains";
+        return land(koppenClass);
     }
 }
