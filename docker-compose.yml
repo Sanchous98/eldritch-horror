@@ -1,0 +1,78 @@
+# Dev environment for Eldritch Horror (Minecraft 1.21.1 / NeoForge).
+#
+#   docker compose run --rm dev ./gradlew build
+#   docker compose run --rm dev ./gradlew runData
+#   docker compose run --rm dev bash
+#
+# The repo is bind-mounted at /workspace, so edits on the host are seen instantly.
+# The Gradle cache lives in a named volume, so Minecraft/NeoForge decompilation is
+# downloaded and kept **once** (~1 GB) instead of on every run.
+#
+# The dev client (runClient) needs a display + GPU; see the `gpu` profile at the
+# bottom and the "Dev client on Linux" section of the README.
+name: eldritch-horror-dev
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    image: eldritch-horror-dev:latest
+    init: true
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - gradle-cache:/home/dev/.gradle
+    environment:
+      GRADLE_USER_HOME: /home/dev/.gradle
+      # Give the daemon room; the first build decompiles Minecraft with Vineflower.
+      JAVA_TOOL_OPTIONS: "-Xmx3g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      # Uncomment to force the exact host UID/GID if the bind mount is not writable:
+      # HOST_UID: ${UID:-1000}
+    # `docker compose run --rm dev` is the normal entry point. `up -d` keeps an
+    # idle container you can `exec` into:
+    #   docker compose up -d dev && docker compose exec dev bash
+    command: ["sleep", "infinity"]
+    stdin_open: true
+    tty: true
+
+  # ---------------------------------------------------------------------------
+  # Dev client with a GPU + X11/Wayland display (Linux only).
+  #
+  #   xhost +si:localuser:$(id -un)   # allow the container to use your display
+  #   docker compose --profile gpu run --rm dev-gpu ./gradlew runClient
+  #
+  # On Wayland, ensure XWayland is running; DISPLAY/XDG_RUNTIME_DIR are forwarded.
+  # The `nvidia` section is opt-in: uncomment `deploy` if you have the NVIDIA
+  # Container Toolkit, otherwise Docker uses your default GPU (often none/softpipe).
+  # ---------------------------------------------------------------------------
+  dev-gpu:
+    profiles: ["gpu"]
+    extends:
+      service: dev
+    environment:
+      GRADLE_USER_HOME: /home/dev/.gradle
+      JAVA_TOOL_OPTIONS: "-Xmx3g"
+      DISPLAY: ${DISPLAY:-:0}
+      XDG_RUNTIME_DIR: /tmp/xdg
+      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-}
+    volumes:
+      - .:/workspace
+      - gradle-cache:/home/dev/.gradle
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XDG_RUNTIME_DIR:-/tmp/xdg}:/tmp/xdg:rw
+    # For NVIDIA, install the container toolkit and uncomment:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu, graphics]
+
+volumes:
+  gradle-cache:

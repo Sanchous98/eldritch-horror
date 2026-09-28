@@ -1,0 +1,14 @@
+# Keep the build context small — the repo is bind-mounted at runtime, not copied in.
+.git
+.gradle
+build
+run
+run-data
+repo
+.gradle/
+**/build/
+**/.idea/
+**/*.iml
+*.log
+design/
+docs/

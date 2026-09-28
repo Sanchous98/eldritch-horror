@@ -1,0 +1,31 @@
+# Dev image for Eldritch Horror — JDK 21 + the native libs the dev client needs.
+#
+# You normally never build this by hand; `docker compose` builds it. The UID/GID
+# args make the in-container user match you, so files written to the bind-mounted
+# repo stay owned by you instead of root.
+FROM eclipse-temurin:21-jdk-jammy
+
+ARG UID=1000
+ARG GID=1000
+
+# Toolchain: the Gradle wrapper downloads Gradle itself. The X11/GL/OpenAL libs are
+# for `./gradlew runClient` (they are unused for headless builds).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      bash git curl ca-certificates procps less \
+      libx11-6 libxext6 libxrender1 libxtst6 libxi6 libxrandr2 \
+      libxcursor1 libxinerama1 libxxf86vm1 libgl1 libglu1-mesa \
+      libopenal1 libpulse0 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Create a user matching the host; tolerate a base image that already owns the ids.
+RUN set -eux; \
+    if ! getent group "${GID}" >/dev/null; then groupadd -g "${GID}" dev; fi; \
+    if ! getent passwd "${UID}" >/dev/null; then useradd -m -u "${UID}" -g "${GID}" -s /bin/bash dev; fi; \
+    install -d -o "${UID}" -g "${GID}" /workspace /home/dev/.gradle
+
+ENV HOME=/home/dev \
+    GRADLE_USER_HOME=/home/dev/.gradle
+
+USER ${UID}:${GID}
+WORKDIR /workspace

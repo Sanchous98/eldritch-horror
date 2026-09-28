@@ -18,13 +18,16 @@ The mod is built on three RPG axes and one progression engine:
 | **Cult reputation** | Faction standing gating rites, reagents and services. | Social progression; cults oppose each other. |
 | **Rituals** | Data-driven altar recipes with a block pattern + offerings + outcomes. | Quest-like advancement and the mod's boss/content unlocks. |
 
-See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design and
+See [`design/`](design/README.md) for the complete design bible (source of truth), or
+[`docs/DESIGN.md`](docs/DESIGN.md) for a short summary and
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the code is laid out.
 
 ## Requirements
 
 - **JDK 21** (Mojang ships Java 21 with 1.21.1).
 - No Gradle install needed — the wrapper is committed (`./gradlew`).
+
+**Or skip the local install entirely — see [Development with Docker](#development-with-docker).**
 
 ## Build & run
 
@@ -40,6 +43,41 @@ See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design and
 > hardcodes a **4 GB** heap for it. If the build dies with `Node action for decompile failed`
 > (and no other error), give the Gradle daemon more RAM — on a machine with limited free memory
 > this first step is the bottleneck. Once the NeoForm cache is warm, later builds are quick.
+
+## Development with Docker
+
+If you'd rather not install a JDK (or want a clean, reproducible toolchain), use the
+dev container. It uses JDK 21 and keeps the Gradle cache in a named volume, so the
+one-time NeoForge decompile happens **once** instead of on every run.
+
+```sh
+docker compose run --rm dev ./gradlew build          # build the mod
+docker compose run --rm dev ./gradlew runData        # run data generators
+docker compose run --rm dev ./gradlew runServer      # headless dev server
+docker compose run --rm dev bash                     # a shell in the environment
+```
+
+The repo is bind-mounted at `/workspace`, so edits on the host are picked up instantly.
+Artifacts land in `build/` on your host, owned by you (the image matches your `UID`/`GID`).
+
+### Dev client (needs a display + GPU)
+
+`runClient` opens a window, so it needs X11/Wayland and a GPU — on Linux:
+
+```sh
+xhost +si:localuser:$(id -un)                        # let the container use your display
+docker compose --profile gpu run --rm dev-gpu ./gradlew runClient
+```
+
+The `gpu` profile forwards `DISPLAY` and the X11 socket. For an NVIDIA GPU, install the
+[NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+and uncomment the `deploy:` block in `docker-compose.yml`. On macOS/Windows Docker
+Desktop there is no GPU/X11 pass-through; run the client natively there and use Docker
+only for builds.
+
+> **Memory:** the first in-container build decompiles Minecraft (Vineflower wants
+> ~4 GB). Give Docker Desktop at least ~6 GB, or on Linux set `JAVA_TOOL_OPTIONS`
+> in `docker-compose.yml` and ensure the host has headroom.
 
 ## Project layout
 
