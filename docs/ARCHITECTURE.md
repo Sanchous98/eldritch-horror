@@ -91,3 +91,16 @@ depends on a loader class that would break the dedicated-server side.
    matcher? A bespoke matcher is simpler but loses structure-block tooling.
 4. **Client rendering**: vanilla `GuiGraphics` overlay vs. a separate render layer for the
    distortion effect.
+
+## Server-first & sessions
+
+The mod targets a **dedicated server with many players**; see
+[`MULTIPLAYER.md`](MULTIPLAYER.md). Two rules follow:
+
+- **Server-only is the default.** Gameplay state (terrain, sanity, corruption, reputation,
+  rifts, session phase) lives on the server. The client half is limited to presentation
+  (HUD, overlays, particles) and must never decide outcomes or generate terrain.
+- **The map is server-side.** The baked Earth layers are **common** mod resources read by
+  the server at startup through the mod class loader (`world/EarthMap`). No client classes
+  are referenced from `world/`. The `ContinentChunkGenerator` and `EarthBiomeSource` run
+  only where worldgen runs — the server (or the integrated server in singleplayer).
