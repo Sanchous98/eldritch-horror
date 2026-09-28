@@ -78,7 +78,50 @@ Then iterate on the rest of M2 (#65–#71) — hallucinations, rest/nightmares, 
 - **M4 Cults** (#33) — after rituals exist to teach.
 - Then **M9 Gear** → **M5 Bestiary/endgame** → **M7 World** → **M8 Quest/Dialogue**.
 
-## Ways to start badly (avoid)
+## Testable-first alternative (recommended if you want visible progress)
+
+If you'd rather see something work immediately, start with the two things that are
+verifiable in-game within a minute — **Classes/specs** and the **Map** — and pull in the
+core plumbing only as each demands it. The enabler for both is the debug command suite
+(**#46**), which is a tiny bit of plumbing that pays for itself instantly.
+
+### Slice A — Classes & specs  *(fastest, most self-contained)*
+
+Why first: pure logic + attributes, no worldgen or datapacks required, and it makes the
+RPG feel real the moment you pick a class.
+
+1. A `PlayerClass` model + the three specs from [`design/14-classes.md`](../design/14-classes.md)
+   (code-defined first; a datapack registry later).
+2. `#4` the attributes the specs modify (`max_sanity`, …).
+3. One `class_token` item per class, in a creative tab — use it to adopt that class.
+4. `/eldritch class set|get|info` to apply and inspect specs.
+5. A GameTest asserting the bonuses apply.
+
+**Testable in 30 seconds:** join a dev world → `/give` yourself the investigator token →
+use it → `/eldritch class info` shows the spec and your attributes changed.
+
+### Slice B — Map  *(more moving parts; test in a fresh world)*
+
+Why second: worldgen is easy to get subtly wrong, and each change means a new world.
+
+1. One structure (`ritual_altar_site`) → verify with `/place structure eldritch_horror:ritual_altar_site`.
+2. One biome (`blighted_woods`) as a datapack → verify with `/locate biome eldritch_horror:blighted_woods`.
+3. The Veil dimension last — the heaviest piece.
+
+**Testable in a minute:** `/place` the structure next to you; in a new world, `/locate` the
+biome.
+
+### What each slice pulls in (just in time)
+
+| Slice | Core plumbing it forces you to build |
+|---|---|
+| A — Classes | `#46` command suite, `#4` attributes, `#43` id helpers (mostly done) |
+| B — Map | `#50` datapack conventions, structure/biome registration |
+
+Everything else on the board stays later. This ordering keeps you always one command away
+from verifying your work.
+
+
 
 - **Breadth-first:** one story from every epic at once. Nothing is playable, nothing is
   testable, and interfaces churn.
