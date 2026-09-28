@@ -1,0 +1,9 @@
+{
+  "itemGroup.eldritch_horror": "Eldritch Horror",
+  "block.eldritch_horror.eldritch_stone": "Eldritch Stone",
+  "item.eldritch_horror.forbidden_reagent": "Forbidden Reagent",
+  "attribute.eldritch_horror.max_sanity": "Max Sanity",
+  "effect.eldritch_horror.madness": "Madness",
+  "effect.eldritch_horror.marked": "Marked",
+  "effect.eldritch_horror.corrupted": "Corrupted"
+}

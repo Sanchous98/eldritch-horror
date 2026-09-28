@@ -1,0 +1,5 @@
+# Treat Gradle wrapper scripts and the jar as binary-safe.
+*.bat text eol=crlf
+*.jar binary
+*.png binary
+*.ogg binary

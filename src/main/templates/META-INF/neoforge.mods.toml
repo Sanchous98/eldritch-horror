@@ -1,0 +1,31 @@
+# Mod metadata. Placeholders are expanded from gradle.properties by the
+# generateModMetadata task. See https://docs.neoforged.net/docs/gettingstarted/modfiles
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+# issueTrackerURL="https://github.com/Sanchous98/eldritch-horror/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+# logoFile="eldritch_horror.png"
+description='''
+${mod_description}
+'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"

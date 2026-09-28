@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+out/
+repo/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+
+# Minecraft dev run directories (worlds, logs, options)
+run/
+run-data/
+
+# Generated data (datagen output is committed; the cache is not)
+src/generated/**/.cache/
+
+# OS
+.DS_Store
+Thumbs.db
