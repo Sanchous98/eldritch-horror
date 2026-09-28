@@ -227,7 +227,24 @@ survival-scale world (continents a day's walk, not a lifetime's). A **sensible s
 - A debug command `/eldritch map info` → land/sea + elevation for the current column.
 - `ContinentField` unit tests (pure function): determinism, ocean at edges, land fraction.
 
-## Implementation order
+## Implementation status
+
+| Piece | State |
+|---|---|
+| Baked landmask / elevation / Köppen layers | ✅ done (`tools/bake_earth.py`) |
+| `EarthMap` + `EarthMaps` (server-side sampling) | ✅ done |
+| `ElevationCurve`, `BiomeTable` | ✅ done |
+| `EarthBiomeSource`, `EarthChunkGenerator` | ✅ done |
+| Overworld dimension override | ✅ done (`data/minecraft/dimension/overworld.json`) |
+| Runs on a dedicated server | ✅ verified (`Done (…)`, single `minecraft:overworld`) |
+| **Surface decoration** (trees, grass, flowers, flora) | ❌ **deferred** — see the *Surface decoration* story |
+| Pinned coastal spawn | ❌ deferred (vanilla spawn search currently finds land) |
+| Structures (altar sites, temples, vaults) | ❌ later (`design/20-map.md`) |
+
+Because a custom generator **replaces** vanilla biome decoration, the surface is currently
+bare (stone/surface block, no trees or grass). That is expected and tracked separately.
+
+
 
 1. **Bake step** (offline Python): Natural Earth land polygons → a 8192×4096 1-bit landmask;
    optionally ETOPO/GEBCO → an 8-bit elevation layer. Commit the layers.
