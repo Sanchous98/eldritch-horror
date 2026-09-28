@@ -1,6 +1,6 @@
 # Eldritch Horror
 
-An RPG-flavoured **eldritch horror** mod for **Minecraft 1.21.1 / NeoForge**. Sanity, corruption,
+An RPG-flavoured **eldritch horror** mod for **Minecraft 26.3 / NeoForge**. Sanity, corruption,
 cults, forbidden rituals, and things that should not be — built as a progression system rather
 than a monster pack.
 
@@ -24,7 +24,7 @@ See [`design/`](design/README.md) for the complete design bible (source of truth
 
 ## Requirements
 
-- **JDK 21** (Mojang ships Java 21 with 1.21.1).
+- **JDK 25** (Minecraft 26.3 requires Java 25).
 - No Gradle install needed — the wrapper is committed (`./gradlew`).
 
 **Or skip the local install entirely — see [Development with Docker](#development-with-docker).**

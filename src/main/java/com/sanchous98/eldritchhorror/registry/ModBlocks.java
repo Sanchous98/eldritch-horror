@@ -2,7 +2,6 @@ package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -16,7 +15,7 @@ public final class ModBlocks {
     // Placeholder: replace with the ritual altar once the block exists.
     public static final DeferredBlock<Block> ELDRITCH_STONE =
             BLOCKS.registerSimpleBlock("eldritch_stone",
-                    BlockBehaviour.Properties.of().strength(3.0f, 6.0f));
+                    p -> p.strength(3.0f, 6.0f));
 
     private ModBlocks() {
     }

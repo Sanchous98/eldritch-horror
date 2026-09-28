@@ -1,9 +1,9 @@
-# Dev image for Eldritch Horror — JDK 21 + the native libs the dev client needs.
+# Dev image for Eldritch Horror — JDK 25 + the native libs the dev client needs.
 #
-# You normally never build this by hand; `docker compose` builds it. The UID/GID
-# args make the in-container user match you, so files written to the bind-mounted
-# repo stay owned by you instead of root.
-FROM eclipse-temurin:21-jdk-jammy
+# Minecraft 26.3 requires Java 25. You normally never build this by hand; `docker
+# compose` builds it. The UID/GID args make the in-container user match you, so files
+# written to the bind-mounted repo stay owned by you instead of root.
+FROM eclipse-temurin:25-jdk-jammy
 
 ARG UID=1000
 ARG GID=1000

@@ -1,6 +1,6 @@
 # 01 — Overview
 
-**Eldritch Horror** is an RPG-flavoured horror mod for Minecraft **1.21.1 / NeoForge**.
+**Eldritch Horror** is an RPG-flavoured horror mod for Minecraft **26.3 / NeoForge**.
 It is not a monster pack: it is a progression game built on three resources and one
 engine, wrapped around a cosmic-horror fantasy.
 

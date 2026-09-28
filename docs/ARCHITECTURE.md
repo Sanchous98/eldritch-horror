@@ -4,10 +4,10 @@
 
 | Piece | Choice | Why |
 |---|---|---|
-| Loader | **NeoForge** | Rich data-driven systems + capability/attribute APIs; active 1.21.1 line. |
-| Minecraft | **1.21.1** | The stable modded target; huge ecosystem, Java 21 toolchain. |
+| Loader | **NeoForge** | Rich data-driven systems + capability/attribute APIs; current 26.x line. |
+| Minecraft | **26.3** | Current release; Java 25 toolchain, datapack format 121. |
 | Build | **ModDevGradle 2.0.x** | Modern plugin; runs the game from Gradle; official MDK path. |
-| Java | **21** | What Mojang ships for 1.21.1. |
+| Java | **25** | Required by Minecraft 26.3. |
 
 ## Layers
 

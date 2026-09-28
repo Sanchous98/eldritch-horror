@@ -12,9 +12,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(EldritchHorror.MODID);
 
-    // Placeholder reagent.
+    // Placeholder reagent. 26.3 passes a property builder lambda.
     public static final DeferredItem<Item> FORBIDDEN_REAGENT =
-            ITEMS.registerSimpleItem("forbidden_reagent", new Item.Properties().stacksTo(16));
+            ITEMS.registerSimpleItem("forbidden_reagent", p -> p.stacksTo(16));
 
     private ModItems() {
     }

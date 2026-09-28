@@ -1,4 +1,4 @@
-# Dev environment for Eldritch Horror (Minecraft 1.21.1 / NeoForge).
+# Dev environment for Eldritch Horror (Minecraft 26.3 / NeoForge).
 #
 #   docker compose run --rm dev ./gradlew build
 #   docker compose run --rm dev ./gradlew runData
