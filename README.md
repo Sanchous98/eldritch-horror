@@ -66,6 +66,15 @@ The project is early; conventions are deliberately small:
 - One `DeferredRegister` per registry, in `registry/`, registered from the entry point.
 - Never reference a `client/` class from common code path.
 
+## Design & content
+
+- [`design/`](design/) — **the complete game design bible (source of truth)**: overview, pillars,
+  progression, the three axes (sanity/corruption/reputation), the ritual engine, factions, horror
+  & atmosphere, endgame, multiplayer, UI/UX, and all content (rituals, cults, quests, classes,
+  skills, items, mobs, bosses, events, map).
+- [`docs/DESIGN.md`](docs/DESIGN.md) — a short summary of the systems.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — code layout, layers and conventions.
+
 ## Roadmap & progress
 
 Implementation is tracked as GitHub **issues** (one per story) grouped into

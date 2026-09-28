@@ -1,5 +1,10 @@
 # Design — Eldritch Horror
 
+> **The complete design bible is [`design/`](../design/README.md).** This document is a
+> short summary; it is not the source of truth. If this summary and `design/` disagree,
+> `design/` wins — and open decisions are tracked as issues on the
+> [project board](https://github.com/users/Sanchous98/projects/2).
+
 A design bible for the mod. Numbers here are first-pass and will move; the **shape** of the
 systems is the point.
 
