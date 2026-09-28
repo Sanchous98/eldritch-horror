@@ -78,18 +78,18 @@ irreducible; elevation and climate are largely derivable.
 | Layer | Needed? | Source / derivation |
 |---|---|---|
 | **Landmask / coastline** | **yes** (irreducible) | Natural Earth `land` polygons (public domain) |
-| **Elevation** | optional | ETOPO/GEBCO (real), **or** procedural noise shaped by the landmask |
-| **Climate** | derivable | **latitude** (temperature) + **distance-to-coast** (moisture); no raster needed |
+| **Elevation** | **no** — synthesized | procedural noise shaped by the landmask (Earth's continents, invented mountains) |
+| **Climate** | **no** — computed | **latitude** (temperature) + **distance-to-coast** (moisture) |
 
-So the minimum asset is effectively a **1-bit landmask**. Elevation can be real (for Earth's
-Himalayas/Andes) or synthesized; climate does not need a file at all.
+So the **only shipped asset is a 1-bit landmask**. Elevation is procedural terrain shaped by
+the coastline; climate needs no file at all.
 
 ### Layer format (at 2 blocks/pixel, 8192×4096)
 
 | Layer | Encoding | Size |
 |---|---|---|
-| Landmask | 1-bit, packed | **~4 MB** |
-| Elevation/bathymetry | 8-bit (quantized) or 16-bit | **~32 MB** (8b) / ~64 MB (16b) |
+| Landmask | 1-bit PNG (bitmap) | **~4 MB** |
+| Elevation | — (procedural) | 0 |
 | Climate | — (computed) | 0 |
 
 All committed under `src/main/resources/`, read once and cached. Equirectangular mapping
@@ -132,6 +132,13 @@ layers above, and each player's save grows only where they actually explore.
 
 A whole-globe map is inherently **2:1**; forcing it into a square would stretch latitude 2×
 (continents look tall), so the map is 2:1 and the border follows.
+
+> **Polar stretch:** in equirectangular, the poles are a single point stretched across the
+> full width, so Antarctica becomes a full-width strip at the map edge. That is geometrically
+> correct; if it plays badly we can trim/ice-cap it later without changing the rest.
+
+> **Baked:** `tools/bake_landmask.py` rasterizes Natural Earth's 1:50m land polygons to
+> `landmask_8192x4096.png` (1-bit, ~0.1 MB on disk; land ≈ 33%).
 
 | Layer | Pixels | Size |
 |---|---|---|

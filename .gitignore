@@ -24,6 +24,9 @@ src/generated/**/.cache/
 build/*.log
 *.log
 
+# Bake-tool download cache (the generated landmask itself IS committed)
+tools/.cache/
+
 # OS
 .DS_Store
 Thumbs.db
