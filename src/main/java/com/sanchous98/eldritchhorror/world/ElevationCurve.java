@@ -26,25 +26,16 @@ public final class ElevationCurve {
     public static int toY(double metres) {
         double y;
         if (metres >= 0) {
-            y = seaToPeak(metres);
+            // 0 m -> sea level; +8,800 m (Everest) -> ~285
+            y = SEA_LEVEL + clamp(metres / 8800.0, 0.0, 1.0) * (285 - SEA_LEVEL);
         } else {
-            y = seaToTrench(metres);
+            // 0 m -> sea level; -11,000 m (trench) -> ~-40; -4,000 m (ocean floor) -> ~25
+            y = SEA_LEVEL + clamp(metres / 11000.0, -1.0, 0.0) * (SEA_LEVEL + 40);
         }
-        int rounded = (int) Math.round(y);
-        return Math.max(MIN_Y, Math.min(MAX_Y, rounded));
+        return (int) clamp(Math.round(y), MIN_Y, MAX_Y);
     }
 
-    /** 0 m → {@link #SEA_LEVEL}; +8,800 m → ~285. Slightly super-linear so peaks stand out. */
-    private static double seaToPeak(double m) {
-        double t = m / 8800.0;            // 0..1
-        double eased = Math.pow(t, 1.15); // exaggerate the top
-        return SEA_LEVEL + eased * (285 - SEA_LEVEL);
-    }
-
-    /** 0 m → {@link #SEA_LEVEL}; −11,000 m → ~−40. Ocean floors quickly, then tapers. */
-    private static double seaToTrench(double m) {
-        double d = -m;                    // 0..11000
-        double t = Math.log1p(d / 400.0) / Math.log1p(11000.0 / 400.0); // 0..1, fast at first
-        return SEA_LEVEL + t * (-40 - SEA_LEVEL);
+    private static double clamp(double v, double lo, double hi) {
+        return v < lo ? lo : (v > hi ? hi : v);
     }
 }
