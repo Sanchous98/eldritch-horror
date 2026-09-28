@@ -122,6 +122,8 @@ The project is early; conventions are deliberately small:
   skills, items, mobs, bosses, events, map).
 - [`docs/DESIGN.md`](docs/DESIGN.md) — a short summary of the systems.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — code layout, layers and conventions.
+- [`docs/WORLDGEN.md`](docs/WORLDGEN.md) — the Overworld map generator (continents, oceans, vanilla biomes).
+- [`docs/DEVELOPMENT-PLAN.md`](docs/DEVELOPMENT-PLAN.md) — where to start.
 
 ## Roadmap & progress
 

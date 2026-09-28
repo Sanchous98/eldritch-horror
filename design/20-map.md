@@ -1,6 +1,14 @@
 # Map — biomes, dimensions, structures
 
-## Biomes
+> **World map:** the Overworld is a **procedural, fixed-seed, Earth-like landmass** with
+> **vanilla biomes** (16k × 16k, world-bordered). See [`../docs/WORLDGEN.md`](../docs/WORLDGEN.md).
+> The "corrupted biomes" below are **not** worldgen biomes — they are regions the
+> **corruption field** converts at runtime (see [03b-corruption.md](03b-corruption.md)).
+
+## Biomes (corruption states)
+
+These are **overlays applied by the corruption field**, not worldgen biomes. Each is a
+converted form of the underlying vanilla biome. Each supplies a mob list and a resource list.
 
 | id | Name | Where | Feel | Notable content |
 |---|---|---|---|---|
@@ -9,8 +17,11 @@
 | `ashen_waste` | Ashen Waste | Overworld, rift scars | Ash, dead soil, twisted spires | `void_reagent`, rifts |
 | `observatory_plateau` | Observatory Plateau | Overworld highlands | Clear skies, strange monoliths | Order outposts, star-iron |
 
-Corrupted biomes expand from rifts and altars as the corruption field grows; they recede
-after cleansing. Each biome supplies a mob list and a resource list.
+They expand from rifts and altars as the corruption field grows and recede after cleansing.
+
+> The world itself is generated as **continents and oceans with vanilla biomes**
+> ([`../docs/WORLDGEN.md`](../docs/WORLDGEN.md)); the above are corruption-field states laid
+> over that map, not separate worldgen biomes.
 
 ## Dimensions
 

@@ -100,16 +100,24 @@ RPG feel real the moment you pick a class.
 **Testable in 30 seconds:** join a dev world → `/give` yourself the investigator token →
 use it → `/eldritch class info` shows the spec and your attributes changed.
 
-### Slice B — Map  *(more moving parts; test in a fresh world)*
+### Slice B — World map  *(decided: procedural, fixed seed, vanilla biomes)*
 
-Why second: worldgen is easy to get subtly wrong, and each change means a new world.
+Full design in [`WORLDGEN.md`](WORLDGEN.md). The map is **16k × 16k**, made by a custom
+`ChunkGenerator` + `BiomeSource` sampling a deterministic `ContinentField` (fBm + domain
+warp + radial ocean falloff). **No custom biomes, no image asset.**
 
-1. One structure (`ritual_altar_site`) → verify with `/place structure eldritch_horror:ritual_altar_site`.
-2. One biome (`blighted_woods`) as a datapack → verify with `/locate biome eldritch_horror:blighted_woods`.
-3. The Veil dimension last — the heaviest piece.
+Build in this order:
 
-**Testable in a minute:** `/place` the structure next to you; in a new world, `/locate` the
-biome.
+1. `ContinentField` + unit tests (pure, no Minecraft — iterate fast).
+2. `ContinentBiomeSource` — ocean/land + latitude biomes.
+3. `ContinentChunkGenerator` — height from the field.
+4. Wire the Overworld dimension/noise settings to it; set the world border to ±8192.
+
+**Testable in a minute:** spectator-fly at high Y to see continents; `/locate biome
+minecraft:ocean|minecraft:plains`; `/eldritch map info` for land/sea + elevation.
+
+Structures from [`design/20-map.md`](../design/20-map.md) (the `ritual_altar_site` jigsaw,
+etc.) layer on afterwards — do not block the map on them.
 
 ### What each slice pulls in (just in time)
 
