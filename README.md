@@ -125,6 +125,9 @@ The project is early; conventions are deliberately small:
 
 ## Roadmap & progress
 
+See [`docs/DEVELOPMENT-PLAN.md`](docs/DEVELOPMENT-PLAN.md) for **where to start** (the
+recommended order of work), and the board below for the full backlog.
+
 Implementation is tracked as GitHub **issues** (one per story) grouped into
 **milestones** (`M1 Foundations` → `M5 Content & Endgame`, plus `Backlog`), and mirrored
 onto a Project board: [**Eldritch Horror — Roadmap**](https://github.com/users/Sanchous98/projects/2).
