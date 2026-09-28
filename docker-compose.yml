@@ -23,6 +23,10 @@ services:
     image: eldritch-horror-dev:latest
     init: true
     working_dir: /workspace
+    # Keep Gradle + the first-build decompiler bounded. Adjust to taste; these are
+    # enforced by the daemon's cgroup, which the build inherits.
+    cpus: ${DEV_CPUS:-3}
+    mem_limit: ${DEV_MEM:-4g}
     volumes:
       - .:/workspace
       - gradle-cache:/home/dev/.gradle

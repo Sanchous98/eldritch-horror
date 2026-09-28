@@ -80,9 +80,13 @@ and uncomment the `deploy:` block in `docker-compose.yml`. On macOS/Windows Dock
 Desktop there is no GPU/X11 pass-through; run the client natively there and use Docker
 only for builds.
 
-> **Memory:** the first in-container build decompiles Minecraft (Vineflower wants
-> ~4 GB). Give Docker Desktop at least ~6 GB, or on Linux set `JAVA_TOOL_OPTIONS`
-> in `docker-compose.yml` and ensure the host has headroom.
+> **Memory:** the first in-container build decompiles Minecraft (26.3 uses IntelliJ's
+> Fernflower), which is memory- and CPU-heavy. The compose service is capped at
+> `cpus: 3` / `mem_limit: 4g` by default — raise them via `DEV_CPUS` / `DEV_MEM` if the
+> decompile is too slow or gets OOM-killed, e.g. `DEV_MEM=8g docker compose run --rm dev ./gradlew build`.
+> **Note:** these limits must be set on the object that *runs the build* (the container),
+> not on a shell that merely calls `docker` — a container talking to a separate Docker
+> daemon does not pass its own cgroup limits to the build.
 
 ## Project layout
 
