@@ -21,6 +21,10 @@ runtime. **Whole globe**, **equirectangular**, at **2 blocks/pixel**.
 
 ## Non-goals
 
+- **No ores, no caves.** The world is a *surface* world: terrain height and biome only.
+  Vanilla ore/cave generation is deliberately absent — there is no underground gameplay in
+  this mod (reagents come from the surface, structures and rituals, not mining). This also
+  keeps the generator simple and fast.
 - Custom biomes (vanilla set is enough — see `design/20-map.md`).
 - 1:1 Earth or realistic geography.
 - Changing the Nether or End (Overworld only).
@@ -29,8 +33,9 @@ runtime. **Whole globe**, **equirectangular**, at **2 blocks/pixel**.
 
 ## Architecture
 
-Two custom, deterministic pieces replace vanilla worldgen; everything else (carvers,
-features, structures, mobs) stays vanilla and runs on top.
+Two custom, deterministic pieces replace vanilla worldgen; **surface features** (trees,
+grass, flora) and structures stay vanilla and run on top. Carvers (caves) and ore
+features are intentionally not run — see "Non-goals".
 
 ```
 world seed ──► ContinentField ──► LandMask + Elevation      (per x,z)
