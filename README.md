@@ -66,6 +66,24 @@ The project is early; conventions are deliberately small:
 - One `DeferredRegister` per registry, in `registry/`, registered from the entry point.
 - Never reference a `client/` class from common code path.
 
+## Roadmap & progress
+
+Implementation is tracked as GitHub **issues** (one per story) grouped into
+**milestones** (`M1 Foundations` → `M5 Content & Endgame`, plus `Backlog`), and mirrored
+onto a Project board: [**Eldritch Horror — Roadmap**](https://github.com/users/Sanchous98/projects/2).
+
+Each issue carries a scoped body (**Do** / **Acceptance**) and labels (`sanity`,
+`corruption`, `cult`, `ritual`, `content`, `client`, `build`, `data`, `networking`,
+`tech-debt`, `story`). The board adds **Priority** (P0–P3) and **Area** fields.
+
+The seeding is scripted and idempotent, so the roadmap can be re-applied or adapted:
+
+```sh
+python3 scripts/seed_issues.py     # labels, milestones, issues (needs repo scope)
+python3 scripts/setup_project.py   # project board + fields (needs project scope)
+```
+
+
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
