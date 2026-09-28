@@ -58,19 +58,31 @@ def cache_path(source, default_name):
     return p
 
 
-def read_raster(source, default_name):
-    """Return a numpy array from a .tif, a .zip containing a .tif, or a URL."""
+def read_raster(source, default_name, prefer=None):
+    """Return a numpy array from a .tif, a .zip containing a .tif, or a URL.
+
+    When the zip holds several rasters, ``prefer`` (a list of name fragments, best
+    first) selects one; otherwise the first .tif is used.
+    """
     import tifffile
     import numpy as np
 
     path = cache_path(source, default_name)
     if path.endswith(".zip"):
         with zipfile.ZipFile(path) as z:
-            tifs = [n for n in z.namelist() if n.lower().endswith((".tif", ".tiff"))]
-            if not tifs:
-                # Koppen zip may store the tif without a .tif extension
-                tifs = [n for n in z.namelist() if not n.endswith("/") and "legend" not in n.lower()]
-            name = tifs[0]
+            names = [n for n in z.namelist()
+                     if n.lower().endswith((".tif", ".tiff"))]
+            if not names:
+                names = [n for n in z.namelist()
+                         if not n.endswith("/") and "legend" not in n.lower()]
+            name = None
+            if prefer:
+                for frag in prefer:
+                    name = next((n for n in names if frag in n), None)
+                    if name:
+                        break
+            if name is None:
+                name = names[0]
             print(f"  reading {name} from {os.path.basename(path)}")
             with z.open(name) as f:
                 return tifffile.imread(io.BytesIO(f.read())).astype(np.float32)
@@ -137,7 +149,8 @@ def bake_koppen(w, h, force, source):
     if os.path.exists(out) and not force:
         print(f"skip (exists): {out}")
         return
-    k = read_raster(source, "koppen.zip")
+    k = read_raster(source, "koppen.zip",
+                    prefer=["present_0p0083", "present_0p083", "present_0p5", "present"])
     print(f"  source raster {k.shape}, classes {k.min():.0f}..{k.max():.0f}")
     k = np.clip(resize(k, w, h, "nearest"), 0, 255).astype(np.uint8)
     os.makedirs(OUT_DIR, exist_ok=True)
