@@ -2,7 +2,7 @@ package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The Sanity system: a per-player RPG meter that drains near the eldritch, in darkness, and
@@ -18,8 +18,8 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class SanitySystem {
     /** Attribute id for max sanity. Registered in the attribute registry once implemented. */
-    public static final ResourceLocation MAX_SANITY_ID =
-            ResourceLocation.fromNamespaceAndPath(EldritchHorror.MODID, "max_sanity");
+    public static final Identifier MAX_SANITY_ID =
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "max_sanity");
 
     private SanitySystem() {
     }

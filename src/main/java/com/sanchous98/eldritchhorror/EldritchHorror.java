@@ -7,7 +7,7 @@ import com.sanchous98.eldritchhorror.registry.ModEffects;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModItems;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -38,9 +38,9 @@ public final class EldritchHorror {
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    /** Creates a namespaced {@link ResourceLocation} under this mod's id. */
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+    /** Creates a namespaced {@link Identifier} under this mod's id. */
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 
     public EldritchHorror(IEventBus modEventBus, ModContainer modContainer) {

@@ -39,10 +39,11 @@ See [`design/`](design/README.md) for the complete design bible (source of truth
 ```
 
 > The Gradle wrapper and ModDevGradle will download the Minecraft/NeoForge artifacts on first run.
-> The very first build also **decompiles Minecraft** (26.3 uses IntelliJ's Fernflower; earlier
-> versions used Vineflower), which is memory-heavy and the slowest step. If the build dies during
-> `decompile` with no other error, the host ran out of RAM — give Docker/Gradle more memory. Once
-> the NeoForm cache is warm, later builds are quick.
+> The very first build also **decompiles Minecraft** with **Vineflower** (a Fernflower fork, so its
+> log says `org.jetbrains.java.decompiler.*`), which is memory- and CPU-heavy and the slowest step.
+> It is a single pass with no percentage output; if the build dies during `decompile` with no other
+> error, the container ran out of RAM — raise `DEV_MEM` (see below). Once the NeoForm cache is warm,
+> later builds are quick.
 
 ## Development with Docker
 
