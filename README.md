@@ -36,6 +36,10 @@ See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design and
 ```
 
 > The Gradle wrapper and ModDevGradle will download the Minecraft/NeoForge artifacts on first run.
+> The very first build also decompiles Minecraft with Vineflower, which is memory-hungry: NeoForm
+> hardcodes a **4 GB** heap for it. If the build dies with `Node action for decompile failed`
+> (and no other error), give the Gradle daemon more RAM — on a machine with limited free memory
+> this first step is the bottleneck. Once the NeoForm cache is warm, later builds are quick.
 
 ## Project layout
 

@@ -20,6 +20,10 @@ run-data/
 # Generated data (datagen output is committed; the cache is not)
 src/generated/**/.cache/
 
+# Build logs (local)
+build/*.log
+*.log
+
 # OS
 .DS_Store
 Thumbs.db
