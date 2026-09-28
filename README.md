@@ -60,6 +60,11 @@ docker compose run --rm dev bash                     # a shell in the environmen
 The repo is bind-mounted at `/workspace`, so edits on the host are picked up instantly.
 Artifacts land in `build/` on your host, owned by you (the image matches your `UID`/`GID`).
 
+> **The bind mount resolves on the Docker daemon's host.** That is fine locally (and under
+> Docker Desktop), but if you point `DOCKER_HOST`/a context at a **remote** daemon, the
+> mounted path is read from *that* machine, not yours. Run the dev container against a
+> local daemon (or clone the repo on the remote host first).
+
 ### Dev client (needs a display + GPU)
 
 `runClient` opens a window, so it needs X11/Wayland and a GPU — on Linux:
