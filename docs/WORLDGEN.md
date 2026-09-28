@@ -22,9 +22,12 @@ runtime. **Whole globe**, **equirectangular**, at **2 blocks/pixel**.
 ## Non-goals
 
 - **No ores, no caves.** The world is a *surface* world: terrain height and biome only.
-  Vanilla ore/cave generation is deliberately absent — there is no underground gameplay in
-  this mod (reagents come from the surface, structures and rituals, not mining). This also
-  keeps the generator simple and fast.
+  Vanilla ore/cave generation is deliberately absent. This is consistent with the design:
+  **nothing in [`design/`](../../design/README.md) requires mining or underground
+  resources.** Reagents come from the surface, structures, mobs and cult trade; vanilla
+  stone tools/armour aren't part of the progression. (If the design ever does need an
+  underground reagent, add a *targeted* feature or a structure/loot source rather than
+  re-enabling global ore generation.)
 - Custom biomes (vanilla set is enough — see `design/20-map.md`).
 - 1:1 Earth or realistic geography.
 - Changing the Nether or End (Overworld only).
@@ -38,10 +41,10 @@ grass, flora) and structures stay vanilla and run on top. Carvers (caves) and or
 features are intentionally not run — see "Non-goals".
 
 ```
-world seed ──► ContinentField ──► LandMask + Elevation      (per x,z)
-                    │
-                    ├──► ContinentChunkGenerator   → terrain height per column
-                    └──► ContinentBiomeSource      → vanilla biome per column
+world (x,z) ──► EarthField ──► LandMask + Elevation + Köppen   (per column)
+                   │
+                   ├──► EarthChunkGenerator   → terrain height per column
+                   └──► EarthBiomeSource      → vanilla biome per column
 ```
 
 Both consume the **same** `ContinentField` so terrain and biome agree.

@@ -14,7 +14,7 @@ Material components consumed by rites.
 | `bone_reagent` | Grave Bone | Skeletons, ossuaries | `call_the_lesser` |
 | `star_reagent` | Star-Iron Fragment | Meteors, the Veil | `summon_star_spawn` |
 | `void_reagent` | Void Residue | Rifts, corrupted chunks | `open_rift` |
-| `silver_reagent` | Moonlit Silver | Deep mining, Order trade | `rite_of_cleansing`, `respec` |
+| `silver_reagent` | Moonlit Silver | Order trade, ruined vaults | `rite_of_cleansing`, `respec` |
 | `pearl_reagent` | Drowned Pearl | Coast, Choir trade | `drowned_blessing` |
 | `blood_offering` | Blood Offering | Player (costs health) or mobs | summoning/open rites |
 
