@@ -25,6 +25,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
+import com.sanchous98.eldritchhorror.world.city.CityStamper;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -170,6 +171,19 @@ public class EarthChunkGenerator extends ChunkGenerator {
         result.add(Component.literal(String.format("Earth elevation %.0f m",
                 map.elevationMetres(feetPos.getX(), feetPos.getZ()))).getString());
         result.add(Component.literal("Köppen class " + map.koppenClass(feetPos.getX(), feetPos.getZ())).getString());
+    }
+
+    /**
+     * Stamp curated cities after vanilla decoration, so a city is not overwritten by it.
+     * {@code WorldGenRegion} applies writes only to the chunk in progress, so each chunk
+     * contributes its own slice of any city it overlaps.
+     */
+    @Override
+    public void applyBiomeDecoration(net.minecraft.world.level.WorldGenLevel level,
+                                     ChunkAccess chunk,
+                                     StructureManager structureManager) {
+        super.applyBiomeDecoration(level, chunk, structureManager);
+        CityStamper.stamp(level, chunk);
     }
 
     @Override
