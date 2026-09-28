@@ -19,9 +19,10 @@ the generator. Two selectable modes:
 ## Goals
 
 - **Deterministic & fixed**: the same map every run; iterate on it, ship it.
-- **Earth-like or actual Earth** landmasses with real oceans and coastlines.
-- **Vanilla biomes** reused wholesale: cold poles, temperate middle, hot equator.
+- **Actual Earth** landmass (curated window), with real oceans and coastlines.
+- **Vanilla biomes** reused wholesale: cold north, temperate middle, hot equator.
 - **Playable, not a simulation**: compressed climate, bounded oceans, a world border.
+- **Small footprint**: ship a few MB of baked layers, not a prebuilt save.
 
 
 ## Non-goals
@@ -116,7 +117,51 @@ climate(x, z)    -> {temperature, moisture}
 - `EARTH` looks them up from the baked layers.
 
 
-## Playability rules
+## How big is the data, really?
+
+**Not 300 GB.** The huge numbers people quote (EarthMC 6 GB, 0xBit up to 300 GB) are
+**prebuilt world *saves*** — every one of millions of chunks is generated and written to
+disk up front. We never do that: our map is sampled at runtime, so we ship only the small
+source layers below, and each player's save grows only where they actually explore.
+
+| Representation | Pixels | Per-layer size |
+|---|---|---|
+| PNG 8-bit per channel, 2048² | 4.2 M | **~4 MB** |
+| PNG, whole Earth at 8192×4096 | 33.5 M | **~20–30 MB** |
+| Raw 16-bit, whole Earth 8192×4096 | 33.5 M | **~268 MB** (do not ship) |
+
+At our **16,384 × 16,384** extent (square, so it excludes the poles), a **2048² layer is
+8 blocks/pixel** — enough for a recognizable Earth — and lands at a few MB per channel.
+Even a much finer **8192² (2 blocks/pixel)** is only a few tens of MB packed.
+
+> At 1:1 Earth scale you'd need ~33.5 M columns just for latitude/longitude, and far more
+> for elevation — 300 GB territory. We deliberately map **Earth onto a 16k playable square**
+> instead, which is the whole point of "playable, not a simulation".
+
+### Projection & trim
+
+**Recommendation — "Earth, stylized":** because the playable square is only 16k wide, a
+faithful whole-planet projection would leave most gameplay on ocean and most land at the
+edges. Instead:
+
+- **Equirectangular**, prime-meridian centred, `lat/lon → x/z` trivial.
+- **Bake a curated window** that contains most land — roughly **lat −55°…+72°, lon
+  −10°…+150°** (Africa, Europe, most of Asia, and Australia; optionally a second window for
+  the Americas). This keeps continents large, oceans bounded, and the map *playable*.
+- Antarctica and the empty Pacific are trimmed by design.
+- Note: 16k square spans ±55–60° of real latitude, so even a window like this is
+  **compressed** (a deliberate, documented distortion).
+
+*Alternative:* a true global 2:1 map (lon −180…180, lat −90…90) squeezed into 16k — more
+faithful, but Europe/Africa become small and the Pacific dominates. Not recommended for a
+survival map.
+
+
+### Playable resolution
+
+8 blocks/pixel is our baseline; it keeps the committed assets small and the continents
+readable. If it looks too blocky, 4096² (4 blocks/pixel, ~15 MB/layer) is the next step.
+
 
 - **World border** at ±8192 (`/worldborder set 16384 center 0 0`), matching the extent.
 - **Bounded oceans**: cap the falloff so no ocean exceeds a crossable width.
