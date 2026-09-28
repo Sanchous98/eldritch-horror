@@ -43,28 +43,53 @@ Both consume the **same** `ContinentField` so terrain and biome agree.
 
 ### `ContinentChunkGenerator` (`Registries.CHUNK_GENERATOR`)
 
-- Samples `ContinentField` for each `(x,z)`: `land` (0–1) and `elevation`.
-- **Sea level** at Y=63. Below → ocean floor; above → land.
-- **Height spline**: lowlands near the coast, hills inland, mountains where elevation is
-  high; continental shelf so oceans are shallow near coasts and deep offshore.
+- Samples `ContinentField` for each `(x,z)`: `elevation` (real metres).
+- **Sea level** at Y=63 (elevation 0). Below → ocean floor as deep as the real
+  bathymetry; above → land scaled toward the build ceiling.
+- **Vertical exaggeration:** a linear map of the real −11,000…+8,800 m onto the build range
+  would erase most terrain (the Himalaya would only reach ~Y+96). We apply a **non-linear
+  curve** so the extremes feel extreme:
+
+  | Real | Minecraft Y |
+  |---|---|
+  | Mariana Trench (−11,000 m) | ~−40 (bedrock) |
+  | Ocean floor (−4,000 m) | ~25 |
+  | Sea level (0) | 63 |
+  | Tibetan plateau (+4,500 m) | ~150 |
+  | Himalaya / Everest (+8,800 m) | ~250–300 |
+
+  Land is exaggerated more than ocean, so highlands read as *high* and the abyss as *deep*.
 - Emits a `NoiseChunk`/`ChunkAccess` surface; delegates caves/carvers to vanilla.
 
-### `ContinentBiomeSource` (`Registries.BIOME_SOURCE`)
+### `EarthBiomeSource` (`Registries.BIOME_SOURCE`)
 
-Maps **latitude + elevation + moisture** to vanilla biomes:
+Uses the **baked real biome layer** (Beck Köppen–Geiger classes), not computed latitude —
+so the Sahara is desert and the Amazon is rainforest, which latitude alone cannot know.
+A **class → vanilla biome** table maps all 30 Köppen classes onto vanilla biomes (below),
+with ocean/land and elevation refinements (peaks, coasts).
 
-| Condition | Biomes |
+| Köppen class | Vanilla biome |
 |---|---|
-| Below sea level, shallow | `river`/`beach` at coast, `ocean` → `deep_ocean` by depth |
-| High elevation | `windswept_hills`, `frozen_peaks`, `stony_peaks` |
-| Hot (equator) | `desert`, `savanna`, `jungle`, `badlands` by moisture |
-| Temperate | `plains`, `forest`, `birch_forest`, `swamp` by moisture |
-| Cold (poles) | `taiga`, `snowy_taiga`, `snowy_plains`, `ice_spikes` |
+| Af / Am | `jungle` |
+| Aw | `savanna` |
+| BWh | `desert` |
+| BWk | `desert` (cold variant) |
+| BSh / BSk | `savanna` / `plains` (steppe) |
+| Csa / Csb | `plains` (Mediterranean) |
+| Cfa / Cfb / Cfc | `forest` / `birch_forest` |
+| Cwa / Cwb / Cwc | `forest` (monsoon) |
+| Dfa / Dfb / Dfc | `taiga` / `forest` |
+| Dwa–Dwd / Dsa–Dsd | `taiga` / `snowy_taiga` |
+| ET | `snowy_plains` / `snowy_taiga` |
+| EF | `ice_spikes` / `snowy_plains` |
+| Land, high elevation | `windswept_hills` / `frozen_peaks` / `stony_peaks` |
+| Coast | `beach` / `stony_shore` |
+| Ocean | `ocean` → `deep_ocean` by depth |
 
 ## The map data
 
-The geography must come from somewhere; a formula can only give Earth-*like*. The choices
-are **where the data lives**:
+Real geography can't be derived from a formula, so we bake it. The choices are **where the
+data lives**:
 
 | Placement | Shipped | Trade-off |
 |---|---|---|
@@ -72,25 +97,25 @@ are **where the data lives**:
 | Runtime download | ~0 | needs network + cache + a maintained source; first-use latency |
 | Pre-generated chunks | 6–300 GB | huge saves; not shippable as a mod |
 
-**Design lean:** we need far less data than "three rasters". Only the **coastline** is truly
-irreducible; elevation and climate are largely derivable.
+**Decision:** biomes must *really match* and mountains/oceans must be extreme, so we bake
+all three layers from **real, observed data**:
 
-| Layer | Needed? | Source / derivation |
+| Layer | Source | Encoding |
 |---|---|---|
-| **Landmask / coastline** | **yes** (irreducible) | Natural Earth `land` polygons (public domain) |
-| **Elevation** | **no** — synthesized | procedural noise shaped by the landmask (Earth's continents, invented mountains) |
-| **Climate** | **no** — computed | **latitude** (temperature) + **distance-to-coast** (moisture) |
+| **Landmask / coastline** | Natural Earth `land` | 1-bit |
+| **Elevation + bathymetry** | ETOPO (NOAA) | 8-bit, signed range, quantized non-linearly |
+| **Climate / biome class** | Beck Köppen–Geiger 1 km (CC-BY) | 5-bit class (0–29) |
 
-So the **only shipped asset is a 1-bit landmask**. Elevation is procedural terrain shaped by
-the coastline; climate needs no file at all.
+This is the difference between *Earth-shaped* and *Earth*: real elevation puts the Himalaya
+in Asia and the deep trenches in the Pacific, and real climate puts the Sahara where it is.
+
 
 ### Layer format (at 2 blocks/pixel, 8192×4096)
 
 | Layer | Encoding | Size |
 |---|---|---|
-| Landmask | 1-bit PNG (bitmap) | **~4 MB** |
-| Elevation | — (procedural) | 0 |
-| Climate | — (computed) | 0 |
+| Landmask | 1-bit PNG (bitmap) | **~0.1 MB** (baked) |
+| Elevation | 8-bit grayscale PNG, non-linear quantized | **~5–30 MB** |
 
 All committed under `src/main/resources/`, read once and cached. Equirectangular mapping
 `lon/lat → x/z` is linear.
@@ -99,19 +124,20 @@ This is exactly how the prebuilt Earth maps are made (WorldPainter from these da
 we sample the data at runtime instead of baking every chunk.
 
 
-## The `ContinentField` interface
+## The `EarthField` interface
 
 One sampler, so `ChunkGenerator`/`BiomeSource` don't care where the data comes from:
 
 ```
-land(x, z)       -> 0..1   (0 = deep ocean, 1 = high land; from the landmask)
-elevation(x, z)  -> metres (signed; below 0 = ocean floor)
-climate(x, z)    -> {temperature, moisture}
+elevation(x, z)   -> metres (signed; below 0 = ocean floor)   [baked ETOPO]
+koppen(x, z)      -> 0..29 climate class                       [baked Köppen]
+land(x, z)        -> bool                                      [BakedMask]
 ```
 
-- `land` comes from the baked **landmask** (irreducible).
-- `elevation` is the baked **elevation layer**, or procedural noise shaped by `land`.
-- `climate` is **computed**: temperature from latitude, moisture from distance-to-coast.
+- `elevation` ← the baked **ETOPO** layer (real Himalaya, real trenches).
+- `koppen` ← the baked **Beck Köppen–Geiger** layer (real Sahara/Amazon).
+- `land` ← the baked **landmask** (used for coasts/validation).
+
 
 
 
