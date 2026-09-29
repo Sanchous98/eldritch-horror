@@ -89,7 +89,41 @@ The port is published (`SERVER_PORT` overrides 25565). The world and logs land i
 in the repo. The Earth map is server-side, so the server generates it — your client needs
 nothing special. Stop with Ctrl-C.
 
-### Dev client (needs a display + GPU)
+### Windows: run natively (recommended)
+
+Docker Desktop on Windows crosses a VM filesystem boundary for every file, which is slow
+and flaky for Minecraft builds. If you have JDK 25, run the game **on the host** instead:
+
+```powershell
+.\gradlew.bat runClient      # opens the game with the mod
+.\gradlew.bat runServer      # dedicated server on localhost:25565
+```
+
+**Pick one build path.** Do not run a Docker build and a host build at the same time — they
+share the repo's `build/` folder, and Windows locks files exclusively, so the second one
+fails with `AccessDeniedException` or `FileHasher: Input/output error`.
+
+If you hit `…minecraft-patched-….jar is locked` (or `AccessDeniedException` on a `.tmp`
+move), a process still holds the jar open. Close it and clear the artifact:
+
+```powershell
+# stop any dev game / server (close the window, or Ctrl-C the terminal)
+# stop Docker if it was running:
+docker compose --profile server down
+docker ps -a
+
+# kill stray Java/Gradle holders, then clear the locked artifact
+taskkill /F /IM java.exe
+rmdir /s /q build\moddev
+
+# retry
+.\gradlew.bat runClient
+```
+
+A running dev client/server keeps the patched jar on its classpath, so you cannot rebuild
+while it is open — always quit the game first.
+
+### Dev client in Docker (Linux)
 
 `runClient` opens a window, so it needs X11/Wayland and a GPU — on Linux:
 
