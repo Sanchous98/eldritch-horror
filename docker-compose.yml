@@ -58,6 +58,12 @@ services:
     command: ["./gradlew", "runServer", "--no-daemon", "--console=plain"]
     ports:
       - "${SERVER_PORT:-25565}:25565"
+    environment:
+      GRADLE_USER_HOME: /home/dev/.gradle
+      JAVA_TOOL_OPTIONS: "${DEV_JAVA_XMX:--Xmx1g}"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      # Auto-op on join and other dev conveniences (see core/DevTools).
+      EH_DEV: "true"
     stdin_open: true
     tty: true
 
