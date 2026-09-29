@@ -63,20 +63,33 @@ one-time NeoForge decompile happens **once** instead of on every run.
 > ```
 > (or just re-clone). Do not let an editor or Git (`core.autocrlf`) convert `gradlew` to CRLF.
 
+The source is **copied into the image** and all mutable state lives in **named volumes**
+(`gradle-cache`, `build-out`, `run-data`) — there is no host bind mount. That is deliberate:
+Docker Desktop on Windows cannot share `C:\` paths, so bind mounts are avoided on every OS
+for a setup that behaves identically everywhere.
+
+> **Rebuild the image after changing code:** `docker compose build dev` (or add `--build`
+> to `up`). Since the source is baked in, edits aren't picked up until you rebuild.
+
+> **Windows:** Docker Desktop's `C:\` file sharing is unreliable for this project. Prefer
+> the native path in [`docs/WINDOWS.md`](docs/WINDOWS.md); if you use Docker, this
+> baked-image setup (no bind mount) is the one that works.
+
 ```sh
+docker compose build dev                             # rebuild after code changes
 docker compose run --rm dev ./gradlew build          # build the mod
 docker compose run --rm dev ./gradlew runData        # run data generators
-docker compose run --rm dev ./gradlew runServer      # headless dev server
+docker compose --profile server up server            # dedicated server on :25565
 docker compose run --rm dev bash                     # a shell in the environment
 ```
 
-The repo is bind-mounted at `/workspace`, so edits on the host are picked up instantly.
-Artifacts land in `build/` on your host, owned by you (the image matches your `UID`/`GID`).
+Build output and the server world persist in the named volumes across `run --rm`. To move
+files in/out (e.g. edit `server.properties`, or copy the built jar to the host):
 
-> **The bind mount resolves on the Docker daemon's host.** That is fine locally (and under
-> Docker Desktop), but if you point `DOCKER_HOST`/a context at a **remote** daemon, the
-> mounted path is read from *that* machine, not yours. Run the dev container against a
-> local daemon (or clone the repo on the remote host first).
+```sh
+docker compose run --rm dev bash                     # world/config are at /workspace/run
+docker compose cp dev:/workspace/build/libs/eldritch_horror-0.1.0.jar ./build/libs/
+```
 
 ### Dev server (connect your own client)
 
