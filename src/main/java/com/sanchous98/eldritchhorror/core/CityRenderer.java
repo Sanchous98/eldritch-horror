@@ -66,9 +66,9 @@ public final class CityRenderer {
             try {
                 renderCity(server, city, dir);
                 rendered.add(city.id());
-            } catch (Exception e) {
+            } catch (Throwable t) {
                 EldritchHorror.LOGGER.error("CityRenderer: failed to render {} ({})",
-                        city.name(), city.id(), e);
+                        city.name(), city.id(), t);
             }
         }
         EldritchHorror.LOGGER.info("CityRenderer: rendered {} cities into {}",
@@ -78,10 +78,9 @@ public final class CityRenderer {
 
     private static void renderCity(MinecraftServer server, City city, File dir) throws Exception {
         ServerLevel level = server.overworld();
-        // The city is actually built by CityLocation, whose radius (220..400) is far larger than
-        // the legacy City.radius() (10..44); render the real footprint.
-        int cityRadius = new com.sanchous98.eldritchhorror.world.loc.city.CityLocation(city).radius();
-        int radius = Math.min(cityRadius + 24, MAX_RENDER_RADIUS);
+        // The city is actually built by CityLocation, whose radius (220..400) is a *cull* radius:
+        // the built district is only DISTRICT_CAP (150) blocks, so render a tight box around it.
+        int radius = Math.min(cityRadius, 160) + 20;
         int diameter = radius * 2 + 1;
         int minX = city.x() - radius;
         int minZ = city.z() - radius;
@@ -147,19 +146,17 @@ public final class CityRenderer {
         }
         write(top, dir, city.id() + "_top.png");
 
-        // --- 4. Isometric projection, columns painted back-to-front. ---
-        // sx = (x - minX) - (z - minZ); sy = ((x - minX) + (z - minZ)) / 2 - (topY - minSurface).
+        // --- 4. Isometric projection: paint each column as a vertical run from its top down to
+        // the ground, back-to-front, so walls/silhouettes are visible (not just roofs). ---
         int spanX = diameter;
         int spanZ = diameter;
         int isoW = spanX + spanZ;
+        int depth = Math.min(maxSurface - minSurface + 4, 96); // cap the wall extrusion
         int groundSpan = (spanX + spanZ) / 2;
-        int minDrawY = -(maxSurface - minSurface);
-        int maxDrawY = groundSpan;
-        int isoH = maxDrawY - minDrawY + 1;
-        int offY = -minDrawY;
+        int isoH = groundSpan + depth + 4;
+        int offY = depth;
 
         BufferedImage iso = new BufferedImage(isoW, isoH, BufferedImage.TYPE_INT_ARGB);
-        // Back-to-front: far columns (small x+z) first, so nearer ones overwrite them.
         for (int s = 0; s <= (spanX - 1) + (spanZ - 1); s++) {
             for (int ix = 0; ix < spanX; ix++) {
                 int iz = s - ix;
@@ -168,9 +165,23 @@ public final class CityRenderer {
                 }
                 int idx = ix * diameter + iz;
                 int sx = ix - iz + (spanZ - 1);
-                int sy = (ix + iz) / 2 - (topY[idx] - minSurface) + offY;
-                if (sx >= 0 && sx < isoW && sy >= 0 && sy < isoH) {
-                    iso.setRGB(sx, sy, argb[idx]);
+                int top = topY[idx];
+                int x = minX + ix;
+                int z = minZ + iz;
+                // Wall runs from the roof top down to the local ground, coloured by the actual
+                // block at each height, so plaster walls and timber beams read (not just roofs).
+                int bottom = Math.max(top - depth, minSurface - 2);
+                for (int y = top; y >= bottom; y--) {
+                    pos.set(x, y, z);
+                    BlockState st = level.getBlockState(pos);
+                    if (st.isAir()) {
+                        continue;
+                    }
+                    int col = colourOf(st, level, x, y, z);
+                    int sy = (ix + iz) / 2 - (y - minSurface) + offY;
+                    if (sx >= 0 && sx < isoW && sy >= 0 && sy < isoH) {
+                        iso.setRGB(sx, sy, col);
+                    }
                 }
             }
         }
