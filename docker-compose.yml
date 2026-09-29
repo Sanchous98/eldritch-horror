@@ -31,9 +31,6 @@ services:
     volumes:
       - .:/workspace
       - gradle-cache:/home/dev/.gradle
-      # Keep the container's build output out of the host tree, so native and Docker
-      # builds never contend for the same files (Windows file locks are exclusive).
-      - build-cache:/workspace/build
     environment:
       GRADLE_USER_HOME: /home/dev/.gradle
       # Gradle heap. The decompiler forks separately (4 GB), so keep this modest.
@@ -90,9 +87,6 @@ services:
     volumes:
       - .:/workspace
       - gradle-cache:/home/dev/.gradle
-      # Keep the container's build output out of the host tree, so native and Docker
-      # builds never contend for the same files (Windows file locks are exclusive).
-      - build-cache:/workspace/build
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XDG_RUNTIME_DIR:-/tmp/xdg}:/tmp/xdg:rw
     # For NVIDIA, install the container toolkit and uncomment:
@@ -106,4 +100,3 @@ services:
 
 volumes:
   gradle-cache:
-  build-cache:
