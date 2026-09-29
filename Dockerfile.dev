@@ -45,7 +45,7 @@ RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
 # the volumes are root-owned and Gradle cannot write /workspace/build or /workspace/run.
 RUN mkdir -p /workspace/build /workspace/run /home/dev/.gradle \
  && printf 'eula=true\n' > /workspace/run/eula.txt \
- && printf 'white-list=false\nenforce-whitelist=false\nonline-mode=false\nmotd=Eldritch Horror (dev)\n' \
+ && printf 'white-list=false\nenforce-whitelist=false\nonline-mode=false\nallow-flight=true\nmotd=Eldritch Horror (dev)\n' \
       > /workspace/run/server.properties \
  && chown -R "${UID}:${GID}" /workspace/build /workspace/run /home/dev/.gradle
 
