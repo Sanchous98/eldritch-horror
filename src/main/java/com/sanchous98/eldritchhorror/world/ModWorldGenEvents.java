@@ -50,6 +50,7 @@ public final class ModWorldGenEvents {
      */
     @SubscribeEvent
     public static void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        maybeRenderCities(event);
         String city = System.getProperty("eh.debugCity");
         if (city == null || city.isBlank()) {
             return;
@@ -68,5 +69,30 @@ public final class ModWorldGenEvents {
             return;
         }
         EldritchHorror.LOGGER.warn("debug: city '{}' not found", city);
+    }
+
+    /**
+     * Dev aid: if {@code -Deh.renderCities} is set to {@code true}/{@code all} or a comma list of
+     * city names, render those cities to PNG on the server thread (see
+     * {@link com.sanchous98.eldritchhorror.core.CityRenderer}). Inert unless the property is set.
+     */
+    private static void maybeRenderCities(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        String prop = System.getProperty("eh.renderCities");
+        if (prop == null || prop.isBlank()) {
+            return;
+        }
+        java.util.List<String> names = new java.util.ArrayList<>();
+        if (!"true".equalsIgnoreCase(prop) && !"all".equalsIgnoreCase(prop)) {
+            for (String part : prop.split(",")) {
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    names.add(trimmed);
+                }
+            }
+        }
+        EldritchHorror.LOGGER.info("render: rendering cities {} -> run/render",
+                names.isEmpty() ? "ALL" : names);
+        var rendered = com.sanchous98.eldritchhorror.core.CityRenderer.render(event.getServer(), names);
+        EldritchHorror.LOGGER.info("render: done ({} png city pairs)", rendered.size());
     }
 }

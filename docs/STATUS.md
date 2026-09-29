@@ -54,8 +54,10 @@ A `@Mod` skeleton plus a working **Earth world generator** with **24 curated rea
 
 ## In flight / current
 
-- **24 city styles**: all 24 style files authored (one per curated city). Awaiting the final
-  integration build + commit; then verify in-game.
+- **Overnight: bring the world to a good state** (see `docs/NIGHT-PLAN.md`). Rendering all 24
+  cities server-side to PNG (`-Deh.renderCities=true`, dev-only `core/CityRenderer`) to review
+  style conformance without a client. Fixes: renderer now uses the real `CityLocation.radius`
+  (was the legacy `City.radius`, so it only captured the centre).
 
 ## Known limitations / deferred
 
