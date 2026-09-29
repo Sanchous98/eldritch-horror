@@ -11,11 +11,11 @@ FROM eclipse-temurin:25-jdk-jammy
 ARG UID=1000
 ARG GID=1000
 
-# Toolchain: the Gradle wrapper downloads Gradle itself. The X11/GL/OpenAL libs are
-# for `./gradlew runClient` (unused for headless builds).
+# Toolchain: the Gradle wrapper downloads Gradle itself. `setpriv` drops privileges in the
+# entrypoint. The X11/GL/OpenAL libs are for `./gradlew runClient` (unused for headless).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      bash git curl ca-certificates procps less \
+      bash git curl ca-certificates procps less util-linux \
       libx11-6 libxext6 libxrender1 libxtst6 libxi6 libxrandr2 \
       libxcursor1 libxinerama1 libxxf86vm1 libgl1 libglu1-mesa \
       libopenal1 libpulse0 \
@@ -40,6 +40,15 @@ WORKDIR /workspace
 COPY --chown=${UID}:${GID} . /workspace
 RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
 
-USER ${UID}:${GID}
+# Create the volume mount points owned by the dev user. A freshly created named
+# volume inherits the ownership of the image directory it mounts over; without this
+# the volumes are root-owned and Gradle cannot write /workspace/build or /workspace/run.
+RUN mkdir -p /workspace/build /workspace/run /home/dev/.gradle \
+ && chown -R "${UID}:${GID}" /workspace/build /workspace/run /home/dev/.gradle
+
+# Stay root at entry so the entrypoint can fix named-volume ownership, then drop to the
+# dev user (see docker-entrypoint.sh). DEV_UID/DEV_GID tell it who to drop to.
+ENV DEV_UID=${UID} \
+    DEV_GID=${GID}
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sleep", "infinity"]
