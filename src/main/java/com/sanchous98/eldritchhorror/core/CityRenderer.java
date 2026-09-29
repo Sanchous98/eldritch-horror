@@ -80,6 +80,7 @@ public final class CityRenderer {
         ServerLevel level = server.overworld();
         // The city is actually built by CityLocation, whose radius (220..400) is a *cull* radius:
         // the built district is only DISTRICT_CAP (150) blocks, so render a tight box around it.
+        int cityRadius = new com.sanchous98.eldritchhorror.world.loc.city.CityLocation(city).radius();
         int radius = Math.min(cityRadius, 160) + 20;
         int diameter = radius * 2 + 1;
         int minX = city.x() - radius;
@@ -165,13 +166,13 @@ public final class CityRenderer {
                 }
                 int idx = ix * diameter + iz;
                 int sx = ix - iz + (spanZ - 1);
-                int top = topY[idx];
+                int roofY = topY[idx];
                 int x = minX + ix;
                 int z = minZ + iz;
                 // Wall runs from the roof top down to the local ground, coloured by the actual
                 // block at each height, so plaster walls and timber beams read (not just roofs).
-                int bottom = Math.max(top - depth, minSurface - 2);
-                for (int y = top; y >= bottom; y--) {
+                int bottom = Math.max(roofY - depth, minSurface - 2);
+                for (int y = roofY; y >= bottom; y--) {
                     pos.set(x, y, z);
                     BlockState st = level.getBlockState(pos);
                     if (st.isAir()) {
