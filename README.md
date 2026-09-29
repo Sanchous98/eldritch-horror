@@ -48,8 +48,17 @@ See [`design/`](design/README.md) for the complete design bible (source of truth
 ## Development with Docker
 
 If you'd rather not install a JDK (or want a clean, reproducible toolchain), use the
-dev container. It uses JDK 21 and keeps the Gradle cache in a named volume, so the
+dev container. It uses JDK 25 and keeps the Gradle cache in a named volume, so the
 one-time NeoForge decompile happens **once** instead of on every run.
+
+> **Windows:** `gradlew` must have LF line endings, or the Linux container fails with
+> `/bin/sh^M: bad interpreter`. `.gitattributes` enforces this (`gradlew text eol=lf`),
+> but if you cloned **before** that rule existed, refresh your checkout:
+> ```powershell
+> git pull
+> git rm -r --cached . ; git reset --hard
+> ```
+> (or just re-clone). Do not let an editor or Git (`core.autocrlf`) convert `gradlew` to CRLF.
 
 ```sh
 docker compose run --rm dev ./gradlew build          # build the mod
