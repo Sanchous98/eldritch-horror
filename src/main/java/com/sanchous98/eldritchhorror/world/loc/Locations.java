@@ -6,6 +6,8 @@ import com.sanchous98.eldritchhorror.world.EarthMaps;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
+import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
+import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -85,6 +87,21 @@ public final class Locations {
             Builder builder = new Builder(level, chunk, rng, palette, e.x(), e.z());
             e.loc().build(builder);
         }
+    }
+
+    /**
+     * Builds the {@link Palette} for a location. Cultural styles may override the climate
+     * palette (local colour); everything else keeps the climate gothic palette.
+     */
+    public static Palette paletteFor(Location loc, int koppenClass, boolean coastal) {
+        CityStyle style = styleOf(loc);
+        return style == null ? Palette.fromBiome(koppenClass, coastal)
+                : style.palette(koppenClass, coastal);
+    }
+
+    /** The cultural style of a location, if it is a styled city; otherwise {@code null}. */
+    private static CityStyle styleOf(Location loc) {
+        return loc instanceof CityLocation city ? CityStyles.forCity(city.city().name()) : null;
     }
 
     /** A site counts as coastal if any of eight directions hits water within 48 blocks. */

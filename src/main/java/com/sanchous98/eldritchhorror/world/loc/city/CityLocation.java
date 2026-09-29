@@ -6,6 +6,8 @@ import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import com.sanchous98.eldritchhorror.world.loc.Tier;
+import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
+import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,6 +44,19 @@ public final class CityLocation implements Location {
         this.city = city;
     }
 
+    /** The city this location represents (used to resolve its cultural style). */
+    public City city() {
+        return this.city;
+    }
+
+    /** Half-extent in blocks, scaled from real population: {@code clamp(220 + sqrt(pop)/40, 220, 400)}. */
+    @Override
+    public int radius() {
+        double r = 220.0 + Math.sqrt(Math.max(this.city.population(), 1)) / 40.0;
+        int rounded = (int) Math.round(r);
+        return Math.max(220, Math.min(400, rounded));
+    }
+
     @Override
     public String id() {
         return "eldritch_horror:city/" + this.city.id();
@@ -52,17 +67,6 @@ public final class CityLocation implements Location {
         return Tier.METROPOLIS;
     }
 
-    /**
-     * Half-extent in blocks, scaled from real population so big cities sprawl further:
-     * {@code clamp(220 + sqrt(pop)/40, 220, 400)}.
-     */
-    @Override
-    public int radius() {
-        double r = 220.0 + Math.sqrt(Math.max(this.city.population(), 1)) / 40.0;
-        int rounded = (int) Math.round(r);
-        return Math.max(220, Math.min(400, rounded));
-    }
-
     @Override
     public void build(StructureBuilder b) {
         int cx = this.city.x();
@@ -70,6 +74,7 @@ public final class CityLocation implements Location {
         int ground = b.groundY(cx, cz);
         Palette p = b.palette();
         RandomSource rng = b.rng();
+        CityStyle style = CityStyles.forCity(this.city.name());
 
         int district = Math.min(radius(), DISTRICT_CAP);
         int plaza = PLAZA;
@@ -79,10 +84,10 @@ public final class CityLocation implements Location {
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground + 1, ground + 1, p.ground());
 
-        // 2. Landmark: the cathedral, whose spire dominates the skyline.
-        cathedral(b, rng, cx, cz, ground, p);
+        // 2. Landmark: the cultural skyline piece (cathedral / temple / mosque / pagoda …).
+        style.landmark(b, rng, cx, cz, ground, p);
 
-        // 3. Plaza monument, off the cathedral axis.
+        // 3. Plaza monument, off the landmark axis.
         b.monument(cx + plaza - 5, cz + plaza - 5, ground + 1);
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
@@ -99,94 +104,27 @@ public final class CityLocation implements Location {
                     continue;
                 }
                 if (Math.abs(dx) < inner && Math.abs(dz) < inner) {
-                    continue; // keep the cathedral and plaza clear
+                    continue; // keep the landmark and plaza clear
                 }
                 if (rng.nextFloat() > 0.82f) {
                     continue; // a few vacant lots
                 }
-                building(b, rng, x, z, p);
+                building(b, rng, x, z, p, style);
                 built++;
             }
         }
+
+        // 5. Street furniture for the culture (lanterns, torii, neon, statues…).
+        style.streetProps(b, rng, cx, cz, district, ground, p);
+
         b.marker("city_center", cx, ground + 1, cz);
-    }
-
-    // ------------------------------------------------------------------ landmark
-
-    /** A long nave with a tall entrance tower and a spire, buttressed and narrow-windowed. */
-    private static void cathedral(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        int w = 11;   // across X
-        int l = 21;   // along Z
-        int h = 13;   // nave wall height
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - l / 2;
-        int z1 = z0 + l - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
-
-        // Paved steps up to the entrance.
-        b.ground(x0 - 2, z0 - 3, x1 + 2, z1 + 2, ground, ground, p.foundation());
-
-        // Nave shell: walls, hollow interior, floor.
-        b.room(x0, y0, z0, x1, y1, z1, new StructureBuilder.Doorway(Side.N, 5));
-
-        // Steep pitched roof, ridge along the long (Z) axis; eaves overhang by one.
-        b.pitchedRoof(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1, 7, 1);
-
-        // Buttresses along both long walls.
-        for (int z = z0 + 2; z <= z1 - 2; z += 4) {
-            b.buttress(x0, z, y0, 4, Side.W);
-            b.buttress(x1, z, y0, 4, Side.E);
-        }
-
-        // Tall narrow windows down the nave.
-        int wy = y0 + 3;
-        for (int z = z0 + 3; z <= z1 - 3; z += 3) {
-            b.window(x0, wy, z, 4, 1, true);
-            b.window(x1, wy, z, 4, 1, true);
-        }
-
-        // Entrance tower at the north end: square, crenellated, then a spire.
-        int tx0 = cx - 4;
-        int tx1 = cx + 4;
-        int tz0 = z0 - 6;
-        int tz1 = z0 - 1;
-        int towerTop = y0 + 26;
-        // Hollow shaft with a floor and a ceiling under the parapet.
-        b.room(tx0, y0, tz0, tx1, towerTop, tz1,
-                new StructureBuilder.Doorway(Side.S, 4));
-
-        // Corner quoins up the tower.
-        for (int y = y0; y <= towerTop; y++) {
-            b.put(tx0, y, tz0, p.accent());
-            b.put(tx1, y, tz0, p.accent());
-            b.put(tx0, y, tz1, p.accent());
-            b.put(tx1, y, tz1, p.accent());
-        }
-        // Tower windows and a crenellated parapet.
-        for (int y = y0 + 5; y <= towerTop - 4; y += 5) {
-            b.window(tx0, y, (tz0 + tz1) / 2, 3, 1, true);
-            b.window(tx1, y, (tz0 + tz1) / 2, 3, 1, true);
-            b.window((tx0 + tx1) / 2, y, tz0, 3, 1, true);
-        }
-        b.crenellations(tx0 - 1, tz0 - 1, tx1 + 1, tz1 + 1, towerTop + 1);
-
-        // The dominating spire, set back from the tower top.
-        b.spire(cx, (tz0 + tz1) / 2, towerTop + 3, 20);
-
-        // Grand door in the tower's south doorway.
-        BlockState lower = p.door()
-                .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)
-                .setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
-        b.put(cx, y0 + 1, tz1, lower);
-        b.put(cx, y0 + 2, tz1, lower.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
     }
 
     // ------------------------------------------------------------------ pieces
 
     /** One building: quoined shell, tall windows, a steep ridge, optional spire/buttress, decay. */
-    private static void building(StructureBuilder b, RandomSource rng, int x, int z, Palette p) {
+    private static void building(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
+                                 CityStyle style) {
         int w = 5 + rng.nextInt(4);   // 5..8 across X
         int d = 5 + rng.nextInt(4);   // 5..8 across Z
         int h = 4 + rng.nextInt(6);   // wall height 4..9
@@ -248,6 +186,9 @@ public final class CityLocation implements Location {
         }
 
         decay(b, rng, x, y0, z, x1, y1, z1, p);
+
+        // Cultural flourish (signs, balconies, verandas…) — default does nothing.
+        style.flourish(b, rng, x, y0, z, x1, y1, z1, p);
 
         // A single guttering light in some buildings only.
         if (rng.nextFloat() < 0.3f) {

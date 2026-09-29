@@ -104,11 +104,68 @@ Rules:
   more boilerplate than fixed cities need. Do not build this until a site needs it.
 
 
+## Cultural styles (local colour)
+
+Climate alone cannot make Tokyo look Japanese — Tokyo is Köppen *Cfa*, the same class as
+New Orleans. **Local colour is culture, not climate.** So a second axis is added.
+
+A **`CityStyle`** is one file per city style. The shared `CityLocation` layout (jittered
+district, alleys, decay, lights) is owned centrally; the style only supplies *materials* and
+*flourishes*, so many styles can be built in parallel without touching shared code.
+
+```java
+public interface CityStyle {
+    /** Stable id, e.g. "japanese". */
+    String id();
+
+    /** Materials for this culture, varied by climate + coast. May delegate to
+     *  Palette.fromBiome(...) for the parts culture does not change. */
+    Palette palette(int koppenClass, boolean coastal);
+
+    /** The skyline landmark (cathedral / temple / mosque / pagoda …). */
+    void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p);
+
+    /** Optional per-building flourishes (signs, balconies, verandas…). Default: none. */
+    default void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,
+                          int x1, int y1, int z1, Palette p) {}
+
+    /** Optional street furniture (lanterns, torii, neon, statues…). Default: none. */
+    default void streetProps(StructureBuilder b, RandomSource rng, int cx, int cz,
+                             int district, int ground, Palette p) {}
+}
+```
+
+- **`CityStyles.forCity(String name)`** is a single registry file, owned centrally, mapping
+  each curated city to a `CityStyle` (fallback: the gothic `Palette.fromBiome` when a city's
+  style is missing). **Workers never edit the registry.**
+- A worker's job for one city = **create exactly one file**
+  `world/loc/style/<Name>Style.java` implementing `CityStyle`. Nothing else.
+- **Architecture helpers** available to styles (built on the base builder): the shaped ops in
+  "Architecture vocabulary" below, plus style-specific helpers that a style may add as local
+  `private` methods in its own file (e.g. `torii`, `pagoda`, `mosqueDome`).
+
+### JAPANESE (reference style, Tokyo)
+
+| Element | Blocks |
+|---|---|
+| plaster wall (shikkui) | white concrete / smooth quartz |
+| timber beams, koushi lattice | dark oak / spruce logs, fences, trapdoors |
+| kawara tile roof (grey, flared eaves) | deepslate tiles / polished andesite, stairs+slabs |
+| oxidized copper roof | oxidized/weathered copper |
+| vermilion (torii, pillars) | red concrete / red terracotta / crimson planks |
+| paper lantern / chōchin | shroomlight / ochre froglight / redstone lamp |
+| neon signage | red/magenta/blue stained glass + glowstone/sea lantern |
+
+The **landmark** is a five-level **pagoda** with stacked flared roofs; **streetProps** add
+**torii** gates and stone/paper lanterns along the approaches. This is the reference other
+styles copy.
+
 ## Palettes
 
 `Palette` is the frozen block vocabulary (locations never hardcode blocks). It is a
 **dark-gothic core with regional flavour** — every city reads as brooding architecture, but
-materials and overgrowth change with the real climate:
+materials and overgrowth change with the real climate **and culture**:
+
 
 ```java
 public record Palette(
