@@ -52,6 +52,8 @@ public final class Locations {
             }
             for (City city : Cities.all()) {
                 register(new CityLocation(city), city.x(), city.z());
+                EldritchHorror.LOGGER.info("  city {} -> style '{}'",
+                        city.name(), CityStyles.forCity(city.name()).id());
             }
             initialised = true;
             EldritchHorror.LOGGER.info("registered {} fixed locations", ENTRIES.size());
@@ -83,7 +85,7 @@ public final class Locations {
             RandomSource rng = RandomSource.create(e.loc().id().hashCode());
             boolean coastal = isCoastal(map, e.x(), e.z());
             int koppen = map.koppenClass(e.x(), e.z());
-            Palette palette = Palette.fromBiome(koppen, coastal);
+            Palette palette = paletteFor(e.loc(), koppen, coastal);
             Builder builder = new Builder(level, chunk, rng, palette, e.x(), e.z());
             e.loc().build(builder);
         }
