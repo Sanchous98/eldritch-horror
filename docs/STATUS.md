@@ -44,12 +44,18 @@ A `@Mod` skeleton plus a working **Earth world generator** with **24 curated rea
   materials); builder gained shaped ops (`pitchedRoof`, `spire`, `buttress`, `window`,
   `crenellations`, `monument`, `scatter`, `ruins`); `CityLocation` rebuilt with varied
   silhouettes, a cathedral landmark and a decay pass.
+- **Cultural styles** (`world/loc/style/`): one `CityStyle` per curated city (24 files, one
+  owner each). Central frame: `CityStyle`, `CityStyles` registry, `StyleKit` shared helpers
+  (cathedral/mosque/dome/minaret/pagoda/torii/steppedTemple/obelisk/statue/lantern),
+  `Materials` colour helpers (26.3 moved dyed blocks to `ColorCollection.pick`),
+  `FallbackStyle`. `CityLocation` delegates palette/landmark/flourish/streetProps to the
+  style. **TokyoStyle** is the reference (shikkui+kawara+vermilion+neon). The other 23 cities
+  are being authored in parallel by subagents.
 
 ## In flight / current
 
-- Next: **parallel location content** — temples, vaults, strongholds, altar sites — each a
-  single `Location` file, built by one worker against the frozen contract. Random-in-biome
-  sites will need a real `Structure`/`StructureSet` when the first one lands.
+- **24 city styles**: all 24 style files authored (one per curated city). Awaiting the final
+  integration build + commit; then verify in-game.
 
 ## Known limitations / deferred
 

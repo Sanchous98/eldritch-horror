@@ -2,15 +2,36 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Bangkok — cultural city style. STUB: not styled yet, so the city uses the climate gothic palette
- * and the default cathedral landmark. Replace this file wholesale to give Bangkok its real local
- * colour (materials, landmark, flourishes). See docs/STRUCTURES-CONTRACT.md § Cultural styles;
- * copy the pattern from {@link TokyoStyle}. Shared helpers live in {@link StyleKit}.
+ * Bangkok — Thai: white stucco walls, gold/vermilion temple roofs with steep chofah spires,
+ * mosaic trim, canals and spirit houses. Colour is culture, not climate, so the stucco and the
+ * gold lead while the region only supplies overgrowth (jungle vines, or kelp on the delta).
+ *
+ * <p>Landmark: a Thai temple — an ordination hall on a tiered base, a steep stacked roof and a
+ * tall golden spire. Street props: spirit houses, lantern posts and guardian statues. Follows
+ * {@link TokyoStyle}; shared shapes live in {@link StyleKit}.
  */
 public final class BangkokStyle implements CityStyle {
+
+    /** Temple roof tile: golden glazed terracotta, with matching stairs/slabs for pitch. */
+    private static BlockState goldTiles() {
+        return Materials.glazed(DyeColor.YELLOW);
+    }
+
+    private static BlockState goldStairs() {
+        return Blocks.CONCRETE_STAIRS.pick(DyeColor.YELLOW).defaultBlockState();
+    }
+
+    private static BlockState goldSlab() {
+        return Blocks.CONCRETE_SLAB.pick(DyeColor.YELLOW).defaultBlockState();
+    }
 
     @Override
     public String id() {
@@ -19,11 +40,106 @@ public final class BangkokStyle implements CityStyle {
 
     @Override
     public Palette palette(int koppenClass, boolean coastal) {
-        return Palette.fromBiome(koppenClass, coastal);
+        Palette bio = Palette.fromBiome(koppenClass, coastal);
+        return new Palette(
+                Blocks.STONE_BRICKS.defaultBlockState(),             // ground: paved temple court
+                Blocks.POLISHED_DIORITE.defaultBlockState(),         // foundation: pale plinth
+                Materials.whiteConcrete(),                           // wall: white stucco
+                Materials.lightGrayConcrete(),                       // weathered stucco
+                Blocks.POLISHED_BLACKSTONE.defaultBlockState(),      // accent: lacquer pillars
+                goldTiles(),                                         // roof: gold temple tile
+                goldStairs(),                                        // roof stairs
+                goldSlab(),                                          // roof slabs / eaves
+                Materials.stainedPane(DyeColor.LIGHT_BLUE),          // window: mosaic glazing
+                Blocks.STRIPPED_DARK_OAK_LOG.defaultBlockState(),    // frame: dark timber
+                Blocks.CRIMSON_DOOR.defaultBlockState(),             // door: vermilion gate leaf
+                Blocks.CRIMSON_FENCE.defaultBlockState(),            // rail
+                Blocks.LANTERN.defaultBlockState(),                  // light: hanging lantern
+                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                Blocks.GRAVEL.defaultBlockState());                  // rubble
     }
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        StyleKit.cathedral(b, rng, cx, cz, ground, p);
+        temple(b, cx, cz, ground, p);
+    }
+
+    /**
+     * A Thai temple: a 17x11 hall raised on a three-step tiered base, with a vermilion colonnade,
+     * mosaic window bands and a steep two-tier golden roof capped by a tall chofah spire.
+     */
+    private static void temple(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int w = 17;
+        int d = 11;
+        int x0 = cx - w / 2;
+        int x1 = x0 + w - 1;
+        int z0 = cz - d / 2;
+        int z1 = z0 + d - 1;
+        int y0 = ground + 3;   // the hall sits on top of the tiers
+        int h = 7;
+
+        // Tiered base: three shrinking slabs of pale stone.
+        b.ground(x0 - 3, z0 - 3, x1 + 3, z1 + 3, ground, ground + 2, p.foundation());
+        b.ground(x0 - 1, z0 - 1, x1 + 1, z1 + 1, ground, ground + 2, p.wall());
+
+        b.room(x0, y0, z0, x1, y0 + h, z1, new Doorway(Side.S, w / 2), new Doorway(Side.N, w / 2));
+
+        // Vermilion columns down both long sides, carried one course past the eave.
+        for (int x = x0 + 1; x <= x1 - 1; x += 3) {
+            b.fill(x, y0, z0, x, y0 + h + 1, z0, p.accent());
+            b.fill(x, y0, z1, x, y0 + h + 1, z1, p.accent());
+        }
+        // Mosaic window bands on the flanks.
+        for (int x = x0 + 2; x <= x1 - 2; x += 3) {
+            b.window(x, y0 + 3, z0, 3, 1, true);
+            b.window(x, y0 + 3, z1, 3, 1, true);
+        }
+
+        // Steep stacked roof: a broad lower shell, a narrower upper shell, then the golden spire.
+        b.pitchedRoof(x0 - 2, z0 - 2, x1 + 2, z1 + 2, y0 + h, 5, 0);
+        b.pitchedRoof(x0 + 3, z0 + 1, x1 - 3, z1 - 1, y0 + h + 5, 4, 0);
+        b.spire(cx, cz, y0 + h + 9, 16);
+    }
+
+    /**
+     * A spirit house: a tiny gilded shrine raised on a post so the household spirit sits above the
+     * street, with a small pitched roof — the everyday Thai street shrine.
+     */
+    private static void spiritHouse(StructureBuilder b, int x, int z, int ground, Palette p) {
+        b.put(x, ground + 1, z, p.accent());
+        b.put(x, ground + 2, z, p.accent());
+        BlockState gold = Materials.glazed(DyeColor.YELLOW);
+        b.fill(x - 1, ground + 3, z - 1, x + 1, ground + 3, z + 1, gold);
+        b.put(x, ground + 4, z, p.wall());
+        b.put(x, ground + 5, z, p.wall());
+        b.pitchedRoof(x - 1, z - 1, x + 1, z + 1, ground + 5, 2, 0);
+        b.put(x, ground + 8, z, p.light());
+    }
+
+    @Override
+    public void streetProps(StructureBuilder b, RandomSource rng, int cx, int cz,
+                            int district, int ground, Palette p) {
+        // Guardian statues flanking the temple approach.
+        StyleKit.statue(b, cx - 9, cz + 4, ground, p);
+        StyleKit.statue(b, cx + 9, cz + 4, ground, p);
+        // Spirit houses on the corners of the central district.
+        spiritHouse(b, cx - district + 12, cz - district + 12, ground, p);
+        spiritHouse(b, cx + district - 12, cz + district - 12, ground, p);
+        // Lantern posts down the two main axes, spaced by the deterministic RNG.
+        int step = 12 + rng.nextInt(3);
+        for (int d = 26; d <= district - 12; d += step) {
+            StyleKit.lanternPost(b, cx + d, cz - 3, ground, p);
+            StyleKit.lanternPost(b, cx - d, cz + 3, ground, p);
+        }
+    }
+
+    @Override
+    public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,
+                         int x1, int y1, int z1, Palette p) {
+        // A vermilion eave band and a gold trim course, with a sparse hanging lantern.
+        b.fill(x, y1, z, x1, y1, z1, p.accent());
+        if (rng.nextFloat() < 0.4F) {
+            b.put((x + x1) / 2, y0 + 1, z, p.light());
+        }
     }
 }

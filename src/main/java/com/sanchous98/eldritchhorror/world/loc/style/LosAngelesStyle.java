@@ -2,13 +2,19 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
 
 /**
- * LosAngeles — cultural city style. STUB: not styled yet, so the city uses the climate gothic palette
- * and the default cathedral landmark. Replace this file wholesale to give LosAngeles its real local
- * colour (materials, landmark, flourishes). See docs/STRUCTURES-CONTRACT.md § Cultural styles;
- * copy the pattern from {@link TokyoStyle}. Shared helpers live in {@link StyleKit}.
+ * Los Angeles — cultural city style. Spanish-colonial / Mission Revival and pastel Art-Deco:
+ * white stucco bungalows under terracotta tile, arcaded colonnades, palm-lined boulevards,
+ * glassy modern towers.
+ *
+ * <p>Landmark: a Spanish mission church — white stucco nave with a terracotta pitched roof,
+ * an arched arcade along its front and a red-tile bell tower. Street props: palm posts, lamp
+ * posts, statues and a big HOLLYWOOD-style sign/arch. Deterministic; uses only
+ * {@link StructureBuilder} + {@link Palette} (via {@link StyleKit}/{@link Materials}).
  */
 public final class LosAngelesStyle implements CityStyle {
 
@@ -19,11 +25,186 @@ public final class LosAngelesStyle implements CityStyle {
 
     @Override
     public Palette palette(int koppenClass, boolean coastal) {
-        return Palette.fromBiome(koppenClass, coastal);
+        // Culture leads: white stucco + terracotta tile, whatever the Köppen class. Climate only
+        // supplies the overgrowth; the coast swaps it for kelp.
+        Palette bio = Palette.fromBiome(koppenClass, coastal);
+        return new Palette(
+                Blocks.SMOOTH_SANDSTONE.defaultBlockState(),        // ground: pale boulevard paving
+                Blocks.CUT_SANDSTONE.defaultBlockState(),           // foundation: stone base course
+                Materials.whiteConcrete(),                          // wall: white stucco
+                Blocks.SMOOTH_SANDSTONE.defaultBlockState(),        // weathered: sun-bleached stucco
+                Materials.redTerracotta(),                          // accent: terracotta trim / arches
+                Blocks.BRICKS.defaultBlockState(),                  // roof: red tile bed
+                Blocks.BRICK_STAIRS.defaultBlockState(),            // roof stairs
+                Blocks.BRICK_SLAB.defaultBlockState(),              // roof slabs / eaves
+                Blocks.GLASS_PANE.defaultBlockState(),              // window: mission glazing
+                Blocks.ACACIA_TRAPDOOR.defaultBlockState(),         // frame: timber shutters
+                Blocks.ACACIA_DOOR.defaultBlockState(),             // door
+                Blocks.ACACIA_FENCE.defaultBlockState(),            // rail
+                Blocks.LANTERN.defaultBlockState(),                 // light: patio lantern
+                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                Blocks.GRAVEL.defaultBlockState());                 // rubble: dry debris
     }
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        StyleKit.cathedral(b, rng, cx, cz, ground, p);
+        mission(b, cx, cz, ground, p);
+    }
+
+    @Override
+    public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,
+                         int x1, int y1, int z1, Palette p) {
+        // A pastel Deco band or a timber balcony on some upper walls.
+        int roll = rng.nextInt(3);
+        if (roll == 0) {
+            return;
+        }
+        int y = y1 - 2;
+        if (roll == 1) {
+            switch (rng.nextInt(4)) {
+                case 0 -> b.fill(x + 1, y, z, x1 - 1, y, z, p.accent());
+                case 1 -> b.fill(x + 1, y, z1, x1 - 1, y, z1, p.accent());
+                case 2 -> b.fill(x, y, z + 1, x, y, z1 - 1, p.accent());
+                default -> b.fill(x1, y, z + 1, x1, y, z1 - 1, p.accent());
+            }
+        } else {
+            switch (rng.nextInt(4)) {
+                case 0 -> b.fill(x + 1, y, z - 1, x1 - 1, y, z - 1, p.rail());
+                case 1 -> b.fill(x + 1, y, z1 + 1, x1 - 1, y, z1 + 1, p.rail());
+                case 2 -> b.fill(x - 1, y, z + 1, x - 1, y, z1 - 1, p.rail());
+                default -> b.fill(x1 + 1, y, z + 1, x1 + 1, y, z1 - 1, p.rail());
+            }
+        }
+    }
+
+    @Override
+    public void streetProps(StructureBuilder b, RandomSource rng, int cx, int cz,
+                            int district, int ground, Palette p) {
+        // Palm-lined boulevards: fronded posts down both main axes.
+        for (int d = 28; d <= district - 8; d += 16) {
+            palm(b, cx + d, cz + 5, ground, p);
+            palm(b, cx - d, cz - 5, ground, p);
+            palm(b, cx + 5, cz + d, ground, p);
+            palm(b, cx - 5, cz - d, ground, p);
+        }
+        // Lamp posts flank the plaza.
+        for (int d = 30; d <= district - 10; d += 20) {
+            StyleKit.lanternPost(b, cx + d, cz - 3, ground, p);
+            StyleKit.lanternPost(b, cx - d, cz + 3, ground, p);
+        }
+        // Statues and the big HOLLYWOOD sign/arch on the approaches.
+        StyleKit.statue(b, cx - 8, cz + district - 34, ground, p);
+        StyleKit.statue(b, cx + 8, cz + district - 34, ground, p);
+        bigSign(b, cx, cz + district - 44, ground, p);
+    }
+
+    // ------------------------------------------------------------------ local helpers
+
+    /**
+     * The mission landmark: a stucco nave under a terracotta pitched roof, an arched arcade
+     * colonnade along the south front, and a red-tile bell tower at the north-west corner.
+     * Small and cheap — safe to call per chunk.
+     */
+    private static void mission(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int w = 11;
+        int l = 19;
+        int h = 8;
+        int x0 = cx - w / 2;
+        int x1 = x0 + w - 1;
+        int z0 = cz - l / 2;
+        int z1 = z0 + l - 1;
+        int y0 = ground + 1;
+        int y1 = y0 + h;
+
+        b.ground(x0 - 2, z0 - 2, x1 + 2, z1 + 2, ground, ground, p.foundation());
+        b.room(x0, y0, z0, x1, y1, z1, new StructureBuilder.Doorway(Side.N, 5));
+        b.pitchedRoof(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1, 5, 1);
+        for (int z = z0 + 3; z <= z1 - 3; z += 4) {
+            b.window(x0, y0 + 3, z, 3, 1, true);
+            b.window(x1, y0 + 3, z, 3, 1, true);
+        }
+        arcade(b, x0, x1, z1 + 3, ground, p);
+        bellTower(b, x0 - 3, z0 + 3, ground, p);
+    }
+
+    /**
+     * An arched arcade colonnade along X at fixed Z: terracotta piers two apart under a tile
+     * lintel, capped with stair heads suggesting round mission arches.
+     */
+    private static void arcade(StructureBuilder b, int x0, int x1, int z, int ground, Palette p) {
+        int y = ground + 1;
+        int top = y + 3;
+        for (int x = x0; x <= x1; x += 2) {
+            b.fill(x, y, z, x, top, z, p.accent());
+        }
+        b.fill(x0 - 1, top + 1, z, x1 + 1, top + 1, z, p.roof());
+        for (int x = x0 + 1; x <= x1 - 1; x += 2) {
+            b.put(x, top, z, p.roofStairs());
+        }
+    }
+
+    /**
+     * A Mission bell tower: a slender stucco shaft with a red-tile cap and a tile bell canopy
+     * carried on four corner posts, finished with a light.
+     */
+    private static void bellTower(StructureBuilder b, int x, int z, int ground, Palette p) {
+        int y0 = ground + 1;
+        int y1 = y0 + 18;
+        b.room(x - 1, y0, z - 1, x + 1, y1, z + 1);
+        for (int y = y0; y <= y1; y++) {
+            b.put(x - 1, y, z - 1, p.accent());
+            b.put(x + 1, y, z - 1, p.accent());
+            b.put(x - 1, y, z + 1, p.accent());
+            b.put(x + 1, y, z + 1, p.accent());
+        }
+        for (int y = y0 + 4; y <= y1 - 3; y += 4) {
+            b.window(x, y, z - 1, 2, 1, true);
+            b.window(x, y, z + 1, 2, 1, true);
+        }
+        // Tile cap.
+        b.pitchedRoof(x - 2, z - 2, x + 2, z + 2, y1, 3, 0);
+        // Bell canopy: four posts, a lintel and a small tile roof, lit from within.
+        int by = y1 + 4;
+        for (int y = y1 + 1; y <= by; y++) {
+            b.put(x - 1, y, z - 1, p.accent());
+            b.put(x + 1, y, z - 1, p.accent());
+            b.put(x - 1, y, z + 1, p.accent());
+            b.put(x + 1, y, z + 1, p.accent());
+        }
+        b.put(x, by, z, p.light());
+        b.pitchedRoof(x - 2, z - 2, x + 2, z + 2, by + 1, 3, 0);
+    }
+
+    /** A palm: a slim timber trunk with a mop of leaves. */
+    private static void palm(StructureBuilder b, int x, int z, int ground, Palette p) {
+        int h = 6;
+        for (int y = ground + 1; y <= ground + h; y++) {
+            b.put(x, y, z, Blocks.JUNGLE_LOG.defaultBlockState());
+        }
+        b.fill(x - 1, ground + h, z, x + 1, ground + h, z, Blocks.JUNGLE_LEAVES.defaultBlockState());
+        b.fill(x, ground + h, z - 1, x, ground + h, z + 1, Blocks.JUNGLE_LEAVES.defaultBlockState());
+        b.put(x, ground + h, z, Blocks.JUNGLE_LEAVES.defaultBlockState());
+        b.put(x, ground + h + 1, z, Blocks.JUNGLE_LEAVES.defaultBlockState());
+    }
+
+    /**
+     * A big hillside sign: two terracotta end piers carrying a band of pale letters on a stepped
+     * frame — an unmistakable Tinseltown marker without spelling anything.
+     */
+    private static void bigSign(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int y = ground + 1;
+        int half = 8;
+        // End piers.
+        b.fill(cx - half, y, cz, cx - half, y + 3, cz, p.accent());
+        b.fill(cx + half, y, cz, cx + half, y + 3, cz, p.accent());
+        // Letter band: pale panels with terracotta dividers.
+        for (int i = -half + 1; i <= half - 1; i++) {
+            b.put(cx + i, y + 1, cz, p.wall());
+            b.put(cx + i, y + 2, cz, (i % 5 == 0) ? p.accent() : p.wall());
+        }
+        // Stepped frame along the top.
+        for (int i = -half; i <= half; i++) {
+            b.put(cx + i, y + 3, cz, p.accent());
+        }
     }
 }
