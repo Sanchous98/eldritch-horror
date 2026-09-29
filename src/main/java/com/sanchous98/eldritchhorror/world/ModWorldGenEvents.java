@@ -25,13 +25,23 @@ public final class ModWorldGenEvents {
         EarthBiomeSource.setRegistry(biomes);
         // Load the map now so a missing/broken asset fails loudly on startup, not mid-chunk.
         EarthMaps.get();
-        // Match the world border to the 2:1 map extent (Overworld only).
-        var overworld = event.getServer().overworld();
-        var border = overworld.getWorldBorder();
-        border.setCenter(0.0, 0.0);
-        border.setSize(131072.0);
         EldritchHorror.LOGGER.info("Earth world generator ready: {}x{} map at {} blocks/pixel",
                 EarthMaps.PIXEL_WIDTH, EarthMaps.PIXEL_WIDTH / 2, EarthMap.BLOCKS_PER_PIXEL);
+    }
+
+    /**
+     * Match the world border to the 2:1 map extent (Overworld only). This must run after the
+     * server's levels exist — {@link ServerAboutToStartEvent} is too early ({@code overworld()}
+     * is still {@code null} there).
+     */
+    @SubscribeEvent
+    public static void onServerStartedSetBorder(
+            net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        var border = event.getServer().overworld().getWorldBorder();
+        border.setCenter(0.0, 0.0);
+        border.setSize(2.0 * EarthMap.HALF_WIDTH);
+        EldritchHorror.LOGGER.info("world border set to {}x{} blocks",
+                2L * EarthMap.HALF_WIDTH, 2L * EarthMap.HALF_HEIGHT);
     }
 
     /**
