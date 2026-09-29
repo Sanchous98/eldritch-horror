@@ -91,17 +91,37 @@ nothing special. Stop with Ctrl-C.
 
 ### Windows: run natively (recommended)
 
-Docker Desktop on Windows crosses a VM filesystem boundary for every file, which is slow
-and flaky for Minecraft builds. If you have JDK 25, run the game **on the host** instead:
+Docker Desktop on Windows shares your `C:\...` project into a Linux VM over 9p/virtiofs,
+which is slow and **fails under heavy builds** with `FileHasher: Input/output error` or
+`AccessDeniedException` (Windows locks files exclusively). This is a Docker Desktop
+limitation, not the project. Two reliable paths:
+
+**Native (simplest):** with JDK 25 installed, run on the host — no Docker.
 
 ```powershell
 .\gradlew.bat runClient      # opens the game with the mod
 .\gradlew.bat runServer      # dedicated server on localhost:25565
 ```
 
-**Pick one build path.** Do not run a Docker build and a host build at the same time — they
-share the repo's `build/` folder, and Windows locks files exclusively, so the second one
-fails with `AccessDeniedException` or `FileHasher: Input/output error`.
+**Or Docker with the repo inside WSL2** (avoids the 9p boundary entirely):
+
+```bash
+# in an Ubuntu WSL2 shell
+cd ~ && git clone git@github.com:Sanchous98/eldritch-horror.git
+cd eldritch-horror && docker compose --profile server up server
+# connect from Windows Minecraft to localhost:25565
+```
+
+If a build fails with `Input/output error`, clear the stale build state and retry:
+
+```powershell
+docker compose --profile server down -v
+rmdir /s /q .gradle
+rmdir /s /q build
+```
+
+**Pick one path.** Do not run a Docker build and a host build at the same time — they
+share the repo's `build/` folder, and Windows locks files exclusively.
 
 If you hit `…minecraft-patched-….jar is locked` (or `AccessDeniedException` on a `.tmp`
 move), a process still holds the jar open. Close it and clear the artifact:
