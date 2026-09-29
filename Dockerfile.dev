@@ -44,6 +44,9 @@ RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
 # volume inherits the ownership of the image directory it mounts over; without this
 # the volumes are root-owned and Gradle cannot write /workspace/build or /workspace/run.
 RUN mkdir -p /workspace/build /workspace/run /home/dev/.gradle \
+ && printf 'eula=true\n' > /workspace/run/eula.txt \
+ && printf 'white-list=false\nenforce-whitelist=false\nonline-mode=false\nmotd=Eldritch Horror (dev)\n' \
+      > /workspace/run/server.properties \
  && chown -R "${UID}:${GID}" /workspace/build /workspace/run /home/dev/.gradle
 
 # Stay root at entry so the entrypoint can fix named-volume ownership, then drop to the
