@@ -25,10 +25,10 @@ public final class TokyoStyle implements CityStyle {
         // the overgrowth (wetter → vines); the coast swaps the overgrowth for kelp.
         Palette bio = Palette.fromBiome(koppenClass, coastal);
         return new Palette(
-                Blocks.STONE_BRICKS.defaultBlockState(),            // ground: paved stone street
+                Blocks.GRAVEL.defaultBlockState(),                  // ground: raked gravel street
                 Blocks.POLISHED_ANDESITE.defaultBlockState(),       // foundation
                 Materials.whiteConcrete(),                          // wall: shikkui plaster
-                Materials.lightGrayConcrete(),                      // weathered plaster
+                Blocks.CALCITE.defaultBlockState(),                 // weathered plaster
                 Blocks.STRIPPED_DARK_OAK_LOG.defaultBlockState(),   // accent: dark timber beams
                 Blocks.DEEPSLATE_TILES.defaultBlockState(),         // roof: kawara tile
                 Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(),   // roof stairs
@@ -40,6 +40,34 @@ public final class TokyoStyle implements CityStyle {
                 Blocks.SHROOMLIGHT.defaultBlockState(),             // light: paper lantern glow
                 coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble: raked gravel
+    }
+
+    @Override
+    public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,
+                         int x1, int y1, int z1, Palette p) {
+        // The defining Japanese look: dark timber beams framing pale shikkui walls.
+        // Horizontal sill and lintel courses all round, plus a vertical post at one corner.
+        for (int y = y0; y <= y0 + 1 && y <= y1; y++) {
+            b.fill(x, y, z, x1, y, z, p.accent());
+            b.fill(x, y, z1, x1, y, z1, p.accent());
+            b.fill(x, y, z, x, y, z1, p.accent());
+            b.fill(x1, y, z, x1, y, z1, p.accent());
+        }
+        for (int y = y0; y < y1; y += 2) {
+            b.fill(x, y, z, x1, y, z, p.accent());
+            b.fill(x, y, z1, x1, y, z1, p.accent());
+        }
+        // A cherry-blossom accent tree beside some buildings.
+        if (rng.nextFloat() < 0.3f) {
+            int tx = x - 2;
+            int tz = z - 2;
+            int gy = b.groundY(tx, tz);
+            b.put(tx, gy + 1, tz, Blocks.CHERRY_LOG.defaultBlockState());
+            b.put(tx, gy + 2, tz, Blocks.CHERRY_LOG.defaultBlockState());
+            b.fill(tx - 1, gy + 3, tz - 1, tx + 1, gy + 3, tz + 1,
+                    Blocks.CHERRY_LEAVES.defaultBlockState());
+            b.put(tx, gy + 4, tz, Blocks.CHERRY_LEAVES.defaultBlockState());
+        }
     }
 
     @Override
