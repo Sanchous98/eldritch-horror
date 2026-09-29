@@ -1,0 +1,51 @@
+# Server image that COPIES the project in, instead of bind-mounting the host folder.
+#
+# Why: Docker Desktop on Windows fails to bind-mount C:\ paths (host_mnt read-only /
+# 9p I/O errors). `docker build` instead streams the build context to the daemon, which
+# does not need file sharing — so this image builds and runs on Windows.
+#
+# Build/run with docker-compose.windows.yml, or:
+#   docker build -f Dockerfile.server -t eldritch-horror-server .
+#   docker run -p 25565:25565 -v eh-world:/workspace/run eldritch-horror-server
+FROM eclipse-temurin:25-jdk-jammy
+
+ARG UID=1000
+ARG GID=1000
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      bash git curl ca-certificates procps less \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    if ! getent group "${GID}" >/dev/null; then groupadd -g "${GID}" dev; fi; \
+    if ! getent passwd "${UID}" >/dev/null; then useradd -m -u "${UID}" -g "${GID}" -s /bin/bash dev; fi; \
+    install -d -o "${UID}" -g "${GID}" /workspace /home/dev/.gradle
+
+COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod 0755 /usr/local/bin/entrypoint.sh
+
+ENV HOME=/home/dev \
+    GRADLE_USER_HOME=/home/dev/.gradle \
+    JAVA_TOOL_OPTIONS=-Xmx1g
+
+WORKDIR /workspace
+
+# Source is baked into the image (no host bind mount).
+COPY --chown=${UID}:${GID} . /workspace
+
+# Windows checkouts lose the +x bit and may carry CRLF; normalise both.
+RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
+
+# Pre-build (this decompiles Minecraft, the slow step) so `up` is fast and errors surface
+# at image-build time rather than at run time.
+RUN ./gradlew build --no-daemon --console=plain
+
+RUN mkdir -p run && printf 'eula=true\n' > run/eula.txt \
+ && chown -R "${UID}:${GID}" run
+
+USER ${UID}:${GID}
+EXPOSE 25565
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["./gradlew", "runServer", "--no-daemon", "--console=plain"]

@@ -1,14 +1,16 @@
-# Keep the build context small — the repo is bind-mounted at runtime, not copied in.
+# Build context excludes. Note Dockerfile.dev COPIES the source in, so nothing
+# under src/ may be excluded here.
 .git
 .gradle
 build
+**/build/
 run
 run-data
 repo
-.gradle/
-**/build/
 **/.idea/
 **/*.iml
 *.log
-design/
-docs/
+.DS_Store
+Thumbs.db
+# The raw bake downloads (hundreds of MB); the baked assets are already in src/.
+tools/.cache/

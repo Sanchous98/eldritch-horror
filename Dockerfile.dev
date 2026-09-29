@@ -1,15 +1,18 @@
 # Dev image for Eldritch Horror — JDK 25 + the native libs the dev client needs.
 #
-# Minecraft 26.3 requires Java 25. You normally never build this by hand; `docker
-# compose` builds it. The UID/GID args make the in-container user match you, so files
-# written to the bind-mounted repo stay owned by you instead of root.
+# The source is COPIED into the image (not bind-mounted). Docker Desktop on Windows
+# cannot share C:\ reliably, so named volumes + a baked-context image is the setup that
+# works on every OS. Rebuild the image after changing code.
+#
+#   docker compose build dev
+#   docker compose run --rm dev ./gradlew build
 FROM eclipse-temurin:25-jdk-jammy
 
 ARG UID=1000
 ARG GID=1000
 
 # Toolchain: the Gradle wrapper downloads Gradle itself. The X11/GL/OpenAL libs are
-# for `./gradlew runClient` (they are unused for headless builds).
+# for `./gradlew runClient` (unused for headless builds).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       bash git curl ca-certificates procps less \
@@ -31,6 +34,12 @@ RUN chmod 0755 /usr/local/bin/entrypoint.sh
 ENV HOME=/home/dev \
     GRADLE_USER_HOME=/home/dev/.gradle
 
-USER ${UID}:${GID}
 WORKDIR /workspace
+
+# Source baked in (no host bind mount). Owned by the dev user.
+COPY --chown=${UID}:${GID} . /workspace
+RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
+
+USER ${UID}:${GID}
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["sleep", "infinity"]

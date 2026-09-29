@@ -47,6 +47,9 @@ See [`design/`](design/README.md) for the complete design bible (source of truth
 
 ## Development with Docker
 
+> **Windows users: read [`docs/WINDOWS.md`](docs/WINDOWS.md) first.** Docker Desktop's
+> file sharing breaks Minecraft/Gradle builds on Windows; run the game natively instead.
+
 If you'd rather not install a JDK (or want a clean, reproducible toolchain), use the
 dev container. It uses JDK 25 and keeps the Gradle cache in a named volume, so the
 one-time NeoForge decompile happens **once** instead of on every run.

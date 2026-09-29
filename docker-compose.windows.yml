@@ -1,0 +1,35 @@
+# Windows-friendly Docker setup for the dedicated dev server.
+#
+# Unlike docker-compose.yml, this does NOT bind-mount the host folder (Docker Desktop on
+# Windows cannot share C:\ reliably). The source is baked into the image at build time
+# and the world + Gradle cache live in named volumes, so nothing touches /host_mnt.
+#
+#   docker compose -f docker-compose.windows.yml up --build
+#   # then: Minecraft 26.3 -> Multiplayer -> Direct Connect -> localhost:25565
+#
+# Rebuild after changing code:  docker compose -f docker-compose.windows.yml up --build
+name: eldritch-horror-win
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    image: eldritch-horror-server:latest
+    # The decompiler forks a 4 GB JVM; the Gradle heap is smaller. Give the container room.
+    mem_limit: ${DEV_MEM:-8g}
+    cpus: ${DEV_CPUS:-3}
+    ports:
+      - "${SERVER_PORT:-25565}:25565"
+    volumes:
+      - server-world:/workspace/run        # world + server.properties (persists across runs)
+      - server-gradle:/home/dev/.gradle    # Gradle/NeoForge cache (speeds up rebuilds)
+    stdin_open: true
+    tty: true
+
+volumes:
+  server-world:
+  server-gradle:

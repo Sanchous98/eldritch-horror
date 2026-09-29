@@ -1,15 +1,17 @@
 # Dev environment for Eldritch Horror (Minecraft 26.3 / NeoForge).
 #
-#   docker compose run --rm dev ./gradlew build
-#   docker compose run --rm dev ./gradlew runData
-#   docker compose run --rm dev bash
+# Source is COPIED into the image and all mutable state lives in NAMED VOLUMES — there is
+# no host bind mount. This is deliberate: Docker Desktop on Windows cannot share C:\ paths
+# (host_mnt read-only / 9p I/O errors), so bind mounts are avoided on every OS for a setup
+# that behaves identically everywhere.
 #
-# The repo is bind-mounted at /workspace, so edits on the host are seen instantly.
-# The Gradle cache lives in a named volume, so Minecraft/NeoForge decompilation is
-# downloaded and kept **once** (~1 GB) instead of on every run.
+#   docker compose build dev                              # build the toolchain (JDK 25)
+#   docker compose run --rm dev ./gradlew build           # build the mod
+#   docker compose run --rm dev ./gradlew runData         # datagen
+#   docker compose --profile server up server             # dedicated server on :25565
+#   docker compose run --rm dev bash                       # a shell
 #
-# The dev client (runClient) needs a display + GPU; see the `gpu` profile at the
-# bottom and the "Dev client on Linux" section of the README.
+# Rebuild after changing code:  docker compose build dev   (or `--build` on `up`).
 name: eldritch-horror-dev
 
 services:
@@ -23,36 +25,31 @@ services:
     image: eldritch-horror-dev:latest
     init: true
     working_dir: /workspace
-    # Keep Gradle + the first-build decompiler bounded. The decompiler forks its own JVM
-    # with a hardcoded -Xmx4096m, so mem_limit must exceed the Gradle heap by ~4.5 GB or
-    # it is OOM-killed ("Node action for decompile failed"). Raise DEV_MEM if needed.
+    # The decompiler forks a hardcoded 4 GB JVM; keep the container above that + overhead.
     cpus: ${DEV_CPUS:-3}
     mem_limit: ${DEV_MEM:-8g}
     volumes:
-      - .:/workspace
-      - gradle-cache:/home/dev/.gradle
+      # Mutable state only — never the source tree.
+      - gradle-cache:/home/dev/.gradle    # Gradle + NeoForge cache (the big first-build decompile)
+      - build-out:/workspace/build        # compiled output, kept across `run --rm`
+      - run-data:/workspace/run           # dev server world + server.properties
     environment:
       GRADLE_USER_HOME: /home/dev/.gradle
-      # Gradle heap. The decompiler forks separately (4 GB), so keep this modest.
       JAVA_TOOL_OPTIONS: "${DEV_JAVA_XMX:--Xmx1g}"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-      # Uncomment to force the exact host UID/GID if the bind mount is not writable:
-      # HOST_UID: ${UID:-1000}
-    # `docker compose run --rm dev` is the normal entry point. `up -d` keeps an
-    # idle container you can `exec` into:
-    #   docker compose up -d dev && docker compose exec dev bash
     command: ["sleep", "infinity"]
     stdin_open: true
     tty: true
 
   # ---------------------------------------------------------------------------
-  # Dedicated dev server — connect with your normal Minecraft client on 1.21.11/26.3.
+  # Dedicated dev server — connect with your normal Minecraft client (26.3).
   #
   #   docker compose --profile server up server
-  #   # then in your client: Multiplayer -> Direct Connect -> localhost:25565
+  #   # then: Multiplayer -> Direct Connect -> localhost:25565
   #
-  # The server runs `./gradlew runServer`, which builds the mod and starts NeoForge.
-  # World/data live in ./run (bind-mounted via the repo mount). Port is published.
+  # World and server.properties persist in the `run-data` volume. To edit them, either
+  # `docker compose run --rm dev bash` (they are at /workspace/run) or copy in/out with
+  # `docker cp`. Port is published.
   # ---------------------------------------------------------------------------
   server:
     profiles: ["server"]
@@ -65,14 +62,11 @@ services:
     tty: true
 
   # ---------------------------------------------------------------------------
-  # Dev client with a GPU + X11/Wayland display (Linux only).
+  # Dev client with a GPU + X11/Wayland display (Linux only; needs the X11/GL libs,
+  # which Dockerfile.dev installs). Windows/macOS: run the client natively instead.
   #
-  #   xhost +si:localuser:$(id -un)   # allow the container to use your display
+  #   xhost +si:localuser:$(id -un)
   #   docker compose --profile gpu run --rm dev-gpu ./gradlew runClient
-  #
-  # On Wayland, ensure XWayland is running; DISPLAY/XDG_RUNTIME_DIR are forwarded.
-  # The `nvidia` section is opt-in: uncomment `deploy` if you have the NVIDIA
-  # Container Toolkit, otherwise Docker uses your default GPU (often none/softpipe).
   # ---------------------------------------------------------------------------
   dev-gpu:
     profiles: ["gpu"]
@@ -80,16 +74,17 @@ services:
       service: dev
     environment:
       GRADLE_USER_HOME: /home/dev/.gradle
-      JAVA_TOOL_OPTIONS: "-Xmx2g"
+      JAVA_TOOL_OPTIONS: "${DEV_JAVA_XMX:--Xmx2g}"
       DISPLAY: ${DISPLAY:-:0}
       XDG_RUNTIME_DIR: /tmp/xdg
       WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-}
     volumes:
-      - .:/workspace
       - gradle-cache:/home/dev/.gradle
+      - build-out:/workspace/build
+      - run-data:/workspace/run
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XDG_RUNTIME_DIR:-/tmp/xdg}:/tmp/xdg:rw
-    # For NVIDIA, install the container toolkit and uncomment:
+    # For NVIDIA: install the container toolkit and uncomment:
     # deploy:
     #   resources:
     #     reservations:
@@ -100,3 +95,5 @@ services:
 
 volumes:
   gradle-cache:
+  build-out:
+  run-data:
