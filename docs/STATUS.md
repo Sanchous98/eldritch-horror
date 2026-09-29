@@ -34,7 +34,8 @@ A `@Mod` skeleton plus a working **Earth world generator** with **24 curated rea
   **16 384 × 8192** (= 8 blocks/pixel). Constants (`HALF_WIDTH=65536`, `HALF_HEIGHT=32768`,
   `BLOCKS_PER_PIXEL=8`, `PIXEL_WIDTH=16384`), `settlements.json` (blocks-per-degree 364.09;
   Tokyo x=50881 z=−12993), explicit **world border** (131072² centred on 0,0) and the preview
-  are all in place. `compileJava` green.
+  are all in place. Elevation is stored **8-bit** (`round(m/75)+127`, ~21 MB) to stay under
+  hosting size limits. `compileJava` green; pushed to `main`.
 
 ## In flight / current
 

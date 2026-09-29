@@ -123,7 +123,7 @@ in Asia and the deep trenches in the Pacific, and real climate puts the Sahara w
 | Layer | Encoding | Size |
 |---|---|---|
 | Landmask | 1-bit PNG (bitmap) | **~0.3 MB** (baked) |
-| Elevation | 8-bit grayscale PNG, `round(m/75)+127` | **~8 MB** |
+| Elevation | 8-bit grayscale PNG, `round(m/75)+127` | **~21 MB** |
 | Köppen | 8-bit PNG class index | **~2.2 MB** |
 
 All committed under `src/main/resources/`, read once and cached. Equirectangular mapping
