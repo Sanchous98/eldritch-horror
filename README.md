@@ -123,6 +123,20 @@ rmdir /s /q build\moddev
 A running dev client/server keeps the patched jar on its classpath, so you cannot rebuild
 while it is open — always quit the game first.
 
+#### "Cannot connect: not in server's whitelist"
+
+The dev server's settings live in `run\server.properties`. For a private dev server:
+
+```properties
+white-list=false
+enforce-whitelist=false
+online-mode=false        # only for an offline/dev client; true for a real account
+```
+
+Or add yourself while the server runs, from its console: `whitelist add <YourName>`.
+The server files (`run\server.properties`, `run\world\`, `run\ops.json`) are git-ignored and
+safe to edit.
+
 ### Dev client in Docker (Linux)
 
 `runClient` opens a window, so it needs X11/Wayland and a GPU — on Linux:
