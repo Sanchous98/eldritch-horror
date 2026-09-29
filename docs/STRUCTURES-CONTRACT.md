@@ -41,6 +41,9 @@ public interface StructureBuilder {
     /** Replaces whatever is at (x,z) in [y0,y1] with the surface block. */
     void ground(int x0, int z0, int x1, int z1, int y0, int y1, BlockState state);
 
+    /** (Plus the shaped operations in "Architecture vocabulary" below: roof/spire/buttress/
+     *  window/crenellations/monument/scatter/ruins.) */
+
     /** Deterministic RNG for this location (seeded by the location id). */
     RandomSource rng();
 
@@ -103,25 +106,68 @@ Rules:
 
 ## Palettes
 
-`Palette` is a small data interface (frozen vocabulary — locations never hardcode blocks):
+`Palette` is the frozen block vocabulary (locations never hardcode blocks). It is a
+**dark-gothic core with regional flavour** — every city reads as brooding architecture, but
+materials and overgrowth change with the real climate:
 
 ```java
 public record Palette(
-        BlockState surface,   // ground/paths
-        BlockState wall,      // primary wall block
-        BlockState accent,    // trim / corners
-        BlockState roof,      // roof / upper
-        BlockState window,    // glazing (glass-like)
-        BlockState light,     // light source
-        BlockState door        // door / gate
+        BlockState ground,       // path / plaza surface
+        BlockState foundation,   // building base course
+        BlockState wall,         // primary wall block
+        BlockState weathered,    // cracked / mossy variant of `wall`
+        BlockState accent,       // trim, pillars, quoins
+        BlockState roof,         // solid roof block
+        BlockState roofStairs,   // pitched-roof stairs
+        BlockState roofSlab,     // pitched-roof slabs / eaves
+        BlockState window,       // glazing (pane-like)
+        BlockState frame,        // window frame / mullions
+        BlockState door,         // door / gate
+        BlockState rail,         // railing / fence
+        BlockState light,        // lantern / candle / torch
+        BlockState overgrowth,   // vines / leaves / moss (nullable = none)
+        BlockState rubble         // gravel / coarse dirt / debris
 ) {
-    /** Palette for the real Köppen class + whether the site is coastal. */
     static Palette fromBiome(int koppenClass, boolean coastal);
 }
 ```
 
-A desert city and a harbour city therefore differ without hand-authoring, and a location
-picks its palette via `builder.palette()`.
+Regional mapping (Köppen family → materials; keep the gothic *shape* everywhere):
+
+| Family | wall | accent | roof | overgrowth |
+|---|---|---|---|---|
+| **C** temperate/oceanic | deepslate + stone bricks | dark oak | dark oak stairs, deepslate tiles | vines, moss |
+| **D** continental/boreal | deepslate, spruce | spruce logs | spruce stairs, deepslate | moss, ferns |
+| **B** arid | sandstone bricks, cut sandstone | blackstone trim | dark oak/acacia | dead bush |
+| **A** tropical | mossy stone bricks | jungle wood | jungle stairs | vines, leaves |
+| **E** polar | stone bricks, deepslate | spruce | snow/ice slabs | none (snow drift) |
+| **coastal** modifier | + prismarine | + dried kelp | — | kelp |
+
+## Architecture vocabulary
+
+The builder exposes **shaped** operations, not just boxes, so locations compose real
+silhouettes. All are deterministic and chunk-clipped:
+
+```java
+void pitchedRoof(int x0, int z0, int x1, int z1, int y, int height, int ridgeAxis);
+void spire(int cx, int cz, int baseY, int height);
+void buttress(int x, int z, int baseY, int height, Side outward);
+void window(int x, int y, int z, int height, int width, boolean vertical);
+void crenellations(int x0, int z0, int x1, int z1, int y);
+void monument(int cx, int cz, int baseY);   // obelisk / statue plinth
+void scatter(int x0, int z0, int x1, int z1, int y0, int y1, BlockState state, float chance);
+void ruins(int x0, int y0, int z0, int x1, int y1, int z1, float holeChance);
+```
+
+## Atmosphere rules (what makes it feel *wrong*)
+
+1. **Silhouette over footprint**: steep pitched roofs, spires, buttresses, tall narrow
+   windows — even a small building should look gothic, not like a box.
+2. **Decay pass**: after building, scatter cobwebs in corners, moss/overgrowth low on
+   north/wet walls, rubble at foundations, punch holes in some walls, break some roofs.
+3. **Light is scarce**: windows mostly dark; lit only by lanterns/candles, sparsely.
+4. **Density & alleys**: streets 2–3 wide, irregular blocks, no grid straightness.
+5. **Landmark contrast**: one over-tall cathedral/spire per city dominates the skyline.
 
 
 ## Hand-authored `.nbt` (jigsaw) — the seam for artistry
