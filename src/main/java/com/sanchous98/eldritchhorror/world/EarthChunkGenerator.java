@@ -25,7 +25,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
-import com.sanchous98.eldritchhorror.world.city.CityStamper;
+import com.sanchous98.eldritchhorror.world.loc.Locations;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -183,7 +183,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
                                      ChunkAccess chunk,
                                      StructureManager structureManager) {
         super.applyBiomeDecoration(level, chunk, structureManager);
-        CityStamper.stamp(level, chunk);
+        Locations.place(level, chunk);
     }
 
     @Override

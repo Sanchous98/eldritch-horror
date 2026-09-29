@@ -36,11 +36,16 @@ A `@Mod` skeleton plus a working **Earth world generator** with **24 curated rea
   Tokyo x=50881 z=−12993), explicit **world border** (131072² centred on 0,0) and the preview
   are all in place. Elevation is stored **8-bit** (`round(m/75)+127`, ~21 MB) to stay under
   hosting size limits. `compileJava` green; pushed to `main`.
+- **Location frame** (`world/loc/`): `Tier`, `Palette`, `StructureBuilder` + `Builder`,
+  `Location`, `Locations` registry, and a reference metropolis `loc/city/CityLocation`.
+  `EarthChunkGenerator.applyBiomeDecoration` now dispatches via `Locations.place`; the old
+  `CityBuilder`/`CityStamper` are gone. See `docs/STRUCTURES-CONTRACT.md`.
 
 ## In flight / current
 
-- Next: freeze the **structure frame** (a `StructureBuilder` implementation + palettes) and
-  build **one reference location** as the pattern, then parallelise the rest.
+- Next: **parallel location content** — temples, vaults, strongholds, altar sites — each a
+  single `Location` file, built by one worker against the frozen contract. Random-in-biome
+  sites will need a real `Structure`/`StructureSet` when the first one lands.
 
 ## Known limitations / deferred
 
@@ -55,8 +60,8 @@ A `@Mod` skeleton plus a working **Earth world generator** with **24 curated rea
 
 ## Next steps (suggested order)
 
-1. Finish ×8 scale (in progress).
-2. Structure frame + reference city (per `docs/STRUCTURES-CONTRACT.md`).
+1. Parallel location content against the frame (per `docs/STRUCTURES-CONTRACT.md`).
+2. Random-in-biome placement (real `Structure`/`StructureSet`) when the first site lands.
 3. Parallel location work via **subagents**, one location/area each.
 4. A gameplay system (sanity is self-contained and testable) when locations are good enough.
 
