@@ -40,6 +40,10 @@ A `@Mod` skeleton plus a working **Earth world generator** with **24 curated rea
   `Location`, `Locations` registry, and a reference metropolis `loc/city/CityLocation`.
   `EarthChunkGenerator.applyBiomeDecoration` now dispatches via `Locations.place`; the old
   `CityBuilder`/`CityStamper` are gone. See `docs/STRUCTURES-CONTRACT.md`.
+- **Gothic atmosphere**: `Palette` expanded to 15 fields (dark-gothic core + Köppen regional
+  materials); builder gained shaped ops (`pitchedRoof`, `spire`, `buttress`, `window`,
+  `crenellations`, `monument`, `scatter`, `ruins`); `CityLocation` rebuilt with varied
+  silhouettes, a cathedral landmark and a decay pass.
 
 ## In flight / current
 

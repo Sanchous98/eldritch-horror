@@ -27,6 +27,43 @@ public interface StructureBuilder {
     /** Replaces whatever is at (x,z) in [y0,y1] with `state`. */
     void ground(int x0, int z0, int x1, int z1, int y0, int y1, BlockState state);
 
+    // ------------------------------------------------------------------ shaped ops
+    // (see "Architecture vocabulary" in docs/STRUCTURES-CONTRACT.md)
+
+    /**
+     * A gable/hip roof over the rectangle, rising {@code height} blocks from base Y {@code y}.
+     * {@code ridgeAxis} 0 = ridge runs along X, 1 = along Z. Built from {@link Palette#roofStairs()}
+     * and {@link Palette#roofSlab()}; the underside is filled with {@link Palette#roof()}.
+     */
+    void pitchedRoof(int x0, int z0, int x1, int z1, int y, int height, int ridgeAxis);
+
+    /** A tapered tower (wall/accent) with a stair cap and narrow window slits. */
+    void spire(int cx, int cz, int baseY, int height);
+
+    /** A stepped, leaning support column against a wall on {@code outward}. */
+    void buttress(int x, int z, int baseY, int height, Side outward);
+
+    /**
+     * A framed window set into a wall line. {@code vertical} true makes it tall and narrow;
+     * false makes it a wide horizontal band. {@code height}/{@code width} are in blocks.
+     */
+    void window(int x, int y, int z, int height, int width, boolean vertical);
+
+    /** Alternating merlons around the rectangular perimeter at Y {@code y}. */
+    void crenellations(int x0, int z0, int x1, int z1, int y);
+
+    /** An obelisk / statue plinth (foundation base + tapering accent column + top). Not occult. */
+    void monument(int cx, int cz, int baseY);
+
+    /**
+     * Deterministically scatters {@code state} through the box with probability {@code chance},
+     * only replacing cells that are currently air / replaceable where that can be read.
+     */
+    void scatter(int x0, int z0, int x1, int z1, int y0, int y1, BlockState state, float chance);
+
+    /** Deterministically carves holes through the box to read as decay. */
+    void ruins(int x0, int y0, int z0, int x1, int y1, int z1, float holeChance);
+
     /** Deterministic RNG for this location (seeded by the location id). */
     RandomSource rng();
 
