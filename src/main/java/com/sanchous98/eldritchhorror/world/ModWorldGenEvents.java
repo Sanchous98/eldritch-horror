@@ -25,8 +25,13 @@ public final class ModWorldGenEvents {
         EarthBiomeSource.setRegistry(biomes);
         // Load the map now so a missing/broken asset fails loudly on startup, not mid-chunk.
         EarthMaps.get();
-        EldritchHorror.LOGGER.info("Earth world generator ready: {}x{} map at 2 blocks/pixel",
-                EarthMaps.PIXEL_WIDTH, EarthMaps.PIXEL_WIDTH / 2);
+        // Match the world border to the 2:1 map extent (Overworld only).
+        var overworld = event.getServer().overworld();
+        var border = overworld.getWorldBorder();
+        border.setCenter(0.0, 0.0);
+        border.setSize(131072.0);
+        EldritchHorror.LOGGER.info("Earth world generator ready: {}x{} map at {} blocks/pixel",
+                EarthMaps.PIXEL_WIDTH, EarthMaps.PIXEL_WIDTH / 2, EarthMap.BLOCKS_PER_PIXEL);
     }
 
     /**

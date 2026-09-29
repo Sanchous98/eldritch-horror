@@ -2,7 +2,7 @@
 
 How the Overworld map is made. **Decision:** a **prebuilt `EARTH` map** — the actual
 planet — baked from public geodata into compact layers, sampled deterministically at
-runtime. **Whole globe**, **equirectangular**, at **2 blocks/pixel**.
+runtime. **Whole globe**, **equirectangular**, at **8 blocks/pixel**.
 
 > **Important:** no Minecraft *world seed* can generate Earth. Vanilla's generator is a
 > noise function with no notion of external geography, so no seed emits the real coastline
@@ -111,19 +111,20 @@ all three layers from **real, observed data**:
 | Layer | Source | Encoding |
 |---|---|---|
 | **Landmask / coastline** | Natural Earth `land` | 1-bit |
-| **Elevation + bathymetry** | ETOPO (NOAA) | 8-bit, signed range, quantized non-linearly |
+| **Elevation + bathymetry** | ETOPO (NOAA) | 8-bit, 75 m/level, offset 127 |
 | **Climate / biome class** | Beck Köppen–Geiger 1 km (CC-BY) | 5-bit class (0–29) |
 
 This is the difference between *Earth-shaped* and *Earth*: real elevation puts the Himalaya
 in Asia and the deep trenches in the Pacific, and real climate puts the Sahara where it is.
 
 
-### Layer format (at 2 blocks/pixel, 8192×4096)
+### Layer format (at 8 blocks/pixel, 16384×8192)
 
 | Layer | Encoding | Size |
 |---|---|---|
-| Landmask | 1-bit PNG (bitmap) | **~0.1 MB** (baked) |
-| Elevation | 8-bit grayscale PNG, non-linear quantized | **~5–30 MB** |
+| Landmask | 1-bit PNG (bitmap) | **~0.3 MB** (baked) |
+| Elevation | 8-bit grayscale PNG, `round(m/75)+127` | **~8 MB** |
+| Köppen | 8-bit PNG class index | **~2.2 MB** |
 
 All committed under `src/main/resources/`, read once and cached. Equirectangular mapping
 `lon/lat → x/z` is linear.
@@ -158,11 +159,13 @@ layers above, and each player's save grows only where they actually explore.
 
 ### Map extent & resolution (decided)
 
-- **Map:** whole Earth, **equirectangular**, **2:1** — **16,384 × 8,192** blocks (X = 360°
-  longitude at 2 blocks/°, Z = 180° latitude at 2 blocks/°).
-- **World border:** matches the map (not square). `x ∈ [−8192, 8192)`, `z ∈ [−4096, 4096)`.
-- **Layer resolution:** **8192 × 4096** pixels = 2 blocks/pixel.
-- **Projection:** longitude `−180…180 → x −8192…8192`; latitude `+90…−90 → z −4096…4096`.
+- **Map:** whole Earth, **equirectangular**, **2:1** — **131,072 × 65,536** blocks (X = 360°
+  longitude at ~364.09 blocks/°, Z = 180° latitude at ~364.09 blocks/°).
+- **World border:** square **131,072 × 65,536**, centred at (0, 0). `x ∈ [−65536, 65536)`,
+  `z ∈ [−32768, 32768)`.
+- **Layer resolution:** **16384 × 8192** pixels = 8 blocks/pixel.
+- **Projection:** longitude `−180…180 → x −65536…65536`; latitude `+90…−90 → z −32768…32768`.
+  Blocks per degree = `16384 × 8 / 360 = 364.088…`.
 
 A whole-globe map is inherently **2:1**; forcing it into a square would stretch latitude 2×
 (continents look tall), so the map is 2:1 and the border follows.
@@ -171,30 +174,30 @@ A whole-globe map is inherently **2:1**; forcing it into a square would stretch 
 > full width, so Antarctica becomes a full-width strip at the map edge. That is geometrically
 > correct; if it plays badly we can trim/ice-cap it later without changing the rest.
 
-> **Baked:** `tools/bake_landmask.py` rasterizes Natural Earth's 1:50m land polygons to
-> `landmask_8192x4096.png` (1-bit, ~0.1 MB on disk; land ≈ 33%).
+> **Baked:** `tools/bake_earth.py` rasterizes Natural Earth's 1:50m land polygons to
+> `landmask_16384x8192.png` (1-bit, ~0.3 MB on disk; land ≈ 33%).
 
 | Layer | Pixels | Size |
 |---|---|---|
-| Landmask (1-bit packed) | 8192×4096 (33.5 M) | **~4 MB** |
-| Elevation (8-bit) | 8192×4096 | **~32 MB** |
-| Climate | computed (lat + distance-to-coast) | 0 |
+| Landmask (1-bit packed) | 16384×8192 (134 M) | **~0.3 MB** |
+| Elevation (8-bit) | 16384×8192 | **~8 MB** |
+| Köppen (8-bit) | 16384×8192 | **~2.2 MB** |
 
-> At 1:1 Earth scale you'd need ~33.5 M columns just for latitude/longitude, and far more
-> for elevation — 300 GB territory. We map **Earth onto a 16k-wide playable strip** at
-> 2 blocks/pixel instead: "playable, not a simulation".
+> At this resolution real proportions are much closer to Earth: **Japan is ≈ 8,400 blocks**
+> across (at the old 2 blocks/pixel it was ~2,100).
 
 ### Playability
 
-At 2 blocks/pixel the world is ~8 km across — realistic Earth geography, compressed into a
-survival-scale world (continents a day's walk, not a lifetime's). A **sensible start region**
+At 8 blocks/pixel the world is ~131,072 × 65,536 blocks (1 block ≈ 0.61 km) — realistic
+Earth geography with continents at their true relative scale. A **sensible start region**
 (a temperate, coastal spawn near the map centre) is chosen so players don't spawn mid-ocean.
 
 
 
 ### Playability rules
 
-- **World border** matching the 2:1 map: `x ∈ [−8192, 8192)`, `z ∈ [−4096, 4096)`.
+- **World border** matching the 2:1 map: square 131,072 × 65,536 centred at 0,0;
+  `x ∈ [−65536, 65536)`, `z ∈ [−32768, 32768)`.
 - **Sensible spawn**: a temperate coastal region near the map centre — never mid-ocean.
 - **Bounded oceans**: real Earth oceans are huge; boats/rites make them crossable, and the
   spawn is on land.
@@ -246,7 +249,7 @@ bare (stone/surface block, no trees or grass). That is expected and tracked sepa
 
 
 
-1. **Bake step** (offline Python): Natural Earth land polygons → a 8192×4096 1-bit landmask;
+1. **Bake step** (offline Python): Natural Earth land polygons → a 16384×8192 1-bit landmask;
    optionally ETOPO/GEBCO → an 8-bit elevation layer. Commit the layers.
 2. `ContinentField` (landmask sampler + computed climate) + unit tests (no Minecraft).
 3. `ContinentBiomeSource` — ocean/land + latitude/moisture biomes.

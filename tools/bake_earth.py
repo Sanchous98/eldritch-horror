@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Bake the Earth map layers for the Eldritch Horror world generator.
 
-Produces, at the map resolution (8192x4096 = 2 blocks/pixel, equirectangular),
+Produces, at the map resolution (16384x8192 = 8 blocks/pixel, equirectangular),
 under src/main/resources/assets/eldritch_horror/map/:
 
-  landmask_8192x4096.png    1-bit land/ocean bitmap      (~0.1 MB)
-  elevation_8192x4096.png   16-bit unsigned, metres+12000 (~tens of MB)
-  koppen_8192x4096.png      8-bit Koppen-Geiger class 0-29
+  landmask_16384x8192.png    1-bit land/ocean bitmap      (~0.1 MB)
+  elevation_16384x8192.png   8-bit grayscale, (metres/75)+127  (~tens of MB)
+  koppen_16384x8192.png      8-bit Koppen-Geiger class 0-29
 
 Sources (public / open):
   land     Natural Earth 1:50m land polygons (public domain)
@@ -14,13 +14,13 @@ Sources (public / open):
   koppen   Beck et al. 2018 Koppen-Geiger map (CC-BY)
 
 Mapping: lon -180..180 -> x 0..W-1 ; lat +90..-90 -> y 0..H-1.
-The mod maps x -> world X = x*2 - 8192, y -> world Z = y*2 - 4096.
+The mod maps x -> world X = x*8 - 65536, y -> world Z = y*8 - 32768.
 
 Usage:
   python3 tools/bake_earth.py --layers landmask
   python3 tools/bake_earth.py --layers elevation --elevation-src tools/.cache/etopo1.tif.zip
   python3 tools/bake_earth.py --layers koppen    --koppen-src    tools/.cache/koppen.zip
-  python3 tools/bake_earth.py --layers all --width 8192
+  python3 tools/bake_earth.py --layers all --width 16384
 """
 import argparse
 import io
@@ -57,10 +57,13 @@ HERE = os.path.dirname(__file__)
 CACHE = os.path.join(HERE, ".cache")
 OUT_DIR = os.path.abspath(os.path.join(
     HERE, "..", "src", "main", "resources", "assets", "eldritch_horror", "map"))
-ELEV_OFFSET = 12000  # store elevation+offset as unsigned 16-bit
+ELEV_OFFSET = 127                # stored = round(metres / ELEV_METRES_PER_LEVEL) + offset
+ELEV_METRES_PER_LEVEL = 75.0     # 8-bit range ~= +/-9525 m (trenches saturate)
 
-# World extent, matching EarthMap: 2:1, 2 blocks/pixel, 16384 x 8192.
-BLOCKS_PER_DEGREE = 16384 / 360.0
+# World extent, matching EarthMap: 2:1, 8 blocks/pixel, 16384 x 8192.
+PIXEL_WIDTH = 16384
+BLOCKS_PER_PIXEL = 8
+BLOCKS_PER_DEGREE = PIXEL_WIDTH * BLOCKS_PER_PIXEL / 360.0
 
 
 def cache_path(source, default_name):
@@ -151,9 +154,9 @@ def bake_elevation(w, h, force, source):
     z = read_raster(source, "etopo1.tif.zip")
     print(f"  source raster {z.shape}, range {z.min():.0f}..{z.max():.0f} m")
     z = resize(z, w, h, "bilinear")
-    z = np.clip(z + ELEV_OFFSET, 0, 65535).astype(np.uint16)
+    z = np.clip(np.round(z / ELEV_METRES_PER_LEVEL) + ELEV_OFFSET, 0, 255).astype(np.uint8)
     os.makedirs(OUT_DIR, exist_ok=True)
-    Image.fromarray(z, mode="I;16").save(out, optimize=True)
+    Image.fromarray(z, mode="L").save(out, optimize=True)
     print(f"wrote {out} ({os.path.getsize(out)/1e6:.1f} MB)")
 
 
@@ -282,7 +285,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--layers", default="all",
                     help="comma list of landmask,elevation,koppen (or 'all')")
-    ap.add_argument("--width", type=int, default=8192)
+    ap.add_argument("--width", type=int, default=16384)
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--elevation-src", default=DEFAULT_ELEVATION)
     ap.add_argument("--koppen-src", default=DEFAULT_KOPPEN)

@@ -10,8 +10,8 @@ import java.io.IOException;
  * <p>Never call this from client-only code.
  */
 public final class EarthMaps {
-    /** Pixel width of the baked layers (2 blocks/pixel). Must match the baked assets. */
-    public static final int PIXEL_WIDTH = 8192;
+    /** Pixel width of the baked layers (8 blocks/pixel). Must match the baked assets. */
+    public static final int PIXEL_WIDTH = 16384;
 
     private static volatile EarthMap instance;
 

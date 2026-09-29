@@ -1,0 +1,12 @@
+# Headless client view: run the Minecraft dev client on a virtual display (Xvfb) with
+# software OpenGL, so it can be launched and screenshotted from a container with no GPU.
+# Used only for taking screenshots of the world; not for interactive play.
+FROM eldritch-horror-dev:latest
+
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      xvfb x11-utils imagemagick xdotool \
+      libgl1-mesa-dri mesa-utils libglx-mesa0 \
+ && rm -rf /var/lib/apt/lists/*
+USER 1000

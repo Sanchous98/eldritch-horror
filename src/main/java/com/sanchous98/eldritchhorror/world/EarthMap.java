@@ -8,12 +8,12 @@ import javax.imageio.ImageIO;
 /**
  * Loads and samples the baked Earth layers (see {@code tools/bake_earth.py}).
  *
- * <p>Pixels are equirectangular at 2 blocks/pixel: image x 0..W-1 maps to world
- * X -8192..8191 and image y 0..H-1 maps to world Z -4096..4095.
+ * <p>Pixels are equirectangular at 8 blocks/pixel: image x 0..W-1 maps to world
+ * X -65536..65535 and image y 0..H-1 maps to world Z -32768..32767.
  *
  * <ul>
  *   <li>{@code landmask_<W>x<H>.png} — 1-bit land/ocean.</li>
- *   <li>{@code elevation_<W>x<H>.png} — 16-bit unsigned, metres + {@link #ELEVATION_OFFSET}.</li>
+ *   <li>{@code elevation_<W>x<H>.png} — 8-bit grayscale, {@code round(metres / ELEVATION_METRES_PER_LEVEL) + ELEVATION_OFFSET}.</li>
  *   <li>{@code koppen_<W>x<H>.png} — 8-bit Köppen–Geiger class index.</li>
  * </ul>
  *
@@ -22,12 +22,14 @@ import javax.imageio.ImageIO;
  */
 public final class EarthMap {
     /** World extent (blocks). Map is 2:1: X spans 2 * HALF_WIDTH. */
-    public static final int HALF_WIDTH = 8192;
-    public static final int HALF_HEIGHT = 4096;
+    public static final int HALF_WIDTH = 65536;
+    public static final int HALF_HEIGHT = 32768;
     /** Blocks per map pixel. */
-    public static final int BLOCKS_PER_PIXEL = 2;
-    /** Stored elevation is {@code metres + ELEVATION_OFFSET}. */
-    public static final int ELEVATION_OFFSET = 12000;
+    public static final int BLOCKS_PER_PIXEL = 8;
+    /** Stored elevation is {@code round(metres / ELEVATION_METRES_PER_LEVEL) + ELEVATION_OFFSET}. */
+    public static final int ELEVATION_OFFSET = 127;
+    /** Metres represented by one stored elevation level. */
+    public static final double ELEVATION_METRES_PER_LEVEL = 75.0;
 
     private final int width;
     private final int height;
@@ -101,7 +103,7 @@ public final class EarthMap {
         double px = (worldX + HALF_WIDTH) / BLOCKS_PER_PIXEL;
         double py = (worldZ + HALF_HEIGHT) / BLOCKS_PER_PIXEL;
         double v = bilinear(elevation, px, py);
-        return v - ELEVATION_OFFSET;
+        return (v - ELEVATION_OFFSET) * ELEVATION_METRES_PER_LEVEL;
     }
 
     /** Köppen–Geiger class index (0 = ocean/unknown, else the legend number). Nearest. */

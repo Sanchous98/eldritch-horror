@@ -15,8 +15,8 @@ Image.MAX_IMAGE_PIXELS = None
 BASE = "src/main/resources/assets/eldritch_horror/map/"
 W, H = 2048, 1024
 
-land = np.asarray(Image.open(BASE + "landmask_8192x4096.png").convert("L").resize((W, H))) > 127
-elev = np.asarray(Image.open(BASE + "elevation_8192x4096.png").resize((W, H))).astype(np.float32) - 12000.0
+land = np.asarray(Image.open(BASE + "landmask_16384x8192.png").convert("L").resize((W, H))) > 127
+elev = np.asarray(Image.open(BASE + "elevation_16384x8192.png").resize((W, H))).astype(np.float32) - 12000.0
 
 ocean_nodes = [-11000, -6000, -2000, -200, 0]
 ocean_cols = [[6, 18, 55], [15, 50, 110], [35, 100, 160], [70, 150, 195], [95, 170, 205]]
@@ -36,7 +36,7 @@ rgb = np.where(land[..., None],
 img = np.clip(rgb, 0, 255).astype(np.uint8)
 
 fig, ax = plt.subplots(figsize=(20, 10), dpi=110)
-ax.imshow(img, extent=[-8192, 8192, -4096, 4096], origin="upper")
+ax.imshow(img, extent=[-65536, 65536, -32768, 32768], origin="upper")
 
 sett = json.load(open(BASE + "settlements.json"))
 cur = [p for p in sett["settlements"] if p["tier"] == "curated"]
@@ -46,12 +46,12 @@ for p in cur:
                 fontsize=9, color="white", weight="bold", zorder=6,
                 path_effects=[pe.withStroke(linewidth=2.5, foreground="black")])
 
-ax.set_title("Eldritch Horror — Earth map  (16,384 × 8,192 blocks, 1 block ≈ 2.44 km)  •  24 curated cities",
+ax.set_title("Eldritch Horror — Earth map  (131,072 × 65,536 blocks, 1 block ≈ 0.61 km)  •  24 curated cities",
              fontsize=15)
 ax.set_xlabel("x  (west ← → east)")
 ax.set_ylabel("z  (north ↑ / south ↓)")
-ax.set_xlim(-8192, 8192)
-ax.set_ylim(4096, -4096)
+ax.set_xlim(-65536, 65536)
+ax.set_ylim(32768, -32768)
 ax.grid(color="white", alpha=0.15, linewidth=0.5)
 fig.tight_layout()
 fig.savefig("docs/world-preview.png", bbox_inches="tight")
