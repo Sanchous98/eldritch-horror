@@ -1,5 +1,15 @@
-# Treat Gradle wrapper scripts and the jar as binary-safe.
+# Normalise line endings so the wrapper runs everywhere.
+#   - Shell scripts must use LF, even when checked out on Windows (a CRLF `gradlew`
+#     fails with "/bin/sh^M: bad interpreter" inside a Linux container).
+#   - Windows batch files must use CRLF.
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+*.sh text eol=lf
 *.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary-safe assets.
 *.jar binary
 *.png binary
 *.ogg binary
+*.nbt binary
