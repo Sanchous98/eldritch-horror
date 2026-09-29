@@ -23,17 +23,18 @@ services:
     image: eldritch-horror-dev:latest
     init: true
     working_dir: /workspace
-    # Keep Gradle + the first-build decompiler bounded. Adjust to taste; these are
-    # enforced by the daemon's cgroup, which the build inherits.
+    # Keep Gradle + the first-build decompiler bounded. The decompiler forks its own JVM
+    # with a hardcoded -Xmx4096m, so mem_limit must exceed the Gradle heap by ~4.5 GB or
+    # it is OOM-killed ("Node action for decompile failed"). Raise DEV_MEM if needed.
     cpus: ${DEV_CPUS:-3}
-    mem_limit: ${DEV_MEM:-4g}
+    mem_limit: ${DEV_MEM:-8g}
     volumes:
       - .:/workspace
       - gradle-cache:/home/dev/.gradle
     environment:
       GRADLE_USER_HOME: /home/dev/.gradle
-      # Give the daemon room; the first build decompiles Minecraft with Vineflower.
-      JAVA_TOOL_OPTIONS: "-Xmx3g"
+      # Gradle heap. The decompiler forks separately (4 GB), so keep this modest.
+      JAVA_TOOL_OPTIONS: "${DEV_JAVA_XMX:--Xmx1g}"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       # Uncomment to force the exact host UID/GID if the bind mount is not writable:
       # HOST_UID: ${UID:-1000}
