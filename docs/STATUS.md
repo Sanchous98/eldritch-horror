@@ -1,91 +1,69 @@
 # Status & handoff
 
 Read this together with `AGENTS.md` after any context compaction. It is the short, current
-snapshot; the durable truth is in `design/` and `docs/`.
 
 ## How to resume after compaction
 
-1. Read `AGENTS.md` (working rules — especially: **delegate bulk work to subagents**).
+1. Read `AGENTS.md` (working rules — subagents; **host safety, no OOM**).
 2. Read this file.
-3. Read the doc relevant to the task (table at the bottom).
-4. Check the board for tasks: <https://github.com/users/Sanchous98/projects/2>.
+3. See the continuation plan below (chat).
+4. Check the board: <https://github.com/users/Sanchous98/projects/2>.
 
 ## Project
 
 Eldritch Horror — an RPG-flavoured horror mod for **Minecraft 26.3 / NeoForge / Java 25**.
-Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
-A `@Mod` skeleton plus a working **Earth world generator** with **24 curated real cities**.
+Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed).
 
-## What works (verified)
+## Done (verified)
 
-- **Build**: `./gradlew build` passes on 26.3 (in Docker: `docker compose build dev`).
-- **Earth map**: custom `EarthChunkGenerator` + `EarthBiomeSource` sample baked real layers
-  (landmask, ETOPO elevation, Köppen climate) and generate real terrain + real biomes.
-  Overworld replaced via `data/minecraft/dimension/overworld.json`.
-- **Cities**: 24 curated cities at real coordinates, abstracted builds (palette from biome,
-  harbour if coastal), footprint scaled to real population. Verified generating.
-- **Dev server**: `docker compose --profile server up server`; auto-op on join (`EH_DEV`).
-- **Docker**: no host bind mount (source baked into image); named volumes; entrypoint fixes
-  volume ownership and CRLF. Works around Docker Desktop on Windows. See `docs/WINDOWS.md`.
+- **Earth world generator**: real baked layers (landmask, ETOPO elevation, Köppen), real
+  terrain + biomes, Overworld replaced. `Earth world generator ready` on server start.
+- **World ×8**: extent **131 072 × 65 536** blocks, layers **16 384 × 8 192** (8 blocks/px),
+  elevation **8-bit** (`round(m/75)+127`, ~21 MB). `settlements.json` at 364 blocks/°.
+  Explicit **world border** (set on `ServerStarted`).
+- **Location frame** (`world/loc/`): `StructureBuilder`/`Builder`, `Location`, `Locations`
+  registry, shaped ops (pitchedRoof/spire/buttress/window/crenellations/monument/scatter/
+  ruins), `Tier`, `Palette`, `Materials` (26.3 dyed blocks via `ColorCollection.pick`).
+- **24 cultural city styles** (`world/loc/style/*Style.java`, one file per city) + `StyleKit`
+  shared landmarks (cathedral/mosque/dome/minaret/pagoda/torii/steppedTemple/obelisk/statue/
+  lantern). Tokyo is the reference (shikkui + kawara + vermilion + neon + cherry blossom).
+- **Cities at contract size**: district 380 (~760 across), bigger landmarks, decay pass.
+- **City renderer** (`core/CityRenderer`, dev-only `-Deh.renderCities`): PNGs to `run/render/`,
+  tick-sliced. Used to review without a client.
+- **Design**: `design/23-boundary-and-travel.md` (cylinder + Morok);
+  `docs/STRUCTURES-CONTRACT.md`; `AGENTS.md`; `docs/HOST-SAFETY.md`.
+- **Safety**: hard caps in `docker-compose.yml`, `scripts/guarded-run.sh`.
 
-## Done recently
+## Fixed (notable)
 
-- **World scale ×8**: world is now **131 072 × 65 536** blocks, layers re-baked to
-  **16 384 × 8192** (= 8 blocks/pixel). Constants (`HALF_WIDTH=65536`, `HALF_HEIGHT=32768`,
-  `BLOCKS_PER_PIXEL=8`, `PIXEL_WIDTH=16384`), `settlements.json` (blocks-per-degree 364.09;
-  Tokyo x=50881 z=−12993), explicit **world border** (131072² centred on 0,0) and the preview
-  are all in place. Elevation is stored **8-bit** (`round(m/75)+127`, ~21 MB) to stay under
-  hosting size limits. `compileJava` green; pushed to `main`.
-- **Location frame** (`world/loc/`): `Tier`, `Palette`, `StructureBuilder` + `Builder`,
-  `Location`, `Locations` registry, and a reference metropolis `loc/city/CityLocation`.
-  `EarthChunkGenerator.applyBiomeDecoration` now dispatches via `Locations.place`; the old
-  `CityBuilder`/`CityStamper` are gone. See `docs/STRUCTURES-CONTRACT.md`.
-- **Gothic atmosphere**: `Palette` expanded to 15 fields (dark-gothic core + Köppen regional
-  materials); builder gained shaped ops (`pitchedRoof`, `spire`, `buttress`, `window`,
-  `crenellations`, `monument`, `scatter`, `ruins`); `CityLocation` rebuilt with varied
-  silhouettes, a cathedral landmark and a decay pass.
-- **Cultural styles** (`world/loc/style/`): one `CityStyle` per curated city (24 files, one
-  owner each). Central frame: `CityStyle`, `CityStyles` registry, `StyleKit` shared helpers
-  (cathedral/mosque/dome/minaret/pagoda/torii/steppedTemple/obelisk/statue/lantern),
-  `Materials` colour helpers (26.3 moved dyed blocks to `ColorCollection.pick`),
-  `FallbackStyle`. `CityLocation` delegates palette/landmark/flourish/streetProps to the
-  style. **TokyoStyle** is the reference (shikkui+kawara+vermilion+neon). The other 23 cities
-  are being authored in parallel by subagents.
-
-## In flight / current
-
-- **Overnight: bring the world to a good state** (see `docs/NIGHT-PLAN.md`). Rendering all 24
-  cities server-side to PNG (`-Deh.renderCities=true`, dev-only `core/CityRenderer`) to review
-  style conformance without a client. Fixes: renderer now uses the real `CityLocation.radius`
-  (was the legacy `City.radius`, so it only captured the centre).
+- Palette for a city's style was bypassed in `Locations.place` (grey cities) — fixed.
+- World border crashed startup (`ServerAboutToStart` → `ServerStarted`).
+- Renderer used the legacy city radius (captured only the centre) — fixed.
 
 ## Known limitations / deferred
 
-- Terrain is **surface-only** — no ores, no caves, and **no surface decoration** (no trees/
-  grass) yet. Tracked as a story.
-- Cities have **no services and no state** yet (trade/inn/quests; Thriving→Fallen) — deferred
-  until those features exist.
-- **No combat, mobs, bosses, rituals, sanity, corruption** implemented yet — design only.
-- Spawn is vanilla-chosen (lands near the Atlantic); a pinned coastal spawn is a tracked task.
-- `PlayerList`/server APIs differ subtly in 26.3 — verify against the decompiled sources
-  (extract from the NeoForm cache if needed).
+- Terrain is **surface-only** and **undecorated** (no grass/trees/flowers) — Phase 3.
+- Cities have **no services/state** yet (deferred until those features exist).
+- **No combat, mobs, bosses, rituals, sanity, corruption** implemented — design only.
+- **Landmark duplicates** not yet separated (Paris/Mexico City; Istanbul/Cairo) — Phase 2.
+- Only ~4–10 of 24 cities visually reviewed so far — Phase 1.
+- Spawn is vanilla-chosen; a pinned coastal spawn is a tracked task.
 
-## Next steps (suggested order)
+## Open incident
 
-1. Parallel location content against the frame (per `docs/STRUCTURES-CONTRACT.md`).
-2. Random-in-biome placement (real `Structure`/`StructureSet`) when the first site lands.
-3. Parallel location work via **subagents**, one location/area each.
-4. A gameplay system (sanity is self-contained and testable) when locations are good enough.
+The host OOM (dockerd killed, all containers stopped) was caused by the dev container having
+the host `docker.sock` (rw): spawned containers were **siblings**, unbounded by the container
+cgroup. Remedy in progress: no host socket; build inside the container cgroup. See
+`docs/HOST-SAFETY.md`. **Do not use the host socket. Run through `scripts/guarded-run.sh`.**
 
 ## Where things live
 
 | Concern | File |
 |---|---|
-| Working rules (subagents!) | `AGENTS.md` |
-| Design, the source of truth | `design/` |
-| Code architecture | `docs/ARCHITECTURE.md` |
+| Host safety (no OOM) | `docs/HOST-SAFETY.md` |
+| Working rules (subagents) | `AGENTS.md` |
+| Design, source of truth | `design/` |
 | World generation | `docs/WORLDGEN.md` |
 | Locations / parallel authoring | `docs/STRUCTURES-CONTRACT.md` |
 | Multiplayer & sessions | `docs/MULTIPLAYER.md` |
 | Windows/Docker pitfalls | `docs/WINDOWS.md` |
-| Where to start coding | `docs/DEVELOPMENT-PLAN.md` |
