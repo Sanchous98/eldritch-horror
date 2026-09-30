@@ -36,6 +36,16 @@ public final class BoundaryTravel {
     private BoundaryTravel() {
     }
 
+    /** {@code |z|} beyond which the sampler clamps and Morok begins (blocks). */
+    public static int morokEdgeZ() {
+        return MOROK_EDGE_Z;
+    }
+
+    /** Depth past the edge at which Morok reaches full lethality (blocks). */
+    public static double morokLethalDepth() {
+        return MOROK_LETHAL_DEPTH;
+    }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         long tick = event.getServer().getTickCount();

@@ -42,6 +42,11 @@ public final class ModConfig {
             BUILDER.comment("[demo] Sanity change per second inside a city (positive recovers).")
                     .defineInRange("sanityCityRate", 0.08, 0.0, 10.0);
 
+    /** Source: the lethal polar end of the world (Morok) drains sanity with depth. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_MOROK =
+            BUILDER.comment("Enable the 'morok' sanity source (polar drain past the charted edge).")
+                    .define("enableSanityMorok", true);
+
     // --- Sanity stage cut-offs (fractions of max sanity) -----------------------------------
 
     /** Below this fraction → Uneasy. */

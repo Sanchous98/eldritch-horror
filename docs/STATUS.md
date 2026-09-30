@@ -54,21 +54,33 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - **Varied city fabric**: lots are a mix of houses (height 2–10, flat or pitched), 12–20 towers,
   open squares and walled gardens; the district clears vanilla biome vegetation so a jungle city
   is not buried by its own trees.
+- **Second-echelon sites reviewed** by render: `drowned_temple` was built on the deep seabed and
+  showed as open ocean — it now rises above sea level on a pedestal. The other four read but are
+  small/plain (a later polish pass). See `docs/STATUS.md` render notes.
 - **Honest coastline**: the landmask is authoritative — ETOPO shelf elevations can no longer
   surface as land in shallow water (fixed the Rio de la Plata estuary).
 - **Second-echelon sites** (`world/loc/site/`): `cult_stronghold`, `order_vault`, `drowned_temple`,
   `ritual_altar_site`, `rift_scar` — 5 `Location`s registered as fixed coordinates (29 locations).
 - **Tests**: JUnit via `./gradlew test` — `EarthMapCylinderTest` (2 tests) guards the longitude
   wrap and the ocean seam, loading the real baked layers.
-- **RPG systems decided** (`design/27-systems-framework.md`): Sanity = per-player stub value
-  (replaces **hunger**), Corruption = per-player stub value + per-chunk **taint** (replaces
+- **RPG systems** (`design/27-systems-framework.md`): Sanity = per-player value
+  (replaces **hunger**), Corruption = per-player value + per-chunk **taint** (replaces
   **experience**), Reputation = per-cult integer. Mixins disable hunger (`FoodData.tick`) and
-  XP/enchanting. Storage = NeoForge attachments; API = `SanitySystem`/`CorruptionSystem`/`CultSystem`
-  (get/set/add, clamped via `Math.clamp`); commands `/eh sanity|corruption|rep get|set|add|list`.
-  Sanity/corruption sync to the owner; the HUD (`ClientHud`) draws sanity where the food bar was
-  and corruption where the experience bar was. Cults: `CultDefinition` + 3 seeds
-  (`drowned_choir`, `unblinking_eye`, `hollow_choir`) with opposed pairs. **Stubs only — nothing
-  affects gameplay yet.**
+  XP/enchanting. Storage = NeoForge attachments; the HUD (`ClientHud`) draws sanity where the food
+  bar was and corruption where the experience bar was. Cults: `CultDefinition` + 3 seeds
+  (`drowned_choir`, `unblinking_eye`, `hollow_choir`) with opposed pairs.
+- **Sanity core implemented** (`sanity/`): `SanitySource` SPI + `SanitySources` registry,
+  `SanityState` (Composed…Marked), `SanityTicker` (1/s, overworld, `enableSanity`-gated), and the
+  `madness`/`marked` effects applied on state transition. Two demo sources: `darkness` (drains at
+  night or in low light; a city shelters you) and `city` (recovers inside a curated city footprint).
+- **Corruption core implemented** (`corruption/`): `CorruptionSource` SPI, `CorruptionState`
+  (Dormant…Claimed), `CorruptionTicker`, the `corrupted` effect, and `TaintSystem` (per-chunk taint
+  diffuses once a second across the loaded chunks around players; player corruption rises in a
+  tainted chunk). Config moved to `Type.SERVER`. Commands `/eh sanity|corruption|rep|taint`.
+- **City polish**: varied street paving, a soft rim that fades into the wild (no hard circular
+  cut), generic street dressing (stalls/crates/wells) placed before buildings and occupancy-gated.
+- **Site renderer**: `CityRenderer` can render the second-echelon `Location`s (`-Deh.renderCities=sites`),
+  with each site's true radius.
 - **Item registry**: **128 content-stub items** across 11 category files
   (`registry/items/*.java`) through one frozen `ModItems.add(id, stack)` surface, with a single
   creative tab, `en_us.json` names + 128 tooltips. Effects are recorded in comments/design only.
@@ -87,9 +99,9 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 ## Known limitations / deferred
 
 - Cities have **no services/state** yet (deferred until those features exist).
-- **No combat, mobs, bosses, rituals, cults implemented — design only.** Sanity/corruption exist
-  as inert stubs (values + commands, no effects); items exist but have no behaviour.
-  (Morok itself is implemented; it is the first sanity/health-escalation hook.)
+- **No combat, mobs, bosses, rituals, cults implemented — design only.** Sanity and corruption
+  now have real tickers, states, effects and config; items still have no behaviour, and cults are
+  definitions + reputation only. (Morok itself is implemented; it is the first sanity/health hook.)
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,

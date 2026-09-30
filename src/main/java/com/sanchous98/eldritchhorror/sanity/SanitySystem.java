@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import com.sanchous98.eldritchhorror.registry.ModAttributes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -17,24 +18,24 @@ import net.minecraft.server.level.ServerPlayer;
  * effects on transition, and it replaces the hunger bar on the HUD.
  */
 public final class SanitySystem {
-    /** Attribute id for max sanity (registered once the attribute is implemented). */
+    /** Attribute id for the max sanity ceiling. */
     public static final Identifier MAX_SANITY_ID =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "max_sanity");
 
-    /** Default ceiling. A future {@code max_sanity} attribute will override this. */
+    /** Fallback ceiling, used only if the {@code max_sanity} attribute is somehow absent. */
     public static final double DEFAULT_MAX = 100.0;
 
     private SanitySystem() {
     }
 
-    /** Current sanity, clamped to {@code [0, DEFAULT_MAX]}. */
+    /** Current sanity, clamped to {@code [0, max(player)]}. */
     public static double get(ServerPlayer player) {
-        return Math.clamp(player.getData(ModAttachments.SANITY.get()), 0.0, DEFAULT_MAX);
+        return Math.clamp(player.getData(ModAttachments.SANITY.get()), 0.0, max(player));
     }
 
-    /** Sets sanity to {@code value} (clamped). Returns the stored value. */
+    /** Sets sanity to {@code value} (clamped to {@code [0, max(player)]}). Returns the stored value. */
     public static double set(ServerPlayer player, double value) {
-        double v = Math.clamp(value, 0.0, DEFAULT_MAX);
+        double v = Math.clamp(value, 0.0, max(player));
         player.setData(ModAttachments.SANITY.get(), v);
         return v;
     }
@@ -44,13 +45,23 @@ public final class SanitySystem {
         return set(player, get(player) + delta);
     }
 
-    /** The meter ceiling. A future {@code max_sanity} attribute will override {@link #DEFAULT_MAX}. */
+    /** The meter ceiling: the player's {@code max_sanity} attribute, or {@link #DEFAULT_MAX} if absent. */
     public static double max() {
         return DEFAULT_MAX;
     }
 
+    /** The meter ceiling for {@code player}: the {@code max_sanity} attribute, or {@link #DEFAULT_MAX}. */
+    public static double max(ServerPlayer player) {
+        var instance = player.getAttribute(ModAttributes.MAX_SANITY);
+        if (instance == null) {
+            return DEFAULT_MAX; // attribute absent (non-player or removed): never throw
+        }
+        double value = instance.getValue();
+        return value > 0.0 ? value : DEFAULT_MAX;
+    }
+
     /** The current state band for {@code player}, derived from the meter and the configured cut-offs. */
     public static SanityState state(ServerPlayer player) {
-        return SanityState.of(get(player));
+        return SanityState.of(get(player), max(player));
     }
 }

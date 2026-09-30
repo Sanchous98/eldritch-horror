@@ -19,13 +19,18 @@ export DOCKER_HOST=${DOCKER_HOST:-unix:///home/dev/.docker-run/docker.sock}
 
 CG_MAX=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || echo 0)
 CG_CUR=$(cat /sys/fs/cgroup/memory.current 2>/dev/null || echo 0)
+# cgroup v2 counts reclaimable page cache in memory.current; the kernel evicts it under
+# pressure rather than OOMing, so subtract the inactive file pages for a realistic usage.
+CG_FILE=$(awk '/^inactive_file /{print $2}' /sys/fs/cgroup/memory.stat 2>/dev/null || echo 0)
+CG_USED=$(( CG_CUR > CG_FILE ? CG_CUR - CG_FILE : CG_CUR ))
 HOST_AVAIL_MB=$(free -m | awk '/^Mem:/{print $7}')
 HOST_SWAP_USED_MB=$(free -m | awk '/^Swap:/{print $3}')
 
 if [ "${FORCE:-0}" != "1" ]; then
-  # Refuse when the cgroup is >80% full or the host has <400 MB available.
-  if [ "$CG_MAX" -gt 0 ] && [ "$CG_CUR" -gt $(( CG_MAX * 8 / 10 )) ]; then
-    echo "safe-build: cgroup at $(( CG_CUR / 1048576 )) MiB / $(( CG_MAX / 1048576 )) MiB — too full, refusing." >&2
+  # Refuse only when the cgroup's *non-reclaimable* usage is >80% full, or the host has
+  # <400 MB available.
+  if [ "$CG_MAX" -gt 0 ] && [ "$CG_USED" -gt $(( CG_MAX * 8 / 10 )) ]; then
+    echo "safe-build: cgroup used $(( CG_USED / 1048576 )) MiB / $(( CG_MAX / 1048576 )) MiB (excl. cache) — too full, refusing." >&2
     exit 3
   fi
   if [ "$HOST_AVAIL_MB" -lt 400 ]; then
@@ -34,7 +39,7 @@ if [ "${FORCE:-0}" != "1" ]; then
   fi
 fi
 
-echo "safe-build: cgroup $(( CG_CUR / 1048576 ))/$(( CG_MAX / 1048576 )) MiB, host avail ${HOST_AVAIL_MB} MiB, swap used ${HOST_SWAP_USED_MB} MiB"
+echo "safe-build: cgroup $(( CG_USED / 1048576 ))/$(( CG_MAX / 1048576 )) MiB used (excl. cache), host avail ${HOST_AVAIL_MB} MiB, swap used ${HOST_SWAP_USED_MB} MiB"
 
 # 1. pre-clean
 docker container prune -f >/dev/null 2>&1 || true

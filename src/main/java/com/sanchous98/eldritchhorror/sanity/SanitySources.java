@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.world.BoundaryTravel;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
@@ -50,6 +51,7 @@ public final class SanitySources {
             }
             register(new DarknessSource());
             register(new CitySource());
+            register(new MorokSource());
             initialised = true;
         }
     }
@@ -128,6 +130,40 @@ public final class SanitySources {
                 return 0.0;
             }
             return ctx.nearCity() ? ModConfig.SANITY_CITY_RATE.get() : 0.0;
+        }
+    }
+
+    /**
+     * <b>Morok</b>: the lethal polar end of the charted world. Past {@code |z| =
+     * BoundaryTravel.morokEdgeZ()} the drain grows linearly with depth, reaching {@code -2.0/s}
+     * at full lethality ({@code morokLethalDepth} blocks past the edge). Overworld only.
+     *
+     * <p>{@code BoundaryTravel.morok} keeps its darkness/nausea/damage pressure; this source owns
+     * only the sanity consequence, so the player is never drained twice for the same depth.
+     */
+    private static final class MorokSource implements SanitySource {
+        /** Sanity points lost per second at full lethality (depth &ge; {@code MOROK_LETHAL_DEPTH}). */
+        private static final double FULL_LETHAL_RATE = 2.0;
+
+        @Override
+        public String id() {
+            return "morok";
+        }
+
+        @Override
+        public double deltaPerSecond(ServerPlayer player, SanityContext ctx) {
+            if (!ModConfig.ENABLE_SANITY_MOROK.get()) {
+                return 0.0;
+            }
+            if (!ctx.level().dimension().equals(Level.OVERWORLD)) {
+                return 0.0;
+            }
+            double depth = Math.abs(player.getZ()) - BoundaryTravel.morokEdgeZ();
+            if (depth <= 0.0) {
+                return 0.0;
+            }
+            double f = Math.min(1.0, depth / BoundaryTravel.morokLethalDepth()); // 0..1
+            return -FULL_LETHAL_RATE * f;
         }
     }
 }

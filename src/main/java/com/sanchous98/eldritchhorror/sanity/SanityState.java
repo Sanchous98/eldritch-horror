@@ -21,9 +21,11 @@ public enum SanityState {
     /** Marked: the horror has noticed you. */
     MARKED;
 
-    /** Band of {@code sanity}, using the configured cut-offs. */
-    public static SanityState of(double sanity) {
-        double max = SanitySystem.max();
+    /**
+     * Band of {@code sanity} against a meter ceiling of {@code max}, using the configured cut-offs.
+     * The ceiling is the player's {@code max_sanity} attribute, so the bands track that value.
+     */
+    public static SanityState of(double sanity, double max) {
         double f = max <= 0.0 ? 0.0 : Math.clamp(sanity / max, 0.0, 1.0);
         if (f > ModConfig.SANITY_UNEASY.get()) {
             return COMPOSED;
