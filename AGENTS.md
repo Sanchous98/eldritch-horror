@@ -34,6 +34,27 @@ context wastes the session and loses the thread.
 transcribe. When a task is mechanical and self-contained, hand it to a subagent and bring
 back the outcome.
 
+### Hard anti-bloat rules (learned the hard way)
+
+Main-context length is the thing that kills this project's continuity: when it grows, the
+session gets compacted and the thread is lost. So, by default:
+
+- **Subagent-first.** Exploration, bulk edits, "find/read/inspect X", audits, anything that
+  produces more than ~1 screen of output → a subagent returns a *summary + exact paths*, not
+  the raw content.
+- **Never paste large tool output into main context.** Big logs, scraped pages, generated
+  listings, rendered-file dumps: write them to a file (or a subagent) and read back only the
+  verdict. Cap shell greps with `head`/filters.
+- **Don't read many images inline.** Ask a subagent (or the dev renderer) to reduce to a
+  verdict; only open an image in main context when a human-facing judgement is required, and
+  then at most 1–2, ideally downscaled/cropped.
+- **Durable over remembered.** Decisions go into `design/`, `docs/STATUS.md` and code comments
+  the same session — never only in chat. After any compaction, read `docs/STATUS.md` first.
+- **One writer, then verify.** Parallel authors each own files; a separate verifier agent reads
+  the result and returns a fix list; the main agent applies fixes and runs the single build.
+- **Build/run loops belong in the background**; main context only sees the final
+  `BUILD SUCCESSFUL` / failure lines.
+
 ## One writer per area
 
 Parallel work is expected (see the contract). Each worker touches **only its own files**

@@ -60,8 +60,17 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   `ritual_altar_site`, `rift_scar` — 5 `Location`s registered as fixed coordinates (29 locations).
 - **Tests**: JUnit via `./gradlew test` — `EarthMapCylinderTest` (2 tests) guards the longitude
   wrap and the ocean seam, loading the real baked layers.
+- **RPG systems decided** (`design/27-systems-framework.md`): Sanity = per-player stub value
+  (replaces **hunger**), Corruption = per-player stub value + per-chunk **taint** (replaces
+  **experience**), Reputation = per-cult integer. Mixins disable hunger (`FoodData.tick`) and
+  XP/enchanting. Storage = NeoForge attachments; API = `SanitySystem`/`CorruptionSystem` (get/set/add,
+  clamped); commands `/eh sanity|corruption get|set|add`. **Stubs only — nothing affects gameplay
+  yet.**
+- **Item registry**: **128 content-stub items** across 11 category files
+  (`registry/items/*.java`) through one frozen `ModItems.add(id, stack)` surface, with a single
+  creative tab, `en_us.json` names + 128 tooltips. Effects are recorded in comments/design only.
 - **Design docs**: `design/24-sanity-and-corruption.md`, `25-bestiary-and-entities.md`,
-  `26-rituals-and-occult.md` (+ README index).
+  `26-rituals-and-occult.md`, `27-systems-framework.md` (+ README index).
 - **Design**: `design/23-boundary-and-travel.md` (cylinder + Morok);
   `docs/STRUCTURES-CONTRACT.md`; `AGENTS.md`; `docs/HOST-SAFETY.md`.
 - **Safety**: hard caps in `docker-compose.yml`, `scripts/guarded-run.sh`.
@@ -75,7 +84,8 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 ## Known limitations / deferred
 
 - Cities have **no services/state** yet (deferred until those features exist).
-- **No combat, mobs, bosses, rituals, sanity, corruption** implemented — design only.
+- **No combat, mobs, bosses, rituals, cults implemented — design only.** Sanity/corruption exist
+  as inert stubs (values + commands, no effects); items exist but have no behaviour.
   (Morok itself is implemented; it is the first sanity/health-escalation hook.)
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
