@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.cult;
 
+import net.minecraft.network.chat.Component;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,10 @@ public final class Cults {
         register(new CultDefinition(
                 "drowned_choir", "The Drowned Choir",
                 "Coastlines, drowned temples, tide pools",
-                List.of("Acolyte", "Tidebound", "Deep-Sworn", "Voice of the Choir"),
+                List.of(Component.translatable("rank.eldritch_horror.drowned_choir.0"),
+                        Component.translatable("rank.eldritch_horror.drowned_choir.1"),
+                        Component.translatable("rank.eldritch_horror.drowned_choir.2"),
+                        Component.translatable("rank.eldritch_horror.drowned_choir.3")),
                 List.of("unblinking_eye"),
                 "drowned_blessing",
                 "Tide-worshippers who trade breath for devotion."));
@@ -27,7 +32,10 @@ public final class Cults {
         register(new CultDefinition(
                 "unblinking_eye", "The Order of the Unblinking Eye",
                 "Libraries, observatories, warded vaults",
-                List.of("Initiate", "Witness", "Archivist", "Keeper"),
+                List.of(Component.translatable("rank.eldritch_horror.unblinking_eye.0"),
+                        Component.translatable("rank.eldritch_horror.unblinking_eye.1"),
+                        Component.translatable("rank.eldritch_horror.unblinking_eye.2"),
+                        Component.translatable("rank.eldritch_horror.unblinking_eye.3")),
                 List.of("drowned_choir"),
                 "ward_of_the_eye",
                 "Scholars who catalogue the horror to survive it."));
@@ -35,7 +43,10 @@ public final class Cults {
         register(new CultDefinition(
                 "hollow_choir", "The Hollow Choir",
                 "Deep places, rifts, the Veil",
-                List.of("Aspirant", "Vessel", "Hollowed", "Chorus-Speaker"),
+                List.of(Component.translatable("rank.eldritch_horror.hollow_choir.0"),
+                        Component.translatable("rank.eldritch_horror.hollow_choir.1"),
+                        Component.translatable("rank.eldritch_horror.hollow_choir.2"),
+                        Component.translatable("rank.eldritch_horror.hollow_choir.3")),
                 List.of("drowned_choir", "unblinking_eye"),
                 "summon_star_spawn",
                 "The cult that wants the horror summoned."));

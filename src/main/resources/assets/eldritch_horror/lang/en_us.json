@@ -284,5 +284,19 @@
   "rank.eldritch_horror.initiate": "Initiate",
   "rank.eldritch_horror.member": "Member",
   "rank.eldritch_horror.devoted": "Devoted",
-  "rank.eldritch_horror.inner_circle": "Inner Circle"
+  "rank.eldritch_horror.inner_circle": "Inner Circle",
+  "rank.eldritch_horror.drowned_choir.0": "Acolyte",
+  "rank.eldritch_horror.drowned_choir.1": "Tidebound",
+  "rank.eldritch_horror.drowned_choir.2": "Deep-Sworn",
+  "rank.eldritch_horror.drowned_choir.3": "Voice of the Choir",
+  "rank.eldritch_horror.unblinking_eye.0": "Initiate",
+  "rank.eldritch_horror.unblinking_eye.1": "Witness",
+  "rank.eldritch_horror.unblinking_eye.2": "Archivist",
+  "rank.eldritch_horror.unblinking_eye.3": "Keeper",
+  "rank.eldritch_horror.hollow_choir.0": "Aspirant",
+  "rank.eldritch_horror.hollow_choir.1": "Vessel",
+  "rank.eldritch_horror.hollow_choir.2": "Hollowed",
+  "rank.eldritch_horror.hollow_choir.3": "Chorus-Speaker",
+  "tooltip.eldritch_horror.sanity": "Sanity %s",
+  "tooltip.eldritch_horror.corruption": "Corruption %s"
 }

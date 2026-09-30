@@ -84,9 +84,9 @@ public final class EldritchCommands {
                                                     }
                                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
                                                     int n = CultSystem.get(p, cult);
-                                                    String rank = CultSystem.rank(p, cult);
+                                                    Component rank = CultSystem.rank(p, cult);
                                                     ctx.getSource().sendSuccess(
-                                                            () -> Component.literal(cult + " rep = " + n + " (" + rank + ")"), false);
+                                                            () -> Component.literal(cult + " rep = " + n + " (").append(rank).append(")"), false);
                                                     return 1;
                                                 })))
                                 .then(Commands.literal("set")

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.cult;
 
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -65,24 +66,25 @@ public final class CultSystem {
     }
 
     /**
-     * The cult-specific rank name for a player: an {@code Outsider}/{@code Neutral} floor below the
-     * first band, otherwise the cult's ladder name for the band. Unknown cult ⇒ "Neutral".
+     * The cult-specific rank for a player: an {@code Outsider}/{@code Neutral} translatable
+     * component below the first band, otherwise the cult's ladder rank for the band. Unknown
+     * cult ⇒ the neutral component.
      */
-    public static String rank(ServerPlayer player, String cultId) {
+    public static Component rank(ServerPlayer player, String cultId) {
         int v = get(player, cultId);
         if (v < 0) {
-            return "Outsider";
+            return Component.translatable("rank.eldritch_horror.outsider");
         }
         int band = 0;
         while (band < BANDS.length && v >= BANDS[band]) {
             band++;
         }
         if (band == 0) {
-            return "Neutral";
+            return Component.translatable("rank.eldritch_horror.neutral");
         }
         CultDefinition def = Cults.byId(cultId);
         if (def == null || def.ranks().isEmpty()) {
-            return "Neutral";
+            return Component.translatable("rank.eldritch_horror.neutral");
         }
         int idx = Math.min(band - 1, def.ranks().size() - 1);
         return def.ranks().get(idx);

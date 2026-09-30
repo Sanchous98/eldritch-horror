@@ -1,11 +1,13 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -45,16 +47,23 @@ public final class ModAttachments {
                     .build());
 
     /**
-     * Per-player reputation with each cult: a map of cult id → value (−100…+100), persisted and
-     * copied on death. Not synced yet (the cult screen is later). See {@code design/09-cults.md}.
+     * Per-player reputation with each cult: a map of cult id → value (−100…+100), persisted,
+     * copied on death, and synced to the owner so a future cult screen can read it.
+     * See {@code design/09-cults.md}.
      */
-    public static final Supplier<AttachmentType<java.util.Map<String, Integer>>> REPUTATION =
+    public static final Supplier<AttachmentType<Map<String, Integer>>> REPUTATION =
             ATTACHMENT_TYPES.register("reputation",
-                    () -> AttachmentType.<java.util.Map<String, Integer>>builder(java.util.Map::of)
+                    () -> AttachmentType.<Map<String, Integer>>builder(Map::of)
                             .serialize(com.mojang.serialization.Codec
                                     .unboundedMap(com.mojang.serialization.Codec.STRING,
                                             com.mojang.serialization.Codec.INT)
                                     .fieldOf("rep"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.<RegistryFriendlyByteBuf, String, Integer,
+                                                    Map<String, Integer>>map(
+                                                    java.util.HashMap::new,
+                                                    ByteBufCodecs.STRING_UTF8,
+                                                    ByteBufCodecs.VAR_INT))
                             .copyOnDeath()
                             .build());
 

@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.registry.items;
 
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -11,7 +13,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+
+import java.util.function.Consumer;
 
 /**
  * A reusable use-to-apply item: right-clicking applies fixed sanity/corruption deltas.
@@ -49,6 +55,37 @@ public class ConsumableItem extends Item {
         this.sanity = sanity;
         this.corruption = corruption;
         this.consumed = consumed;
+    }
+
+    /** The sanity delta applied on use (client-visible tooltip source). */
+    public double sanityDelta() {
+        return this.sanity;
+    }
+
+    /** The corruption delta applied on use (client-visible tooltip source). */
+    public double corruptionDelta() {
+        return this.corruption;
+    }
+
+    /**
+     * Renders the stored sanity/corruption deltas as colour-coded, translatable tooltip lines.
+     * Purely client-side presentation: no gameplay state is read or written here.
+     */
+    @Override
+    public void appendHoverText(ItemStack itemStack, Item.TooltipContext context,
+                                TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
+        appendDelta(builder, "tooltip.eldritch_horror.sanity", this.sanityDelta());
+        appendDelta(builder, "tooltip.eldritch_horror.corruption", this.corruptionDelta());
+    }
+
+    /** Emits one colour-coded "label +N"/"label −N" line when {@code delta} is non-zero. */
+    private static void appendDelta(Consumer<Component> builder, String key, double delta) {
+        if (delta == 0) {
+            return;
+        }
+        long n = Math.round(delta);
+        ChatFormatting colour = n > 0 ? ChatFormatting.GREEN : ChatFormatting.RED;
+        builder.accept(Component.translatable(key, n).withStyle(colour));
     }
 
     @Override

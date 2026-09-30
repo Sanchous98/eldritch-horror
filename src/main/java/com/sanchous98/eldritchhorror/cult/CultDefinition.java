@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.cult;
 
+import net.minecraft.network.chat.Component;
+
 import java.util.List;
 
 /**
@@ -13,7 +15,7 @@ import java.util.List;
  * @param id           stable snake_case id (also the reputation key)
  * @param name         display name
  * @param domain       short flavour of where the cult operates
- * @param ranks        rank names, low → high (the ladder order matters)
+ * @param ranks        translatable rank names, low → high (the ladder order matters)
  * @param opposed      ids of cults this one opposes (cross-reputation cost)
  * @param signatureRite the rite that grants reputation with this cult
  * @param fantasy      one-line pitch
@@ -22,13 +24,13 @@ public record CultDefinition(
         String id,
         String name,
         String domain,
-        List<String> ranks,
+        List<Component> ranks,
         List<String> opposed,
         String signatureRite,
         String fantasy) {
 
     /** Rank names in ladder order. */
-    public List<String> ranks() {
+    public List<Component> ranks() {
         return List.copyOf(ranks);
     }
 }
