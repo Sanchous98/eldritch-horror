@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.sanchous98.eldritchhorror.mixin",
+  "compatibilityLevel": "JAVA_22",
+  "mixins": [
+    "FoodDataMixin",
+    "PlayerExperienceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

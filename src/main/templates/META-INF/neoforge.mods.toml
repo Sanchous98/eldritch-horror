@@ -14,6 +14,11 @@ description='''
 ${mod_description}
 '''
 
+# Mixin configs (loaded by Mixin/FancyModLoader). See the classes under
+# com.sanchous98.eldritchhorror.mixin: hunger and experience are disabled there.
+[[mixins]]
+    config="${mod_id}.mixins.json"
+
 [[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
