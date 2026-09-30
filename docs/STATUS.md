@@ -42,10 +42,17 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   seam warp carries a player across `|x|>=HALF_WIDTH`, and a lethal escalating polar debuff
   (darkness/nausea/weakness/slowness → magic damage) past `|z|>HALF_HEIGHT`. Morok never casts
   you back.
+- **Varied city fabric**: lots are a mix of houses (height 2–10, flat or pitched), 12–20 towers,
+  open squares and walled gardens; the district clears vanilla biome vegetation so a jungle city
+  is not buried by its own trees.
+- **Honest coastline**: the landmask is authoritative — ETOPO shelf elevations can no longer
+  surface as land in shallow water (fixed the Rio de la Plata estuary).
 - **Second-echelon sites** (`world/loc/site/`): `cult_stronghold`, `order_vault`, `drowned_temple`,
   `ritual_altar_site`, `rift_scar` — 5 `Location`s registered as fixed coordinates (29 locations).
 - **Tests**: JUnit via `./gradlew test` — `EarthMapCylinderTest` (2 tests) guards the longitude
   wrap and the ocean seam, loading the real baked layers.
+- **Design docs**: `design/24-sanity-and-corruption.md`, `25-bestiary-and-entities.md`,
+  `26-rituals-and-occult.md` (+ README index).
 - **Design**: `design/23-boundary-and-travel.md` (cylinder + Morok);
   `docs/STRUCTURES-CONTRACT.md`; `AGENTS.md`; `docs/HOST-SAFETY.md`.
 - **Safety**: hard caps in `docker-compose.yml`, `scripts/guarded-run.sh`.
