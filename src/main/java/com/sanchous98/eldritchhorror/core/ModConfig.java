@@ -60,8 +60,54 @@ public final class ModConfig {
                     .defineInRange("sanityBreaking", 0.25, 0.0, 1.0);
 
     public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SPREAD =
-            BUILDER.comment("Allow corruption to spread from altars and rifts.")
+            BUILDER.comment("Allow the per-chunk taint field to bleed into neighbouring chunks.")
                     .define("enableCorruptionSpread", true);
+
+    // --- Corruption system ------------------------------------------------------------------
+
+    /** Master switch for the per-player corruption meter and its threshold effects. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION =
+            BUILDER.comment("Enable the Corruption system (meter ticking and stage effects).")
+                    .define("enableCorruption", true);
+
+    /** Global multiplier applied to all corruption gain/loss. */
+    public static final ModConfigSpec.DoubleValue CORRUPTION_MULTIPLIER =
+            BUILDER.comment("Global multiplier applied to all per-player corruption change.")
+                    .defineInRange("corruptionMultiplier", 1.0, 0.0, 10.0);
+
+    // --- Corruption sources -----------------------------------------------------------------
+
+    /** Source: corruption creeps up while the player stands in a tainted chunk. */
+    public static final ModConfigSpec.DoubleValue CORRUPTION_TAINT_RATE =
+            BUILDER.comment("Corruption per second per unit of taint in the player's chunk.")
+                    .defineInRange("corruptionTaintRate", 0.15, 0.0, 10.0);
+
+    /** Taint spread: fraction of the excess above the threshold bled to each 4-neighbour per second. */
+    public static final ModConfigSpec.DoubleValue TAINT_SPREAD_RATE =
+            BUILDER.comment("Per-second fraction of a chunk's taint above the threshold bled to neighbours.")
+                    .defineInRange("taintSpreadRate", 0.02, 0.0, 1.0);
+
+    /** A chunk must exceed this taint before it bleeds into its neighbours. */
+    public static final ModConfigSpec.DoubleValue TAINT_SPREAD_THRESHOLD =
+            BUILDER.comment("Taint a chunk must exceed before it spreads to neighbouring chunks.")
+                    .defineInRange("taintSpreadThreshold", 0.1, 0.0, 1.0);
+
+    // --- Corruption stage cut-offs (fractions of DEFAULT_MAX) --------------------------------
+
+    /** At or above this fraction → Touched. */
+    public static final ModConfigSpec.DoubleValue CORRUPTION_TOUCHED =
+            BUILDER.comment("Corruption fraction at or above which the state becomes Touched.")
+                    .defineInRange("corruptionTouched", 0.25, 0.0, 1.0);
+
+    /** At or above this fraction → Marked (corrupted effect). */
+    public static final ModConfigSpec.DoubleValue CORRUPTION_MARKED =
+            BUILDER.comment("Corruption fraction at or above which the state becomes Marked.")
+                    .defineInRange("corruptionMarked", 0.5, 0.0, 1.0);
+
+    /** At or above this fraction → Claimed (stronger corrupted effect). */
+    public static final ModConfigSpec.DoubleValue CORRUPTION_CLAIMED =
+            BUILDER.comment("Corruption fraction at or above which the state becomes Claimed.")
+                    .defineInRange("corruptionClaimed", 0.85, 0.0, 1.0);
 
     public static final ModConfigSpec.IntValue RITUAL_COOLDOWN_TICKS =
             BUILDER.comment("Minimum ticks between ritual attempts at the same altar.")
