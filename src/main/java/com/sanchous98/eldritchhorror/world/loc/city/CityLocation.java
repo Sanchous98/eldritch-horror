@@ -191,7 +191,7 @@ public final class CityLocation implements Location {
             garden(b, rng, x, z, p);
             return;
         }
-        if (lot < 0.17f) {
+        if (lot < 0.12f) {
             tower(b, rng, x, z, p, style);
             return;
         }

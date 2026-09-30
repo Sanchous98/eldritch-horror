@@ -58,9 +58,10 @@ public final class CairoStyle implements CityStyle {
                 break;
             }
             int y = ground + 1 + layer;
-            // Banded casing courses: alternate sandstone to pick out each step in the tapering mass.
+            // Banded casing courses: dark mudbrick against light sandstone, so the tapering mass
+            // reads against the sand plateau instead of blending into it.
             b.fill(cx - h, y, cz - h, cx + h, y, cz + h,
-                    (layer & 1) == 0 ? p.foundation() : p.roof());
+                    (layer & 1) == 0 ? p.wall() : p.foundation());
         }
         // A gilt capstone (benben) crowning the apex.
         b.put(cx, ground + 1 + height, cz, p.accent());

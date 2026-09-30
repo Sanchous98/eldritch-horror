@@ -462,7 +462,7 @@ public final class CityRenderer {
             t.top = new BufferedImage(t.diameter, t.diameter, BufferedImage.TYPE_INT_ARGB);
             for (int ix = 0; ix < t.diameter; ix++) {
                 for (int iz = 0; iz < t.diameter; iz++) {
-                    t.top.setRGB(ix, iz, t.argb[ix * t.diameter + iz]);
+                    t.top.setRGB(ix, iz, shadedForHeight(t, ix, iz));
                 }
             }
             write(t.top, t.dir, t.city.id() + "_top.png");
@@ -533,7 +533,10 @@ public final class CityRenderer {
             pos.set(x, y, z);
             BlockState st = t.level.getBlockState(pos);
             if (!st.isAir()) {
-                int col = colourOf(st, t.level, x, y, z);
+                // Directional relief: the two world-tangent faces have different brightness, so
+                // iso silhouettes read even when a landmark shares its material with the ground.
+                int shade = ((ix + iz) & 1) == 0 ? 118 : 86;
+                int col = tint(colourOf(st, t.level, x, y, z), shade);
                 int sy = (ix + iz) / 2 - (y - t.minSurface) + t.isoOffY;
                 if (sx >= 0 && sx < t.isoW && sy >= 0 && sy < t.isoH) {
                     t.iso.setRGB(sx, sy, col);
@@ -553,6 +556,26 @@ public final class CityRenderer {
         int cityRadius = new CityLocation(city).radius();
         int district = Math.min(cityRadius, 380);
         return Math.min(district, MAX_RENDER_RADIUS) + 20;
+    }
+
+    /**
+     * Shade a top-down pixel by its height above the city's lowest surface, so a tall landmark
+     * casts a readable silhouette even when it is built from the same material as the ground
+     * (a sandstone pyramid on sand would otherwise vanish).
+     */
+    private static int shadedForHeight(CityTask t, int ix, int iz) {
+        int base = t.argb[ix * t.diameter + iz];
+        int h = t.topY[ix * t.diameter + iz] - t.minSurface;
+        int pct = 100 + Math.min(h * 2, 55); // taller = brighter, capped
+        return tint(base, pct);
+    }
+
+    /** Multiply an opaque ARGB int's RGB by {@code pct}/100, keeping it opaque. */
+    private static int tint(int argb, int pct) {
+        int r = ((argb >> 16) & 0xFF) * pct / 100;
+        int g = ((argb >> 8) & 0xFF) * pct / 100;
+        int b = (argb & 0xFF) * pct / 100;
+        return 0xFF000000 | (Math.min(r, 255) << 16) | (Math.min(g, 255) << 8) | Math.min(b, 255);
     }
 
     /** Map colour of a state, as an opaque ARGB int, falling back to grey. */
