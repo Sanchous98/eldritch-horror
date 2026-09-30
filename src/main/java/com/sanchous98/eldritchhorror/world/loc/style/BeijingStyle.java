@@ -71,10 +71,141 @@ public final class BeijingStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // The imperial axis: the broad Hall of Supreme Harmony behind (north), fronted by the red
-        // gate tower (south). Wide and low — golden double eaves over a white terrace, not a spire.
-        imperialHall(b, cx, cz - 8, ground, p);
-        gateTower(b, cx, cz + 20, ground, p);
+        // The imperial axis: the broad Hall of Supreme Harmony behind (north), fronted by a tall
+        // red gate tower (south). Broad double golden eaves over a raised stepped white terrace,
+        // scaled up so the hall crest and the tower clearly dominate the skyline.
+        BlockState air = Blocks.AIR.defaultBlockState();
+
+        // ---- Hall of Supreme Harmony ----------------------------------------------------------
+        int czHall = cz - 8;
+        int w = 57;
+        int d = 31;
+        int h = 26;
+        int x0 = cx - w / 2;
+        int x1 = x0 + w - 1;
+        int z0 = czHall - d / 2;
+        int z1 = z0 + d - 1;
+
+        // White marble terrace: four shrinking courses rising to the hall floor.
+        for (int s = 0; s < 4; s++) {
+            int m = 8 - s * 2;
+            b.ground(x0 - m, z0 - m, x1 + m, z1 + m,
+                    ground + s * 4, ground + s * 4 + 3, p.foundation());
+        }
+        int y0 = ground + 16;
+
+        // Hall body, hollowed, with doors on the south (front) and north (rear) faces.
+        b.room(x0, y0, z0, x1, y0 + h, z1, new Doorway(Side.S, w / 2), new Doorway(Side.N, w / 2));
+
+        // Vermilion walls: red on every face, leaving the gold eave course showing.
+        for (int y = y0 + 1; y <= y0 + h - 1; y++) {
+            for (int x = x0; x <= x1; x++) {
+                b.put(x, y, z0, p.accent());
+                b.put(x, y, z1, p.accent());
+            }
+            for (int z = z0 + 1; z <= z1 - 1; z++) {
+                b.put(x0, y, z, p.accent());
+                b.put(x1, y, z, p.accent());
+            }
+        }
+        // Re-open the doors through the new red skin.
+        b.put(cx, y0 + 1, z0, air);
+        b.put(cx, y0 + 2, z0, air);
+        b.put(cx, y0 + 1, z1, air);
+        b.put(cx, y0 + 2, z1, air);
+
+        // Tall dark-latticed window bays along the flanks and the short ends, in two bands.
+        for (int x = x0 + 6; x <= x1 - 6; x += 5) {
+            b.window(x, y0 + 5, z0, 9, 1, true);
+            b.window(x, y0 + 5, z1, 9, 1, true);
+            b.window(x, y0 + 17, z0, 6, 1, true);
+            b.window(x, y0 + 17, z1, 6, 1, true);
+        }
+        for (int z = z0 + 6; z <= z1 - 6; z += 5) {
+            b.window(x0, y0 + 5, z, 9, 1, true);
+            b.window(x1, y0 + 5, z, 9, 1, true);
+            b.window(x0, y0 + 17, z, 6, 1, true);
+            b.window(x1, y0 + 17, z, 6, 1, true);
+        }
+
+        // Wide lower eave: a broad golden hip roof overhanging four blocks, ridge along X.
+        b.pitchedRoof(x0 - 4, z0 - 4, x1 + 4, z1 + 4, y0 + h, 6, 0);
+
+        // Clerestory band standing on the lower eave — the "double" of the double eave.
+        int ux0 = x0 + 10;
+        int ux1 = x1 - 10;
+        int uz0 = z0 + 4;
+        int uz1 = z1 - 4;
+        for (int y = y0 + h + 7; y <= y0 + h + 9; y++) {
+            for (int x = ux0; x <= ux1; x++) {
+                b.put(x, y, uz0, p.accent());
+                b.put(x, y, uz1, p.accent());
+            }
+            for (int z = uz0 + 1; z <= uz1 - 1; z++) {
+                b.put(ux0, y, z, p.accent());
+                b.put(ux1, y, z, p.accent());
+            }
+        }
+        for (int x = ux0 + 4; x <= ux1 - 4; x += 5) {
+            b.window(x, y0 + h + 8, uz0, 2, 1, true);
+            b.window(x, y0 + h + 8, uz1, 2, 1, true);
+        }
+
+        // Upper eave: a narrower golden hip roof, capped by a gold ridge crest and a lantern.
+        b.pitchedRoof(ux0 - 5, uz0 - 5, ux1 + 5, uz1 + 5, y0 + h + 10, 6, 0);
+        b.fill(cx - 3, y0 + h + 17, czHall, cx + 3, y0 + h + 17, czHall, p.roof());
+        b.put(cx, y0 + h + 18, czHall, p.light());
+
+        // ---- Red gate tower: a tall, tiered watchtower with three golden roofs giving the
+        // composition a strong vertical on the palace axis. ------------------------------------
+        int gt = cz + 24;
+        int gy0 = ground + 2;
+        b.ground(cx - 10, gt - 7, cx + 10, gt + 7, ground, ground + 1, p.foundation());
+
+        // Tier 1 — wide base storey.
+        int t1h = 16;
+        b.room(cx - 8, gy0, gt - 4, cx + 8, gy0 + t1h, gt + 4,
+                new Doorway(Side.S, 17), new Doorway(Side.N, 17));
+        for (int y = gy0; y <= gy0 + t1h; y++) {
+            b.put(cx - 8, y, gt - 4, p.accent());
+            b.put(cx + 8, y, gt - 4, p.accent());
+            b.put(cx - 8, y, gt + 4, p.accent());
+            b.put(cx + 8, y, gt + 4, p.accent());
+        }
+        for (int x = cx - 6; x <= cx + 6; x += 4) {
+            b.window(x, gy0 + 4, gt - 4, 9, 1, true);
+            b.window(x, gy0 + 4, gt + 4, 9, 1, true);
+        }
+        b.pitchedRoof(cx - 10, gt - 6, cx + 10, gt + 6, gy0 + t1h, 5, 0);
+
+        // Tier 2.
+        int ty2 = gy0 + t1h + 6;
+        int t2h = 15;
+        b.room(cx - 6, ty2, gt - 3, cx + 6, ty2 + t2h, gt + 3);
+        for (int y = ty2; y <= ty2 + t2h; y++) {
+            b.put(cx - 6, y, gt - 3, p.accent());
+            b.put(cx + 6, y, gt - 3, p.accent());
+            b.put(cx - 6, y, gt + 3, p.accent());
+            b.put(cx + 6, y, gt + 3, p.accent());
+        }
+        for (int x = cx - 4; x <= cx + 4; x += 4) {
+            b.window(x, ty2 + 4, gt - 3, 8, 1, true);
+            b.window(x, ty2 + 4, gt + 3, 8, 1, true);
+        }
+        b.pitchedRoof(cx - 8, gt - 5, cx + 8, gt + 5, ty2 + t2h, 5, 0);
+
+        // Tier 3 — the crowning pavilion.
+        int ty3 = ty2 + t2h + 5;
+        int t3h = 14;
+        b.room(cx - 4, ty3, gt - 2, cx + 4, ty3 + t3h, gt + 2);
+        for (int y = ty3; y <= ty3 + t3h; y++) {
+            b.put(cx - 4, y, gt - 2, p.accent());
+            b.put(cx + 4, y, gt - 2, p.accent());
+            b.put(cx - 4, y, gt + 2, p.accent());
+            b.put(cx + 4, y, gt + 2, p.accent());
+        }
+        b.pitchedRoof(cx - 6, gt - 4, cx + 6, gt + 4, ty3 + t3h, 5, 0);
+        b.put(cx, ty3 + t3h + 6, gt, p.light());
     }
 
     /**

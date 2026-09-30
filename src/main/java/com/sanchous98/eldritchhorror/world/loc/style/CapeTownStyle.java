@@ -51,9 +51,9 @@ public final class CapeTownStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // The Castle of Good Hope: a low stone star-fort — a broad pentagonal rampart with a
-        // projecting bastion at each of its five points, a gate in the south curtain and a small
-        // central keep with a flag spire. Broad and low; the bastioned outline is the silhouette.
+        // The Castle of Good Hope, doubled: a broad stone star-fort with a projecting bastion at
+        // each of its five points and a gate in the south curtain, but now dominated by a tall
+        // whitewashed keep/watchtower rising ~78 blocks from the courtyard within the rampart.
         final int n = 10;
         double[] ox = new double[n];
         double[] oz = new double[n];
@@ -113,16 +113,41 @@ public final class CapeTownStyle implements CityStyle {
         b.put(cx - 1, ground + 4, cz + 27, p.light());
         b.put(cx + 1, ground + 4, cz + 27, p.light());
 
-        // Small central keep: whitewashed walls, thatch roof and a flag spire.
-        int kh = 18;
-        b.room(cx - 6, ground + 1, cz - 6, cx + 6, ground + kh, cz + 6,
-                new Doorway(Side.S, 6));
-        b.window(cx - 6, ground + 6, cz, 4, 1, true);
-        b.window(cx + 6, ground + 6, cz, 4, 1, true);
-        b.window(cx, ground + 6, cz - 6, 4, 1, true);
-        b.pitchedRoof(cx - 7, cz - 7, cx + 7, cz + 7, ground + kh, 8, 1);
-        b.spire(cx, cz, ground + kh + 9, 14);
-        b.put(cx, ground + kh + 8, cz, p.light());
+        // Domineering central keep/watchtower: a tall whitewashed shaft on a battered base,
+        // string-coursed into storeys, with a balcony ring of crenellations, a thatch cap and a
+        // flag spire — the vertical element that lifts the star-fort over the city skyline.
+        int kr = 9;
+        int kz = 2;
+        int keepBase = ground + 1;
+        int keepTop = ground + 66;
+        b.fill(cx - kr - 1, keepBase, cz - kz - 1, cx + kr + 1, keepBase + 7, cz + kz + 1, p.foundation());
+        b.room(cx - kr, keepBase, cz - kz, cx + kr, keepTop, cz + kz,
+                new Doorway(Side.S, kr));
+        for (int y = keepBase; y <= keepTop; y++) {
+            b.put(cx - kr, y, cz - kz, p.accent());
+            b.put(cx + kr, y, cz - kz, p.accent());
+            b.put(cx - kr, y, cz + kz, p.accent());
+            b.put(cx + kr, y, cz + kz, p.accent());
+        }
+        // Cream string-courses ring the shaft every eight blocks.
+        for (int y = keepBase + 8; y <= keepTop - 4; y += 8) {
+            b.fill(cx - kr, y, cz - kz, cx + kr, y, cz + kz, p.weathered());
+        }
+        // Paired slit windows up each long face, storey by storey.
+        for (int y = keepBase + 6; y <= keepTop - 10; y += 8) {
+            b.window(cx - kr, y, cz, 4, 1, true);
+            b.window(cx + kr, y, cz, 4, 1, true);
+            b.window(cx, y, cz - kz, 4, 1, true);
+        }
+        // Wide arched watch-room just under the parapet, then the crenellated balcony.
+        b.window(cx, keepTop - 9, cz - kz, 8, 3, true);
+        b.window(cx, keepTop - 9, cz + kz, 8, 3, true);
+        b.window(cx - kr, keepTop - 9, cz, 8, 3, true);
+        b.window(cx + kr, keepTop - 9, cz, 8, 3, true);
+        b.crenellations(cx - kr - 1, cz - kz - 1, cx + kr + 1, cz + kz + 1, keepTop);
+        b.pitchedRoof(cx - kr, cz - kz, cx + kr, cz + kz, keepTop + 1, 6, 0);
+        b.spire(cx, cz, keepTop + 7, 6);
+        b.put(cx, keepTop + 13, cz, p.light());
     }
 
     @Override

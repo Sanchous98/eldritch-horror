@@ -68,7 +68,9 @@ public final class LagosStyle implements CityStyle {
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
         // National Theatre Lagos: a broad octagonal drum on a tall painted colonnade, carrying a
         // wide, shallow shell roof. The shell is built as shrinking elliptical rings whose Z radius
-        // collapses first, so the cap folds into a long X-aligned crest — a wing/umbrella shape.
+        // collapses first, so the cap folds into a long X-aligned crest. A tall central drum and a
+        // crest/mast then rise ~85 blocks, so the theatre dominates the skyline instead of reading
+        // as a low blob.
         int y0 = ground + 1;
 
         // --- podium: a broad paved apron around the theatre -------------------
@@ -195,6 +197,53 @@ public final class LagosStyle implements CityStyle {
             }
         }
         b.put(cx, shellBase + layers, cz, p.light());
+
+        // --- tall central drum: a slender tower rising from the shell ---------
+        // The drum reads as the theatre's fly tower / lantern, carrying the composition from the
+        // broad low shell (~48) up to the mast tip (~85) so it dominates the city skyline.
+        int drumBase = ground + 30;
+        int r = 4;
+        for (int y = drumBase; y <= ground + 64; y++) {
+            for (int x = cx - r; x <= cx + r; x++) {
+                for (int z = cz - r; z <= cz + r; z++) {
+                    boolean edge = x == cx - r || x == cx + r || z == cz - r || z == cz + r;
+                    if (!edge) {
+                        continue;
+                    }
+                    b.put(x, y, z, ((x + z + y) & 1) == 0 ? p.accent() : p.wall());
+                }
+            }
+            // Painted glazing bands every few courses.
+            if (Math.floorMod(y - drumBase, 6) == 0) {
+                b.window(cx - r, y, cz, 3, 1, true);
+                b.window(cx + r, y, cz, 3, 1, true);
+                b.window(cx, y, cz - r, 3, 1, true);
+                b.window(cx, y, cz + r, 3, 1, true);
+            }
+        }
+        // Painted cornice and crenellated parapet around the drum head.
+        b.walls(cx - r - 1, ground + 65, cz - r - 1, cx + r + 1, ground + 65, cz + r + 1, p.roofSlab());
+        b.crenellations(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, ground + 66);
+
+        // A small capped roof on the drum, then the mast spire to ~85 blocks.
+        b.pitchedRoof(cx - 6, cz - 6, cx + 6, cz + 6, ground + 68, 5, 0);
+        b.spire(cx, cz, ground + 74, 8);
+
+        // --- tall crest / mast on the shell ridge (X-aligned) ------------------
+        // Two thin vanes at the ends of the long shell ridge, joined by a bright crest, so the
+        // whole shell reads as a single tall feature rather than a flat cap.
+        int crestTop = ground + 44;
+        for (int dx : new int[]{-22, 22}) {
+            for (int y = ground + 36; y <= crestTop; y++) {
+                b.put(cx + dx, y, cz, paint(y));
+            }
+        }
+        b.fill(cx - 22, crestTop + 1, cz, cx + 22, crestTop + 1, cz, Materials.glazed(DyeColor.YELLOW));
+        b.fill(cx - 20, crestTop + 2, cz, cx + 20, crestTop + 2, cz, p.roof());
+        b.fill(cx - 14, crestTop + 3, cz, cx + 14, crestTop + 3, cz, p.roofSlab());
+        for (int x = cx - 18; x <= cx + 18; x += 6) {
+            b.put(x, crestTop + 4, cz, p.light());
+        }
     }
 
     /**

@@ -61,16 +61,16 @@ public final class BangkokStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // Wat Arun: a tall, steeply stepped central prang flanked by two smaller prangs,
-        // white porcelain stucco banded with gold, rising over a paved temple terrace.
+        // Wat Arun: a very tall, steeply stepped central prang flanked by two smaller prangs,
+        // white porcelain stucco banded with gold, rising over a wide paved temple terrace.
         int y0 = ground + 1;
-        b.ground(cx - 24, cz - 12, cx + 24, cz + 12, ground, ground, p.foundation());
+        b.ground(cx - 30, cz - 16, cx + 30, cz + 16, ground, ground, p.foundation());
 
         // --- central prang ---------------------------------------------------------
-        int half = 10;
+        int half = 14;                 // 29 blocks wide at the base
         int y = y0;
         for (int t = 0; t < 5; t++) {
-            int h = 8;
+            int h = 12;
             b.room(cx - half, y, cz - half, cx + half, y + h - 1, cz + half);
             // Lacquered corner pillars and gold tier cornice.
             for (int yy = y; yy <= y + h - 1; yy++) {
@@ -83,15 +83,15 @@ public final class BangkokStyle implements CityStyle {
             b.fill(cx - half - 1, y + h, cz - half - 1, cx + half + 1, y + h, cz + half + 1, p.roofSlab());
             b.fill(cx - half, y + h, cz - half, cx + half, y + h, cz + half, p.roof());
             // Mosaic niches on every face.
-            b.window(cx - half, y + 3, cz, 4, 1, true);
-            b.window(cx + half, y + 3, cz, 4, 1, true);
-            b.window(cx, y + 3, cz - half, 4, 1, true);
-            b.window(cx, y + 3, cz + half, 4, 1, true);
+            b.window(cx - half, y + 4, cz, 5, 1, true);
+            b.window(cx + half, y + 4, cz, 5, 1, true);
+            b.window(cx, y + 4, cz - half, 5, 1, true);
+            b.window(cx, y + 4, cz + half, 5, 1, true);
             y += h;
             half -= 2;
         }
         // Steep corn-cob spire: shrinking gold-nibbed rings tapering to a needle.
-        int sh = 6;
+        int sh = 8;
         int yy = y;
         while (sh > 0) {
             for (int k = 0; k < 4 && sh > 0; k++) {
@@ -104,7 +104,7 @@ public final class BangkokStyle implements CityStyle {
             }
             sh--;
         }
-        for (int k = 0; k < 4; k++) {
+        for (int k = 0; k < 5; k++) {
             b.put(cx, yy, cz, p.wall());
             yy++;
         }
@@ -112,25 +112,25 @@ public final class BangkokStyle implements CityStyle {
         b.put(cx, yy + 1, cz, p.light());
 
         // --- two smaller flanking prangs ------------------------------------------
-        int[] fxs = {cx - 17, cx + 17};
+        int[] fxs = {cx - 22, cx + 22};
         for (int s = 0; s < 2; s++) {
             int qx = fxs[s];
-            int qh = 4;
+            int qh = 6;
             int qy = y0;
             for (int t = 0; t < 3; t++) {
-                b.room(qx - qh, qy, cz - qh, qx + qh, qy + 5, cz + qh);
-                for (int k = qy; k <= qy + 5; k++) {
+                b.room(qx - qh, qy, cz - qh, qx + qh, qy + 11, cz + qh);
+                for (int k = qy; k <= qy + 11; k++) {
                     b.put(qx - qh, k, cz - qh, p.accent());
                     b.put(qx + qh, k, cz - qh, p.accent());
                     b.put(qx - qh, k, cz + qh, p.accent());
                     b.put(qx + qh, k, cz + qh, p.accent());
                 }
-                b.fill(qx - qh - 1, qy + 6, cz - qh - 1, qx + qh + 1, qy + 6, cz + qh + 1, p.roofSlab());
-                b.fill(qx - qh, qy + 6, cz - qh, qx + qh, qy + 6, cz + qh, p.roof());
-                qy += 7;
+                b.fill(qx - qh - 1, qy + 12, cz - qh - 1, qx + qh + 1, qy + 12, cz + qh + 1, p.roofSlab());
+                b.fill(qx - qh, qy + 12, cz - qh, qx + qh, qy + 12, cz + qh, p.roof());
+                qy += 12;
                 qh -= 1;
             }
-            int qs = 2;
+            int qs = 4;
             while (qs > 0) {
                 for (int k = 0; k < 3; k++) {
                     b.fill(qx - qs, qy, cz - qs, qx + qs, qy, cz + qs, p.wall());
