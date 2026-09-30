@@ -27,9 +27,18 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - **24 cultural city styles** (`world/loc/style/*Style.java`, one file per city) + `StyleKit`
   shared landmarks (cathedral/mosque/dome/minaret/pagoda/torii/steppedTemple/obelisk/statue/
   lantern). Tokyo is the reference (shikkui + kawara + vermilion + neon + cherry blossom).
+- **Iconic self-generated landmarks**: every one of the 24 cities now carries a recognisable
+  silhouette built procedurally in its own style file (Eiffel Tower, Big Ben + Parliament,
+  Statue of Liberty, Colosseum, Giza pyramids + sphinx, Taj Mahal, Sydney Opera House,
+  Christ the Redeemer, Hagia Sophia, St Basil's, Hall of Supreme Harmony, Gyeongbokgung,
+  Himeji-style castle, Oriental Pearl, Gateway of India, Wat Arun, Monas, Capitol Records,
+  Lagos National Theatre, a colonial twin-tower cathedral, KICC, Castle of Good Hope, the
+  Obelisco, the Angel of Independence). No imported/third-party builds (see below).
 - **Cities at contract size**: district 380 (~760 across), bigger landmarks, decay pass.
 - **City renderer** (`core/CityRenderer`, dev-only `-Deh.renderCities`): PNGs to `run/render/`,
-  tick-sliced. Used to review without a client.
+  tick-sliced. It now **shades by height** (top-down) and applies directional relief (iso), so a
+  tall landmark reads even when it shares its material with the ground. A labelled contact sheet
+  can be built with `tools/contact_sheet.py <render-dir> <out.png>` (needs Pillow).
 - **All 24 cities rendered and reviewed** (Phase 1). Verdict: culture reads by colour; then the
   systemic issues below were fixed and all 24 re-rendered.
 - **Style fixes**: duplicated landmarks separated (Paris gothic cathedral vs Mexico City colonial
@@ -73,6 +82,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,
   so it is judged in-game rather than on the map PNGs.
 - Spawn is vanilla-chosen; a pinned coastal spawn is a tracked task.
+- **No third-party builds are imported.** Landmarks/cities are generated procedurally from our
+  own code. Community schematics (e.g. Planet Minecraft) were considered and rejected: most are
+  All-Rights-Reserved (we publish to a public repo), and raw `.schematic/.litematic` do not drop
+  into this generated world. If ever desired, only CC0/CC-BY (or the author's own) files may be
+  used, converted to `.nbt` and dropped in as a landmark (the seam in `STRUCTURES-CONTRACT.md`).
 - **Rootless docker** starts manually each session (see `docs/HOST-SAFETY.md`); it does not
   auto-start.
 
