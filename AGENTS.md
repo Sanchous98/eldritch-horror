@@ -70,6 +70,11 @@ integration build green.
   `docker compose build dev` (or `. ./scripts/safe-build.sh docker compose build dev`), or the
   container silently builds and runs the *previous* commit. (Cost: one real bug — a renderer
   change reported "0 selected" while the image still held the old class.)
+- **Verify worldgen changes on a fresh world.** The dev server persists its world in the
+  `run-data` named volume (`/workspace/run/world`), and chunk generation is cached there: a
+  re-render or re-forceload of an already-generated city/site returns the OLD blocks, so a real
+  change looks like it did nothing. Before verifying a layout/generator change, drop the world:
+  `docker compose run --rm dev bash -lc 'rm -rf /workspace/run/world'` and re-run.
 - One Gradle build at a time; they share `build/` and Windows locks files exclusively.
 - Verify with `./gradlew compileJava` (fast, warm cache) before claiming done.
 - The first build decompiles Minecraft (~5 min, ~4 GB); later builds are quick.

@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -52,21 +53,27 @@ public final class DrownedTemple implements Location {
         int ground = b.groundY(cx, cz);
         Palette p = b.palette();
         RandomSource rng = b.rng();
-        int y0 = ground + 1;
+        // The temple rises OUT of the water. On the deep seabed `groundY` sits far below the
+        // waterline, so a platform laid at it would be entirely drowned and invisible. Raise the
+        // deck just above sea level on a solid pedestal reaching down to the seabed, so the
+        // shrine reads as half-sunk rather than lost.
+        int surface = Math.max(ground, ElevationCurve.SEA_LEVEL + 2);
+        int y0 = surface + 1;
+        int pedestalBottom = Math.min(ground, ElevationCurve.SEA_LEVEL) - 2;
 
-        // A low stone platform, three courses tall, standing out of the water.
-        b.fill(cx - PLATFORM, ground - 2, cz - PLATFORM, cx + PLATFORM, ground, cz + PLATFORM,
+        // A low stone platform standing out of the water on a foundation to the seabed.
+        b.fill(cx - PLATFORM, pedestalBottom, cz - PLATFORM, cx + PLATFORM, surface, cz + PLATFORM,
                 p.foundation());
-        b.ground(cx - PLATFORM, cz - PLATFORM, cx + PLATFORM, cz + PLATFORM, ground, ground,
+        b.ground(cx - PLATFORM, cz - PLATFORM, cx + PLATFORM, cz + PLATFORM, surface, surface,
                 p.ground());
         b.crenellations(cx - PLATFORM, cz - PLATFORM, cx + PLATFORM, cz + PLATFORM, y0);
 
         // The sunken sanctuary in the middle.
-        shrine(b, p, cx, cz, ground);
+        shrine(b, p, cx, cz, surface);
 
         // Two subsidiary sanctuaries.
-        sanctuary(b, p, cx - 18, cz - 14, ground);
-        sanctuary(b, p, cx + 18, cz - 14, ground);
+        sanctuary(b, p, cx - 18, cz - 14, surface);
+        sanctuary(b, p, cx + 18, cz - 14, surface);
 
         // Drowned decay.
         decay(b, rng, cx, cz, y0, p);
