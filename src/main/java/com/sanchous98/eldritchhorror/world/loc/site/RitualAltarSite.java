@@ -7,14 +7,18 @@ import com.sanchous98.eldritchhorror.world.loc.Tier;
 import net.minecraft.util.RandomSource;
 
 /**
- * A minor open-air ritual site: a ring of monolith stones around a raised, defiled altar dais,
- * with burnt offerings and a broken processional path. Something was summoned here — and
- * answered.
+ * A minor open-air ritual site: a clearly built raised plinth and a marked central altar, ringed
+ * by a readable circle of standing stones, with burnt offerings and a broken processional path.
+ * Something was summoned here — and answered.
  */
 public final class RitualAltarSite implements Location {
 
     /** Radius of the stone circle (blocks). */
     private static final int RING = 22;
+    /** Plinth half-width: the raised stepped dais under the altar. */
+    private static final int PLINTH = 7;
+    /** Number of standing stones in the ring. */
+    private static final int STONES = 12;
 
     private final int centerX;
     private final int centerZ;
@@ -37,7 +41,12 @@ public final class RitualAltarSite implements Location {
 
     @Override
     public int radius() {
-        return 60;
+        return 60; // cull radius — unchanged
+    }
+
+    @Override
+    public int renderRadius() {
+        return RING + 30; // render the built circle, not the 60 cull radius
     }
 
     @Override
@@ -53,13 +62,14 @@ public final class RitualAltarSite implements Location {
         b.ground(cx - RING - 6, cz - RING - 6, cx + RING + 6, cz + RING + 6,
                 ground, ground, p.ground());
 
-        // The stone circle: a monument at each of eight stations.
-        for (int i = 0; i < 8; i++) {
-            double a = i * Math.PI / 4.0;
+        // The stone circle: evenly spaced standing stones of graded height, each on a small paved
+        // base so the ring reads as a deliberate arrangement rather than a random clump.
+        for (int i = 0; i < STONES; i++) {
+            double a = i * 2.0 * Math.PI / STONES;
             int mx = cx + (int) Math.round(Math.cos(a) * RING);
             int mz = cz + (int) Math.round(Math.sin(a) * RING);
-            b.ground(mx - 2, mz - 2, mx + 2, mz + 2, ground, ground, p.foundation());
-            b.monument(mx, mz, y0);
+            b.ground(mx - 1, mz - 1, mx + 1, mz + 1, ground, ground, p.foundation());
+            standingStone(b, rng, mx, mz, y0, p);
         }
 
         // The altar dais at the centre.
@@ -82,17 +92,39 @@ public final class RitualAltarSite implements Location {
 
     // ------------------------------------------------------------------ pieces
 
+    /** A raised, stepped plinth carrying a marked altar: the site's unmistakable built centre. */
     private static void altar(StructureBuilder b, Palette p, int cx, int cz, int ground) {
         int y0 = ground + 1;
-        b.fill(cx - 5, y0, cz - 5, cx + 5, y0, cz + 5, p.foundation());
-        b.fill(cx - 3, y0 + 1, cz - 3, cx + 3, y0 + 1, cz + 3, p.foundation());
-        b.fill(cx - 2, y0 + 2, cz - 2, cx + 2, y0 + 2, cz + 2, p.accent());
-        // The defiled altar block itself.
+        // Three stepped courses, widest at the base, so the dais reads as architecture.
+        b.fill(cx - PLINTH, y0, cz - PLINTH, cx + PLINTH, y0, cz + PLINTH, p.foundation());
+        b.fill(cx - PLINTH + 2, y0 + 1, cz - PLINTH + 2, cx + PLINTH - 2, y0 + 1, cz + PLINTH - 2,
+                p.wall());
+        b.fill(cx - PLINTH + 4, y0 + 2, cz - PLINTH + 4, cx + PLINTH - 4, y0 + 2, cz + PLINTH - 4,
+                p.foundation());
+        // A ring of accent posts around the top step reads as a marked ritual margin.
+        for (int i = 0; i < 8; i++) {
+            double a = i * Math.PI / 4.0;
+            int px = cx + (int) Math.round(Math.cos(a) * (PLINTH - 4));
+            int pz = cz + (int) Math.round(Math.sin(a) * (PLINTH - 4));
+            b.put(px, y0 + 3, pz, p.accent());
+        }
+        // The defiled altar block itself: weathered, deliberately distinct from the plinth.
         b.fill(cx - 1, y0 + 3, cz - 1, cx + 1, y0 + 3, cz + 1, p.weathered());
-        // A single candle, and a stone lectern facing the altar.
         b.put(cx + 1, y0 + 4, cz + 1, p.light());
         b.put(cx - 2, y0 + 4, cz + 1, p.frame());
         b.put(cx - 2, y0 + 5, cz + 1, p.accent());
+    }
+
+    /** One standing stone: a graded, slightly irregular pillar on its paved base. */
+    private static void standingStone(StructureBuilder b, RandomSource rng, int x, int z, int y0,
+                                      Palette p) {
+        int h = 4 + rng.nextInt(4);
+        for (int i = 0; i < h; i++) {
+            b.put(x, y0 + i, z, i == 0 ? p.foundation() : p.wall());
+        }
+        if (rng.nextFloat() < 0.4f) {
+            b.put(x, y0 + h, z, p.accent());
+        }
     }
 
     private static void path(StructureBuilder b, RandomSource rng, int cx, int z0, int z1,

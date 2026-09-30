@@ -262,9 +262,9 @@ public final class CityRenderer {
 
         Session session = new Session(selected.size());
         session.exitWhenDone = exitWhenDone;
-        // Sites are wrapped as synthetic Cities for the shared pipeline, but their true half-extent
-        // is small and would clamp to the 220-block city floor. Remember the real radius per id so
-        // the render box matches the site.
+        // Sites are wrapped as synthetic Cities for the shared pipeline, but their built footprint
+        // is small and would clamp to the 220-block city floor. Remember each site's render radius
+        // (the built extent, NOT the larger cull radius) per id so the render box matches it.
         Map<String, Integer> siteRadii = new LinkedHashMap<>();
         for (City city : selected) {
             if (siteRadii.containsKey(city.id())) {
@@ -272,7 +272,7 @@ public final class CityRenderer {
             }
             for (Location loc : Locations.byId(city.id())) {
                 if (loc.id().equals(city.id())) {
-                    siteRadii.put(city.id(), loc.radius());
+                    siteRadii.put(city.id(), loc.renderRadius());
                     break;
                 }
             }

@@ -76,6 +76,12 @@ public final class CityLocation implements Location {
         return Math.max(220, Math.min(400, rounded));
     }
 
+    /** The built district half-extent (blocks), not the larger cull radius. */
+    @Override
+    public int renderRadius() {
+        return Math.min(radius(), DISTRICT_CAP);
+    }
+
     @Override
     public String id() {
         return "eldritch_horror:city/" + this.city.id();

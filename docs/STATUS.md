@@ -71,12 +71,19 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   (`drowned_choir`, `unblinking_eye`, `hollow_choir`) with opposed pairs.
 - **Sanity core implemented** (`sanity/`): `SanitySource` SPI + `SanitySources` registry,
   `SanityState` (Composed…Marked), `SanityTicker` (1/s, overworld, `enableSanity`-gated), and the
-  `madness`/`marked` effects applied on state transition. Two demo sources: `darkness` (drains at
-  night or in low light; a city shelters you) and `city` (recovers inside a curated city footprint).
+  `madness`/`marked` effects applied on state transition. Sources: `darkness` (drains at night or in
+  low light; a city shelters you), `city` (recovers inside a curated city footprint) and `morok`
+  (drains with polar depth). A player `eldritch_horror:max_sanity` attribute (`registry/ModAttributes`,
+  default 100) sets the ceiling; bands and clamps follow it.
 - **Corruption core implemented** (`corruption/`): `CorruptionSource` SPI, `CorruptionState`
   (Dormant…Claimed), `CorruptionTicker`, the `corrupted` effect, and `TaintSystem` (per-chunk taint
   diffuses once a second across the loaded chunks around players; player corruption rises in a
   tainted chunk). Config moved to `Type.SERVER`. Commands `/eh sanity|corruption|rep|taint`.
+- **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
+  they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
+  by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
+  (the grant is deferred until a rite-knowledge system exists). Cult `REPUTATION` is synced to the
+  owner and ranks are localised (`rank.eldritch_horror.*`).
 - **City polish**: varied street paving, a soft rim that fades into the wild (no hard circular
   cut), generic street dressing (stalls/crates/wells) placed before buildings and occupancy-gated.
 - **Site renderer**: `CityRenderer` can render the second-echelon `Location`s (`-Deh.renderCities=sites`),
@@ -99,9 +106,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 ## Known limitations / deferred
 
 - Cities have **no services/state** yet (deferred until those features exist).
-- **No combat, mobs, bosses, rituals, cults implemented — design only.** Sanity and corruption
-  now have real tickers, states, effects and config; items still have no behaviour, and cults are
-  definitions + reputation only. (Morok itself is implemented; it is the first sanity/health hook.)
+- **No combat, mobs, bosses or rituals yet — design only.** Sanity and corruption have real
+  tickers, states, effects, config and item interaction; cults are definitions + synced reputation
+  + ranks. Morok is implemented on both axes (mob effects + a sanity source). Items only yet act on
+  the meters; rites, spawning and block conversion are deferred.
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,

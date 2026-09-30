@@ -19,7 +19,9 @@ import net.minecraft.util.RandomSource;
 public final class OrderVault implements Location {
 
     /** Half-extent of the enclosure walls (blocks). */
-    private static final int WALL = 29;
+    private static final int WALL = 31;
+    /** Height of the enclosure wall above the precinct floor. */
+    private static final int WALL_H = 9;
 
     private final int centerX;
     private final int centerZ;
@@ -42,7 +44,12 @@ public final class OrderVault implements Location {
 
     @Override
     public int radius() {
-        return 110;
+        return 110; // cull radius — unchanged
+    }
+
+    @Override
+    public int renderRadius() {
+        return WALL + 30; // render the built enclosure, not the 110 cull radius
     }
 
     @Override
@@ -57,9 +64,14 @@ public final class OrderVault implements Location {
         // Paved precinct inside the enclosure.
         b.ground(cx - WALL, cz - WALL, cx + WALL, cz + WALL, ground, ground, p.ground());
 
-        // Tall enclosure wall, crenellated.
-        b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + 6, cz + WALL, p.wall());
-        b.crenellations(cx - WALL, cz - WALL, cx + WALL, cz + WALL, y0 + 7);
+        // Tall enclosure wall, crenellated, with a thick foundation course and corner towers.
+        b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + WALL_H, cz + WALL, p.wall());
+        b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + 1, cz + WALL, p.foundation());
+        b.crenellations(cx - WALL, cz - WALL, cx + WALL, cz + WALL, y0 + WALL_H + 1);
+        cornerTower(b, p, cx - WALL, cz - WALL, ground);
+        cornerTower(b, p, cx + WALL, cz - WALL, ground);
+        cornerTower(b, p, cx - WALL, cz + WALL, ground);
+        cornerTower(b, p, cx + WALL, cz + WALL, ground);
 
         // Gatehouse breaking the south wall.
         gatehouse(b, p, cx, cz + WALL, ground);
@@ -129,7 +141,37 @@ public final class OrderVault implements Location {
         b.pitchedRoof(cx - half - 1, cz - half - 1, cx + half + 1, cz + half + 1, y0 + h, 10, 0);
         b.spire(cx, cz, y0 + h + 10, 16);
         StyleKit.twoHighDoor(b, p, cx, cz + half, y0 + 1, Direction.SOUTH);
+        // A reinforced portal frames the vault door so the way in reads clearly.
+        vaultPortal(b, p, cx, cz + half, y0);
         b.put(cx, y0 + h - 3, cz, p.light());
+    }
+
+    /** Jambs, lintel and a pair of lights marking the strongroom's sealed door. */
+    private static void vaultPortal(StructureBuilder b, Palette p, int cx, int z, int y0) {
+        for (int y = y0 + 1; y <= y0 + 3; y++) {
+            b.put(cx - 1, y, z, p.accent());
+            b.put(cx + 1, y, z, p.accent());
+        }
+        b.fill(cx - 1, y0 + 4, z, cx + 1, y0 + 4, z, p.accent());
+        b.put(cx - 1, y0 + 5, z, p.light());
+        b.put(cx + 1, y0 + 5, z, p.light());
+    }
+
+    /** A tall crenellated corner tower: the enclosure's strong silhouette accent. */
+    private static void cornerTower(StructureBuilder b, Palette p, int x, int z, int ground) {
+        int y0 = ground + 1;
+        int half = 4;
+        int h = 12;
+        b.room(x - half, y0, z - half, x + half, y0 + h, z + half);
+        b.fill(x - half, y0, z - half, x + half, y0, z + half, p.foundation());
+        for (int y = y0; y < y0 + h; y++) {
+            b.put(x - half, y, z - half, p.accent());
+            b.put(x + half, y, z - half, p.accent());
+            b.put(x - half, y, z + half, p.accent());
+            b.put(x + half, y, z + half, p.accent());
+        }
+        b.window(x, y0 + 6, z - half, 3, 1, true);
+        b.crenellations(x - half, z - half, x + half, z + half, y0 + h + 1);
     }
 
     private static void archive(StructureBuilder b, Palette p, int cx, int cz, int ground) {

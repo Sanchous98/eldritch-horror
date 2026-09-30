@@ -19,7 +19,9 @@ import net.minecraft.util.RandomSource;
 public final class CultStronghold implements Location {
 
     /** Built half-extent of the curtain wall (blocks). */
-    private static final int WALL = 26;
+    private static final int WALL = 30;
+    /** Height of the curtain wall above the courtyard floor. */
+    private static final int WALL_H = 7;
 
     private final int centerX;
     private final int centerZ;
@@ -42,7 +44,12 @@ public final class CultStronghold implements Location {
 
     @Override
     public int radius() {
-        return 110;
+        return 110; // cull radius — unchanged
+    }
+
+    @Override
+    public int renderRadius() {
+        return WALL + 30; // render the built curtain wall, not the 110 cull radius
     }
 
     @Override
@@ -57,9 +64,17 @@ public final class CultStronghold implements Location {
         // Courtyard apron inside the walls.
         b.ground(cx - WALL, cz - WALL, cx + WALL, cz + WALL, ground, ground, p.ground());
 
-        // Curtain wall with battlements all round.
-        b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + 5, cz + WALL, p.wall());
-        b.crenellations(cx - WALL, cz - WALL, cx + WALL, cz + WALL, y0 + 6);
+        // Curtain wall with battlements all round: taller and thicker at the base so it reads as a
+        // stronghold rather than a cottage fence.
+        b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + WALL_H, cz + WALL, p.wall());
+        b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + 1, cz + WALL, p.foundation());
+        b.crenellations(cx - WALL, cz - WALL, cx + WALL, cz + WALL, y0 + WALL_H + 1);
+
+        // Corner towers break the rectangular silhouette.
+        cornerTower(b, p, cx - WALL, cz - WALL, ground);
+        cornerTower(b, p, cx + WALL, cz - WALL, ground);
+        cornerTower(b, p, cx - WALL, cz + WALL, ground);
+        cornerTower(b, p, cx + WALL, cz + WALL, ground);
 
         // Gatehouse on the south curtain; the gate faces outward.
         gatehouse(b, p, cx, cz + WALL, ground);
@@ -68,8 +83,8 @@ public final class CultStronghold implements Location {
         keep(b, p, cx, cz, ground);
 
         // Two squat side chapels against the north curtain.
-        sideChapel(b, p, cx - 17, cz - WALL + 5, ground);
-        sideChapel(b, p, cx + 17, cz - WALL + 5, ground);
+        sideChapel(b, p, cx - 20, cz - WALL + 8, ground);
+        sideChapel(b, p, cx + 20, cz - WALL + 8, ground);
 
         // Decay: weathering, rubble, overgrowth, cobwebs and a collapsed corner.
         decay(b, rng, cx, cz, y0, p);
@@ -144,6 +159,23 @@ public final class CultStronghold implements Location {
         b.window(cx, y0 + 3, cz - half, 3, 1, true);
         b.pitchedRoof(cx - half - 1, cz - half - 1, cx + half + 1, cz + half + 1, y0 + h, 5, 0);
         StyleKit.twoHighDoor(b, p, cx, cz + half, y0 + 1, Direction.SOUTH);
+    }
+
+    /** A squat crenellated tower at a wall corner: the stronghold's second silhouette feature. */
+    private static void cornerTower(StructureBuilder b, Palette p, int x, int z, int ground) {
+        int y0 = ground + 1;
+        int half = 4;
+        int h = 10;
+        b.room(x - half, y0, z - half, x + half, y0 + h, z + half);
+        b.fill(x - half, y0, z - half, x + half, y0, z + half, p.foundation());
+        for (int y = y0; y < y0 + h; y++) {
+            b.put(x - half, y, z - half, p.accent());
+            b.put(x + half, y, z - half, p.accent());
+            b.put(x - half, y, z + half, p.accent());
+            b.put(x + half, y, z + half, p.accent());
+        }
+        b.window(x, y0 + 5, z - half, 3, 1, true);
+        b.crenellations(x - half, z - half, x + half, z + half, y0 + h + 1);
     }
 
     /** The decay pass: weathering, rubble, overgrowth, cobwebs and a collapsed corner. */

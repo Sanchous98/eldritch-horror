@@ -47,6 +47,11 @@ public final class DrownedTemple implements Location {
     }
 
     @Override
+    public int renderRadius() {
+        return PLATFORM + 30; // render the raised temple, not the 110 cull radius
+    }
+
+    @Override
     public void build(StructureBuilder b) {
         int cx = this.centerX;
         int cz = this.centerZ;

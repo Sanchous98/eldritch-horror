@@ -17,4 +17,13 @@ public interface Location {
 
     /** Half-extent in blocks: chunks farther than this are skipped. */
     int radius();
+
+    /**
+     * Half-extent in blocks to actually render/review: the built footprint (plus a little breathing
+     * room). The cull radius ({@link #radius()}) is usually larger, so a structure sized to this
+     * fills the frame instead of reading as a speck. Defaults to {@link #radius()}.
+     */
+    default int renderRadius() {
+        return radius();
+    }
 }
