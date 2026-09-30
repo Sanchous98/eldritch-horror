@@ -5,9 +5,16 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
+import com.sanchous98.eldritchhorror.rite.RiteDefinition;
+import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
+import com.sanchous98.eldritchhorror.rite.Rites;
+import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,8 +25,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /**
- * Admin/debug commands for the RPG meters: {@code /eh sanity|corruption get|set|add}. These are
- * what make the stubs testable before gameplay reads them.
+ * Admin/debug commands for the RPG meters: {@code /eh sanity|corruption get|set|add}, cult
+ * reputation, and the rite framework ({@code /eh rite <id>}, {@code /eh rites}). These are what
+ * make the stubs testable before gameplay reads them.
  */
 @EventBusSubscriber(modid = com.sanchous98.eldritchhorror.EldritchHorror.MODID)
 public final class EldritchCommands {
@@ -131,7 +139,53 @@ public final class EldritchCommands {
                                     String line = sb.toString();
                                     ctx.getSource().sendSuccess(() -> Component.literal(line), false);
                                     return 1;
-                                }))));
+                                })))
+                        .then(Commands.literal("rite")
+                                .then(Commands.argument("id", StringArgumentType.word())
+                                        .executes(ctx -> performRite(ctx))))
+                        .then(Commands.literal("rites").executes(ctx -> listRites(ctx))));
+    }
+
+    /**
+     * {@code /eh rite <id>}: performs a known rite for the caller. The framework applies the
+     * documented sanity/corruption cost and reports the outcome; the outcome's world effect is
+     * <b>not yet implemented</b> and is reported as such (never a silent no-op).
+     */
+    private static int performRite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String id = StringArgumentType.getString(ctx, "id");
+        RiteDefinition rite = Rites.byId(id);
+        if (rite == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown rite: " + id));
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        if (!RiteKnowledge.knows(p, id)) {
+            ctx.getSource().sendFailure(Component.literal("You do not know the rite: " + id));
+            return 0;
+        }
+        if (rite.sanity() != 0) {
+            SanityAPI.add(p, rite.sanity());
+        }
+        if (rite.corruption() != 0) {
+            CorruptionAPI.add(p, rite.corruption());
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("Performed " + rite.id()
+                + " (" + rite.name().getString() + ", tier " + rite.tier() + "): outcome "
+                + rite.outcome() + " — NOT YET IMPLEMENTED."), true);
+        return 1;
+    }
+
+    /** {@code /eh rites}: lists the rites the caller knows. */
+    private static int listRites(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        var known = RiteKnowledge.known(p);
+        if (known.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("You know no rites."), false);
+            return 1;
+        }
+        String line = String.join(" ", new java.util.TreeSet<>(known));
+        ctx.getSource().sendSuccess(() -> Component.literal("Known rites: " + line), false);
+        return 1;
     }
 
     /** Sends a failure message and returns {@code true} when {@code cultId} is not a known cult. */

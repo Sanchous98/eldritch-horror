@@ -86,6 +86,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   (Dormant…Claimed), `CorruptionTicker`, the `corrupted` effect, and `TaintSystem` (per-chunk taint
   diffuses once a second across the loaded chunks around players; player corruption rises in a
   tainted chunk). Config moved to `Type.SERVER`. Commands `/eh sanity|corruption|rep|taint`.
+- **Rite framework** (`rite/`): `RiteDefinition` + `Rites` (the 8 rites from `design/08-rituals.md`
+  with their exact tiers and **cost**), a per-player `RITE_KNOWLEDGE` attachment (synced, copyOnDeath),
+  `/eh rite <id>` and `/eh rites`, and tome-reading grants knowledge of the rite (main-hand only).
+  Performing a rite charges its cost and reports the outcome as **not yet implemented** — the
+  resolution engine (wards, spawns, rifts, reputation) is the next layer.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost

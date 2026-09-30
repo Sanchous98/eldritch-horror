@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -64,6 +65,33 @@ public final class ModAttachments {
                                                     java.util.HashMap::new,
                                                     ByteBufCodecs.STRING_UTF8,
                                                     ByteBufCodecs.VAR_INT))
+                            .copyOnDeath()
+                            .build());
+
+    /**
+     * Per-player set of known rite ids, persisted, copied on death, and synced to the owner so a
+     * future rite/codex screen can read it. Mirrors the synced-map {@code REPUTATION} pattern using
+     * a set codec: {@code Set.copyOf} is an immutable snapshot, so callers add through
+     * {@link com.sanchous98.eldritchhorror.rite.RiteKnowledge}. See {@code design/26-rituals-and-occult.md}.
+     */
+    public static final Supplier<AttachmentType<Set<String>>> RITE_KNOWLEDGE =
+            ATTACHMENT_TYPES.register("rite_knowledge",
+                    () -> AttachmentType.<Set<String>>builder(() -> Set.of())
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.BOOL)
+                                    .xmap(set -> Set.copyOf(set.keySet()), key -> {
+                                        java.util.Map<String, Boolean> map = new java.util.HashMap<>();
+                                        for (String k : key) {
+                                            map.put(k, Boolean.TRUE);
+                                        }
+                                        return map;
+                                    })
+                                    .fieldOf("known"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.collection(
+                                            java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
+                                            .map(s -> Set.copyOf(s), s -> new java.util.HashSet<>(s)))
                             .copyOnDeath()
                             .build());
 

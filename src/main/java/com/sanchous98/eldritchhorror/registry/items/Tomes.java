@@ -11,8 +11,9 @@ import com.sanchous98.eldritchhorror.registry.ModItems;
  * and persist, so their use applies only the sanity/corruption cost and does <b>not</b> consume the
  * book (see {@code ModItems.add(id, maxStack, sanity, corruption, false)}).
  *
- * <p>The <b>grant</b> itself is not wired: there is no rite-knowledge system yet, so reading a tome
- * charges the cost and nothing else. When a rite registry exists, hook the grant here.
+ * <p>The <b>grant</b> is wired through {@code rite/TomeRiteKnowledge}, which listens for the use
+ * interaction and teaches the granted rite id(s); the cost itself is applied here via
+ * {@code ModItems.add(id, maxStack, sanity, corruption, false)}.
  */
 public final class Tomes {
     private Tomes() {}
