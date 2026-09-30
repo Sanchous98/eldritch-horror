@@ -50,6 +50,12 @@ public final class CityLocation implements Location {
      * pass). Taller than the tallest tree we expect to remove; buildings are placed afterwards.
      */
     private static final int CLEAR_ABOVE = 40;
+    /**
+     * Width (blocks) of the outer fade ring. Inside this ring the district no longer carves or
+     * fills: it lays a paving course only on columns that already sit at the city level, so the
+     * paved fabric dissolves into the wild terrain instead of ending on a hard circular cut.
+     */
+    private static final int EDGE_RING = 6;
 
     private final City city;
 
@@ -92,6 +98,9 @@ public final class CityLocation implements Location {
         int district = Math.min(radius(), DISTRICT_CAP);
         int plaza = PLAZA;
         int inner = INNER_CLEAR;
+        // The flattened interior is EDGE_RING smaller than the district; buildings and street
+        // furniture stay inside it so nothing sits on the un-levelled fade ring.
+        int buildRadius = district - EDGE_RING;
 
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
@@ -99,7 +108,7 @@ public final class CityLocation implements Location {
 
         // 1b. Pave the whole district on land, so the city reads as urban fabric rather than
         // scattered buildings on wild terrain. Chunk-clipped: only this chunk's columns write.
-        paveDistrict(b, rng, cx, cz, district, p, ground);
+        paveDistrict(b, cx, cz, district, plaza, p, ground);
 
         // 2. Landmark: the cultural skyline piece (cathedral / temple / mosque / pagoda …).
         style.landmark(b, rng, cx, cz, ground, p);
@@ -107,17 +116,25 @@ public final class CityLocation implements Location {
         // 3. Plaza monument, off the landmark axis.
         b.monument(cx + plaza - 5, cz + plaza - 5, ground + 1);
 
+        // 3b. Generic street dressing shared by every culture: stalls, crates and a courtyard well
+        // or two. Placed BEFORE buildings, so it can never punch through a wall, a door or a road;
+        // every write is also gated on the cell being air/replaceable. Off the landmark plaza and
+        // inside the paved fabric, deterministic like the rest.
+        streetDetails(b, rng, cx, cz, district, inner, ground, p);
+
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
+        // Bounded to the flattened interior: the outer EDGE_RING is no longer levelled, so a lot
+        // whose far corner reached into it would float over un-flattened terrain.
         int built = 0;
-        for (int gx = -district; gx <= district && built < MAX_BUILDINGS; gx += CELL) {
-            for (int gz = -district; gz <= district && built < MAX_BUILDINGS; gz += CELL) {
+        for (int gx = -buildRadius; gx <= buildRadius && built < MAX_BUILDINGS; gx += CELL) {
+            for (int gz = -buildRadius; gz <= buildRadius && built < MAX_BUILDINGS; gz += CELL) {
                 int jx = gx + rng.nextInt(5) - 2;
                 int jz = gz + rng.nextInt(5) - 2;
                 int x = cx + jx;
                 int z = cz + jz;
                 int dx = x - cx;
                 int dz = z - cz;
-                if (dx * dx + dz * dz > district * district) {
+                if (dx * dx + dz * dz > buildRadius * buildRadius) {
                     continue;
                 }
                 if (Math.abs(dx) < inner && Math.abs(dz) < inner) {
@@ -131,8 +148,9 @@ public final class CityLocation implements Location {
             }
         }
 
-        // 5. Street furniture for the culture (lanterns, torii, neon, statues…).
-        style.streetProps(b, rng, cx, cz, district, ground, p);
+        // 5. Street furniture for the culture (lanterns, torii, neon, statues…). Also before the
+        // buildings, so it cannot overwrite them, and bounded to the flattened interior.
+        style.streetProps(b, rng, cx, cz, buildRadius, ground, p);
 
         b.marker("city_center", cx, ground + 1, cz);
     }
@@ -144,8 +162,8 @@ public final class CityLocation implements Location {
      * radius. This gives the city a continuous urban surface (streets and courts) instead of
      * buildings floating on untouched terrain. Deterministic and chunk-clipped.
      */
-    private static void paveDistrict(StructureBuilder b, RandomSource rng, int cx, int cz,
-                                     int district, Palette p, int ground) {
+    private static void paveDistrict(StructureBuilder b, int cx, int cz,
+                                     int district, int plaza, Palette p, int ground) {
         // Only the columns of the chunk currently generating are visited (O(256) per chunk),
         // so paving costs the same regardless of district size.
         int x0 = b.chunkMinX();
@@ -163,15 +181,28 @@ public final class CityLocation implements Location {
                 if (!b.isLand(x, z)) {
                     continue;
                 }
-                // Flatten the whole district to the single city-centre level: cut hills down,
-                // fill hollows up, then cap every column with one paving course.
+                // Outer fade ring: no big carve/fill here, so the rim reads as terrain
+                // swallowing the city rather than a circular wall. Lay a paving course only
+                // where the land already happens to sit at the city level, and never clear
+                // vegetation (that would leave scars in the wild). Inside the ring the old
+                // hard flatten still applies.
                 int surface = b.groundY(x, z);
+                if (dx * dx + dz * dz > (district - EDGE_RING) * (district - EDGE_RING)) {
+                    if (surface == ground) {
+                        // Plain ground course here: the fade reads as one clean surface, and no
+                        // texture hash is spent outside the built fabric.
+                        b.put(x, ground, z, p.ground());
+                    }
+                    continue;
+                }
+                // Flatten the whole interior to the single city-centre level: cut hills down,
+                // fill hollows up, then cap every column with one paving course.
                 if (surface > ground) {
                     b.fill(x, ground + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
                 } else if (surface < ground) {
                     b.fill(x, surface + 1, z, x, ground, z, p.foundation());
                 }
-                b.put(x, ground, z, p.ground());
+                b.put(x, ground, z, streetSurface(x, z, cx, cz, plaza, p));
                 // Clear the vanilla vegetation the biome decoration planted here (trees/leaves/
                 // grass) above the paving, so a jungle city is not swallowed by its own biome.
                 for (int y = ground + 1; y <= ground + 1 + CLEAR_ABOVE; y++) {
@@ -179,6 +210,169 @@ public final class CityLocation implements Location {
                 }
             }
         }
+    }
+
+    /**
+     * The paving block for one street column: {@link Palette#ground()} as the base, with a small
+     * deterministic texture scattered by a position hash — worn {@link Palette#rubble()} patches
+     * and slightly different {@link Palette#foundation()} pavers. A pure hash of {@code (x,z)} (no
+     * {@link RandomSource}) keeps the stream consumed by the rest of the layout unchanged and the
+     * texture stable regardless of chunk order. The plaza is skipped so its deliberate, uniform
+     * {@code ground()} apron is never clobbered.
+     */
+    private static BlockState streetSurface(int x, int z, int cx, int cz, int plaza, Palette p) {
+        int dx = x - cx;
+        int dz = z - cz;
+        if (Math.abs(dx) <= plaza && Math.abs(dz) <= plaza) {
+            return p.ground();
+        }
+        int h = (x * 0x9E3779B9) ^ (z * 0x85EBCA6B);
+        h ^= h >>> 16;
+        h *= 0x7FEB352D;
+        h ^= h >>> 15;
+        int v = h & 0x7F;
+        if (v < 6) {
+            return p.rubble();      // ~5% worn patch
+        }
+        if (v < 14) {
+            return p.foundation();  // ~6% a different paver
+        }
+        return p.ground();
+    }
+
+    /**
+     * Shared, culture-neutral street dressing: a handful of market stalls, loose crates and a
+     * couple of courtyard wells, scattered deterministically in a band beyond the landmark
+     * plaza. Everything sits on the district surface (already paved by {@link #paveDistrict});
+     * the plaza proper (|dx| ≤ plaza && |dz| ≤ plaza) is deliberately left untouched so the
+     * landmark reads clean. A few dozen blocks at most, chunk-clipped like the rest.
+     */
+    private static void streetDetails(StructureBuilder b, RandomSource rng, int cx, int cz,
+                                      int district, int inner, int ground, Palette p) {
+        int plaza = PLAZA;
+        int outer = district - EDGE_RING - 6; // keep the whole prop inside the paved fabric
+
+        // A few market stalls in the mid ring, clear of alleys and the plaza.
+        for (int i = 0; i < 7; i++) {
+            int x = cx + rng.nextInt(2 * outer + 1) - outer;
+            int z = cz + rng.nextInt(2 * outer + 1) - outer;
+            int dx = x - cx;
+            int dz = z - cz;
+            if (dx * dx + dz * dz > outer * outer) {
+                continue; // outside the paved fabric
+            }
+            if (inLandmarkClear(dx, dz, inner)) {
+                continue; // off the landmark / plaza keep-out box
+            }
+            // The whole 3x3 stall footprint must be land and stand on replaceable (open) ground.
+            if (!landBox(b, x, z, x + 2, z + 2) || !b.isReplaceable(x, ground + 1, z)) {
+                continue;
+            }
+            marketStall(b, rng, x, z, ground, p);
+        }
+
+        // Loose crates: single foundation blocks on the paved surface, never on the plaza.
+        for (int i = 0; i < 24; i++) {
+            int x = cx + rng.nextInt(2 * outer + 1) - outer;
+            int z = cz + rng.nextInt(2 * outer + 1) - outer;
+            int dx = x - cx;
+            int dz = z - cz;
+            if (dx * dx + dz * dz > outer * outer) {
+                continue;
+            }
+            if (inLandmarkClear(dx, dz, inner) || onPlaza(x, z, cx, cz, plaza)) {
+                continue;
+            }
+            if (!b.isLand(x, z) || !b.isReplaceable(x, ground + 1, z)) {
+                continue; // never overwrite a wall, a door or a landmark with a crate
+            }
+            b.put(x, ground + 1, z, p.foundation());
+            if (rng.nextFloat() < 0.4f && b.isReplaceable(x, ground + 2, z)) {
+                b.put(x, ground + 2, z, p.foundation());
+            }
+        }
+
+        // One or two small paved courtyards, each with a curb ring and a dark mouth (a well).
+        int wells = 1 + rng.nextInt(2);
+        for (int i = 0; i < wells; i++) {
+            int x = cx + rng.nextInt(2 * outer + 1) - outer;
+            int z = cz + rng.nextInt(2 * outer + 1) - outer;
+            int dx = x - cx;
+            int dz = z - cz;
+            if (dx * dx + dz * dz > outer * outer) {
+                continue;
+            }
+            if (inLandmarkClear(dx, dz, inner) || onPlaza(x, z, cx, cz, plaza)) {
+                continue;
+            }
+            // half is 2..3, so a 3-block box fully covers the court before it is laid.
+            if (!landBox(b, x - 3, z - 3, x + 3, z + 3)) {
+                continue; // never hang a paved court over water
+            }
+            courtyardWell(b, rng, x, z, ground, p);
+        }
+    }
+
+    /** True if every column in the inclusive box {@code [x0..x1] × [z0..z1]} is real land. */
+    private static boolean landBox(StructureBuilder b, int x0, int z0, int x1, int z1) {
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                if (!b.isLand(x, z)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** True if (x,z) lies inside the landmark plaza apron (inclusive of its edge). */
+    private static boolean onPlaza(int x, int z, int cx, int cz, int plaza) {
+        return Math.abs(x - cx) <= plaza && Math.abs(z - cz) <= plaza;
+    }
+
+    /** True if the offset (dx,dz) falls in the square the landmark/buildings keep clear. */
+    private static boolean inLandmarkClear(int dx, int dz, int inner) {
+        return Math.abs(dx) < inner && Math.abs(dz) < inner;
+    }
+
+    /**
+     * A market stall: two posts carrying a roofSlab awning, with a foundation counter beneath.
+     * Compact (3×3) and culture-neutral, so it can drop into any city's street fabric.
+     */
+    private static void marketStall(StructureBuilder b, RandomSource rng, int x, int z,
+                                    int ground, Palette p) {
+        BlockState post = rng.nextBoolean() ? p.accent() : p.wall();
+        // Counter along one diagonal, two posts at the other corners.
+        b.put(x, ground + 1, z, p.foundation());
+        b.put(x + 1, ground + 1, z, p.foundation());
+        b.put(x, ground + 1, z + 1, p.foundation());
+        b.put(x + 1, ground + 1, z + 1, post);
+        b.put(x + 1, ground + 2, z + 1, post);
+        b.put(x, ground + 2, z, post);
+        // Two more posts so every awning slab has support beneath it (no floating roof).
+        b.put(x + 2, ground + 1, z + 1, post);
+        b.put(x + 2, ground + 2, z + 1, post);
+        b.put(x + 1, ground + 1, z + 2, post);
+        b.put(x + 1, ground + 2, z + 2, post);
+        b.put(x, ground + 3, z, p.roofSlab());
+        b.put(x + 1, ground + 3, z + 1, p.roofSlab());
+        b.put(x + 2, ground + 3, z + 1, p.roofSlab());
+        b.put(x + 1, ground + 3, z + 2, p.roofSlab());
+        b.put(x + 1, ground + 3, z, p.roofSlab());
+        b.put(x, ground + 3, z + 1, p.roofSlab());
+        if (rng.nextFloat() < 0.5f) {
+            b.put(x, ground + 2, z + 1, p.light());
+        }
+    }
+
+    /** A small paved court with a low well: a cobbled apron, a curb ring and a dark mouth. */
+    private static void courtyardWell(StructureBuilder b, RandomSource rng, int x, int z,
+                                      int ground, Palette p) {
+        int half = 2 + rng.nextInt(2); // 2..3 -> a 5..7 wide court
+        b.ground(x - half, z - half, x + half, z + half, ground, ground, p.ground());
+        b.fill(x - 1, ground + 1, z - 1, x + 1, ground + 1, z + 1, p.foundation());
+        b.put(x, ground + 1, z, p.ground());
+        b.put(x, ground + 1, z - 2, p.light());
     }
 
     /** One lot: an ordinary house, a tall tower, an open square, or a walled garden. */

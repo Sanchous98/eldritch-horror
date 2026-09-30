@@ -73,6 +73,14 @@ public interface StructureBuilder {
     /** True if (x,z) is real land (not ocean) per the baked landmask. */
     boolean isLand(int x, int z);
 
+    /**
+     * True if the cell at (x,y,z) is air or otherwise replaceable, where it can be read.
+     * Inside the generating chunk this reflects the live chunk; outside it returns {@code false}
+     * (writes there are clipped rather than compared). Used to place loose dressing without
+     * overwriting a wall, door or road.
+     */
+    boolean isReplaceable(int x, int y, int z);
+
     /** Minimum block X of the chunk currently generating (inclusive). */
     int chunkMinX();
 

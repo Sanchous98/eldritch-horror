@@ -21,6 +21,16 @@ import net.minecraft.world.level.chunk.ChunkAccess;
  */
 public final class SurfaceDecorator {
 
+    /** District half-extent cap, mirrored from {@code CityLocation#DISTRICT_CAP}. */
+    private static final int CITY_DISTRICT_CAP = 380;
+    /**
+     * Keep-out margin beyond the built district. Buildings overhang their 13-block lots by at
+     * most ~12 blocks (largest footprint + roof eave), so this is the smallest radius that still
+     * guarantees no decoration lands under a structure — while keeping the denuded rim thin so
+     * the terrain pass bleeds right up to the city and softens its edge.
+     */
+    private static final int CITY_MARGIN = 16;
+
     private SurfaceDecorator() {
     }
 
@@ -138,8 +148,13 @@ public final class SurfaceDecorator {
     /** True if (x,z) lies inside a curated city's built footprint (keep it clear). */
     private static boolean inCity(EarthMap map, int x, int z) {
         for (City c : Cities.all()) {
-            // Match the city's own scaled radius (it can reach 400) plus a small margin.
-            int r = Math.min(400, (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0)) + 24;
+            // Match the city's *built* district (radius capped at DISTRICT_CAP) plus a small
+            // margin — not the larger cull radius. This keeps greenery out from under the
+            // buildings while leaving a thin natural rim that softens the district edge.
+            // clamp(radius, 220, DISTRICT_CAP), exactly as CityLocation computes its district.
+            int district = Math.max(220, Math.min(CITY_DISTRICT_CAP,
+                    (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0)));
+            int r = district + CITY_MARGIN;
             long dx = (long) x - c.x();
             long dz = (long) z - c.z();
             if (dx * dx + dz * dz <= (long) r * r) {

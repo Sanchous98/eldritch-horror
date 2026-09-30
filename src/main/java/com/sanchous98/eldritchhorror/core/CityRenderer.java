@@ -3,12 +3,16 @@ package com.sanchous98.eldritchhorror.core;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.loc.Location;
+import com.sanchous98.eldritchhorror.world.loc.Locations;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -99,10 +103,20 @@ public final class CityRenderer {
         BufferedImage iso;
 
         CityTask(City city, ServerLevel level, File dir) {
+            this(city, level, dir, -1);
+        }
+
+        /**
+         * @param radiusOverride the location's true half-extent when it is a wrapped site, or
+         *                       {@code -1} for a normal city (derive the radius from the city).
+         */
+        CityTask(City city, ServerLevel level, File dir, int radiusOverride) {
             this.city = city;
             this.level = level;
             this.dir = dir;
-            this.radius = renderRadius(city);
+            this.radius = radiusOverride > 0
+                    ? Math.min(radiusOverride, MAX_RENDER_RADIUS) + 20
+                    : renderRadius(city);
             this.diameter = this.radius * 2 + 1;
             this.minX = city.x() - this.radius;
             this.minZ = city.z() - this.radius;
@@ -153,10 +167,12 @@ public final class CityRenderer {
      * Prepares a render session. Must be called on the server thread. Cities are rendered one (or
      * two) per server tick by {@link #onTick(ServerTickEvent.Pre)}.
      *
-     * @param spec {@code true}/{@code all} for every city, a comma list of names, or
-     *             {@code batch=I/N} / {@code I/N} for slice {@code I} (1-based) of {@code N}.
+     * @param spec {@code true}/{@code all} for every city, {@code sites} for every registered
+     *             second-echelon location that is not a city, a comma list of city names or
+     *             location ids, or {@code batch=I/N} / {@code I/N} for slice {@code I}
+     *             (1-based) of {@code N}.
      * @param exitWhenDone shut the server down once every selected city is written (single-shot run)
-     * @return the number of cities selected
+     * @return the number of cities (or wrapped sites) selected
      */
     public static synchronized int begin(MinecraftServer server, String spec, boolean exitWhenDone) {
         if (active != null) {
@@ -180,14 +196,16 @@ public final class CityRenderer {
 
         boolean all = spec == null || spec.isBlank()
                 || "true".equalsIgnoreCase(spec) || "all".equalsIgnoreCase(spec);
+        // `sites` selects the second-echelon Locations (ruins, vaults, scars) that are not cities.
+        boolean sites = !all && "sites".equalsIgnoreCase(spec.trim());
         List<String> names = new ArrayList<>();
         int batchIndex = 0;
         int batchSize = 0;
         int[] batch = new int[]{0, 0};
-        if (!all && parseBatch(spec, batch)) {
+        if (!all && !sites && parseBatch(spec, batch)) {
             batchIndex = batch[0];
             batchSize = batch[1];
-        } else if (!all) {
+        } else if (!all && !sites) {
             for (String part : spec.split(",")) {
                 String trimmed = part.trim();
                 if (!trimmed.isEmpty()) {
@@ -197,27 +215,70 @@ public final class CityRenderer {
         }
 
         List<City> selected = new ArrayList<>();
-        int ordinal = 0;
-        for (City city : Cities.all()) {
-            if (batchSize > 0) {
-                if (Math.floorMod(ordinal, batchSize) != batchIndex) {
+        if (sites) {
+            // Every registered Location that is not a curated city, in deterministic registry
+            // order. Wrapping keeps the rest of the pipeline untouched.
+            for (Location loc : Locations.all()) {
+                if (!(loc instanceof CityLocation)) {
+                    selected.add(fromLocation(loc));
+                }
+            }
+        } else {
+            int ordinal = 0;
+            for (City city : Cities.all()) {
+                if (batchSize > 0) {
+                    if (Math.floorMod(ordinal, batchSize) != batchIndex) {
+                        ordinal++;
+                        continue;
+                    }
+                } else if (!names.isEmpty()
+                        && names.stream().noneMatch(n -> n.equalsIgnoreCase(city.name())
+                                || n.equalsIgnoreCase(city.id()))) {
                     ordinal++;
                     continue;
                 }
-            } else if (!names.isEmpty()
-                    && names.stream().noneMatch(n -> n.equalsIgnoreCase(city.name())
-                            || n.equalsIgnoreCase(city.id()))) {
+                selected.add(city);
                 ordinal++;
-                continue;
             }
-            selected.add(city);
-            ordinal++;
+            // A spec token that names a registered site (e.g. a Location id) selects that site in
+            // addition to any city matches. byId is a case-insensitive "contains" lookup; city
+            // locations are skipped here because the City loop above already covers them.
+            if (!names.isEmpty()) {
+                List<String> seen = new ArrayList<>();
+                for (City c : selected) {
+                    seen.add(c.id());
+                }
+                for (String name : names) {
+                    for (Location loc : Locations.byId(name)) {
+                        if (loc instanceof CityLocation || seen.contains(loc.id())) {
+                            continue;
+                        }
+                        selected.add(fromLocation(loc));
+                        seen.add(loc.id());
+                    }
+                }
+            }
         }
 
         Session session = new Session(selected.size());
         session.exitWhenDone = exitWhenDone;
+        // Sites are wrapped as synthetic Cities for the shared pipeline, but their true half-extent
+        // is small and would clamp to the 220-block city floor. Remember the real radius per id so
+        // the render box matches the site.
+        Map<String, Integer> siteRadii = new LinkedHashMap<>();
         for (City city : selected) {
-            session.tasks.add(new CityTask(city, server.overworld(), dir));
+            if (siteRadii.containsKey(city.id())) {
+                continue;
+            }
+            for (Location loc : Locations.byId(city.id())) {
+                if (loc.id().equals(city.id())) {
+                    siteRadii.put(city.id(), loc.radius());
+                    break;
+                }
+            }
+        }
+        for (City city : selected) {
+            session.tasks.add(new CityTask(city, server.overworld(), dir, siteRadii.getOrDefault(city.id(), -1)));
         }
         // A headless render run has no players: the vanilla empty-server pause would stop the
         // server ticking 60 s in and freeze the render. Disable it for the duration.
@@ -550,6 +611,33 @@ public final class CityRenderer {
     }
 
     // ------------------------------------------------------------------ helpers
+
+    /**
+     * Wraps a second-echelon {@link Location} as a synthetic {@link City} so the existing
+     * city pipeline (which only knows how to read a {@code City}) can render it unchanged. The
+     * location id is used for both id and name; the population is inverted from the location's
+     * radius so {@link CityLocation#radius()} reproduces it.
+     */
+    private static City fromLocation(Location loc) {
+        return new City(loc.id(), loc.id(), Locations.xOf(loc), Locations.zOf(loc),
+                populationForRadius(loc.radius()));
+    }
+
+    /**
+     * Inverse of {@code CityLocation.radius()}: for a target radius {@code R} in
+     * {@code [220, 400]} it returns the population for which
+     * {@code clamp(round(220 + sqrt(pop)/40), 220, 400) == R}. Radii below 220 are clamped, so a
+     * smaller site is simply rendered as a 220-radius area.
+     */
+    private static int populationForRadius(int radius) {
+        int r = Math.max(220, Math.min(400, radius));
+        double sqrtPop = (r - 220) * 40.0;
+        double pop = sqrtPop * sqrtPop;
+        if (pop >= Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) Math.round(pop);
+    }
 
     /** How far to render around a city: the built district, not the (larger) cull radius. */
     private static int renderRadius(City city) {

@@ -64,6 +64,12 @@ integration build green.
 
 ## Build discipline
 
+- **The image bakes the source — rebuild it after editing code.** `docker-compose.yml` copies
+  the tree into the image (`COPY . /workspace`) and does **not** bind-mount the host tree (named
+  volumes hold only `build/`, `run/` and the Gradle cache). So after changing Java, run
+  `docker compose build dev` (or `. ./scripts/safe-build.sh docker compose build dev`), or the
+  container silently builds and runs the *previous* commit. (Cost: one real bug — a renderer
+  change reported "0 selected" while the image still held the old class.)
 - One Gradle build at a time; they share `build/` and Windows locks files exclusively.
 - Verify with `./gradlew compileJava` (fast, warm cache) before claiming done.
 - The first build decompiles Minecraft (~5 min, ~4 GB); later builds are quick.

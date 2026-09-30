@@ -443,7 +443,8 @@ public final class Builder implements StructureBuilder {
     }
 
     /** True when the cell at (x,y,z) is air or otherwise replaceable, where readable. */
-    private boolean isReplaceable(int x, int y, int z) {
+    @Override
+    public boolean isReplaceable(int x, int y, int z) {
         // Outside the generating chunk we cannot read reliably; let `put` clip the write instead.
         if (x >> 4 != this.chunk.x() || z >> 4 != this.chunk.z()) {
             return false;
