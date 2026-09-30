@@ -41,6 +41,10 @@ is the complete specification.
 22. [20-map.md](20-map.md) — biomes, dimensions, structures.
 23. [21-settlements.md](21-settlements.md) — cities and towns (real Earth coordinates).
 24. [22-map-and-knowledge.md](22-map-and-knowledge.md) — the world map and map-change events.
+25. [23-boundary-and-travel.md](23-boundary-and-travel.md) — the cylinder world, Morok, travel.
+26. [24-sanity-and-corruption.md](24-sanity-and-corruption.md) — sanity & corruption (consolidates 03a/03b).
+27. [25-bestiary-and-entities.md](25-bestiary-and-entities.md) — the entity roster (consolidates 17/18).
+28. [26-rituals-and-occult.md](26-rituals-and-occult.md) — the occult systems (consolidates 05/08).
 
 ## The one-paragraph summary
 
