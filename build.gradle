@@ -77,6 +77,13 @@ configurations {
 
 dependencies {
     // Optional integrations (e.g. JEI/EMI) go here as compileOnly + localRuntime.
+    testImplementation platform('org.junit:junit-bom:5.10.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 // Expands ${...} placeholders in the neoforge.mods.toml template from gradle.properties.
