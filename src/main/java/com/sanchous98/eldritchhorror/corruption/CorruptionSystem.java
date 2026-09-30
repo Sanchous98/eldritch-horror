@@ -23,12 +23,12 @@ public final class CorruptionSystem {
 
     /** Current player corruption, clamped to {@code [0, DEFAULT_MAX]}. */
     public static double get(ServerPlayer player) {
-        return clamp(player.getData(ModAttachments.CORRUPTION.get()));
+        return Math.clamp(player.getData(ModAttachments.CORRUPTION.get()), 0.0, DEFAULT_MAX);
     }
 
     /** Sets player corruption (clamped). Returns the stored value. */
     public static double set(ServerPlayer player, double value) {
-        double v = clamp(value);
+        double v = Math.clamp(value, 0.0, DEFAULT_MAX);
         player.setData(ModAttachments.CORRUPTION.get(), v);
         return v;
     }
@@ -43,20 +43,16 @@ public final class CorruptionSystem {
      * persists and saves with the world. Not used for anything yet.
      */
     public static double getTaint(net.minecraft.world.level.chunk.LevelChunk chunk) {
-        return Math.max(0.0, Math.min(1.0, chunk.getData(ModAttachments.TAINT.get())));
+        return Math.clamp(chunk.getData(ModAttachments.TAINT.get()), 0.0, 1.0);
     }
 
     public static double setTaint(net.minecraft.world.level.chunk.LevelChunk chunk, double value) {
-        double v = Math.max(0.0, Math.min(1.0, value));
+        double v = Math.clamp(value, 0.0, 1.0);
         chunk.setData(ModAttachments.TAINT.get(), v);
         return v;
     }
 
     public static double addTaint(net.minecraft.world.level.chunk.LevelChunk chunk, double delta) {
         return setTaint(chunk, getTaint(chunk) + delta);
-    }
-
-    private static double clamp(double v) {
-        return Math.max(0.0, Math.min(DEFAULT_MAX, v));
     }
 }

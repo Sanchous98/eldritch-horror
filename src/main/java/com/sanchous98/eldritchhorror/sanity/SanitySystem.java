@@ -29,12 +29,12 @@ public final class SanitySystem {
 
     /** Current sanity, clamped to {@code [0, DEFAULT_MAX]}. */
     public static double get(ServerPlayer player) {
-        return clamp(player.getData(ModAttachments.SANITY.get()));
+        return Math.clamp(player.getData(ModAttachments.SANITY.get()), 0.0, DEFAULT_MAX);
     }
 
     /** Sets sanity to {@code value} (clamped). Returns the stored value. */
     public static double set(ServerPlayer player, double value) {
-        double v = clamp(value);
+        double v = Math.clamp(value, 0.0, DEFAULT_MAX);
         player.setData(ModAttachments.SANITY.get(), v);
         return v;
     }
@@ -42,9 +42,5 @@ public final class SanitySystem {
     /** Adds {@code delta} (may be negative). Returns the new value. */
     public static double add(ServerPlayer player, double delta) {
         return set(player, get(player) + delta);
-    }
-
-    private static double clamp(double v) {
-        return Math.max(0.0, Math.min(DEFAULT_MAX, v));
     }
 }

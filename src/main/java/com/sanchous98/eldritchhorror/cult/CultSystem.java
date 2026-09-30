@@ -1,17 +1,90 @@
 package com.sanchous98.eldritchhorror.cult;
 
+import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Cults: factions with reputation, rites, and NPCs. Reputation is the second RPG axis — it
- * gates which rituals and items a player may access, and cults may oppose each other.
+ * The cult reputation axis: a per-player, per-cult integer in {@code −100…+100}.
  *
- * <p>Planned shape:
- * <ul>
- *   <li>A data-driven cult definition (rites, demands, taboos, ranks).</li>
- *   <li>Per-player reputation storage with a sync path.</li>
- *   <li>An AI faction layer over cultists (worship, summon, sacrifice).</li>
- * </ul>
+ * <p><b>This is a stub.</b> Values go up and down, persist and copy on death, and expose
+ * {@link #rank}; opposed pairs apply a cross-consequence — but nothing reads reputation for
+ * gameplay yet (no services, quests or dialogue). See {@code design/03c-reputation.md} and
+ * {@code design/27-systems-framework.md}.
  */
 public final class CultSystem {
+    public static final int MIN = -100;
+    public static final int MAX = 100;
+
+    /** Generic rank thresholds (value ≥ threshold ⇒ that band); see design/03c-reputation.md. */
+    private static final int[] BANDS = {20, 40, 60, 80};
+
+    /** Fraction of a gain that is subtracted from an opposed cult. */
+    private static final double OPPOSED_FACTOR = 0.5;
+
     private CultSystem() {
+    }
+
+    /** Current reputation with a cult, clamped. Defaults to 0. */
+    public static int get(ServerPlayer player, String cultId) {
+        Integer v = player.getData(ModAttachments.REPUTATION.get()).get(cultId);
+        return v == null ? 0 : Math.clamp(v, MIN, MAX);
+    }
+
+    /** Sets reputation with a cult (clamped), without opposed cross-effects. Returns the value. */
+    public static int set(ServerPlayer player, String cultId, int value) {
+        Map<String, Integer> map = new HashMap<>(player.getData(ModAttachments.REPUTATION.get()));
+        int v = Math.clamp(value, MIN, MAX);
+        map.put(cultId, v);
+        player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));
+        return v;
+    }
+
+    /**
+     * Adds {@code delta} to a cult and applies the opposed cross-consequence to its opposites
+     * (a gain costs them {@code OPPOSED_FACTOR × delta}, and vice versa). Returns the new value
+     * with the cult itself.
+     */
+    public static int add(ServerPlayer player, String cultId, int delta) {
+        Map<String, Integer> map = new HashMap<>(player.getData(ModAttachments.REPUTATION.get()));
+        int v = Math.clamp(map.getOrDefault(cultId, 0) + delta, MIN, MAX);
+        map.put(cultId, v);
+
+        CultDefinition def = Cults.byId(cultId);
+        if (def != null && !def.opposed().isEmpty()) {
+            int spill = (int) Math.round(Math.abs(delta) * OPPOSED_FACTOR) * (delta >= 0 ? -1 : 1);
+            for (String other : def.opposed()) {
+                int ov = Math.clamp(map.getOrDefault(other, 0) + spill, MIN, MAX);
+                map.put(other, ov);
+            }
+        }
+        player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));
+        return v;
+    }
+
+    /**
+     * The cult-specific rank name for a player: an {@code Outsider}/{@code Neutral} floor below the
+     * first band, otherwise the cult's ladder name for the band. Unknown cult ⇒ "Neutral".
+     */
+    public static String rank(ServerPlayer player, String cultId) {
+        int v = get(player, cultId);
+        if (v < 0) {
+            return "Outsider";
+        }
+        int band = 0;
+        while (band < BANDS.length && v >= BANDS[band]) {
+            band++;
+        }
+        if (band == 0) {
+            return "Neutral";
+        }
+        CultDefinition def = Cults.byId(cultId);
+        if (def == null || def.ranks().isEmpty()) {
+            return "Neutral";
+        }
+        int idx = Math.min(band - 1, def.ranks().size() - 1);
+        return def.ranks().get(idx);
     }
 }

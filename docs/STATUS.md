@@ -63,9 +63,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - **RPG systems decided** (`design/27-systems-framework.md`): Sanity = per-player stub value
   (replaces **hunger**), Corruption = per-player stub value + per-chunk **taint** (replaces
   **experience**), Reputation = per-cult integer. Mixins disable hunger (`FoodData.tick`) and
-  XP/enchanting. Storage = NeoForge attachments; API = `SanitySystem`/`CorruptionSystem` (get/set/add,
-  clamped); commands `/eh sanity|corruption get|set|add`. **Stubs only — nothing affects gameplay
-  yet.**
+  XP/enchanting. Storage = NeoForge attachments; API = `SanitySystem`/`CorruptionSystem`/`CultSystem`
+  (get/set/add, clamped via `Math.clamp`); commands `/eh sanity|corruption|rep get|set|add|list`.
+  Sanity/corruption sync to the owner; the HUD (`ClientHud`) draws sanity where the food bar was
+  and corruption where the experience bar was. Cults: `CultDefinition` + 3 seeds
+  (`drowned_choir`, `unblinking_eye`, `hollow_choir`) with opposed pairs. **Stubs only — nothing
+  affects gameplay yet.**
 - **Item registry**: **128 content-stub items** across 11 category files
   (`registry/items/*.java`) through one frozen `ModItems.add(id, stack)` surface, with a single
   creative tab, `en_us.json` names + 128 tooltips. Effects are recorded in comments/design only.

@@ -275,5 +275,14 @@
   "block.eldritch_horror.tainted_soil": "Tainted Soil",
   "block.eldritch_horror.glyph_tile": "Glyph Tile",
   "block.eldritch_horror.ossuary_block": "Ossuary Block",
-  "block.eldritch_horror.seal_stone": "Seal Stone"
+  "block.eldritch_horror.seal_stone": "Seal Stone",
+  "cult.eldritch_horror.drowned_choir": "The Drowned Choir",
+  "cult.eldritch_horror.unblinking_eye": "The Order of the Unblinking Eye",
+  "cult.eldritch_horror.hollow_choir": "The Hollow Choir",
+  "rank.eldritch_horror.outsider": "Outsider",
+  "rank.eldritch_horror.neutral": "Neutral",
+  "rank.eldritch_horror.initiate": "Initiate",
+  "rank.eldritch_horror.member": "Member",
+  "rank.eldritch_horror.devoted": "Devoted",
+  "rank.eldritch_horror.inner_circle": "Inner Circle"
 }

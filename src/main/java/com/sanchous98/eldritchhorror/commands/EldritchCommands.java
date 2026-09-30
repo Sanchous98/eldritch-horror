@@ -2,8 +2,12 @@ package com.sanchous98.eldritchhorror.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
+import com.sanchous98.eldritchhorror.cult.CultSystem;
+import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -35,7 +39,74 @@ public final class EldritchCommands {
                         .then(Commands.literal("corruption")
                                 .then(getNode("corruption", CorruptionSystem::get))
                                 .then(setNode("corruption", CorruptionSystem::set))
-                                .then(addNode("corruption", CorruptionSystem::add))));
+                                .then(addNode("corruption", CorruptionSystem::add)))
+                        .then(Commands.literal("rep")
+                                .then(Commands.literal("get")
+                                        .then(Commands.argument("cult", StringArgumentType.word())
+                                                .executes(ctx -> {
+                                                    String cult = StringArgumentType.getString(ctx, "cult");
+                                                    if (unknownCult(ctx, cult)) {
+                                                        return 0;
+                                                    }
+                                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                                    int n = CultSystem.get(p, cult);
+                                                    String rank = CultSystem.rank(p, cult);
+                                                    ctx.getSource().sendSuccess(
+                                                            () -> Component.literal(cult + " rep = " + n + " (" + rank + ")"), false);
+                                                    return 1;
+                                                })))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("cult", StringArgumentType.word())
+                                                .then(Commands.argument("value", IntegerArgumentType.integer(-100, 100))
+                                                        .executes(ctx -> {
+                                                            String cult = StringArgumentType.getString(ctx, "cult");
+                                                            if (unknownCult(ctx, cult)) {
+                                                                return 0;
+                                                            }
+                                                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                                            int v = IntegerArgumentType.getInteger(ctx, "value");
+                                                            int now = CultSystem.set(p, cult, v);
+                                                            ctx.getSource().sendSuccess(
+                                                                    () -> Component.literal(cult + " rep set to " + now), true);
+                                                            return 1;
+                                                        }))))
+                                .then(Commands.literal("add")
+                                        .then(Commands.argument("cult", StringArgumentType.word())
+                                                .then(Commands.argument("delta", IntegerArgumentType.integer(-100, 100))
+                                                        .executes(ctx -> {
+                                                            String cult = StringArgumentType.getString(ctx, "cult");
+                                                            if (unknownCult(ctx, cult)) {
+                                                                return 0;
+                                                            }
+                                                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                                            int d = IntegerArgumentType.getInteger(ctx, "delta");
+                                                            int now = CultSystem.add(p, cult, d);
+                                                            ctx.getSource().sendSuccess(
+                                                                    () -> Component.literal(cult + " rep = " + now), true);
+                                                            return 1;
+                                                        }))))
+                                .then(Commands.literal("list").executes(ctx -> {
+                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                    StringBuilder sb = new StringBuilder();
+                                    for (var def : Cults.all()) {
+                                        if (sb.length() > 0) {
+                                            sb.append(' ');
+                                        }
+                                        sb.append(def.id()).append('=').append(CultSystem.get(p, def.id()));
+                                    }
+                                    String line = sb.toString();
+                                    ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+                                    return 1;
+                                }))));
+    }
+
+    /** Sends a failure message and returns {@code true} when {@code cultId} is not a known cult. */
+    private static boolean unknownCult(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String cultId) {
+        if (Cults.byId(cultId) == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown cult: " + cultId));
+            return true;
+        }
+        return false;
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> getNode(String label, Meter meter) {

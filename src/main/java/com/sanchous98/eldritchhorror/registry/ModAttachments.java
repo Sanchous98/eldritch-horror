@@ -44,6 +44,20 @@ public final class ModAttachments {
                     .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("value"))
                     .build());
 
+    /**
+     * Per-player reputation with each cult: a map of cult id → value (−100…+100), persisted and
+     * copied on death. Not synced yet (the cult screen is later). See {@code design/09-cults.md}.
+     */
+    public static final Supplier<AttachmentType<java.util.Map<String, Integer>>> REPUTATION =
+            ATTACHMENT_TYPES.register("reputation",
+                    () -> AttachmentType.<java.util.Map<String, Integer>>builder(java.util.Map::of)
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.INT)
+                                    .fieldOf("rep"))
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }
