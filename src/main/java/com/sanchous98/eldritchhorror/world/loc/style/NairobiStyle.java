@@ -52,7 +52,95 @@ public final class NairobiStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        modernTower(b, cx, cz, ground, p);
+        // KICC: a broad, low podium carrying a tall cylindrical shaft that flares outward into an
+        // inverted-cone crown, capped by a slender spire. Deliberately over-tall on the skyline.
+        b.ground(cx - 22, cz - 22, cx + 22, cz + 22, ground, ground, p.foundation());
+
+        // Low podium: a battered cylindrical drum, radius 13, with a solid roof deck.
+        for (int y = ground + 1; y <= ground + 8; y++) {
+            int rr = 13 - (y - (ground + 1)) / 4;
+            for (int dx = -rr; dx <= rr; dx++) {
+                for (int dz = -rr; dz <= rr; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 <= rr * rr && d2 > (rr - 1) * (rr - 1)) {
+                        b.put(cx + dx, y, cz + dz, p.wall());
+                    }
+                }
+            }
+        }
+        for (int dx = -13; dx <= 13; dx++) {
+            for (int dz = -13; dz <= 13; dz++) {
+                if (dx * dx + dz * dz <= 169) {
+                    b.put(cx + dx, ground + 8, cz + dz, p.foundation());
+                }
+            }
+        }
+        // Podium glazing and the four entrances.
+        int wy = ground + 4;
+        b.window(cx - 13, wy, cz, 3, 2, true);
+        b.window(cx + 13, wy, cz, 3, 2, true);
+        b.window(cx, wy, cz - 13, 3, 2, true);
+        b.window(cx, wy, cz + 13, 3, 2, true);
+        StyleKit.twoHighDoor(b, p, cx, cz + 13, ground + 1, Direction.SOUTH);
+        StyleKit.twoHighDoor(b, p, cx, cz - 13, ground + 1, Direction.NORTH);
+        StyleKit.twoHighDoor(b, p, cx + 13, cz, ground + 1, Direction.EAST);
+        StyleKit.twoHighDoor(b, p, cx - 13, cz, ground + 1, Direction.WEST);
+
+        // The shaft: a 46-block cylindrical tower, radius 5, banded with glazing and vertical ribs.
+        int shaft0 = ground + 9;
+        int shaft1 = ground + 54;
+        for (int y = shaft0; y <= shaft1; y++) {
+            boolean band = ((y - shaft0) % 11) == 0;
+            for (int dx = -5; dx <= 5; dx++) {
+                for (int dz = -5; dz <= 5; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 <= 25 && d2 > 16) {
+                        b.put(cx + dx, y, cz + dz, band ? p.window() : p.wall());
+                    }
+                }
+            }
+        }
+        for (int y = shaft0; y <= shaft1; y++) {
+            b.put(cx + 5, y, cz, p.accent());
+            b.put(cx - 5, y, cz, p.accent());
+            b.put(cx, y, cz + 5, p.accent());
+            b.put(cx, y, cz - 5, p.accent());
+            b.put(cx + 3, y, cz + 4, p.accent());
+            b.put(cx - 3, y, cz + 4, p.accent());
+            b.put(cx + 3, y, cz - 4, p.accent());
+            b.put(cx - 3, y, cz - 4, p.accent());
+        }
+
+        // The flared crown: a solid inverted cone widening from radius 5 to 14, accent-rimmed.
+        int crown0 = shaft1 + 1;
+        int crownH = 9;
+        for (int dy = 0; dy <= crownH; dy++) {
+            int y = crown0 + dy;
+            int r = 5 + (dy * 9) / crownH;
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 <= r * r) {
+                        b.put(cx + dx, y, cz + dz,
+                                d2 > (r - 1) * (r - 1) ? p.accent() : p.wall());
+                    }
+                }
+            }
+        }
+        int topY = crown0 + crownH;
+        for (int dx = -14; dx <= 14; dx++) {
+            for (int dz = -14; dz <= 14; dz++) {
+                if (dx * dx + dz * dz <= 196) {
+                    b.put(cx + dx, topY + 1, cz + dz, p.roof());
+                }
+            }
+        }
+
+        // The spire crowning the flare.
+        b.spire(cx, cz, topY + 2, 16);
+
+        // Sparse debris over the plaza fringe.
+        b.scatter(cx - 22, cz - 22, cx + 22, cz + 22, ground + 1, ground + 1, p.rubble(), 0.04f);
     }
 
     @Override

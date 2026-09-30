@@ -55,41 +55,42 @@ public final class MexicoCityStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
+        // La Independencia: a tall golden fluted column on a stepped stone base, crowned by a
+        // bright gilded winged Victory. The gilded figure is the unmistakable silhouette.
         int y0 = ground + 1;
 
-        // 1. Long, low nave with a flat parapet — colonial, not gothic.
-        int nx0 = cx - 6;
-        int nx1 = cx + 6;
-        int nz0 = cz - 16;
-        int nz1 = cz + 8;
-        b.ground(nx0 - 2, nz0 - 2, nx1 + 2, nz1 + 2, ground, ground, p.foundation());
-        b.room(nx0, y0, nz0, nx1, y0 + 10, nz1, new Doorway(Side.N, 6));
-        // Flat parapet roof with a one-block tiled skirt.
-        b.fill(nx0 - 1, y0 + 11, nz0 - 1, nx1 + 1, y0 + 11, nz1 + 1, p.roof());
-        // Round-arch windows down both flanks.
-        for (int z = nz0 + 3; z <= nz1 - 3; z += 4) {
-            b.window(nx0, y0 + 4, z, 3, 1, true);
-            b.window(nx1, y0 + 4, z, 3, 1, true);
+        // 1. Stepped stone base (four shrinking tiers) on a paved apron.
+        b.ground(cx - 7, cz - 7, cx + 7, cz + 7, ground, ground, p.ground());
+        b.fill(cx - 5, y0, cz - 5, cx + 5, y0, cz + 5, p.foundation());
+        b.fill(cx - 4, y0 + 1, cz - 4, cx + 4, y0 + 1, cz + 4, p.foundation());
+        b.fill(cx - 3, y0 + 2, cz - 3, cx + 3, y0 + 2, cz + 3, p.foundation());
+        b.fill(cx - 2, y0 + 3, cz - 2, cx + 2, y0 + 3, cz + 2, p.accent());
+
+        // 2. Solid pedestal drum and its cornice.
+        b.fill(cx - 1, y0 + 4, cz - 1, cx + 1, y0 + 7, cz + 1, p.wall());
+        b.fill(cx - 2, y0 + 8, cz - 2, cx + 2, y0 + 8, cz + 2, p.accent());
+
+        // 3. The tall fluted golden column: gilded 3x3 shaft with corner ribs for the flutes.
+        BlockState gold = Materials.glazed(DyeColor.YELLOW);
+        BlockState goldBright = Materials.glazed(DyeColor.WHITE);
+        int colBase = y0 + 9;
+        int colTop = y0 + 58;
+        for (int y = colBase; y <= colTop; y++) {
+            b.fill(cx - 1, y, cz - 1, cx + 1, y, cz + 1, gold);
+            b.put(cx - 1, y, cz - 1, goldBright);
+            b.put(cx + 1, y, cz - 1, goldBright);
+            b.put(cx - 1, y, cz + 1, goldBright);
+            b.put(cx + 1, y, cz + 1, goldBright);
         }
 
-        // 2. The dominant feature: a great tiled dome on a drum at the crossing.
-        int drumTop = y0 + 13;
-        b.room(cx - 4, drumTop, cz - 4, cx + 4, drumTop + 3, cz + 4,
-                new Doorway(Side.N, 4), new Doorway(Side.S, 4),
-                new Doorway(Side.E, 4), new Doorway(Side.W, 4));
-        for (int y = drumTop; y <= drumTop + 3; y++) {
-            b.put(cx - 4, y, cz - 4, p.accent());
-            b.put(cx + 4, y, cz - 4, p.accent());
-            b.put(cx - 4, y, cz + 4, p.accent());
-            b.put(cx + 4, y, cz + 4, p.accent());
-        }
-        StyleKit.dome(b, cx, cz, drumTop + 4, 7, p);
+        // 4. Capital, then the golden winged Victory.
+        b.fill(cx - 2, colTop + 1, cz - 2, cx + 2, colTop + 1, cz + 2, p.accent());
+        int fig = colTop + 2;                 // body base
+        b.fill(cx, fig, cz, cx, fig + 3, cz, goldBright);   // body/robe
+        b.fill(cx - 2, fig + 1, cz, cx + 2, fig + 1, cz, goldBright); // outstretched wings
+        b.put(cx, fig + 4, cz, goldBright);   // head
 
-        // 3. Two low square bell towers with tiled pyramidal caps.
-        bellTower(b, cx - 5, nz0 - 3, ground, p);
-        bellTower(b, cx + 5, nz0 - 3, ground, p);
-
-        // 4. An Aztec stepped platform on the plaza edge — the cultural signature.
+        // 5. The Aztec stepped platform, kept as a nearby secondary accent.
         StyleKit.steppedTemple(b, cx - 24, cz + 22, ground, 4, p);
     }
 

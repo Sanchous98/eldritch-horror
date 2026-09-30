@@ -51,7 +51,78 @@ public final class CapeTownStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        capeDutchManor(b, cx, cz, ground, p);
+        // The Castle of Good Hope: a low stone star-fort — a broad pentagonal rampart with a
+        // projecting bastion at each of its five points, a gate in the south curtain and a small
+        // central keep with a flag spire. Broad and low; the bastioned outline is the silhouette.
+        final int n = 10;
+        double[] ox = new double[n];
+        double[] oz = new double[n];
+        double[] ix = new double[n];
+        double[] iz = new double[n];
+        double[] ex = new double[n];
+        double[] ez = new double[n];
+        double rTip = 34.0;   // bastion points
+        double rCurt = 25.0;  // curtain midpoints between bastions
+        for (int i = 0; i < n; i++) {
+            double a = -Math.PI / 2.0 + i * Math.PI / 5.0; // 36° steps; first bastion due north
+            double ro = (i % 2 == 0) ? rTip : rCurt;
+            ox[i] = cx + ro * Math.cos(a);
+            oz[i] = cz + ro * Math.sin(a);
+            ix[i] = cx + (ro - 4.0) * Math.cos(a); // inner face of the rampart
+            iz[i] = cz + (ro - 4.0) * Math.sin(a);
+            ex[i] = cx + (ro - 1.5) * Math.cos(a); // outer lip, for merlons
+            ez[i] = cz + (ro - 1.5) * Math.sin(a);
+        }
+
+        int yBottom = ground + 1;
+        int yTop = ground + 9;
+        for (int x = cx - 36; x <= cx + 36; x++) {
+            for (int z = cz - 36; z <= cz + 36; z++) {
+                boolean inOuter = false;
+                boolean inInner = false;
+                boolean inEdge = false;
+                for (int i = 0, j = n - 1; i < n; j = i++) {
+                    if ((oz[i] > z) != (oz[j] > z)
+                            && x < (ox[j] - ox[i]) * (z - oz[i]) / (oz[j] - oz[i]) + ox[i]) {
+                        inOuter = !inOuter;
+                    }
+                    if ((iz[i] > z) != (iz[j] > z)
+                            && x < (ix[j] - ix[i]) * (z - iz[i]) / (iz[j] - iz[i]) + ix[i]) {
+                        inInner = !inInner;
+                    }
+                    if ((ez[i] > z) != (ez[j] > z)
+                            && x < (ex[j] - ex[i]) * (z - ez[i]) / (ez[j] - ez[i]) + ex[i]) {
+                        inEdge = !inEdge;
+                    }
+                }
+                if (inOuter && !inInner) {
+                    b.fill(x, yBottom, z, x, yTop, z, p.foundation());
+                    if (!inEdge && ((x + z) & 1) == 0) {
+                        b.put(x, yTop + 1, z, p.foundation()); // alternating merlon
+                    }
+                } else if (inInner) {
+                    b.put(x, ground, z, p.ground()); // paved courtyard
+                }
+            }
+        }
+
+        // Gatehouse breaching the south curtain wall.
+        b.room(cx - 4, ground + 1, cz + 21, cx + 4, ground + 11, cz + 27);
+        b.crenellations(cx - 4, cz + 21, cx + 4, cz + 27, ground + 12);
+        StyleKit.twoHighDoor(b, p, cx, cz + 27, ground + 1, Direction.SOUTH);
+        b.put(cx - 1, ground + 4, cz + 27, p.light());
+        b.put(cx + 1, ground + 4, cz + 27, p.light());
+
+        // Small central keep: whitewashed walls, thatch roof and a flag spire.
+        int kh = 18;
+        b.room(cx - 6, ground + 1, cz - 6, cx + 6, ground + kh, cz + 6,
+                new Doorway(Side.S, 6));
+        b.window(cx - 6, ground + 6, cz, 4, 1, true);
+        b.window(cx + 6, ground + 6, cz, 4, 1, true);
+        b.window(cx, ground + 6, cz - 6, 4, 1, true);
+        b.pitchedRoof(cx - 7, cz - 7, cx + 7, cz + 7, ground + kh, 8, 1);
+        b.spire(cx, cz, ground + kh + 9, 14);
+        b.put(cx, ground + kh + 8, cz, p.light());
     }
 
     @Override

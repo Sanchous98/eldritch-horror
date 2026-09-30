@@ -14,9 +14,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * stone paving, and yellow/gold glazed-tile roofs. Colour is culture, not climate, so the shell
  * keeps the region's overgrowth while the imperial reds and golds lead.
  *
- * <p>Landmark: a raised palace hall on a stone terrace with a tiered golden roof, a tall gate
- * tower, and a gold-capped pagoda on the sight line. Street props: stone guardian lions, lantern
- * posts, and a drum/bell tower. Follows {@link TokyoStyle}; shared shapes live in {@link StyleKit}.
+ * <p>Landmark: the Hall of Supreme Harmony — a long, low imperial hall under a wide, overhanging
+ * double-eaved golden roof on a stepped white terrace — fronted by a red gate tower. Street props:
+ * stone guardian lions, lantern posts, and a drum/bell tower. Follows {@link TokyoStyle}; shared
+ * shapes live in {@link StyleKit}.
  */
 public final class BeijingStyle implements CityStyle {
 
@@ -70,10 +71,93 @@ public final class BeijingStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // The central axis: gate tower (front), palace hall (behind), pagoda (off the shoulder).
-        gateTower(b, cx, cz + 10, ground, p);
-        palaceHall(b, cx, cz - 16, ground, p);
-        StyleKit.pagoda(b, cx + 26, cz - 26, ground + 1, 5, goldRoofed(p));
+        // The imperial axis: the broad Hall of Supreme Harmony behind (north), fronted by the red
+        // gate tower (south). Wide and low — golden double eaves over a white terrace, not a spire.
+        imperialHall(b, cx, cz - 8, ground, p);
+        gateTower(b, cx, cz + 20, ground, p);
+    }
+
+    /**
+     * The Hall of Supreme Harmony: a long, low imperial hall — vermilion walls under a wide,
+     * overhanging double-eaved golden roof — raised on a stepped white terrace. Reads broad on the
+     * skyline (about 65 blocks wide, 33 tall) rather than tall and narrow, as the imperial axis
+     * demands.
+     */
+    private static void imperialHall(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int w = 57;
+        int d = 31;
+        int h = 14;
+        int x0 = cx - w / 2;          // cx - 28
+        int x1 = x0 + w - 1;          // cx + 28
+        int z0 = cz - d / 2;          // cz - 15
+        int z1 = z0 + d - 1;          // cz + 15
+        int y0 = ground + 3;
+        BlockState air = Blocks.AIR.defaultBlockState();
+
+        // White marble terrace: three solid courses plus a stepped south approach.
+        b.ground(x0 - 4, z0 - 4, x1 + 4, z1 + 4, ground, ground + 2, p.foundation());
+        for (int s = 0; s < 3; s++) {
+            b.fill(x0 + 10, ground, z1 + 5 + s, x1 - 10, ground + 2 - s, z1 + 5 + s,
+                    p.foundation());
+        }
+
+        // Hall body, hollowed, with doors on the south (front) and north (rear) faces.
+        b.room(x0, y0, z0, x1, y0 + h, z1, new Doorway(Side.S, w / 2), new Doorway(Side.N, w / 2));
+
+        // Vermilion walls: red on every face, leaving the gold eave course showing.
+        for (int y = y0 + 1; y <= y0 + h - 1; y++) {
+            for (int x = x0; x <= x1; x++) {
+                b.put(x, y, z0, p.accent());
+                b.put(x, y, z1, p.accent());
+            }
+            for (int z = z0 + 1; z <= z1 - 1; z++) {
+                b.put(x0, y, z, p.accent());
+                b.put(x1, y, z, p.accent());
+            }
+        }
+        // Re-open the doors through the new red skin.
+        b.put(cx, y0 + 1, z0, air);
+        b.put(cx, y0 + 2, z0, air);
+        b.put(cx, y0 + 1, z1, air);
+        b.put(cx, y0 + 2, z1, air);
+
+        // Tall dark-latticed window bays along the flanks and the short ends.
+        for (int x = x0 + 6; x <= x1 - 6; x += 5) {
+            b.window(x, y0 + 4, z0, 7, 1, true);
+            b.window(x, y0 + 4, z1, 7, 1, true);
+        }
+        for (int z = z0 + 6; z <= z1 - 6; z += 5) {
+            b.window(x0, y0 + 4, z, 7, 1, true);
+            b.window(x1, y0 + 4, z, 7, 1, true);
+        }
+
+        // Wide lower eave: a broad golden hip roof overhanging four blocks, ridge along X.
+        b.pitchedRoof(x0 - 4, z0 - 4, x1 + 4, z1 + 4, y0 + h, 5, 0);
+
+        // Clerestory band standing on the lower eave — the "double" of the double eave.
+        int ux0 = x0 + 10;
+        int ux1 = x1 - 10;
+        int uz0 = z0 + 4;
+        int uz1 = z1 - 4;
+        for (int y = y0 + h + 6; y <= y0 + h + 8; y++) {
+            for (int x = ux0; x <= ux1; x++) {
+                b.put(x, y, uz0, p.accent());
+                b.put(x, y, uz1, p.accent());
+            }
+            for (int z = uz0 + 1; z <= uz1 - 1; z++) {
+                b.put(ux0, y, z, p.accent());
+                b.put(ux1, y, z, p.accent());
+            }
+        }
+        for (int x = ux0 + 4; x <= ux1 - 4; x += 5) {
+            b.window(x, y0 + h + 7, uz0, 2, 1, true);
+            b.window(x, y0 + h + 7, uz1, 2, 1, true);
+        }
+
+        // Upper eave: a narrower golden hip roof, capped by a gold ridge crest and a lantern.
+        b.pitchedRoof(ux0 - 5, uz0 - 5, ux1 + 5, uz1 + 5, y0 + h + 9, 5, 0);
+        b.fill(cx - 3, y0 + h + 15, cz, cx + 3, y0 + h + 15, cz, p.roof());
+        b.put(cx, y0 + h + 16, cz, p.light());
     }
 
     /** A tall gate tower with a lower and an upper golden roof — the palace's outer gate. */

@@ -72,7 +72,62 @@ public final class TokyoStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        StyleKit.pagoda(b, cx, cz, ground + 1, 5, p);
+        int y0 = ground + 1;
+
+        // Plaza and the wide, stepped stone tenshu-dai (castle base).
+        b.ground(cx - 24, cz - 24, cx + 24, cz + 24, ground, ground, p.foundation());
+        int baseH = 7;
+        for (int i = 0; i < baseH; i++) {
+            int h = 20 - i;                       // 20 .. 14, wide at the foot, battered inward
+            int y = y0 + i;
+            b.fill(cx - h, y, cz - h, cx + h, y, cz + h,
+                    (i % 3 == 2) ? p.weathered() : p.foundation());
+            if (i == baseH - 1) {                 // dark timber cap course under the keep
+                b.walls(cx - h, y, cz - h, cx + h, y, cz + h, p.accent());
+            }
+        }
+
+        // Five white-walled tiers, each smaller than the last, over dark flared tile eaves.
+        int y = y0 + baseH;                       // first tier floor, sits on the stone base
+        int half = 13;
+        for (int t = 0; t < 5; t++) {
+            int h = 10 - t;
+            int x0 = cx - half;
+            int x1 = cx + half;
+            int z0 = cz - half;
+            int z1 = cz + half;
+            b.room(x0, y, z0, x1, y + h - 1, z1);
+            // Himeji's black-and-white banding: dark timber sill and lintel round each tier.
+            b.walls(x0, y, z0, x1, y, z1, p.accent());
+            b.walls(x0, y + h - 1, z0, x1, y + h - 1, z1, p.accent());
+            // Koushi-lattice windows on all four faces.
+            int wy = y + 3;
+            for (int dx = -half + 3; dx <= half - 3; dx += 4) {
+                b.window(cx + dx, wy, z0, 3, 1, true);
+                b.window(cx + dx, wy, z1, 3, 1, true);
+                b.window(x0, wy, cz + dx, 3, 1, true);
+                b.window(x1, wy, cz + dx, 3, 1, true);
+            }
+            // Dark, deeply overhanging kawara-tile eaves.
+            b.pitchedRoof(x0 - 3, z0 - 3, x1 + 3, z1 + 3, y + h - 1, 4, 0);
+
+            y += h + 2;
+            half -= 2;
+        }
+
+        // Gabled top storey with golden shachihoko on the ridge ends (no spire, unlike the pagoda).
+        int topHalf = half;
+        b.room(cx - topHalf, y, cz - topHalf, cx + topHalf, y + 5, cz + topHalf);
+        b.walls(cx - topHalf, y, cz - topHalf, cx + topHalf, y, cz + topHalf, p.accent());
+        b.window(cx - topHalf, y + 2, cz, 2, 1, true);
+        b.window(cx + topHalf, y + 2, cz, 2, 1, true);
+        b.pitchedRoof(cx - topHalf - 4, cz - topHalf - 4, cx + topHalf + 4, cz + topHalf + 4,
+                y + 5, 9, 1);
+        int peak = y + 5 + 9;
+        b.put(cx, peak, cz - topHalf - 4, p.accent());
+        b.put(cx, peak + 1, cz - topHalf - 4, p.light());
+        b.put(cx, peak, cz + topHalf + 4, p.accent());
+        b.put(cx, peak + 1, cz + topHalf + 4, p.light());
     }
 
     @Override

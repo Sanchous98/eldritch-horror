@@ -52,58 +52,105 @@ public final class LimaStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        int w = 15;
-        int d = 13;
-        int h = 11;
+        // Colonial cathedral with twin bell towers: a long low nave of yellow/cream plaster,
+        // a shallow red-tile roof over buttress bays, a central portal, and two matching towers
+        // with open belfries and pointed tiled caps framing the facade.
+        int w = 23;
+        int l = 45;
         int x0 = cx - w / 2;
         int x1 = x0 + w - 1;
-        int z0 = cz - d / 2;
-        int z1 = z0 + d - 1;
+        int z0 = cz - l / 2;
+        int z1 = z0 + l - 1;
         int y0 = ground + 1;
-        int y1 = y0 + h;
+        int naveH = 16;
+        int y1 = y0 + naveH;
 
-        b.ground(x0 - 2, z0 - 2, x1 + 2, z1 + 2, ground, ground, p.foundation());
-        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, 7));
+        b.ground(x0 - 5, z0 - 5, x1 + 5, z1 + 5, ground, ground, p.foundation());
 
-        // Andean-quake buttresses down the flanks, with tall dark-window slits between.
-        for (int z = z0 + 2; z <= z1 - 2; z += 4) {
-            b.buttress(x0, z, y0, 5, Side.W);
-            b.buttress(x1, z, y0, 5, Side.E);
+        // Buttressed nave: yellow plaster walls with dark-timber quoined buttress bays.
+        for (int z = z0 + 2; z <= z1 - 2; z += 5) {
+            b.buttress(x0, z, y0, 9, Side.W);
+            b.buttress(x1, z, y0, 9, Side.E);
         }
-        for (int z = z0 + 3; z <= z1 - 3; z += 3) {
-            b.window(x0, y0 + 3, z, 4, 1, true);
-            b.window(x1, y0 + 3, z, 4, 1, true);
+        for (int z = z0 + 4; z <= z1 - 4; z += 5) {
+            b.window(x0, y0 + 7, z, 6, 1, true);
+            b.window(x1, y0 + 7, z, 6, 1, true);
         }
+        b.room(x0, y0, z0, x1, y1, z1);
+        // Cream quoins and a warm plaster band under the eaves.
+        b.fill(x0, y1, z0, x0, y1, z1, p.weathered());
+        b.fill(x1, y1, z0, x1, y1, z1, p.weathered());
+        for (int y = y0 + 3; y <= y1; y += 6) {
+            b.put(x0, y, z0, p.accent());
+            b.put(x1, y, z0, p.accent());
+            b.put(x0, y, z1, p.accent());
+            b.put(x1, y, z1, p.accent());
+        }
+        b.pitchedRoof(x0 - 2, z0 - 2, x1 + 2, z1 + 2, y1, 9, 1);
+        // A small crossing cupola on the ridge.
+        b.fill(cx - 3, y1 + 9, cz - 3, cx + 3, y1 + 9, cz + 3, p.roof());
+        b.window(cx, y1 + 9, cz - 3, 4, 3, false);
+        b.window(cx, y1 + 9, cz + 3, 4, 3, false);
+        b.window(cx - 3, y1 + 9, cz, 4, 3, false);
+        b.window(cx + 3, y1 + 9, cz, 4, 3, false);
+        b.put(cx, y1 + 12, cz, p.light());
 
-        // The crossing dome over the nave.
-        StyleKit.dome(b, cx, cz, y1 + 2, 6, p);
+        // West front: a central portal with a rose window, framed by cream pilasters.
+        int fz = z1;
+        b.fill(cx - 5, y0, fz, cx - 5, y1 - 2, fz, p.weathered());
+        b.fill(cx + 5, y0, fz, cx + 5, y1 - 2, fz, p.weathered());
+        b.fill(cx - 5, y1 - 1, fz, cx + 5, y1 - 1, fz, p.accent());
+        b.window(cx, y1 - 6, fz, 4, 4, false);
+        StyleKit.twoHighDoor(b, p, cx, fz + 1, y0 + 1, Direction.SOUTH);
 
-        // Twin bell towers flanking the west front (the landmark skyline).
-        tower(b, x0 + 3, z0 - 5, ground, p);
-        tower(b, x1 - 3, z0 - 5, ground, p);
-
-        StyleKit.twoHighDoor(b, p, cx, z1, y0 + 1, Direction.SOUTH);
+        // Twin bell towers framing the entry front: matching shafts with open arches and
+        // pointed tiled caps.
+        tower(b, x0 + 3, z1 + 6, ground, p);
+        tower(b, x1 - 3, z1 + 6, ground, p);
     }
 
-    /** A colonial bell tower: ochre shaft, dark quoined corners, arched belfry and a tiled cap. */
+    /** A colonial bell tower: ochre plaster shaft, dark quoins, open belfry arches and a tiled cap. */
     private static void tower(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int r = 2;
-        int top = ground + 17;
+        int r = 3;
+        int y0 = ground + 1;
+        int top = ground + 36;
         b.ground(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, ground, ground, p.foundation());
-        b.room(cx - r, ground + 1, cz - r, cx + r, top, cz + r);
-        for (int y = ground + 1; y <= top; y++) {
+        b.room(cx - r, y0, cz - r, cx + r, top, cz + r);
+        for (int y = y0; y <= top; y++) {
             b.put(cx - r, y, cz - r, p.accent());
             b.put(cx + r, y, cz - r, p.accent());
             b.put(cx - r, y, cz + r, p.accent());
             b.put(cx + r, y, cz + r, p.accent());
         }
-        // Open belfry openings near the top.
-        b.window(cx, top - 3, cz - r, 2, 2, true);
-        b.window(cx, top - 3, cz + r, 2, 2, true);
-        b.window(cx - r, top - 3, cz, 2, 2, true);
-        b.window(cx + r, top - 3, cz, 2, 2, true);
-        b.pitchedRoof(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, top, 3, 0);
-        b.put(cx, top + 4, cz, p.light());
+        // Cream string-courses break the tall shaft into storeys.
+        for (int y = y0 + 9; y <= top - 4; y += 9) {
+            b.fill(cx - r, y, cz - r, cx + r, y, cz + r, p.weathered());
+        }
+        // Tall paired openings on each face.
+        for (int y = y0 + 5; y <= top - 14; y += 9) {
+            b.window(cx, y, cz - r, 4, 2, true);
+            b.window(cx, y, cz + r, 4, 2, true);
+            b.window(cx - r, y, cz, 4, 2, true);
+            b.window(cx + r, y, cz, 4, 2, true);
+        }
+        // Open belfry arches under the cap.
+        b.window(cx, top - 8, cz - r, 6, 2, true);
+        b.window(cx, top - 8, cz + r, 6, 2, true);
+        b.window(cx - r, top - 8, cz, 6, 2, true);
+        b.window(cx + r, top - 8, cz, 6, 2, true);
+        for (int y = top - 6; y <= top; y++) {
+            b.put(cx - 1, y, cz - r, p.frame());
+            b.put(cx + 1, y, cz - r, p.frame());
+            b.put(cx - 1, y, cz + r, p.frame());
+            b.put(cx + 1, y, cz + r, p.frame());
+            b.put(cx - r, y, cz - 1, p.frame());
+            b.put(cx - r, y, cz + 1, p.frame());
+            b.put(cx + r, y, cz - 1, p.frame());
+            b.put(cx + r, y, cz + 1, p.frame());
+        }
+        // Pointed tiled cap.
+        b.pitchedRoof(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, top, 7, 0);
+        b.put(cx, top + 8, cz, p.light());
     }
 
     @Override

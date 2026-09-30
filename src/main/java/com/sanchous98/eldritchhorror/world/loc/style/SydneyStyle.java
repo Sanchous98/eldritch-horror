@@ -49,14 +49,58 @@ public final class SydneyStyle implements CityStyle {
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
         int by = ground + 1;
-        // Sandstone concourse with a low, heavy pitched entry roof.
-        b.ground(cx - 18, cz - 14, cx + 18, cz + 16, ground, ground, p.foundation());
-        b.room(cx - 14, by, cz - 10, cx + 14, by + 3, cz + 10);
-        b.pitchedRoof(cx - 14, cz - 10, cx + 14, cz + 10, by + 3, 2, 0);
-        // Three leaning shells, the tallest at the centre, out toward the water.
-        sail(b, cx - 9, cz + 2, by + 4, 7, 20, p);
-        sail(b, cx + 9, cz + 2, by + 4, 7, 20, p);
-        sail(b, cx, cz + 4, by + 4, 9, 26, p);
+        BlockState shell = Materials.whiteConcrete();
+        BlockState shade = Materials.lightGrayConcrete();
+
+        // Broad stepped harbour podium / concourse.
+        b.ground(cx - 30, cz - 20, cx + 30, cz + 26, ground, ground, p.foundation());
+        b.ground(cx - 25, cz - 15, cx + 25, cz + 21, ground, ground, p.ground());
+        for (int t = 0; t < 3; t++) {
+            int s = 25 - t * 3;
+            b.fill(cx - s, by + t, cz - 15 + t * 2, cx + s, by + t, cz + 21 - t * 2, p.foundation());
+        }
+        // Low harbour parapet along the water side (+Z), punctuated by gas lamps.
+        for (int x = cx - 30; x <= cx + 30; x++) {
+            b.put(x, by + 3, cz + 26, p.foundation());
+            b.put(x, by + 4, cz + 26, p.wall());
+        }
+        for (int x = cx - 27; x <= cx + 27; x += 9) {
+            b.put(x, by + 5, cz + 26, p.accent());
+            b.put(x, by + 6, cz + 26, p.light());
+        }
+
+        // The sails: a stepped row of white shells, tallest near the centre. Each shell is a
+        // leaning, curved sheet — vertical ribs whose height follows an arc and whose tops lean
+        // back over the podium, giving the Opera House's stacked-arc silhouette.
+        int[] sxc = {cx - 21, cx - 7, cx + 8, cx + 22};
+        int[] shw = {8, 12, 10, 6};
+        int[] sht = {44, 76, 60, 32};
+        int[] sz0 = {cz + 6, cz + 11, cz + 9, cz + 5};
+        for (int s = 0; s < sxc.length; s++) {
+            int halfW = shw[s];
+            int height = sht[s];
+            int zBase = sz0[s];
+            int lean = height / 7;                       // taller shells lean further back
+            for (int dx = -halfW; dx <= halfW; dx++) {
+                double u = dx / (double) halfW;          // -1 .. 1
+                double frac = 1.0 - u * u;               // curved shell profile
+                int hEdge = (int) Math.round(height * frac);
+                if (hEdge < 1) {
+                    hEdge = 1;
+                }
+                for (int y = 0; y <= hEdge; y++) {
+                    int zz = zBase + (int) Math.round((double) y * lean / height);
+                    b.put(sxc[s] + dx, by + 2 + y, zz, shell);
+                    b.put(sxc[s] + dx, by + 2 + y, zz - 1, y == 0 ? shade : shell);
+                }
+            }
+            // A short finial mast and beacon at each peak.
+            int topY = by + 3 + height;
+            for (int k = 0; k < 2; k++) {
+                b.put(sxc[s], topY + k, zBase + lean, p.accent());
+            }
+            b.put(sxc[s], topY + 2, zBase + lean, p.light());
+        }
     }
 
     /** One curved shell: horizontal rows of tapering width, leaning as they rise. */

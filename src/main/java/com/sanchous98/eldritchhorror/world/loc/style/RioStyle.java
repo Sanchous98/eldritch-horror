@@ -48,7 +48,63 @@ public final class RioStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        cristo(b, cx, cz, ground, p);
+        int by = ground + 1;
+
+        // Mountain-top plaza paved in pale stone with a running dark-tile band.
+        b.ground(cx - 24, cz - 24, cx + 24, cz + 24, ground, ground, p.ground());
+        b.ground(cx - 20, cz - 20, cx + 20, cz + 20, ground, ground, p.foundation());
+        for (int i = -24; i <= 24; i++) {
+            if (Math.floorMod(i, 4) == 0) {
+                b.put(cx + i, ground, cz - 24, p.frame());
+                b.put(cx + i, ground, cz + 24, p.frame());
+                b.put(cx - 24, ground, cz + i, p.frame());
+                b.put(cx + 24, ground, cz + i, p.frame());
+            }
+        }
+
+        // Stepped stone pedestal rising to a tall tower.
+        b.fill(cx - 8, by, cz - 8, cx + 8, by + 1, cz + 8, p.foundation());
+        b.fill(cx - 6, by + 2, cz - 6, cx + 6, by + 3, cz + 6, p.wall());
+        b.fill(cx - 5, by + 4, cz - 5, cx + 5, by + 5, cz + 5, p.accent());
+        for (int y = by + 6; y <= by + 32; y++) {
+            b.fill(cx - 2, y, cz - 2, cx + 2, y, cz + 2, p.wall());
+            b.put(cx - 2, y, cz - 2, p.accent());
+            b.put(cx + 2, y, cz + 2, p.accent());
+        }
+        b.fill(cx - 3, by + 33, cz - 3, cx + 3, by + 33, cz + 3, p.accent());
+
+        // The figure: a robed body flaring at the feet.
+        int fb = by + 34;
+        b.fill(cx - 4, fb, cz - 3, cx + 4, fb, cz + 3, p.accent());
+        b.fill(cx - 3, fb + 1, cz - 3, cx + 3, fb + 1, cz + 3, p.accent());
+        b.fill(cx - 3, fb + 2, cz - 2, cx + 3, fb + 2, cz + 2, p.accent());
+        b.fill(cx - 2, fb + 3, cz - 2, cx + 2, fb + 23, cz + 2, p.accent());
+        int sy = fb + 24;
+        b.fill(cx - 3, sy - 1, cz - 2, cx + 3, sy, cz + 2, p.accent()); // shoulders
+
+        // Outstretched arms — the widest part of the silhouette (a T).
+        int arm = 23;
+        for (int d = 4; d <= arm; d++) {
+            int drop = d >= arm - 3 ? 1 : 0;
+            b.put(cx - d, sy - drop, cz, p.accent());
+            b.put(cx + d, sy - drop, cz, p.accent());
+            b.put(cx - d, sy - 1 - drop, cz, p.accent());
+            b.put(cx + d, sy - 1 - drop, cz, p.accent());
+        }
+        b.put(cx - arm, sy - 2, cz, p.accent());
+        b.put(cx + arm, sy - 2, cz, p.accent());
+
+        // Head and a ringed halo.
+        b.fill(cx - 1, sy + 2, cz - 1, cx + 1, sy + 3, cz + 1, p.accent());
+        b.put(cx, sy + 4, cz, p.accent());
+        int haloY = sy + 6;
+        for (int a = 0; a < 360; a += 30) {
+            double rad = Math.toRadians(a);
+            int hx = cx + (int) Math.round(5 * Math.cos(rad));
+            int hz = cz + (int) Math.round(5 * Math.sin(rad));
+            b.put(hx, haloY, hz, p.light());
+        }
+        b.put(cx, haloY + 1, cz, p.light());
     }
 
     @Override

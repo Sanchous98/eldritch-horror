@@ -66,7 +66,135 @@ public final class LagosStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        palace(b, rng, cx, cz, ground, p);
+        // National Theatre Lagos: a broad octagonal drum on a tall painted colonnade, carrying a
+        // wide, shallow shell roof. The shell is built as shrinking elliptical rings whose Z radius
+        // collapses first, so the cap folds into a long X-aligned crest — a wing/umbrella shape.
+        int y0 = ground + 1;
+
+        // --- podium: a broad paved apron around the theatre -------------------
+        b.ground(cx - 31, cz - 26, cx + 31, cz + 28, ground, ground, p.foundation());
+        b.ground(cx - 25, cz - 20, cx + 25, cz + 22, ground, ground, p.ground());
+
+        // --- the drum: an elongated octagonal auditorium ----------------------
+        int ax = 17;
+        int az = 12;
+        int wallTop = ground + 32;
+        int gw = 2 * ax + 1;
+        int gd = 2 * az + 1;
+        boolean[][] in = new boolean[gw][gd];
+        for (int ix = 0; ix < gw; ix++) {
+            for (int iz = 0; iz < gd; iz++) {
+                int dx = Math.abs(ix - ax);
+                int dz = Math.abs(iz - az);
+                in[ix][iz] = dx <= ax && dz <= az && dx + dz <= ax + az - 4;
+            }
+        }
+        for (int ix = 0; ix < gw; ix++) {
+            for (int iz = 0; iz < gd; iz++) {
+                if (!in[ix][iz]) {
+                    continue;
+                }
+                int x = cx - ax + ix;
+                int z = cz - az + iz;
+                boolean per = (ix == 0 || !in[ix - 1][iz]) || (ix == gw - 1 || !in[ix + 1][iz])
+                        || (iz == 0 || !in[ix][iz - 1]) || (iz == gd - 1 || !in[ix][iz + 1]);
+                if (!per) {
+                    continue;
+                }
+                for (int y = y0; y <= wallTop; y++) {
+                    b.put(x, y, z, Math.floorMod(ix + iz, 6) == 0 ? paint(x + z) : p.wall());
+                }
+            }
+        }
+
+        // Tall glazing bands around the cardinal faces of the drum.
+        for (int x = cx - 6; x <= cx + 6; x += 3) {
+            b.window(x, y0 + 9, cz + az, 5, 1, true);
+            b.window(x, y0 + 20, cz + az, 5, 1, true);
+            b.window(x, y0 + 9, cz - az, 5, 1, true);
+            b.window(x, y0 + 20, cz - az, 5, 1, true);
+        }
+        for (int z = cz - 6; z <= cz + 6; z += 3) {
+            b.window(cx - ax, y0 + 9, z, 5, 1, true);
+            b.window(cx - ax, y0 + 20, z, 5, 1, true);
+            b.window(cx + ax, y0 + 9, z, 5, 1, true);
+            b.window(cx + ax, y0 + 20, z, 5, 1, true);
+        }
+
+        // --- entrance: a bright painted portal on the south face --------------
+        int ez = cz + az;
+        b.fill(cx - 3, y0, ez, cx - 3, y0 + 7, ez, p.accent());
+        b.fill(cx + 3, y0, ez, cx + 3, y0 + 7, ez, p.accent());
+        b.fill(cx - 3, y0 + 8, ez, cx + 3, y0 + 8, ez, paint(1));
+        b.put(cx, y0 + 9, ez, p.light());
+        b.put(cx - 1, y0, ez, p.door());
+        b.put(cx + 1, y0, ez, p.door());
+        b.fill(cx, y0, ez, cx, y0 + 1, ez, p.window());
+
+        // --- the colonnade: a tall ring of painted columns under the shell -----
+        int ax2 = ax + 4;
+        int az2 = az + 4;
+        int colTop = ground + 30;
+        int cw = 2 * ax2 + 1;
+        int cd = 2 * az2 + 1;
+        boolean[][] out = new boolean[cw][cd];
+        for (int ix = 0; ix < cw; ix++) {
+            for (int iz = 0; iz < cd; iz++) {
+                int dx = Math.abs(ix - ax2);
+                int dz = Math.abs(iz - az2);
+                out[ix][iz] = dx <= ax2 && dz <= az2 && dx + dz <= ax2 + az2 - 5;
+            }
+        }
+        for (int ix = 0; ix < cw; ix++) {
+            for (int iz = 0; iz < cd; iz++) {
+                if (!out[ix][iz]) {
+                    continue;
+                }
+                boolean per = (ix == 0 || !out[ix - 1][iz]) || (ix == cw - 1 || !out[ix + 1][iz])
+                        || (iz == 0 || !out[ix][iz - 1]) || (iz == cd - 1 || !out[ix][iz + 1]);
+                if (!per || Math.floorMod(ix + iz, 4) != 0) {
+                    continue;
+                }
+                int x = cx - ax2 + ix;
+                int z = cz - az2 + iz;
+                for (int y = y0; y <= colTop; y++) {
+                    b.put(x, y, z, Math.floorMod(y - y0, 5) == 0 ? p.accent() : p.wall());
+                }
+                b.put(x, colTop + 1, z, p.roofSlab());
+            }
+        }
+
+        // --- the shell roof: a broad, shallow folded canopy -------------------
+        int shellBase = wallTop + 1;
+        int sx = ax + 7;
+        int sz = az + 7;
+        int layers = 16;
+        for (int i = 0; i < layers; i++) {
+            int y = shellBase + i;
+            double t = (double) i / (layers - 1);
+            double kx = Math.cos(t * Math.PI / 2.0);
+            double kz = Math.cos(Math.min(1.0, t * 1.5) * Math.PI / 2.0);
+            int rx = (int) Math.round(sx * kx);
+            int rz = (int) Math.round(sz * kz);
+            for (int x = cx - rx; x <= cx + rx; x++) {
+                for (int z = cz - rz; z <= cz + rz; z++) {
+                    boolean inside;
+                    if (rx <= 0 || rz <= 0) {
+                        inside = true;
+                    } else {
+                        double e = ((double) (x - cx) * (x - cx)) / ((double) rx * rx)
+                                + ((double) (z - cz) * (z - cz)) / ((double) rz * rz);
+                        inside = e <= 1.0001;
+                    }
+                    if (!inside) {
+                        continue;
+                    }
+                    b.put(x, y, z, Math.floorMod(x - cx, 4) == 0
+                            ? p.accent() : Materials.lightGrayConcrete());
+                }
+            }
+        }
+        b.put(cx, shellBase + layers, cz, p.light());
     }
 
     /**

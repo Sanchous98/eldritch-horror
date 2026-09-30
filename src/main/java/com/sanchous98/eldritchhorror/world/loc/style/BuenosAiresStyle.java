@@ -52,7 +52,25 @@ public final class BuenosAiresStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        palace(b, cx, cz, ground, p);
+        // El Obelisco de Buenos Aires: a tall, slender, plain white square obelisk rising from a
+        // small stone base on a paved plaza. The city's cleanest, most minimal skyline mark.
+        b.ground(cx - 8, cz - 8, cx + 8, cz + 8, ground, ground, p.ground());
+
+        // Small two-tier base.
+        b.fill(cx - 3, ground + 1, cz - 3, cx + 3, ground + 1, cz + 3, p.foundation());
+        b.fill(cx - 2, ground + 2, cz - 2, cx + 2, ground + 2, cz + 2, p.accent());
+
+        // The clean 3x3 white shaft (dominant, ~60 blocks).
+        int shaftBase = ground + 3;
+        int shaftTop = ground + 62;
+        for (int y = shaftBase; y <= shaftTop; y++) {
+            b.fill(cx - 1, y, cz - 1, cx + 1, y, cz + 1, p.accent());
+        }
+
+        // A shallow cornice, then the small stepped pyramidion.
+        b.fill(cx - 2, shaftTop + 1, cz - 2, cx + 2, shaftTop + 1, cz + 2, p.accent());
+        b.fill(cx - 1, shaftTop + 2, cz - 1, cx + 1, shaftTop + 2, cz + 1, p.accent());
+        b.put(cx, shaftTop + 3, cz, p.accent());
     }
 
     /**

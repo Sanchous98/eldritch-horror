@@ -46,35 +46,57 @@ public final class CairoStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        int y0 = ground + 1;
-        // A Mamluk madrasa: a low rectangular prayer hall with a grand pointed-arch portal and a
-        // flat parapet. No central Ottoman dome-mosque silhouette — that belongs to Istanbul.
-        int hx = 14;
-        int hz = 12;
-        int wallTop = y0 + 9;
-        b.ground(cx - hx - 3, cz - hz - 3, cx + hx + 3, cz + hz + 3, ground, ground, p.foundation());
-        b.room(cx - hx, y0, cz - hz, cx + hx, wallTop, cz + hz,
-                new StructureBuilder.Doorway(StructureBuilder.Side.S, hx));
-        // Flat terrace roof with a low parapet.
-        b.fill(cx - hx - 1, wallTop + 1, cz - hz - 1, cx + hx + 1, wallTop + 1, cz + hz + 1, p.roof());
-        // Mashrabiya lattice high on the outer walls.
-        for (int x = cx - hx + 3; x <= cx + hx - 3; x += 4) {
-            b.window(x, y0 + 5, cz - hz, 3, 1, true);
-            b.window(x, y0 + 5, cz + hz, 3, 1, true);
+        // Giza: the Great Pyramid dominates the plaza, a smaller companion pyramid stands off to
+        // one side, and a recumbent sphinx faces east along the causeway. Cairo's own Mamluk
+        // minaret lingers on the north-east edge as a slender counterpoint.
+        int half = 30;    // 61-block base — broad, stepped, unmistakably a pyramid
+        int height = 74;  // apex ~75 blocks above the plaza
+        b.ground(cx - half, cz - half, cx + half, cz + half, ground, ground, p.foundation());
+        for (int layer = 0; layer <= height; layer++) {
+            int h = half - (layer * half) / height;
+            if (h < 0) {
+                break;
+            }
+            int y = ground + 1 + layer;
+            // Banded casing courses: alternate sandstone to pick out each step in the tapering mass.
+            b.fill(cx - h, y, cz - h, cx + h, y, cz + h,
+                    (layer & 1) == 0 ? p.foundation() : p.roof());
         }
-        // An ogee entrance portal in front of the south gate.
-        b.fill(cx - 3, y0, cz + hz + 1, cx + 3, y0 + 6, cz + hz + 1, p.accent());
-        b.put(cx, y0 + 1, cz + hz + 1, p.door());
-        b.crenellations(cx - 3, cz + hz + 1, cx + 3, cz + hz + 1, y0 + 7);
+        // A gilt capstone (benben) crowning the apex.
+        b.put(cx, ground + 1 + height, cz, p.accent());
+        b.put(cx, ground + 2 + height, cz, p.light());
 
-        // A carved stone dome over the south-east corner (a mausoleum chamber), on a short drum.
-        int mx = cx + hx - 5;
-        int mz = cz - hz + 5;
-        b.room(mx - 4, y0, mz - 4, mx + 4, y0 + 10, mz + 4);
-        StyleKit.dome(b, mx, mz, y0 + 11, 6, p);
+        // Companion pyramid (Khafre-sized): a smaller stepped mass just beyond the great one.
+        int chalf = 8;
+        int cheight = 24;
+        int px = cx;
+        int pz = b.rng().nextBoolean() ? cz - 36 : cz + 36;
+        b.ground(px - chalf, pz - chalf, px + chalf, pz + chalf, ground, ground, p.foundation());
+        for (int layer = 0; layer <= cheight; layer++) {
+            int h = chalf - (layer * chalf) / cheight;
+            if (h < 0) {
+                break;
+            }
+            int y = ground + 1 + layer;
+            b.fill(px - h, y, pz - h, px + h, y, pz + h,
+                    (layer & 1) == 0 ? p.roof() : p.foundation());
+        }
+        b.put(px, ground + 1 + cheight, pz, p.accent());
 
-        // One tall, slender Mamluk minaret in the north-west corner (multi-balcony).
-        mamlukMinaret(b, cx - hx + 3, cz + hz - 3, ground, p);
+        // A recumbent sphinx east of the pyramids, facing +X: lion body, outstretched paws, nemes.
+        int rx = cx + 34;  // haunch / tail end (clear of the great pyramid's base)
+        int hx = cx + 47;  // head end
+        b.fill(rx, ground + 1, cz - 3, hx, ground + 5, cz + 3, p.roof());               // body
+        b.fill(rx, ground + 1, cz - 2, rx + 4, ground + 7, cz + 2, p.roof());           // raised haunch
+        b.fill(hx, ground + 1, cz - 3, hx + 6, ground + 2, cz + 3, p.roof());           // outstretched paws
+        b.fill(hx - 1, ground + 6, cz - 2, hx + 2, ground + 10, cz + 2, p.accent());    // head
+        b.fill(hx - 1, ground + 7, cz - 3, hx + 1, ground + 9, cz - 2, p.accent());     // nemes lappets
+        b.fill(hx - 1, ground + 7, cz + 2, hx + 1, ground + 9, cz + 3, p.accent());
+        b.put(hx + 2, ground + 9, cz - 1, p.window());                                  // eyes
+        b.put(hx + 2, ground + 9, cz + 1, p.window());
+
+        // A Mamluk minaret keeps the Cairo skyline recognisably Mamluk.
+        mamlukMinaret(b, cx + 36, cz - 32, ground, p);
     }
 
     /** A slender Mamluk minaret: a tall square shaft with two balcony rings and a ribbed cap. */

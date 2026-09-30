@@ -50,17 +50,101 @@ public final class ParisStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // Cathedral nave + north tower + spire (x0=cx-5..cx+5, z0=cz-10..cz+10, y0=ground+1).
-        StyleKit.cathedral(b, rng, cx, cz, ground, p);
-        int x0 = cx - 5;
-        int x1 = cx + 5;
-        int z0 = cz - 10;
-        int z1 = cz + 10;
-        int y0 = ground + 1;
-        // Mirror the north belfry at the south front for the twin-tower silhouette.
-        twinTower(b, cx, z1 + 1, z1 + 6, ground, p);
-        // Flying buttresses down both flanks of the nave.
-        flyingButtresses(b, x0, x1, z0, z1, y0, p);
+        // The Eiffel Tower: four splayed lattice piers on arched bases, meeting at the first
+        // platform, then a tapering shaft through two more observation decks to a beacon spire.
+        int baseHalf = 16;                 // splayed footprint: 33 blocks across at the feet
+        int legR = 2;                      // lattice pier half-width at the base
+        int y1 = ground + 32;              // first platform (the legs converge here)
+        int y2 = ground + 60;              // second platform
+        int y3 = ground + 80;              // top observation deck
+
+        // Plaza apron and four ashlar footing pads under the piers.
+        b.ground(cx - 20, cz - 20, cx + 20, cz + 20, ground, ground, p.ground());
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sz = -1; sz <= 1; sz += 2) {
+                b.fill(cx + sx * baseHalf - 2, ground, cz + sz * baseHalf - 2,
+                        cx + sx * baseHalf + 2, ground, cz + sz * baseHalf + 2, p.foundation());
+            }
+        }
+
+        // Splayed piers, the arched spandrels between them, and horizontal lattice girders.
+        for (int y = ground + 1; y <= y1; y++) {
+            int dy = y - ground;
+            int half = baseHalf - (baseHalf - 6) * dy / 32;   // 16 -> 6 as the legs lean in
+            int lr = Math.max(1, legR - dy / 14);             // pier thins 5x5 -> 3x3
+            for (int sx = -1; sx <= 1; sx += 2) {
+                for (int sz = -1; sz <= 1; sz += 2) {
+                    int lx = cx + sx * half;
+                    int lz = cz + sz * half;
+                    for (int dx = -lr; dx <= lr; dx++) {
+                        for (int dz = -lr; dz <= lr; dz++) {
+                            boolean edge = dx == -lr || dx == lr || dz == -lr || dz == lr;
+                            if (edge) {
+                                b.put(lx + dx, y, lz + dz,
+                                        ((dx + dz + dy) & 1) == 0 ? p.accent() : p.wall());
+                            }
+                        }
+                    }
+                }
+            }
+            // The signature arch: the opening between piers shrinks on a quarter-circle.
+            if (dy <= 15) {
+                int open = (int) Math.round(13.0 * Math.sqrt(Math.max(0.0,
+                        1.0 - (double) (dy * dy) / (15.0 * 15.0))));
+                int edge = half + lr;
+                if (open < edge) {
+                    b.fill(cx - edge, y, cz + half, cx - open, y, cz + half, p.accent());
+                    b.fill(cx + open, y, cz + half, cx + edge, y, cz + half, p.accent());
+                    b.fill(cx - edge, y, cz - half, cx - open, y, cz - half, p.accent());
+                    b.fill(cx + open, y, cz - half, cx + edge, y, cz - half, p.accent());
+                    b.fill(cx + half, y, cz - edge, cx + half, y, cz - open, p.accent());
+                    b.fill(cx + half, y, cz + open, cx + half, y, cz + edge, p.accent());
+                    b.fill(cx - half, y, cz - edge, cx - half, y, cz - open, p.accent());
+                    b.fill(cx - half, y, cz + open, cx - half, y, cz + edge, p.accent());
+                }
+            }
+            // Lattice girders bracing the piers.
+            if (dy % 6 == 0 || dy == 16) {
+                b.walls(cx - half - lr, y, cz - half - lr,
+                        cx + half + lr, y, cz + half + lr, p.wall());
+            }
+        }
+
+        // First platform: slab deck with a two-block iron railing.
+        b.fill(cx - 11, y1, cz - 11, cx + 11, y1, cz + 11, p.foundation());
+        b.walls(cx - 11, y1 + 1, cz - 11, cx + 11, y1 + 1, cz + 11, p.rail());
+        b.walls(cx - 11, y1 + 2, cz - 11, cx + 11, y1 + 2, cz + 11, p.rail());
+
+        // Second stage: taper 6 -> 3.
+        for (int y = y1 + 3; y <= y2; y++) {
+            int t = y - (y1 + 3);
+            int span = Math.max(1, y2 - (y1 + 3));
+            int half = 6 - (6 - 3) * t / span;
+            b.walls(cx - half, y, cz - half, cx + half, y, cz + half, p.accent());
+            if ((y - y1) % 6 == 0) {
+                b.walls(cx - half - 1, y, cz - half - 1,
+                        cx + half + 1, y, cz + half + 1, p.wall());
+            }
+        }
+
+        // Second platform.
+        b.fill(cx - 5, y2, cz - 5, cx + 5, y2, cz + 5, p.foundation());
+        b.walls(cx - 5, y2 + 1, cz - 5, cx + 5, y2 + 1, cz + 5, p.rail());
+        b.walls(cx - 5, y2 + 2, cz - 5, cx + 5, y2 + 2, cz + 5, p.rail());
+
+        // Upper shaft: taper 3 -> 1.
+        for (int y = y2 + 3; y <= y3; y++) {
+            int t = y - (y2 + 3);
+            int span = Math.max(1, y3 - (y2 + 3));
+            int half = 3 - (3 - 1) * t / span;
+            b.walls(cx - half, y, cz - half, cx + half, y, cz + half, p.accent());
+        }
+
+        // Top observation deck and the beacon spire.
+        b.fill(cx - 4, y3, cz - 4, cx + 4, y3, cz + 4, p.foundation());
+        b.walls(cx - 4, y3 + 1, cz - 4, cx + 4, y3 + 1, cz + 4, p.rail());
+        b.walls(cx - 3, y3 + 2, cz - 3, cx + 3, y3 + 2, cz + 3, p.rail());
+        b.spire(cx, cz, y3 + 3, 11);
     }
 
     /** A flat-topped, crenellated belfry tower — the mirrored partner of the cathedral's tower. */

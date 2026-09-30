@@ -57,28 +57,63 @@ public final class ShanghaiStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        int y0 = ground + 1;
-        // Colonnaded stone base.
-        b.ground(cx - 8, cz - 8, cx + 8, cz + 8, ground, ground, p.foundation());
-        b.room(cx - 7, y0, cz - 7, cx + 7, y0 + 9, cz + 7, new Doorway(Side.S, 7));
-        colonnade(b, cx, cz, y0, p);
-        for (int dz = -4; dz <= 4; dz += 8) {
-            b.window(cx - 7, y0 + 3, cz + dz, 5, 1, true);
-            b.window(cx + 7, y0 + 3, cz + dz, 5, 1, true);
-            b.window(cx + dz, y0 + 3, cz - 7, 5, 1, true);
-            b.window(cx + dz, y0 + 3, cz + 7, 5, 1, true);
-        }
-        StyleKit.twoHighDoor(b, p, cx, cz + 7, y0 + 1, Direction.SOUTH);
+        // Plaza.
+        b.ground(cx - 24, cz - 24, cx + 24, cz + 24, ground, ground, p.foundation());
 
-        // Stepped setbacks — the Art-Deco crown.
-        int y = y0 + 10;
-        for (int i = 0; i < 3; i++) {
-            int s = 5 - i * 2;                     // 5, 3, 1
-            b.room(cx - s, y, cz - s, cx + s, y + 5, cz + s);
-            b.crenellations(cx - s - 1, cz - s - 1, cx + s + 1, cz + s + 1, y + 6);
-            y += 7;
+        // Splayed legs carrying the column (a wide, braced foot).
+        int[][] legs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] d : legs) {
+            for (int i = 0; i <= 13; i++) {
+                int y = ground + 1 + i;
+                int dist = 12 - i;                 // 12 -> 0, leaning inward as it rises
+                int x = cx + d[0] * dist;
+                int z = cz + d[1] * dist;
+                int ex = x + (d[0] == 0 ? 1 : 0);
+                int ez = z + (d[1] == 0 ? 1 : 0);
+                b.fill(Math.min(x, ex), y, Math.min(z, ez), Math.max(x, ex), y, Math.max(z, ez),
+                        p.foundation());
+            }
         }
-        b.spire(cx, cz, y, 16);
+
+        // Tapering concrete column.
+        int columnTop = ground + 72;
+        for (int y = ground + 1; y <= columnTop; y++) {
+            int rr = Math.max(1, 5 - (y - ground) / 16);
+            b.fill(cx - rr, y, cz - rr, cx + rr, y, cz + rr, p.wall());
+            b.put(cx - rr, y, cz, p.accent());
+            b.put(cx + rr, y, cz, p.accent());
+            b.put(cx, y, cz - rr, p.accent());
+            b.put(cx, y, cz + rr, p.accent());
+        }
+
+        // Three spheres of different sizes threaded on the column — the Pearl spheres.
+        int[][] spheres = {{22, 6}, {40, 9}, {58, 5}};
+        for (int[] s : spheres) {
+            int cy = ground + s[0];
+            int r = s[1];
+            for (int dy = -r; dy <= r; dy++) {
+                int rr = (int) Math.round(Math.sqrt((double) (r * r - dy * dy)));
+                int y = cy + dy;
+                b.fill(cx - rr, y, cz - rr, cx + rr, y, cz + rr, p.roof());
+                for (int i = -rr; i <= rr; i++) {
+                    b.put(cx + i, y, cz - rr, p.accent());
+                    b.put(cx + i, y, cz + rr, p.accent());
+                    b.put(cx - rr, y, cz + i, p.accent());
+                    b.put(cx + rr, y, cz + i, p.accent());
+                }
+            }
+            // Glowing equatorial observation band.
+            b.fill(cx - r, cy, cz - r, cx + r, cy, cz + r, p.roof());
+            for (int i = -r; i <= r; i++) {
+                b.put(cx + i, cy, cz - r, p.light());
+                b.put(cx + i, cy, cz + r, p.light());
+                b.put(cx - r, cy, cz + i, p.light());
+                b.put(cx + r, cy, cz + i, p.light());
+            }
+        }
+
+        // Spire crowning the tower.
+        b.spire(cx, cz, columnTop + 1, 18);
     }
 
     /** Corner and mid-wall stone piers of the arcade, in the accent colour. */

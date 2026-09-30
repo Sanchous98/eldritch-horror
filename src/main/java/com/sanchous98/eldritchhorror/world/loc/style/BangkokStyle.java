@@ -61,7 +61,89 @@ public final class BangkokStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        temple(b, cx, cz, ground, p);
+        // Wat Arun: a tall, steeply stepped central prang flanked by two smaller prangs,
+        // white porcelain stucco banded with gold, rising over a paved temple terrace.
+        int y0 = ground + 1;
+        b.ground(cx - 24, cz - 12, cx + 24, cz + 12, ground, ground, p.foundation());
+
+        // --- central prang ---------------------------------------------------------
+        int half = 10;
+        int y = y0;
+        for (int t = 0; t < 5; t++) {
+            int h = 8;
+            b.room(cx - half, y, cz - half, cx + half, y + h - 1, cz + half);
+            // Lacquered corner pillars and gold tier cornice.
+            for (int yy = y; yy <= y + h - 1; yy++) {
+                b.put(cx - half, yy, cz - half, p.accent());
+                b.put(cx + half, yy, cz - half, p.accent());
+                b.put(cx - half, yy, cz + half, p.accent());
+                b.put(cx + half, yy, cz + half, p.accent());
+            }
+            // Overhanging gold tier ledge, then the solid tier cap.
+            b.fill(cx - half - 1, y + h, cz - half - 1, cx + half + 1, y + h, cz + half + 1, p.roofSlab());
+            b.fill(cx - half, y + h, cz - half, cx + half, y + h, cz + half, p.roof());
+            // Mosaic niches on every face.
+            b.window(cx - half, y + 3, cz, 4, 1, true);
+            b.window(cx + half, y + 3, cz, 4, 1, true);
+            b.window(cx, y + 3, cz - half, 4, 1, true);
+            b.window(cx, y + 3, cz + half, 4, 1, true);
+            y += h;
+            half -= 2;
+        }
+        // Steep corn-cob spire: shrinking gold-nibbed rings tapering to a needle.
+        int sh = 6;
+        int yy = y;
+        while (sh > 0) {
+            for (int k = 0; k < 4 && sh > 0; k++) {
+                b.fill(cx - sh, yy, cz - sh, cx + sh, yy, cz + sh, p.wall());
+                b.put(cx - sh, yy, cz - sh, p.roof());
+                b.put(cx + sh, yy, cz - sh, p.roof());
+                b.put(cx - sh, yy, cz + sh, p.roof());
+                b.put(cx + sh, yy, cz + sh, p.roof());
+                yy++;
+            }
+            sh--;
+        }
+        for (int k = 0; k < 4; k++) {
+            b.put(cx, yy, cz, p.wall());
+            yy++;
+        }
+        b.fill(cx - 1, yy, cz - 1, cx + 1, yy, cz + 1, p.roof());
+        b.put(cx, yy + 1, cz, p.light());
+
+        // --- two smaller flanking prangs ------------------------------------------
+        int[] fxs = {cx - 17, cx + 17};
+        for (int s = 0; s < 2; s++) {
+            int qx = fxs[s];
+            int qh = 4;
+            int qy = y0;
+            for (int t = 0; t < 3; t++) {
+                b.room(qx - qh, qy, cz - qh, qx + qh, qy + 5, cz + qh);
+                for (int k = qy; k <= qy + 5; k++) {
+                    b.put(qx - qh, k, cz - qh, p.accent());
+                    b.put(qx + qh, k, cz - qh, p.accent());
+                    b.put(qx - qh, k, cz + qh, p.accent());
+                    b.put(qx + qh, k, cz + qh, p.accent());
+                }
+                b.fill(qx - qh - 1, qy + 6, cz - qh - 1, qx + qh + 1, qy + 6, cz + qh + 1, p.roofSlab());
+                b.fill(qx - qh, qy + 6, cz - qh, qx + qh, qy + 6, cz + qh, p.roof());
+                qy += 7;
+                qh -= 1;
+            }
+            int qs = 2;
+            while (qs > 0) {
+                for (int k = 0; k < 3; k++) {
+                    b.fill(qx - qs, qy, cz - qs, qx + qs, qy, cz + qs, p.wall());
+                    b.put(qx - qs, qy, cz - qs, p.roof());
+                    b.put(qx + qs, qy, cz - qs, p.roof());
+                    b.put(qx - qs, qy, cz + qs, p.roof());
+                    b.put(qx + qs, qy, cz + qs, p.roof());
+                    qy++;
+                }
+                qs--;
+            }
+            b.put(qx, qy, cz, p.light());
+        }
     }
 
     /**

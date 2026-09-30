@@ -46,11 +46,69 @@ public final class IstanbulStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // Hagia Sophia / Blue Mosque silhouette: one huge dome between minarets…
-        StyleKit.mosque(b, rng, cx, cz, ground, p);
-        // …flanked by two more, echoing the four-minaret Ottoman imperial mosques.
-        StyleKit.minaret(b, cx - 11, cz, ground, 18, p);
-        StyleKit.minaret(b, cx + 11, cz, ground, 18, p);
+        // Hagia Sophia: a wide drummed central dome over a rectangular basilica, cascading
+        // semi-domes along the long axis, and four slender minarets at the corners.
+        int y0 = ground + 1;
+        int w = 45;
+        int d = 37;
+        int x0 = cx - w / 2;
+        int x1 = x0 + w - 1;
+        int z0 = cz - d / 2;
+        int z1 = z0 + d - 1;
+        int y1 = y0 + 30;
+
+        // Paved forecourt and the brick basilica shell.
+        b.ground(cx - 30, cz - 26, cx + 30, cz + 26, ground, ground, p.foundation());
+        b.room(x0, y0, z0, x1, y1, z1, new StructureBuilder.Doorway(StructureBuilder.Side.S, w / 2));
+        b.crenellations(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1 + 1);
+
+        // Arcaded window bays along the long walls, narrow slits on the short ones.
+        for (int z = z0 + 4; z <= z1 - 4; z += 5) {
+            b.window(x0, y0 + 6, z, 8, 1, true);
+            b.window(x1, y0 + 6, z, 8, 1, true);
+        }
+        for (int x = x0 + 5; x <= x1 - 5; x += 6) {
+            b.window(x, y0 + 6, z0, 8, 1, true);
+            b.window(x, y0 + 6, z1, 8, 1, true);
+        }
+
+        // Wide cylindrical drum carrying the great dome, banded and pierced by clerestory lights.
+        int drumR = 14;
+        int drumH = 12;
+        int drumBase = y1 + 1;
+        for (int y = drumBase; y < drumBase + drumH; y++) {
+            for (int dx = -drumR; dx <= drumR; dx++) {
+                for (int dz = -drumR; dz <= drumR; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 <= drumR * drumR && d2 > (drumR - 2) * (drumR - 2)) {
+                        b.put(cx + dx, y, cz + dz, y % 4 == 0 ? p.accent() : p.wall());
+                    }
+                }
+            }
+        }
+        for (int y = drumBase + 2; y <= drumBase + drumH - 2; y++) {
+            b.put(cx - drumR, y, cz, p.window());
+            b.put(cx + drumR, y, cz, p.window());
+            b.put(cx, y, cz - drumR, p.window());
+            b.put(cx, y, cz + drumR, p.window());
+        }
+
+        // The central dome, flanked by two semi-domes and a further pair of smaller cascades.
+        StyleKit.dome(b, cx, cz, drumBase + drumH, 13, p);
+        StyleKit.dome(b, cx - 17, cz, y1, 9, p);
+        StyleKit.dome(b, cx + 17, cz, y1, 9, p);
+        StyleKit.dome(b, cx - 24, cz, y1 - 3, 5, p);
+        StyleKit.dome(b, cx + 24, cz, y1 - 3, 5, p);
+
+        // Four slender minarets rising well above the dome at the basilica corners.
+        int mx = w / 2 + 4;
+        int mz = d / 2 + 4;
+        StyleKit.minaret(b, cx - mx, cz - mz, ground, 68, p);
+        StyleKit.minaret(b, cx + mx, cz - mz, ground, 68, p);
+        StyleKit.minaret(b, cx - mx, cz + mz, ground, 68, p);
+        StyleKit.minaret(b, cx + mx, cz + mz, ground, 68, p);
+
+        b.marker("istanbul_landmark", cx, y0, cz);
     }
 
     @Override

@@ -48,7 +48,96 @@ public final class DelhiStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        mausoleum(b, cx, cz, ground, p);
+        // The Taj: a white marble mausoleum on a raised podium — a great onion dome on a drum,
+        // four slender corner minarets, and a reflecting-pool axis running south.
+        int ph = 31;   // 63-block marble podium
+        int py = ground + 1;
+        b.ground(cx - ph, cz - ph, cx + ph, cz + ph, ground, ground, p.accent());
+        b.fill(cx - ph, py, cz - ph, cx + ph, py + 1, cz + ph, p.accent());            // podium slab
+        b.fill(cx - ph + 4, py + 2, cz - ph + 4, cx + ph - 4, py + 2, cz + ph - 4, p.foundation());
+
+        // Main mausoleum: a tall marble cube with a pishtaq recess on each face.
+        int w = 15;
+        int y0 = py + 3;
+        int x0 = cx - w;
+        int x1 = cx + w;
+        int z0 = cz - w;
+        int z1 = cz + w;
+        int y1 = y0 + 34;
+        b.room(x0, y0, z0, x1, y1, z1, new StructureBuilder.Doorway(Side.S, w));
+        b.walls(x0, y0, z0, x1, y1, z1, p.accent());   // white-marble skin over the sandstone core
+        b.put(cx, y0 + 1, z1, Blocks.AIR.defaultBlockState());  // re-open the south entrance
+        b.put(cx, y0 + 2, z1, Blocks.AIR.defaultBlockState());
+        iwan(b, cx, z0, y0, p, true);
+        iwan(b, cx, z1, y0, p, true);
+        iwan(b, x0, cz, y0, p, false);
+        iwan(b, x1, cz, y0, p, false);
+        b.fill(x0 - 1, y1 + 1, z0 - 1, x1 + 1, y1 + 1, z1 + 1, p.accent());   // chhajja cornice
+        for (int z = z0 + 3; z <= z1 - 3; z += 6) {
+            b.window(x0, y0 + 8, z, 8, 1, true);
+            b.window(x1, y0 + 8, z, 8, 1, true);
+        }
+
+        // Four small chhatri pavilions on the roof corners, flanking the great dome.
+        chhatri(b, x0 + 2, z0 + 2, y1 + 2, p);
+        chhatri(b, x1 - 2, z0 + 2, y1 + 2, p);
+        chhatri(b, x0 + 2, z1 - 2, y1 + 2, p);
+        chhatri(b, x1 - 2, z1 - 2, y1 + 2, p);
+
+        // Drum, then the great onion dome: a bulb that swells past the drum, then tapers to a finial.
+        int drumR = 9;
+        b.fill(cx - drumR, y1 + 2, cz - drumR, cx + drumR, y1 + 2, cz + drumR, p.foundation());
+        b.fill(cx - drumR + 1, y1 + 2, cz - drumR + 1, cx + drumR - 1, y1 + 7, cz + drumR - 1, p.roof());
+        for (int i = -drumR + 1; i <= drumR - 1; i++) {
+            b.put(cx + i, y1 + 5, cz - drumR + 1, p.accent());
+            b.put(cx + i, y1 + 5, cz + drumR - 1, p.accent());
+            b.put(cx - drumR + 1, y1 + 5, cz + i, p.accent());
+            b.put(cx + drumR - 1, y1 + 5, cz + i, p.accent());
+        }
+        int[] rings = {9, 10, 10, 9, 8, 7, 5, 3, 1};
+        for (int i = 0; i < rings.length; i++) {
+            int r = rings[i];
+            int yy = y1 + 8 + i;
+            b.fill(cx - r, yy, cz - r, cx + r, yy, cz + r, p.roof());
+            for (int j = -r; j <= r; j++) {
+                b.put(cx + j, yy, cz - r, p.accent());
+                b.put(cx + j, yy, cz + r, p.accent());
+                b.put(cx - r, yy, cz + j, p.accent());
+                b.put(cx + r, yy, cz + j, p.accent());
+            }
+        }
+        b.spire(cx, cz, y1 + 8 + rings.length, 12);   // gilt finial above the dome
+
+        // Four slender corner minarets, marble-skinned so the whole monument reads white.
+        int m = ph - 5;
+        int mh = 54;
+        int mtop = ground + 1 + mh;
+        StyleKit.minaret(b, cx - m, cz - m, ground, mh, p);
+        StyleKit.minaret(b, cx + m, cz - m, ground, mh, p);
+        StyleKit.minaret(b, cx - m, cz + m, ground, mh, p);
+        StyleKit.minaret(b, cx + m, cz + m, ground, mh, p);
+        b.walls(cx - m - 2, ground + 1, cz - m - 2, cx - m + 2, mtop, cz - m + 2, p.accent());
+        b.walls(cx + m - 2, ground + 1, cz - m - 2, cx + m + 2, mtop, cz - m + 2, p.accent());
+        b.walls(cx - m - 2, ground + 1, cz + m - 2, cx - m + 2, mtop, cz + m + 2, p.accent());
+        b.walls(cx + m - 2, ground + 1, cz + m - 2, cx + m + 2, mtop, cz + m + 2, p.accent());
+
+        // Reflecting-pool axis: a marble-rimmed channel running south from the podium.
+        int qx0 = cx - 4;
+        int qx1 = cx + 4;
+        int qz0 = cz + 33;
+        int qz1 = cz + 48;
+        b.ground(qx0 - 3, qz0 - 3, qx1 + 3, qz1 + 3, ground, ground, p.accent());
+        b.fill(qx0, ground + 1, qz0, qx1, ground + 1, qz1, p.foundation());
+        b.fill(qx0 + 1, ground + 2, qz0, qx1 - 1, ground + 2, qz1, Materials.terracotta(DyeColor.BLUE));
+        for (int z = qz0; z <= qz1; z++) {
+            b.put(qx0, ground + 2, z, p.accent());
+            b.put(qx1, ground + 2, z, p.accent());
+        }
+        // Marble lantern posts line the water axis.
+        for (int z = qz0; z <= qz1; z += 5) {
+            StyleKit.lanternPost(b, qx0 - 2, z, ground, p);
+            StyleKit.lanternPost(b, qx1 + 2, z, ground, p);
+        }
     }
 
     @Override

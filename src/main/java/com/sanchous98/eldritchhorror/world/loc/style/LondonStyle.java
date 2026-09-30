@@ -48,8 +48,90 @@ public final class LondonStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        domedCathedral(b, cx, cz, ground, p);
-        clockTower(b, cx, cz - 15, ground, p);
+        // ------------------------------------------------------------------ Elizabeth Tower (Big Ben)
+        // A square 7x7 Gothic clock tower, ~70 blocks to the spire tip: a tall banded shaft, a bold
+        // lit clock stage on all four faces, a crenellated belfry and a slender spire.
+        int tr = 3;
+        int shaftTop = ground + 58;
+        b.ground(cx - tr - 1, cz - tr - 1, cx + tr + 1, cz + tr + 1, ground, ground, p.foundation());
+        b.room(cx - tr, ground + 1, cz - tr, cx + tr, shaftTop, cz + tr, new Doorway(Side.S, tr));
+
+        for (int y = ground + 1; y <= shaftTop; y++) {
+            b.put(cx - tr, y, cz - tr, p.accent());
+            b.put(cx + tr, y, cz - tr, p.accent());
+            b.put(cx - tr, y, cz + tr, p.accent());
+            b.put(cx + tr, y, cz + tr, p.accent());
+            if (y % 4 == 0) {                       // banded stone string courses up the shaft
+                b.fill(cx - tr, y, cz - tr, cx + tr, y, cz + tr, p.accent());
+            }
+        }
+        for (int y = ground + 7; y <= shaftTop - 5; y += 5) {
+            b.window(cx, y, cz - tr, 3, 1, true);
+            b.window(cx, y, cz + tr, 3, 1, true);
+            b.window(cx - tr, y, cz, 3, 1, true);
+            b.window(cx + tr, y, cz, 3, 1, true);
+        }
+
+        // Bold clock stage: a lit dial ringed by a dark stone rim, one on each of the four faces.
+        int dialY = shaftTop - 4;
+        b.fill(cx - 1, dialY, cz - tr, cx + 1, dialY, cz - tr, p.accent());
+        b.fill(cx - 1, dialY, cz + tr, cx + 1, dialY, cz + tr, p.accent());
+        b.fill(cx - tr, dialY, cz - 1, cx - tr, dialY, cz + 1, p.accent());
+        b.fill(cx + tr, dialY, cz - 1, cx + tr, dialY, cz + 1, p.accent());
+        b.put(cx, dialY, cz - tr, p.light());
+        b.put(cx, dialY, cz + tr, p.light());
+        b.put(cx - tr, dialY, cz, p.light());
+        b.put(cx + tr, dialY, cz, p.light());
+
+        b.crenellations(cx - tr - 1, cz - tr - 1, cx + tr + 1, cz + tr + 1, shaftTop + 1);
+        b.spire(cx, cz, shaftTop + 2, 14);
+
+        // ------------------------------------------------------- Houses of Parliament (west stub)
+        // A long buttressed Gothic river front running west from the tower, with a central
+        // Victoria Tower breaking the ridge and a lower crenellated terrace at its foot.
+        int px0 = cx - 42;
+        int px1 = cx - 5;
+        int pz0 = cz - 9;
+        int pz1 = cz + 9;
+        int py0 = ground + 1;
+        int py1 = py0 + 19;                 // 20-block riverside facade
+
+        b.ground(px0 - 1, pz0 - 1, px1, pz1 + 1, ground, ground, p.foundation());
+        b.room(px0, py0, pz0, px1, py1, pz1);
+        b.pitchedRoof(px0 - 1, pz0 - 1, px1, pz1 + 1, py1 + 1, 8, 1);   // ridge runs along Z
+
+        // Buttresses and tall traceried windows in bays down both long faces.
+        for (int x = px0 + 3; x <= px1 - 3; x += 5) {
+            b.buttress(x, pz0, py0, 7, Side.N);
+            b.buttress(x, pz1, py0, 7, Side.S);
+            b.window(x, py0 + 5, pz0, 8, 1, true);
+            b.window(x, py0 + 5, pz1, 8, 1, true);
+        }
+        // A lower crenellated river terrace in front of the wing.
+        b.walls(px0, py0, pz0 - 3, px1, py0 + 2, pz0 - 3, p.foundation());
+        b.crenellations(px0, pz0 - 3, px1, pz0 - 3, py0 + 3);
+
+        // Central Victoria Tower breaking the ridge, capped with a spire.
+        int vx0 = cx - 26;
+        int vx1 = cx - 21;
+        int vz0 = cz - 5;
+        int vz1 = cz + 5;
+        int vy1 = py0 + 34;
+        b.room(vx0, py0, vz0, vx1, vy1, vz1);
+        for (int y = py0; y <= vy1; y++) {
+            b.put(vx0, y, vz0, (y & 1) == 0 ? p.accent() : p.wall());
+            b.put(vx1, y, vz0, (y & 1) == 0 ? p.accent() : p.wall());
+            b.put(vx0, y, vz1, (y & 1) == 0 ? p.accent() : p.wall());
+            b.put(vx1, y, vz1, (y & 1) == 0 ? p.accent() : p.wall());
+        }
+        for (int y = py0 + 6; y <= vy1 - 6; y += 8) {
+            b.window(vx0, y, cz, 5, 1, true);
+            b.window(vx1, y, cz, 5, 1, true);
+            b.window((vx0 + vx1) / 2, y, vz0, 5, 1, true);
+            b.window((vx0 + vx1) / 2, y, vz1, 5, 1, true);
+        }
+        b.crenellations(vx0 - 1, vz0 - 1, vx1 + 1, vz1 + 1, vy1 + 1);
+        b.spire((vx0 + vx1) / 2, cz, vy1 + 3, 18);
     }
 
     /** A long buttressed nave crowned by a great dome (St Paul's silhouette). */

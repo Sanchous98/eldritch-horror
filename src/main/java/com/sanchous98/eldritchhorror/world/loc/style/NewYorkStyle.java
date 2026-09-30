@@ -47,7 +47,118 @@ public final class NewYorkStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        skyscraper(b, cx, cz, ground, p);
+        // The Statue of Liberty: a broad stone plaza, an arcaded pedestal, then a tapering
+        // robed figure ~90 blocks tall with a raised torch arm and a spiked crown.
+        int y0 = ground + 1;
+
+        // --- Plaza: a wide limestone apron ringed by a low kerb. ---
+        b.ground(cx - 16, cz - 16, cx + 16, cz + 16, ground, ground, p.ground());
+        b.walls(cx - 16, y0, cz - 16, cx + 16, y0, cz + 16, p.foundation());
+
+        // --- Pedestal tier 1: a broad stepped plinth (21 wide). ---
+        b.fill(cx - 10, y0, cz - 10, cx + 10, y0 + 6, cz + 10, p.foundation());
+        b.fill(cx - 9, y0 + 7, cz - 9, cx + 9, y0 + 7, cz + 9, p.foundation());
+
+        // --- Pedestal tier 2: the main shaft, iron corner piers and tall glazing (15 wide). ---
+        int t2 = y0 + 8;
+        b.fill(cx - 7, t2, cz - 7, cx + 7, t2 + 9, cz + 7, p.wall());
+        cornerPilasters(b, cx, cz, 7, t2, t2 + 9, p);
+        windowBands(b, cx, cz, 7, t2, t2 + 9, p);
+        b.fill(cx - 8, t2 + 10, cz - 8, cx + 8, t2 + 10, cz + 8, p.roofSlab());
+
+        // --- Pedestal tier 3: an open colonnade under a heavy cap (11 wide). ---
+        int t3 = t2 + 11;
+        b.room(cx - 5, t3, cz - 5, cx + 5, t3 + 8, cz + 5);
+        for (int y = t3; y <= t3 + 8; y++) {
+            for (int d = -5; d <= 5; d += 2) {
+                b.put(cx + d, y, cz - 5, p.accent());
+                b.put(cx + d, y, cz + 5, p.accent());
+                b.put(cx - 5, y, cz + d, p.accent());
+                b.put(cx + 5, y, cz + d, p.accent());
+            }
+        }
+        b.fill(cx - 6, t3 + 9, cz - 6, cx + 6, t3 + 9, cz + 6, p.foundation());
+        b.fill(cx - 4, t3 + 10, cz - 4, cx + 4, t3 + 10, cz + 4, p.foundation());
+        int figY = t3 + 11;                                    // the figure's feet
+
+        // --- The robe: an 11-wide hem tapering to 5-wide shoulders. ---
+        int robeH = 34;
+        for (int i = 0; i < robeH; i++) {
+            int y = figY + i;
+            int r = 5 - (i * 3) / (robeH - 1);                 // 5 -> 2 half-width
+            for (int dx = -r; dx <= r; dx++) {
+                int lim = r - Math.abs(dx);
+                for (int dz = -lim; dz <= lim; dz++) {
+                    boolean edge = Math.abs(dx) + Math.abs(dz) == r;
+                    boolean fold = (((dx + dz) % 3) == 0);
+                    b.put(cx + dx, y, cz + dz, edge && fold ? p.weathered() : p.wall());
+                }
+            }
+        }
+
+        // --- Torso and shoulders (7 wide, then 5). ---
+        int torsoY = figY + robeH;
+        for (int i = 0; i <= 6; i++) {
+            int y = torsoY + i;
+            int r = (i < 4) ? 3 : 2;
+            for (int dx = -r; dx <= r; dx++) {
+                int lim = r - Math.abs(dx);
+                for (int dz = -lim; dz <= lim; dz++) {
+                    b.put(cx + dx, y, cz + dz, p.wall());
+                }
+            }
+        }
+
+        // --- Neck and head. ---
+        int neckY = torsoY + 7;
+        b.fill(cx, neckY, cz, cx, neckY + 1, cz, p.wall());
+        int headY = neckY + 2;
+        for (int i = 0; i <= 4; i++) {
+            int y = headY + i;
+            int r = (i == 4) ? 1 : 2;
+            for (int dx = -r; dx <= r; dx++) {
+                int lim = r - Math.abs(dx);
+                for (int dz = -lim; dz <= lim; dz++) {
+                    b.put(cx + dx, y, cz + dz, p.wall());
+                }
+            }
+        }
+
+        // --- The diadem: a 7-point spiked crown. ---
+        int crownY = headY + 5;
+        for (int dx = -3; dx <= 3; dx++) {
+            int lim = 3 - Math.abs(dx);
+            for (int dz = -lim; dz <= lim; dz++) {
+                if (Math.abs(dx) + Math.abs(dz) == 3) {
+                    b.put(cx + dx, crownY, cz + dz, p.accent());
+                }
+            }
+        }
+        int[][] spikes = {{0, 0}, {3, 0}, {-3, 0}, {0, 3}, {0, -3}, {2, 2}, {-2, -2}, {2, -2}, {-2, 2}};
+        for (int[] s : spikes) {
+            b.put(cx + s[0], crownY + 1, cz + s[1], p.accent());
+            b.put(cx + s[0], crownY + 2, cz + s[1], p.roofSlab());
+        }
+        b.put(cx, crownY + 3, cz, p.accent());                 // the tallest central ray
+
+        // --- The raised torch arm (on the east side, well above the head). ---
+        int armX = cx + 3;
+        for (int y = torsoY + 2; y <= torsoY + 22; y++) {
+            b.put(armX, y, cz, p.wall());
+        }
+        b.put(armX, torsoY + 23, cz, p.accent());              // hand / wrist
+        b.fill(armX - 1, torsoY + 24, cz - 1, armX + 1, torsoY + 24, cz + 1, p.roofSlab());
+        b.fill(armX - 1, torsoY + 25, cz - 1, armX + 1, torsoY + 25, cz + 1, p.accent());
+        b.put(armX, torsoY + 26, cz, p.light());               // the flame
+        b.put(armX, torsoY + 27, cz, p.light());
+
+        // --- The other arm, cradling the tablet. ---
+        int tabX = cx - 3;
+        for (int y = torsoY + 2; y <= torsoY + 8; y++) {
+            b.put(tabX, y, cz, p.wall());
+        }
+        b.fill(tabX - 2, torsoY + 9, cz - 1, tabX, torsoY + 9, cz + 1, p.roofSlab());
+        b.fill(tabX - 2, torsoY + 10, cz - 1, tabX, torsoY + 10, cz + 1, p.roof());
     }
 
     /** A stepped Deco tower: widening base, three setback tiers, a crenellated crown and a spire. */

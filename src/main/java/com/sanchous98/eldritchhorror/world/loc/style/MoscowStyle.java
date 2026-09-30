@@ -65,28 +65,47 @@ public final class MoscowStyle implements CityStyle {
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
         int y0 = ground + 1;
-        int half = 14;
+        int half = 21;
 
         // Snowy red-brick terrace with a white-stone kerb.
         b.ground(cx - half, cz - half, cx + half, cz + half, ground, ground, p.foundation());
         b.fill(cx - half, y0, cz - half, cx + half, y0, cz + half, p.wall());
         b.walls(cx - half, y0, cz - half, cx + half, y0, cz + half, p.accent());
 
-        // The central tent tower (Ivan the Great), crowned with a gold onion.
-        tentTower(b, cx, cz, y0 + 1, 6, 16, p);
+        // The central tent tower (Ivan the Great), crowned with a gold onion: the tallest spire.
+        tentTower(b, cx, cz, y0 + 1, 7, 50, p);
 
-        // A ring of smaller onion domes on brick drums, one per glazed colour.
+        // A ring of eight coloured onion domes, each on its own brick tower and drum, of varied
+        // height and width, radiating from the central tower. The ninth dome is the gold centre.
         int n = DOME_SHELLS.length;
+        int ringR = 16;
         for (int k = 0; k < n; k++) {
-            double a = (Math.PI * 2 / n) * k;
-            int dx = (int) Math.round(Math.cos(a) * 9.0);
-            int dz = (int) Math.round(Math.sin(a) * 9.0);
-            int drumH = 5 + rng.nextInt(4);
-            drum(b, cx + dx, cz + dz, y0 + 1, 2, drumH, p);
-            onion(b, cx + dx, cz + dz, y0 + 1 + drumH, 3, DOME_SHELLS[k], p.accent());
-            // A white-stone finial rod above each coloured onion.
-            b.put(cx + dx, y0 + 1 + drumH + 5, cz + dz, p.accent());
+            double a = (Math.PI * 2 / n) * k + (rng.nextDouble() - 0.5) * 0.30;
+            int tx = cx + (int) Math.round(Math.cos(a) * ringR);
+            int tz = cz + (int) Math.round(Math.sin(a) * ringR);
+
+            // Its own red-brick tower: a hollow radius-3 shaft with white-stone window slits.
+            int towerH = 10 + rng.nextInt(13); // varied: 10..22
+            for (int y = y0 + 1; y < y0 + 1 + towerH; y++) {
+                for (int dx = -3; dx <= 3; dx++) {
+                    for (int dz = -3; dz <= 3; dz++) {
+                        int d2 = dx * dx + dz * dz;
+                        if (d2 <= 9 && d2 > 4) {
+                            b.put(tx + dx, y, tz + dz, p.wall());
+                        }
+                    }
+                }
+            }
+            b.window(tx - 3, y0 + 4, tz, 3, 1, true);
+            b.window(tx + 3, y0 + 4, tz, 3, 1, true);
+
+            // A short white-stone drum, then the coloured onion and its finial.
+            int drumH = 3 + rng.nextInt(3);
+            int drumBase = y0 + 1 + towerH;
+            drum(b, tx, tz, drumBase, 2, drumH, p);
+            onion(b, tx, tz, drumBase + drumH, 2 + rng.nextInt(2), DOME_SHELLS[k], p.accent());
         }
+
         b.marker("moscow_landmark", cx, y0, cz);
     }
 

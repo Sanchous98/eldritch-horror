@@ -6,15 +6,16 @@ import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Seoul — Korean cultural style. Grey granite hanok walls under dark timber posts and beams,
  * blue-green tiled roofs with broad upturned eaves, palace gates, and mountain temples rising
  * behind the modern towers.
  *
- * <p>Landmark: a wide palace gate-hall ({@code room} + sweeping {@code pitchedRoof}) in dark
- * timber, flanked by a pagoda tower recoloured to Korean blue-green tiles. Street props: stone
- * lanterns (seokdeung), guardian statues and timber gate posts along the approaches.
+ * <p>Landmark: Gyeongbokgung — a large double-eaved throne hall with a dark tiled roof on a stone
+ * terrace, flanked by two smaller pavilions and fronted by a tall decorative gate. Street props:
+ * stone lanterns (seokdeung), guardian statues and timber gate posts along the approaches.
  *
  * <p>Deterministic and cheap: only {@link StructureBuilder} + {@link Palette} blocks (and
  * {@link StyleKit}); all randomness comes from the passed {@link RandomSource}.
@@ -51,13 +52,156 @@ public final class SeoulStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // The dominant palace gate-hall, facing the city to the south.
-        palaceHall(b, cx, cz + 6, ground, p);
-        // A pagoda temple tower rising behind it, recoloured to dark timber + blue-green tiles.
-        StyleKit.pagoda(b, cx, cz - 22, ground + 2, 5, koreanRoof(p));
-        // Modern towers on the shoulders, reading as the city against the mountains.
-        modernTower(b, cx - 18, cz - 16, ground, 18);
-        modernTower(b, cx + 18, cz - 16, ground, 22);
+        // Gyeongbokgung: the great throne hall behind, flanked by two smaller double-eaved
+        // pavilions, fronted by a tall decorative gate. Dark tiled roofs on stone terraces.
+        gyeongbokHall(b, cx, cz - 7, ground, p);
+        pavilion(b, cx - 27, cz - 3, ground, p);
+        pavilion(b, cx + 27, cz - 3, ground, p);
+        seoulGate(b, cx, cz + 24, ground, p);
+    }
+
+    /**
+     * The throne hall (Geunjeongjeon): a wide grey-granite hall framed by dark timber posts under a
+     * broad double-eaved blue-green tiled roof, raised on a two-course stone terrace. Broad and low
+     * (about 53 wide, 32 tall) with heavy overhanging eaves, like its Gyeongbokgung model.
+     */
+    private static void gyeongbokHall(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int w = 45;
+        int d = 25;
+        int h = 12;
+        int x0 = cx - w / 2;          // cx - 22
+        int x1 = x0 + w - 1;          // cx + 22
+        int z0 = cz - d / 2;          // cz - 12
+        int z1 = z0 + d - 1;          // cz + 12
+        int y0 = ground + 3;
+        BlockState air = Blocks.AIR.defaultBlockState();
+
+        // Stone terrace with a stepped south approach.
+        b.ground(x0 - 4, z0 - 4, x1 + 4, z1 + 4, ground, ground + 2, p.foundation());
+        for (int s = 0; s < 3; s++) {
+            b.fill(x0 + 8, ground, z1 + 5 + s, x1 - 8, ground + 2 - s, z1 + 5 + s, p.foundation());
+        }
+
+        // Hall body with doors front (south) and back (north).
+        b.room(x0, y0, z0, x1, y0 + h, z1, new Doorway(Side.S, w / 2), new Doorway(Side.N, w / 2));
+
+        // Dark timber posts marching along both long facades and across the short ends.
+        for (int x = x0; x <= x1; x += 4) {
+            b.fill(x, y0 + 1, z0, x, y0 + h, z0, p.accent());
+            b.fill(x, y0 + 1, z1, x, y0 + h, z1, p.accent());
+        }
+        for (int z = z0 + 1; z <= z1 - 1; z += 4) {
+            b.fill(x0, y0 + 1, z, x0, y0 + h, z, p.accent());
+            b.fill(x1, y0 + 1, z, x1, y0 + h, z, p.accent());
+        }
+        // Papered lattice door-bays between the posts.
+        for (int x = x0 + 2; x <= x1 - 2; x += 4) {
+            b.window(x, y0 + 3, z0, 6, 1, true);
+            b.window(x, y0 + 3, z1, 6, 1, true);
+        }
+        // Re-open the doors through the timber skin.
+        b.put(cx, y0 + 1, z0, air);
+        b.put(cx, y0 + 2, z0, air);
+        b.put(cx, y0 + 1, z1, air);
+        b.put(cx, y0 + 2, z1, air);
+
+        // Broad lower eave: blue-green tiled roof overhanging four blocks, ridge along X.
+        b.pitchedRoof(x0 - 4, z0 - 4, x1 + 4, z1 + 4, y0 + h, 7, 0);
+
+        // Timber clerestory standing on the lower eave — the storey between the two roofs.
+        int ux0 = cx - 14;
+        int ux1 = cx + 14;
+        int uz0 = cz - 5;
+        int uz1 = cz + 5;
+        for (int y = y0 + h + 8; y <= y0 + h + 9; y++) {
+            for (int x = ux0; x <= ux1; x++) {
+                b.put(x, y, uz0, p.accent());
+                b.put(x, y, uz1, p.accent());
+            }
+            for (int z = uz0 + 1; z <= uz1 - 1; z++) {
+                b.put(ux0, y, z, p.accent());
+                b.put(ux1, y, z, p.accent());
+            }
+        }
+        for (int x = ux0 + 2; x <= ux1 - 2; x += 4) {
+            b.window(x, y0 + h + 8, uz0, 2, 1, true);
+            b.window(x, y0 + h + 8, uz1, 2, 1, true);
+        }
+        // Upper eave: a narrower tiled roof with a ridge crest and a lantern.
+        b.pitchedRoof(ux0 - 3, uz0 - 3, ux1 + 3, uz1 + 3, y0 + h + 10, 5, 0);
+        b.fill(cx - 3, y0 + h + 16, cz, cx + 3, y0 + h + 16, cz, p.roof());
+        b.put(cx, y0 + h + 17, cz, p.light());
+    }
+
+    /** A small double-eaved pavilion (a flanking hall) on its own stone terrace. */
+    private static void pavilion(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int r = 7;
+        int y0 = ground + 3;
+        b.ground(cx - r - 2, cz - r - 2, cx + r + 2, cz + r + 2, ground, ground + 2, p.foundation());
+        b.room(cx - r, y0, cz - r, cx + r, y0 + 6, cz + r);
+        // Dark timber corner and mid posts.
+        for (int y = y0 + 1; y <= y0 + 6; y++) {
+            b.put(cx - r, y, cz - r, p.accent());
+            b.put(cx + r, y, cz - r, p.accent());
+            b.put(cx - r, y, cz + r, p.accent());
+            b.put(cx + r, y, cz + r, p.accent());
+            b.put(cx, y, cz - r, p.accent());
+            b.put(cx, y, cz + r, p.accent());
+            b.put(cx - r, y, cz, p.accent());
+            b.put(cx + r, y, cz, p.accent());
+        }
+        // Lower wide eave.
+        b.pitchedRoof(cx - r - 3, cz - r - 3, cx + r + 3, cz + r + 3, y0 + 6, 4, 0);
+        // Upper drum and its smaller roof.
+        b.room(cx - 3, y0 + 8, cz - 3, cx + 3, y0 + 10, cz + 3);
+        b.pitchedRoof(cx - 6, cz - 6, cx + 6, cz + 6, y0 + 10, 4, 0);
+        b.put(cx, y0 + 14, cz, p.light());
+    }
+
+    /** The tall decorative palace gate: a stone base with three archways under a double roof. */
+    private static void seoulGate(StructureBuilder b, int cx, int cz, int ground, Palette p) {
+        int w = 27;
+        int d = 11;
+        int h = 11;
+        int x0 = cx - w / 2;
+        int x1 = x0 + w - 1;
+        int z0 = cz - d / 2;
+        int z1 = z0 + d - 1;
+        int y0 = ground + 1;
+        BlockState air = Blocks.AIR.defaultBlockState();
+
+        b.ground(x0 - 3, z0 - 3, x1 + 3, z1 + 3, ground, ground, p.foundation());
+        b.room(x0, y0, z0, x1, y0 + h, z1, new Doorway(Side.S, w / 2), new Doorway(Side.N, w / 2));
+        // Two more gate openings beside the central one.
+        for (int dx : new int[]{-8, 8}) {
+            for (int y = y0 + 1; y <= y0 + 3; y++) {
+                b.put(cx + dx, y, z0, air);
+                b.put(cx + dx, y, z1, air);
+            }
+        }
+        // Dark timber posts up the base, carried past the first eave.
+        for (int x = x0; x <= x1; x += 4) {
+            b.fill(x, y0 + 1, z0, x, y0 + h, z0, p.accent());
+            b.fill(x, y0 + 1, z1, x, y0 + h, z1, p.accent());
+        }
+        // Lower roof, then the upper gallery and its roof.
+        b.pitchedRoof(x0 - 3, z0 - 3, x1 + 3, z1 + 3, y0 + h, 5, 0);
+        int ux0 = cx - 7;
+        int ux1 = cx + 7;
+        int uz0 = cz - 3;
+        int uz1 = cz + 3;
+        for (int y = y0 + h + 2; y <= y0 + h + 5; y++) {
+            for (int x = ux0; x <= ux1; x++) {
+                b.put(x, y, uz0, p.accent());
+                b.put(x, y, uz1, p.accent());
+            }
+            for (int z = uz0 + 1; z <= uz1 - 1; z++) {
+                b.put(ux0, y, z, p.accent());
+                b.put(ux1, y, z, p.accent());
+            }
+        }
+        b.pitchedRoof(ux0 - 3, uz0 - 3, ux1 + 3, uz1 + 3, y0 + h + 5, 4, 0);
+        b.put(cx, y0 + h + 11, cz, p.light());
     }
 
     @Override

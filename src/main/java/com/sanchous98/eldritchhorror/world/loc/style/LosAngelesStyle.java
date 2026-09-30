@@ -49,7 +49,87 @@ public final class LosAngelesStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        mission(b, cx, cz, ground, p);
+        // Capitol Records round tower: a cylindrical stack of horizontal record-bands on a low
+        // circular podium, topped by a glazed penthouse and a slender needle. The stacked,
+        // projecting accent bands are the silhouette cue — a pile of records.
+        int g = ground;
+
+        // Boulevard plaza.
+        b.ground(cx - 14, cz - 14, cx + 14, cz + 14, g, g, p.ground());
+
+        // Circular podium drum: radius 10, five high.
+        int podR = 10;
+        for (int y = g + 1; y <= g + 5; y++) {
+            for (int dx = -podR; dx <= podR; dx++) {
+                for (int dz = -podR; dz <= podR; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 > podR * podR) {
+                        continue;
+                    }
+                    boolean rim = d2 > (podR - 2) * (podR - 2);
+                    b.put(cx + dx, y, cz + dz, rim ? p.foundation() : p.wall());
+                }
+            }
+        }
+
+        // The tower shaft: stacked bands, each floor capped by a projecting record-groove ring.
+        int shaftBase = g + 6;
+        int shaftTop = shaftBase + 58;
+        int R = 7;
+        for (int y = shaftBase; y <= shaftTop; y++) {
+            boolean groove = ((y - shaftBase) % 5) == 4;
+            int r = groove ? R + 1 : R;
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (dx * dx + dz * dz > r * r) {
+                        continue;
+                    }
+                    b.put(cx + dx, y, cz + dz, groove ? p.accent() : p.wall());
+                }
+            }
+            // Window band on the shell, four faces, every third floor.
+            if (!groove && ((y - shaftBase) % 3) == 0) {
+                b.put(cx + R, y, cz, p.window());
+                b.put(cx - R, y, cz, p.window());
+                b.put(cx, y, cz + R, p.window());
+                b.put(cx, y, cz - R, p.window());
+            }
+        }
+
+        // Cornice ring at the top, one block wider than the shaft.
+        for (int dx = -R - 1; dx <= R + 1; dx++) {
+            for (int dz = -R - 1; dz <= R + 1; dz++) {
+                if (dx * dx + dz * dz <= (R + 1) * (R + 1)) {
+                    b.put(cx + dx, shaftTop + 1, cz + dz, p.accent());
+                }
+            }
+        }
+
+        // Glazed penthouse (the machine room under the spire).
+        int phBase = shaftTop + 2;
+        int phR = 4;
+        for (int y = phBase; y <= phBase + 4; y++) {
+            for (int dx = -phR; dx <= phR; dx++) {
+                for (int dz = -phR; dz <= phR; dz++) {
+                    int d2 = dx * dx + dz * dz;
+                    if (d2 > phR * phR) {
+                        continue;
+                    }
+                    boolean shell = d2 > (phR - 1) * (phR - 1);
+                    boolean win = shell && ((y - phBase) % 2 == 1);
+                    b.put(cx + dx, y, cz + dz, win ? p.window() : p.wall());
+                }
+            }
+        }
+        b.fill(cx - phR, phBase + 5, cz - phR, cx + phR, phBase + 5, cz + phR, p.roof());
+
+        // The needle: a small base ring, a tapering mast, and a lit tip.
+        int nBase = phBase + 6;
+        b.fill(cx - 1, nBase, cz - 1, cx + 1, nBase, cz + 1, p.accent());
+        for (int y = nBase + 1; y <= nBase + 9; y++) {
+            b.put(cx, y, cz, p.accent());
+        }
+        b.put(cx, nBase + 10, cz, p.light());
     }
 
     @Override

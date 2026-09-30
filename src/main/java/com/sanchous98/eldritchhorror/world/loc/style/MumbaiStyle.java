@@ -50,7 +50,102 @@ public final class MumbaiStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        gateway(b, cx, cz, ground, p);
+        // Gateway of India: a broad Indo-Saracenic basalt arch presented broadside to the water
+        // (the carved facade runs along X at z0; the passage passes straight through on Z),
+        // carried between two massy turreted towers crowned with domes.
+        int y0 = ground + 1;
+        int x0 = cx - 16;
+        int x1 = cx + 16;          // 33 blocks broad
+        int z0 = cz - 7;
+        int z1 = cz + 6;           // 14 blocks deep
+        int towerW = 9;
+        int ax0 = x0 + towerW;     // the great central bay, 15 blocks wide
+        int ax1 = x1 - towerW;
+        int yC = y0 + 46;          // head of the central wall
+        int yT = y0 + 72;          // head of the flanking towers
+        int zc = (z0 + z1) / 2;
+        int mxc = (ax0 + ax1) / 2;
+
+        // Paved plaza and a stepped basalt plinth, centred on the shore.
+        b.ground(x0 - 5, z0 - 5, x1 + 5, z1 + 5, ground, ground, p.foundation());
+        b.fill(x0 - 2, y0, z0 - 2, x1 + 2, y0, z1 + 2, p.foundation());
+
+        // --- two massy turreted towers --------------------------------------------
+        for (int s = 0; s < 2; s++) {
+            int tx0 = (s == 0) ? x0 : x1 - towerW + 1;
+            int tx1 = tx0 + towerW - 1;
+            int fc = (tx0 + tx1) / 2;
+            b.room(tx0, y0, z0, tx1, yT, z1);
+            // Quoined corner pilasters running the full height.
+            for (int y = y0; y <= yT; y++) {
+                b.put(tx0, y, z0, p.accent());
+                b.put(tx0, y, z1, p.accent());
+                b.put(tx1, y, z0, p.accent());
+                b.put(tx1, y, z1, p.accent());
+            }
+            // Banded cornices every twelve courses.
+            for (int y = y0 + 12; y <= yT - 6; y += 12) {
+                b.fill(tx0, y, z0, tx1, y, z0, p.accent());
+                b.fill(tx0, y, z1, tx1, y, z1, p.accent());
+                b.fill(tx0, y, z0, tx0, y, z1, p.accent());
+                b.fill(tx1, y, z0, tx1, y, z1, p.accent());
+            }
+            // Tall Indo-Saracenic niches and jharokha balconies over the water.
+            b.window(fc, y0 + 8, z0, 11, 5, true);
+            b.window(fc, y0 + 28, z0, 9, 5, true);
+            b.window(fc, y0 + 46, z0, 7, 3, true);
+            b.window(tx0, y0 + 10, zc, 9, 3, true);
+            b.window(tx0, y0 + 30, zc, 9, 3, true);
+            b.window(tx1, y0 + 10, zc, 9, 3, true);
+            b.window(tx1, y0 + 30, zc, 9, 3, true);
+            b.fill(tx0 + 1, y0 + 40, z0 - 1, tx1 - 1, y0 + 40, z0 - 1, p.roofSlab());
+            b.fill(tx0 + 1, y0 + 41, z0 - 1, tx1 - 1, y0 + 41, z0 - 1, p.rail());
+            // Crown: parapet and four domed corner turrets.
+            b.crenellations(tx0 - 1, z0 - 1, tx1 + 1, z1 + 1, yT + 1);
+            int[] txs = {tx0, tx1};
+            int[] tzs = {z0, z1};
+            for (int a = 0; a < 2; a++) {
+                for (int c = 0; c < 2; c++) {
+                    int ux = txs[a];
+                    int uz = tzs[c];
+                    b.fill(ux - 1, yT - 4, uz - 1, ux + 1, yT + 9, uz + 1, p.wall());
+                    b.fill(ux - 1, yT - 4, uz - 1, ux + 1, yT - 4, uz + 1, p.accent());
+                    b.put(ux, yT + 10, uz, p.accent());
+                    StyleKit.dome(b, ux, uz, yT + 11, 2, p);
+                }
+            }
+        }
+
+        // --- the great pointed arch ------------------------------------------------
+        int springY = y0 + 20;
+        int R = ax1 - ax0;                 // two-centre pointed profile
+        b.ground(ax0, z0, ax1, z1, ground, ground, p.ground());
+        for (int y = y0; y <= springY + 13; y++) {
+            b.put(ax0 - 1, y, z0, p.accent());
+            b.put(ax1 + 1, y, z0, p.accent());
+            b.put(ax0 - 1, y, z1, p.accent());
+            b.put(ax1 + 1, y, z1, p.accent());
+        }
+        for (int x = ax0; x <= ax1; x++) {
+            int dx = x - mxc;
+            int d = (dx <= 0) ? (ax1 - x) : (x - ax0);
+            int v = R * R - d * d;
+            int rise = v > 0 ? (int) Math.round(Math.sqrt((double) v)) : 0;
+            int yA = springY + rise;
+            // Two-course voussoir band on both carved facades.
+            b.put(x, yA, z0, p.accent());
+            b.put(x, yA, z1, p.accent());
+            b.put(x, yA - 1, z0, p.accent());
+            b.put(x, yA - 1, z1, p.accent());
+            // Solid spandrels above the arch, up to the wall head.
+            b.fill(x, yA + 1, z0, x, yC, z1, p.wall());
+            // Underside of the passage vault.
+            b.fill(x, yA, z0 + 1, x, yA, z1 - 1, p.wall());
+        }
+        // Central lantern-cupola and a low gable over the arch.
+        b.crenellations(ax0, z0, ax1, z1, yC + 1);
+        b.pitchedRoof(ax0 - 1, z0 + 1, ax1 + 1, z1 - 1, yC + 1, 4, 1);
+        StyleKit.dome(b, mxc, cz, yC + 6, 4, p);
     }
 
     @Override
