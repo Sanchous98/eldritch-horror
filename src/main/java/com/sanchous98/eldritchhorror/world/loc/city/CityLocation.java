@@ -223,7 +223,7 @@ public final class CityLocation implements Location {
         int z1 = z + d - 1;
 
         int gy = ground;
-        int y0 = gy + 1;
+        int y0 = gy;                  // interior floor is flush with the street, so the door is walkable
         int y1 = y0 + h;
 
         // Paved margin acts as the alley surface.
@@ -242,9 +242,6 @@ public final class CityLocation implements Location {
             b.put(x, y, z1, p.accent());
             b.put(x1, y, z1, p.accent());
         }
-
-        // Real door at the doorway (the room carving leaves air).
-        placeDoor(b, p, x, z, x1, z1, y0 + 1, doorSide, doorOffset);
 
         // Roof silhouette: a low flat parapet here and there, otherwise a steep ridge whose
         // height varies a lot; some get a chimney.
@@ -291,6 +288,10 @@ public final class CityLocation implements Location {
         decay(b, rng, x, y0, z, x1, y1, z1, p);
         style.flourish(b, rng, x, y0, z, x1, y1, z1, p);
 
+        // Door LAST, so windows/decay/flourish cannot overwrite it; it also re-carves its opening
+        // and lays a threshold so the doorway is walkable from the street.
+        placeDoor(b, p, x, z, x1, z1, y0 + 1, doorSide, doorOffset);
+
         // A single guttering light in some buildings only.
         if (rng.nextFloat() < 0.3f) {
             b.put((x + x1) / 2, y1 - 2, (z + z1) / 2, p.light());
@@ -307,21 +308,19 @@ public final class CityLocation implements Location {
         int z1 = z + d - 1;
 
         int gy = ground;
-        int y0 = gy + 1;
+        int y0 = gy;                  // floor flush with the street (walkable door)
         int y1 = y0 + h;
 
         b.ground(x - 1, z - 1, x1 + 1, z1 + 1, gy - 1, gy, p.ground());
         Side doorSide = Side.values()[rng.nextInt(4)];
         int doorOffset = 1 + rng.nextInt(Math.max(1, (doorSide == Side.N || doorSide == Side.S ? w : d) - 2));
         b.room(x, y0, z, x1, y1, z1, new StructureBuilder.Doorway(doorSide, doorOffset));
-        b.fill(x, y0, z, x1, y0, z1, p.foundation());
         for (int y = y0; y <= y1; y++) {
             b.put(x, y, z, p.accent());
             b.put(x1, y, z, p.accent());
             b.put(x, y, z1, p.accent());
             b.put(x1, y, z1, p.accent());
         }
-        placeDoor(b, p, x, z, x1, z1, y0 + 1, doorSide, doorOffset);
 
         // Stacked windows up the shaft, and small lights near the top (a beacon).
         for (int yy = y0 + 3; yy <= y1 - 3; yy += 4) {
@@ -337,6 +336,9 @@ public final class CityLocation implements Location {
         // A weathered skirt and rubble so it does not look freshly built.
         b.scatter(x - 1, z - 1, x1 + 1, z1 + 1, y0, y0, p.rubble(), 0.15f);
         style.flourish(b, rng, x, y0, z, x1, y1, z1, p);
+
+        // Door LAST so windows do not overwrite it; re-carves its opening.
+        placeDoor(b, p, x, z, x1, z1, y0 + 1, doorSide, doorOffset);
     }
 
     /**
@@ -432,6 +434,10 @@ public final class CityLocation implements Location {
             case W -> { dx = x0; dz = z0 + offset; facing = Direction.WEST; }
             default -> { dx = x1; dz = z0 + offset; facing = Direction.EAST; }
         }
+        BlockState air = Blocks.AIR.defaultBlockState();
+        // Carve the passage so nothing (quoin, window, rubble) blocks it.
+        b.put(dx, y, dz, air);
+        b.put(dx, y + 1, dz, air);
         BlockState lower = p.door()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, facing)
                 .setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
