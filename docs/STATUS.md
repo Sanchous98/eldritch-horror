@@ -57,6 +57,13 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - **Second-echelon sites reviewed** by render: `drowned_temple` was built on the deep seabed and
   showed as open ocean — it now rises above sea level on a pedestal. The other four read but are
   small/plain (a later polish pass). See `docs/STATUS.md` render notes.
+- **Site polish (v2)**: `Location.renderRadius()` decouples the rendered extent from the cull
+  radius, so sites fill the frame; `cult_stronghold`/`order_vault` gained taller walls/towers/a
+  dominant strongroom; the altar got a stepped plinth and a ring of standing stones (now legible
+  from above); `rift_scar` became a meandering canyon with a leaning monolith. The altar and rift
+  were also moved onto flat lowland (picked from the baked elevation map) because their fixed
+  original spots sat on ~900 m of relief, where a shallow feature reads as a hill. Sites remain
+  five fixed coordinates.
 - **Honest coastline**: the landmask is authoritative — ETOPO shelf elevations can no longer
   surface as land in shallow water (fixed the Rio de la Plata estuary).
 - **Second-echelon sites** (`world/loc/site/`): `cult_stronghold`, `order_vault`, `drowned_temple`,

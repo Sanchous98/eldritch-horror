@@ -5,20 +5,26 @@ import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
 import com.sanchous98.eldritchhorror.world.loc.Tier;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
 
 /**
  * A minor open-air ritual site: a clearly built raised plinth and a marked central altar, ringed
- * by a readable circle of standing stones, with burnt offerings and a broken processional path.
- * Something was summoned here — and answered.
+ * by a readable circle of tall standing stones, with burnt offerings and a broken processional
+ * path. Something was summoned here — and answered.
+ *
+ * <p>The whole site is built at roughly double the earlier scale so the concentric steps, the
+ * marked altar and the stone circle are legible from directly above, not just at ground level.
  */
 public final class RitualAltarSite implements Location {
 
     /** Radius of the stone circle (blocks). */
-    private static final int RING = 22;
+    private static final int RING = 30;
     /** Plinth half-width: the raised stepped dais under the altar. */
-    private static final int PLINTH = 7;
+    private static final int PLINTH = 13;
     /** Number of standing stones in the ring. */
-    private static final int STONES = 12;
+    private static final int STONES = 16;
+    /** Number of stepped plinth tiers, one course apart. */
+    private static final int TIERS = 4;
 
     private final int centerX;
     private final int centerZ;
@@ -46,7 +52,7 @@ public final class RitualAltarSite implements Location {
 
     @Override
     public int renderRadius() {
-        return RING + 30; // render the built circle, not the 60 cull radius
+        return RING + 8; // the built circle (RING+6), not the 60 cull radius
     }
 
     @Override
@@ -58,17 +64,40 @@ public final class RitualAltarSite implements Location {
         RandomSource rng = b.rng();
         int y0 = ground + 1;
 
-        // Trampled, ash-streaked clearing.
-        b.ground(cx - RING - 6, cz - RING - 6, cx + RING + 6, cz + RING + 6,
-                ground, ground, p.ground());
+        // Trampled, ash-streaked clearing. Land-gated and chunk-local (no rng), so a coastal edge
+        // is never paved as a floating slab and the per-chunk cost stays flat.
+        int x0 = b.chunkMinX();
+        int z0 = b.chunkMinZ();
+        int clear = RING + 6;
+        int c2 = clear * clear;
+        for (int x = x0; x < x0 + 16; x++) {
+            int dx = x - cx;
+            if (dx * dx > c2) {
+                continue;
+            }
+            for (int z = z0; z < z0 + 16; z++) {
+                int dz = z - cz;
+                if (dx * dx + dz * dz > c2 || !b.isLand(x, z)) {
+                    continue;
+                }
+                b.ground(x, z, x, z, ground, ground, p.ground());
+                // Clear biome vegetation above the clearing so the ring is not buried in trees.
+                for (int y = ground + 1; y <= ground + 12; y++) {
+                    b.put(x, y, z, Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
 
-        // The stone circle: evenly spaced standing stones of graded height, each on a small paved
-        // base so the ring reads as a deliberate arrangement rather than a random clump.
+        // The stone circle: evenly spaced TALL monoliths of graded height, each on a wider paved
+        // base, so the ring reads as a deliberate arrangement from the top view.
         for (int i = 0; i < STONES; i++) {
             double a = i * 2.0 * Math.PI / STONES;
             int mx = cx + (int) Math.round(Math.cos(a) * RING);
             int mz = cz + (int) Math.round(Math.sin(a) * RING);
-            b.ground(mx - 1, mz - 1, mx + 1, mz + 1, ground, ground, p.foundation());
+            if (!b.isLand(mx, mz)) {
+                continue; // never plant a stone over water
+            }
+            b.ground(mx - 2, mz - 2, mx + 2, mz + 2, ground, ground, p.foundation());
             standingStone(b, rng, mx, mz, y0, p);
         }
 
@@ -92,37 +121,51 @@ public final class RitualAltarSite implements Location {
 
     // ------------------------------------------------------------------ pieces
 
-    /** A raised, stepped plinth carrying a marked altar: the site's unmistakable built centre. */
-    private static void altar(StructureBuilder b, Palette p, int cx, int cz, int ground) {
+    /**
+     * A raised, four-tier stepped plinth carrying a marked altar. Each tier is visibly inset by
+     * two blocks and exactly one course higher than the last, so the height shading reads clearly
+     * from above; the top step carries accent posts, a distinct altar block and a lit brazier.
+     */
+    private static void altar(StructureBuilder b, Palette p,
+                              int cx, int cz, int ground) {
         int y0 = ground + 1;
-        // Three stepped courses, widest at the base, so the dais reads as architecture.
-        b.fill(cx - PLINTH, y0, cz - PLINTH, cx + PLINTH, y0, cz + PLINTH, p.foundation());
-        b.fill(cx - PLINTH + 2, y0 + 1, cz - PLINTH + 2, cx + PLINTH - 2, y0 + 1, cz + PLINTH - 2,
-                p.wall());
-        b.fill(cx - PLINTH + 4, y0 + 2, cz - PLINTH + 4, cx + PLINTH - 4, y0 + 2, cz + PLINTH - 4,
-                p.foundation());
-        // A ring of accent posts around the top step reads as a marked ritual margin.
+        for (int t = 0; t < TIERS; t++) {
+            int inset = t * 2;
+            int h = PLINTH - inset;
+            if (h < 1) {
+                break;
+            }
+            // Alternating foundation / wall courses make the step edges legible in height shading.
+            b.fill(cx - h, y0 + t, cz - h, cx + h, y0 + t, cz + h,
+                    (t & 1) == 0 ? p.foundation() : p.wall());
+        }
+        int top = y0 + TIERS - 1;
+        int topHalf = Math.max(1, PLINTH - (TIERS - 1) * 2);
+        // Accent posts around the top step mark the ritual margin.
         for (int i = 0; i < 8; i++) {
             double a = i * Math.PI / 4.0;
-            int px = cx + (int) Math.round(Math.cos(a) * (PLINTH - 4));
-            int pz = cz + (int) Math.round(Math.sin(a) * (PLINTH - 4));
-            b.put(px, y0 + 3, pz, p.accent());
+            int px = cx + (int) Math.round(Math.cos(a) * topHalf);
+            int pz = cz + (int) Math.round(Math.sin(a) * topHalf);
+            b.put(px, top + 1, pz, p.accent());
         }
         // The defiled altar block itself: weathered, deliberately distinct from the plinth.
-        b.fill(cx - 1, y0 + 3, cz - 1, cx + 1, y0 + 3, cz + 1, p.weathered());
-        b.put(cx + 1, y0 + 4, cz + 1, p.light());
-        b.put(cx - 2, y0 + 4, cz + 1, p.frame());
-        b.put(cx - 2, y0 + 5, cz + 1, p.accent());
+        b.fill(cx - 1, top + 1, cz - 1, cx + 1, top + 1, cz + 1, p.weathered());
+        b.put(cx, top + 2, cz, p.frame());
+        b.put(cx + 1, top + 1, cz + 1, p.light());
+        // A lit brazier beside the altar, with a fuel course beneath the flame.
+        b.put(cx - 2, top + 1, cz, p.foundation());
+        b.put(cx - 2, top + 2, cz, p.light());
+        b.put(cx - 1, top + 2, cz + 1, p.accent());
     }
 
-    /** One standing stone: a graded, slightly irregular pillar on its paved base. */
+    /** One standing stone: a TALL, slightly irregular pillar on its paved base. */
     private static void standingStone(StructureBuilder b, RandomSource rng, int x, int z, int y0,
                                       Palette p) {
-        int h = 4 + rng.nextInt(4);
+        int h = 6 + rng.nextInt(5); // 6..10 tall, so the circle carries from above
         for (int i = 0; i < h; i++) {
             b.put(x, y0 + i, z, i == 0 ? p.foundation() : p.wall());
         }
-        if (rng.nextFloat() < 0.4f) {
+        if (rng.nextFloat() < 0.5f) {
             b.put(x, y0 + h, z, p.accent());
         }
     }

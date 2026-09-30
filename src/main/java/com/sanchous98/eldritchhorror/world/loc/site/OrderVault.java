@@ -11,10 +11,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 
 /**
- * The vault of a militant order that keeps what must not be seen. A tall crenellated enclosure
- * with a fortified gatehouse holds a central strongroom ringed by deep archive cells; a ring of
- * obelisks marks the seal at the centre. The roof of the strongroom is holed, the archive doors
- * hang open, and the order itself is long dead.
+ * The vault of a militant order that keeps what must not be seen. A crenellated enclosure with a
+ * fortified gatehouse holds a single dominant, heavily sealed strongroom — the mass of the whole
+ * compound — ringed by deep archive cells; a ring of obelisks marks the seal at the centre. Low
+ * corner buttresses, not towers, carry the enclosure so the silhouette reads "vault with a
+ * strongroom", not "stronghold with towers". The roof of the strongroom is holed, the archive
+ * doors hang open, and the order itself is long dead.
  */
 public final class OrderVault implements Location {
 
@@ -22,6 +24,8 @@ public final class OrderVault implements Location {
     private static final int WALL = 31;
     /** Height of the enclosure wall above the precinct floor. */
     private static final int WALL_H = 9;
+    /** Height of the central strongroom above the precinct floor — well above the walls. */
+    private static final int STRONGROOM_H = 22;
 
     private final int centerX;
     private final int centerZ;
@@ -64,14 +68,15 @@ public final class OrderVault implements Location {
         // Paved precinct inside the enclosure.
         b.ground(cx - WALL, cz - WALL, cx + WALL, cz + WALL, ground, ground, p.ground());
 
-        // Tall enclosure wall, crenellated, with a thick foundation course and corner towers.
+        // Tall enclosure wall, crenellated, with a thick foundation course and low corner buttresses.
         b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + WALL_H, cz + WALL, p.wall());
         b.walls(cx - WALL, y0, cz - WALL, cx + WALL, y0 + 1, cz + WALL, p.foundation());
         b.crenellations(cx - WALL, cz - WALL, cx + WALL, cz + WALL, y0 + WALL_H + 1);
-        cornerTower(b, p, cx - WALL, cz - WALL, ground);
-        cornerTower(b, p, cx + WALL, cz - WALL, ground);
-        cornerTower(b, p, cx - WALL, cz + WALL, ground);
-        cornerTower(b, p, cx + WALL, cz + WALL, ground);
+        // Low corner buttresses rather than towers, so the central strongroom owns the silhouette.
+        cornerButtress(b, p, cx - WALL, cz - WALL, ground, 1, 1);
+        cornerButtress(b, p, cx + WALL, cz - WALL, ground, -1, 1);
+        cornerButtress(b, p, cx - WALL, cz + WALL, ground, 1, -1);
+        cornerButtress(b, p, cx + WALL, cz + WALL, ground, -1, -1);
 
         // Gatehouse breaking the south wall.
         gatehouse(b, p, cx, cz + WALL, ground);
@@ -116,7 +121,7 @@ public final class OrderVault implements Location {
 
     private static void strongroom(StructureBuilder b, Palette p, int cx, int cz, int ground) {
         int y0 = ground + 1;
-        int h = 14;
+        int h = STRONGROOM_H;
         int half = 11;
         b.room(cx - half, y0, cz - half, cx + half, y0 + h, cz + half, new Doorway(Side.S, half));
         b.fill(cx - half, y0, cz - half, cx + half, y0, cz + half, p.foundation());
@@ -127,16 +132,20 @@ public final class OrderVault implements Location {
             b.put(cx + half, y, cz + half, p.accent());
         }
         for (int wx = cx - half + 3; wx <= cx + half - 3; wx += 4) {
-            b.window(wx, y0 + 5, cz - half, 5, 1, true);
-            b.window(wx, y0 + 5, cz + half, 5, 1, true);
+            b.window(wx, y0 + 9, cz - half, 5, 1, true);
+            b.window(wx, y0 + 9, cz + half, 5, 1, true);
+            b.window(wx, y0 + 16, cz - half, 4, 1, true);
+            b.window(wx, y0 + 16, cz + half, 4, 1, true);
         }
         for (int wz = cz - half + 3; wz <= cz + half - 3; wz += 4) {
-            b.window(cx - half, y0 + 5, wz, 5, 1, true);
-            b.window(cx + half, y0 + 5, wz, 5, 1, true);
+            b.window(cx - half, y0 + 9, wz, 5, 1, true);
+            b.window(cx + half, y0 + 9, wz, 5, 1, true);
+            b.window(cx - half, y0 + 16, wz, 4, 1, true);
+            b.window(cx + half, y0 + 16, wz, 4, 1, true);
         }
         for (int z = cz - half + 2; z <= cz + half - 2; z += 5) {
-            b.buttress(cx - half, z, y0, 6, Side.W);
-            b.buttress(cx + half, z, y0, 6, Side.E);
+            b.buttress(cx - half, z, y0, 10, Side.W);
+            b.buttress(cx + half, z, y0, 10, Side.E);
         }
         b.pitchedRoof(cx - half - 1, cz - half - 1, cx + half + 1, cz + half + 1, y0 + h, 10, 0);
         b.spire(cx, cz, y0 + h + 10, 16);
@@ -146,32 +155,39 @@ public final class OrderVault implements Location {
         b.put(cx, y0 + h - 3, cz, p.light());
     }
 
-    /** Jambs, lintel and a pair of lights marking the strongroom's sealed door. */
+    /** Heavy jambs, a deep lintel, a sealed slab and paired lights marking the strongroom portal. */
     private static void vaultPortal(StructureBuilder b, Palette p, int cx, int z, int y0) {
-        for (int y = y0 + 1; y <= y0 + 3; y++) {
+        // Thick flanking jambs, two deep, rising well past the door head.
+        for (int y = y0 + 1; y <= y0 + 5; y++) {
+            b.put(cx - 2, y, z, p.accent());
             b.put(cx - 1, y, z, p.accent());
             b.put(cx + 1, y, z, p.accent());
+            b.put(cx + 2, y, z, p.accent());
+            b.put(cx - 2, y, z, p.foundation());
+            b.put(cx + 2, y, z, p.foundation());
         }
-        b.fill(cx - 1, y0 + 4, z, cx + 1, y0 + 4, z, p.accent());
-        b.put(cx - 1, y0 + 5, z, p.light());
-        b.put(cx + 1, y0 + 5, z, p.light());
+        // A deep lintel and a sealed course above the door.
+        b.fill(cx - 2, y0 + 6, z, cx + 2, y0 + 6, z, p.foundation());
+        b.fill(cx - 2, y0 + 7, z, cx + 2, y0 + 7, z, p.accent());
+        b.put(cx - 1, y0 + 8, z, p.light());
+        b.put(cx + 1, y0 + 8, z, p.light());
     }
 
-    /** A tall crenellated corner tower: the enclosure's strong silhouette accent. */
-    private static void cornerTower(StructureBuilder b, Palette p, int x, int z, int ground) {
+    /** A low, solid corner buttress: mass at the enclosure corner without a tower silhouette. */
+    private static void cornerButtress(StructureBuilder b, Palette p, int x, int z, int ground,
+                                       int inwardX, int inwardZ) {
         int y0 = ground + 1;
-        int half = 4;
-        int h = 12;
-        b.room(x - half, y0, z - half, x + half, y0 + h, z + half);
-        b.fill(x - half, y0, z - half, x + half, y0, z + half, p.foundation());
-        for (int y = y0; y < y0 + h; y++) {
-            b.put(x - half, y, z - half, p.accent());
-            b.put(x + half, y, z - half, p.accent());
-            b.put(x - half, y, z + half, p.accent());
-            b.put(x + half, y, z + half, p.accent());
-        }
-        b.window(x, y0 + 6, z - half, 3, 1, true);
-        b.crenellations(x - half, z - half, x + half, z + half, y0 + h + 1);
+        int h = 3;
+        // A solid low mass (fill, not room) — a buttress, deliberately not a hollow turret.
+        b.fill(x - 1, y0, z - 1, x + 1, y0 + h, z + 1, p.foundation());
+        b.fill(x, y0, z, x, y0 + h, z, p.wall());
+        // A stepped shoulder leaning into the precinct, so it reads as a buttress not a turret.
+        b.put(x + inwardX, y0 + h, z + inwardZ, p.foundation());
+        b.put(x + 2 * inwardX, y0, z + 2 * inwardZ, p.foundation());
+        b.put(x + 2 * inwardX, y0 + 1, z + 2 * inwardZ, p.foundation());
+        b.put(x, y0 + h + 1, z, p.accent());
+        b.put(x, y0 + 1, z + inwardZ, p.accent());
+        b.put(x + inwardX, y0 + 1, z, p.accent());
     }
 
     private static void archive(StructureBuilder b, Palette p, int cx, int cz, int ground) {
@@ -191,9 +207,9 @@ public final class OrderVault implements Location {
             b.scatter(cx - WALL, cz - WALL, cx + WALL, cz + WALL, y0 + 1, y0 + 4,
                     p.overgrowth(), 0.06f);
         }
-        b.scatter(cx - 10, cz - 10, cx + 10, cz + 10, y0 + 1, y0 + 10, Palette.cobweb(), 0.06f);
-        // The strongroom roof has been forced open from within.
-        b.ruins(cx - 11, y0 + 14, cz - 11, cx + 11, y0 + 24, cz + 11, 0.12f);
+        b.scatter(cx - 10, cz - 10, cx + 10, cz + 10, y0 + 1, y0 + 18, Palette.cobweb(), 0.06f);
+        // The tall strongroom roof has been forced open from within.
+        b.ruins(cx - 11, y0 + STRONGROOM_H, cz - 11, cx + 11, y0 + STRONGROOM_H + 15, cz + 11, 0.12f);
         // The east enclosure wall is breached.
         b.ruins(cx + WALL - 6, y0, cz - WALL, cx + WALL, y0 + 7, cz + WALL, 0.14f);
     }

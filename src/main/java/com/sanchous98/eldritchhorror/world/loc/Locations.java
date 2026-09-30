@@ -92,8 +92,10 @@ public final class Locations {
             register(new com.sanchous98.eldritchhorror.world.loc.site.CultStronghold(-29127, -13835), -29127, -13835);
             register(new com.sanchous98.eldritchhorror.world.loc.site.OrderVault(8010, -17476), 8010, -17476);
             register(new com.sanchous98.eldritchhorror.world.loc.site.DrownedTemple(-14564, -10559), -14564, -10559);
-            register(new com.sanchous98.eldritchhorror.world.loc.site.RitualAltarSite(8738, -8010), 8738, -8010);
-            register(new com.sanchous98.eldritchhorror.world.loc.site.RiftScar(36409, -17112), 36409, -17112);
+            // Sites that must read from above (a stepped altar circle, a canyon) sit on flat
+            // lowland so they are not swallowed by relief — chosen from the baked elevation map.
+            register(new com.sanchous98.eldritchhorror.world.loc.site.RitualAltarSite(-46944, -24736), -46944, -24736);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.RiftScar(-53344, -24224), -53344, -24224);
             initialised = true;
             EldritchHorror.LOGGER.info("registered {} fixed locations", ENTRIES.size());
         }
