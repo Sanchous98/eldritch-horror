@@ -41,6 +41,8 @@ public final class CityLocation implements Location {
     private static final int DISTRICT_CAP = 380;
     /** Plaza half-extent: wide enough to seat the enlarged style landmarks on paving. */
     private static final int PLAZA = 30;
+    /** Radius kept clear of ordinary buildings so the (now large) landmark has room. */
+    private static final int INNER_CLEAR = 46;
 
     private final City city;
 
@@ -82,7 +84,7 @@ public final class CityLocation implements Location {
 
         int district = Math.min(radius(), DISTRICT_CAP);
         int plaza = PLAZA;
-        int inner = plaza + 6;
+        int inner = INNER_CLEAR;
 
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
