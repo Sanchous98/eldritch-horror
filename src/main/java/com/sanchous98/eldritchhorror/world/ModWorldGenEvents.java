@@ -1,6 +1,8 @@
 package com.sanchous98.eldritchhorror.world;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.world.loc.Location;
+import com.sanchous98.eldritchhorror.world.loc.Locations;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.Biome;
@@ -57,6 +59,7 @@ public final class ModWorldGenEvents {
     @SubscribeEvent
     public static void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         maybeRenderCities(event);
+        maybeForceload(event);
         String city = System.getProperty("eh.debugCity");
         if (city == null || city.isBlank()) {
             return;
@@ -87,6 +90,35 @@ public final class ModWorldGenEvents {
      * <p>{@code -Deh.renderExit=true} shuts the server down when the selected slice is finished
      * (handy for a one-shot render run).
      */
+    /**
+     * Dev aid: {@code -Deh.forceload=name:radius,...} force-loads a disc around each named fixed
+     * location so its generation can be exercised (and logged) without a client.
+     */
+    private static void maybeForceload(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        String prop = System.getProperty("eh.forceload");
+        if (prop == null || prop.isBlank()) {
+            return;
+        }
+        var src = event.getServer().createCommandSourceStack();
+        for (String part : prop.split(",")) {
+            String[] kv = part.split(":");
+            String name = kv[0].trim();
+            int r = kv.length > 1 ? Integer.parseInt(kv[1].trim()) : 96;
+            boolean hit = false;
+            for (Location loc : Locations.byId(name)) {
+                int x = Locations.xOf(loc);
+                int z = Locations.zOf(loc);
+                event.getServer().getCommands().performPrefixedCommand(src,
+                        "forceload add " + (x - r) + " " + (z - r) + " " + (x + r) + " " + (z + r));
+                EldritchHorror.LOGGER.info("forceload: {} at ({}, {}) r={}", loc.id(), x, z, r);
+                hit = true;
+            }
+            if (!hit) {
+                EldritchHorror.LOGGER.warn("forceload: '{}' not found", name);
+            }
+        }
+    }
+
     private static void maybeRenderCities(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         String prop = System.getProperty("eh.renderCities");
         if (prop == null || prop.isBlank()) {

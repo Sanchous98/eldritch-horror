@@ -41,6 +41,39 @@ public final class Locations {
         ENTRIES.add(new Entry(loc, x, z));
     }
 
+    /** All registered locations whose id contains (case-insensitively) the given text. */
+    public static List<Location> byId(String text) {
+        init();
+        List<Location> out = new ArrayList<>();
+        String needle = text.toLowerCase(java.util.Locale.ROOT);
+        for (Entry e : ENTRIES) {
+            if (e.loc().id().toLowerCase(java.util.Locale.ROOT).contains(needle)) {
+                out.add(e.loc());
+            }
+        }
+        return out;
+    }
+
+    /** Registered centre X of a location, or 0 if unknown. */
+    public static int xOf(Location loc) {
+        for (Entry e : ENTRIES) {
+            if (e.loc() == loc) {
+                return e.x();
+            }
+        }
+        return 0;
+    }
+
+    /** Registered centre Z of a location, or 0 if unknown. */
+    public static int zOf(Location loc) {
+        for (Entry e : ENTRIES) {
+            if (e.loc() == loc) {
+                return e.z();
+            }
+        }
+        return 0;
+    }
+
     /** One-time registration of the curated cities. */
     private static void init() {
         if (initialised) {
@@ -55,6 +88,12 @@ public final class Locations {
                 EldritchHorror.LOGGER.info("  city {} -> style '{}'",
                         city.name(), CityStyles.forCity(city.name()).id());
             }
+            // Second-echelon sites: ruins, vaults and scars scattered far from the cities.
+            register(new com.sanchous98.eldritchhorror.world.loc.site.CultStronghold(-29127, -13835), -29127, -13835);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.OrderVault(8010, -17476), 8010, -17476);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.DrownedTemple(-14564, -10559), -14564, -10559);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.RitualAltarSite(8738, -8010), 8738, -8010);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.RiftScar(36409, -17112), 36409, -17112);
             initialised = true;
             EldritchHorror.LOGGER.info("registered {} fixed locations", ENTRIES.size());
         }
