@@ -18,7 +18,11 @@ players expect legibility — this doc resolves that tension.
 ## HUD
 
 - Extensible widget framework so systems register their own meters.
-- Sanity and corruption are the two baseline widgets.
+- Sanity and corruption are the two baseline widgets. They **occupy reclaimed vanilla slots**:
+  **sanity sits where the food bar was; corruption where the experience bar was**. The vanilla
+  food and experience bars are hidden, and their mechanics are disabled (no hunger, no enchanting
+  — see `24-sanity-and-corruption.md`). Health and armour bars are untouched.
+- The corruption bar fills like experience but is a *cost*, segmenting by stage.
 - Event toasts for notable occurrences (rift opened, rank up, nightmare).
 
 ## Codex

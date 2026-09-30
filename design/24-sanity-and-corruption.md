@@ -16,14 +16,22 @@ tonight; corruption is the tab you can never fully close (see `04-pillars.md`: p
 price). The two interlock: high corruption suppresses sanity recovery and unlocks the worst
 effects.
 
-## Sanity replaces hunger (decided)
+## Sanity replaces hunger; corruption replaces experience (decided)
 
-There is **no hunger/food system**. Vanilla hunger is disabled (the player's `FoodData` is
-pinned full — no food drain, no starvation, no hunger-based weakness) and the **sanity meter
-occupies the food bar's HUD position**. This mirrors the tabletop, which has no food track.
-Food is therefore **not a survival resource**: crops/animals/fish remain only as
-offerings/reagents for rites. Health regeneration is decoupled from food (see Implementation
-notes).
+There is **no hunger/food system and no experience/enchanting system**. Both vanilla HUD slots are
+repurposed, and both vanilla mechanics are disabled (soft-freeze, no mixin required if the
+accessors exist in 26.3 — verify at build time):
+
+| Vanilla HUD slot | Becomes | Vanilla mechanic |
+|---|---|---|
+| Food bar | **Sanity meter** | food pinned full (no drain/starvation) |
+| Experience bar | **Corruption meter** | experience pinned to 0 (no enchanting/anvil XP) |
+
+This mirrors the tabletop, which has no food track and whose "magic" is spells, not enchanting.
+**Magic in this mod is rituals only**: the enchanting table, XP orbs and Mending have no role;
+repair/improvement goes through rituals and items instead. Health and armour bars are untouched.
+The corruption bar fills like experience but is a *cost*, not a currency — it segments by stage
+(Dormant → Touched → Marked → Claimed).
 
 ## Sanity model (decided)
 
@@ -139,8 +147,10 @@ where sanity is what tonight costs, corruption is what the run costs.
 - **Threshold effects:** a table (config/data) mapping state → debuff set; apply/clear on
   transitions, not every tick.
 - **Client half:** HUD meter, whisper/particle overlay and hallucinations — no gameplay state.
-- **Replaces hunger:** on the client, hide the vanilla `FOOD` layer and draw the sanity meter in
-  its place; on the server, pin `FoodData` full each tick (no mixin required if the GUI-layer
-  event and `FoodData` accessors are available in 26.3 — verify at build time).
+- **Replaces hunger and experience:** on the client, hide the vanilla `FOOD` and experience layers
+  and draw the sanity (food slot) and corruption (experience slot) meters in their place; on the
+  server, pin `FoodData` full and experience to 0 each tick (no mixin required if the GUI-layer
+  event and accessors are available in 26.3 — verify at build time). Enchanting is gone; rituals
+  are the only "magic".
 - **Config (`SERVER` type):** `enableSanity`, `enableCorruption`, `sanityDrainMultiplier`,
   per-source rates, stage thresholds, pooled-vs-individual mode.
