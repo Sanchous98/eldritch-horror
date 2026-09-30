@@ -59,8 +59,9 @@ public final class EldritchHorror {
         ModWorldGen.CHUNK_GENERATORS.register(modEventBus);
         ModWorldGen.BIOME_SOURCES.register(modEventBus);
 
-        // Config.
-        modContainer.registerConfig(Type.COMMON, ModConfig.SPEC);
+        // Config. Sanity/corruption knobs are gameplay rules, so they live in the SERVER config
+        // (synced from server to clients) rather than COMMON — see design/27-systems-framework.md.
+        modContainer.registerConfig(Type.SERVER, ModConfig.SPEC);
 
         // Gameplay event listeners (sanity ticking, corruption spread, ritual validation, ...)
         // should be registered here, e.g. NeoForge.EVENT_BUS.register(SomeListener.class).

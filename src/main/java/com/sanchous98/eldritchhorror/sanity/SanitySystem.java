@@ -43,4 +43,14 @@ public final class SanitySystem {
     public static double add(ServerPlayer player, double delta) {
         return set(player, get(player) + delta);
     }
+
+    /** The meter ceiling. A future {@code max_sanity} attribute will override {@link #DEFAULT_MAX}. */
+    public static double max() {
+        return DEFAULT_MAX;
+    }
+
+    /** The current state band for {@code player}, derived from the meter and the configured cut-offs. */
+    public static SanityState state(ServerPlayer player) {
+        return SanityState.of(get(player));
+    }
 }
