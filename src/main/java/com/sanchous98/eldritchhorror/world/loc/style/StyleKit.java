@@ -211,12 +211,11 @@ public final class StyleKit {
 
     // ------------------------------------------------------------------ generic props
 
-    /** A lamp / lantern post beside a street. Sits on the ground at its own column. */
+    /** A lamp / lantern post beside a street. The district is flat, so `ground` is correct. */
     public static void lanternPost(StructureBuilder b, int x, int z, int ground, Palette p) {
-        int g = b.groundY(x, z);
-        b.put(x, g + 1, z, p.rail());
-        b.put(x, g + 2, z, p.rail());
-        b.put(x, g + 3, z, p.light());
+        b.put(x, ground + 1, z, p.rail());
+        b.put(x, ground + 2, z, p.rail());
+        b.put(x, ground + 3, z, p.light());
     }
 
     /** A tall obelisk (monument/plinth) at a plaza. */

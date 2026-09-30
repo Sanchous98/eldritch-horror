@@ -99,7 +99,7 @@ public final class CityLocation implements Location {
 
         // 1b. Pave the whole district on land, so the city reads as urban fabric rather than
         // scattered buildings on wild terrain. Chunk-clipped: only this chunk's columns write.
-        paveDistrict(b, rng, cx, cz, district, p);
+        paveDistrict(b, rng, cx, cz, district, p, ground);
 
         // 2. Landmark: the cultural skyline piece (cathedral / temple / mosque / pagoda …).
         style.landmark(b, rng, cx, cz, ground, p);
@@ -126,7 +126,7 @@ public final class CityLocation implements Location {
                 if (rng.nextFloat() > 0.82f) {
                     continue; // a few vacant lots
                 }
-                building(b, rng, x, z, p, style);
+                building(b, rng, x, z, ground, p, style);
                 built++;
             }
         }
@@ -145,7 +145,7 @@ public final class CityLocation implements Location {
      * buildings floating on untouched terrain. Deterministic and chunk-clipped.
      */
     private static void paveDistrict(StructureBuilder b, RandomSource rng, int cx, int cz,
-                                     int district, Palette p) {
+                                     int district, Palette p, int ground) {
         // Only the columns of the chunk currently generating are visited (O(256) per chunk),
         // so paving costs the same regardless of district size.
         int x0 = b.chunkMinX();
@@ -163,11 +163,18 @@ public final class CityLocation implements Location {
                 if (!b.isLand(x, z)) {
                     continue;
                 }
-                int gy = b.groundY(x, z);
-                b.put(x, gy, z, p.ground());
+                // Flatten the whole district to the single city-centre level: cut hills down,
+                // fill hollows up, then cap every column with one paving course.
+                int surface = b.groundY(x, z);
+                if (surface > ground) {
+                    b.fill(x, ground + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
+                } else if (surface < ground) {
+                    b.fill(x, surface + 1, z, x, ground, z, p.foundation());
+                }
+                b.put(x, ground, z, p.ground());
                 // Clear the vanilla vegetation the biome decoration planted here (trees/leaves/
                 // grass) above the paving, so a jungle city is not swallowed by its own biome.
-                for (int y = gy + 1; y <= gy + 1 + CLEAR_ABOVE; y++) {
+                for (int y = ground + 1; y <= ground + 1 + CLEAR_ABOVE; y++) {
                     b.put(x, y, z, Blocks.AIR.defaultBlockState());
                 }
             }
@@ -175,8 +182,8 @@ public final class CityLocation implements Location {
     }
 
     /** One lot: an ordinary house, a tall tower, an open square, or a walled garden. */
-    private static void building(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
-                                 CityStyle style) {
+    private static void building(StructureBuilder b, RandomSource rng, int x, int z, int ground,
+                                 Palette p, CityStyle style) {
         if (!b.isLand(x, z)) {
             return; // never build on water
         }
@@ -184,23 +191,23 @@ public final class CityLocation implements Location {
         // rest vary strongly in height and roof silhouette.
         float lot = rng.nextFloat();
         if (lot < 0.05f) {
-            square(b, rng, x, z, p);
+            square(b, rng, x, z, ground, p);
             return;
         }
         if (lot < 0.10f) {
-            garden(b, rng, x, z, p);
+            garden(b, rng, x, z, ground, p);
             return;
         }
         if (lot < 0.12f) {
-            tower(b, rng, x, z, p, style);
+            tower(b, rng, x, z, ground, p, style);
             return;
         }
-        house(b, rng, x, z, p, style);
+        house(b, rng, x, z, ground, p, style);
     }
 
     /** An ordinary building: varied footprint, strongly varied height, flat or pitched roof. */
-    private static void house(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
-                              CityStyle style) {
+    private static void house(StructureBuilder b, RandomSource rng, int x, int z, int ground,
+                              Palette p, CityStyle style) {
         int w = 5 + rng.nextInt(5);   // 5..9 across X
         int d = 5 + rng.nextInt(5);   // 5..9 across Z
         int h;
@@ -215,7 +222,7 @@ public final class CityLocation implements Location {
         int x1 = x + w - 1;
         int z1 = z + d - 1;
 
-        int gy = b.groundY(x, z);
+        int gy = ground;
         int y0 = gy + 1;
         int y1 = y0 + h;
 
@@ -291,15 +298,15 @@ public final class CityLocation implements Location {
     }
 
     /** A tall, narrow tower/watchtower: the vertical accents that break the roofline. */
-    private static void tower(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
-                              CityStyle style) {
+    private static void tower(StructureBuilder b, RandomSource rng, int x, int z, int ground,
+                              Palette p, CityStyle style) {
         int w = 4 + rng.nextInt(3);   // 4..6
         int d = 4 + rng.nextInt(3);   // 4..6
         int h = 12 + rng.nextInt(9);  // 12..20 — well above the houses
         int x1 = x + w - 1;
         int z1 = z + d - 1;
 
-        int gy = b.groundY(x, z);
+        int gy = ground;
         int y0 = gy + 1;
         int y1 = y0 + h;
 
@@ -336,9 +343,9 @@ public final class CityLocation implements Location {
      * An open square: paved, with a low well/curb and a pair of lights. Deliberately leaves a
      * hole in the built fabric so a district does not read as one solid carpet of roofs.
      */
-    private static void square(StructureBuilder b, RandomSource rng, int x, int z, Palette p) {
+    private static void square(StructureBuilder b, RandomSource rng, int x, int z, int ground, Palette p) {
         int half = 5 + rng.nextInt(3);   // a 10..16-wide paved court
-        int gy = b.groundY(x, z);
+        int gy = ground;
         b.ground(x - half, z - half, x + half, z + half, gy - 1, gy, p.ground());
         // A low curb ring with a dark mouth — a well.
         b.fill(x - 1, gy + 1, z - 1, x + 1, gy + 1, z + 1, p.foundation());
@@ -351,12 +358,12 @@ public final class CityLocation implements Location {
     }
 
     /** A walled garden/courtyard: low walls, overgrowth and a single stunted tree. */
-    private static void garden(StructureBuilder b, RandomSource rng, int x, int z, Palette p) {
+    private static void garden(StructureBuilder b, RandomSource rng, int x, int z, int ground, Palette p) {
         int w = 6 + rng.nextInt(4);   // 6..9
         int d = 6 + rng.nextInt(4);
         int x1 = x + w - 1;
         int z1 = z + d - 1;
-        int gy = b.groundY(x, z);
+        int gy = ground;
         b.ground(x - 1, z - 1, x1 + 1, z1 + 1, gy - 1, gy, p.ground());
         b.walls(x, gy + 1, z, x1, gy + 2, z1, p.weathered());
         BlockState leaf = p.overgrowth() != null ? p.overgrowth() : p.accent();
