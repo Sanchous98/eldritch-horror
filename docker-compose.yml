@@ -26,8 +26,13 @@ services:
     init: true
     working_dir: /workspace
     # The decompiler forks a hardcoded 4 GB JVM; keep the container above that + overhead.
-    cpus: ${DEV_CPUS:-3}
-    mem_limit: ${DEV_MEM:-8g}
+    # Hard caps. memswap_limit == mem_limit means NO swap spill: the job cannot exceed the
+    # cap, so a runaway build/render can never OOM the host. See docs/HOST-SAFETY.md.
+    cpus: ${DEV_CPUS:-2}
+    mem_limit: ${DEV_MEM:-3g}
+    memswap_limit: ${DEV_MEM:-3g}
+    mem_reservation: 1g
+    pids_limit: 2048
     volumes:
       # Mutable state only — never the source tree.
       - gradle-cache:/home/dev/.gradle    # Gradle + NeoForge cache (the big first-build decompile)

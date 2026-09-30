@@ -3,8 +3,22 @@
 > **After a context compaction:** read `docs/STATUS.md` first (the current snapshot), then
 > this file. Durable truth lives in the repository (`design/`, `docs/`), never only in chat.
 
-## Context discipline — delegate to subagents
+## Host safety — no OOM, ever
 
+**Never use the host `docker.sock`.** A container spawned through it is a *sibling* on the
+host daemon, escapes this container's cgroup, and can OOM-kill `dockerd` — which takes every
+container on the host down. This happened once (see `docs/HOST-SAFETY.md`). Run everything
+**inside** the dev container (`./gradlew …`), bounded by its cgroup.
+
+- **Preflight**: before any heavy job, check free memory and load; refuse if the host is
+  tight. Use `scripts/guarded-run.sh <cmd>` — it refuses when the host is unsafe and hard-caps
+  the job. Do not bypass it.
+- **Hard caps** live in `docker-compose.yml` (`mem_limit == memswap_limit`, `pids_limit`,
+  `cpus`). Do not raise them to "make it fit".
+- **One heavy job at a time.** Renders are batched with a small heap.
+- If the host is loaded, **wait** — do not start anything.
+
+## Context discipline — delegate to subagents
 **Do not do bulk work inline.** This project produces large artefacts and long logs
 (bake tooling, decompilation, Java sources, build output). Reading all of it into the main
 context wastes the session and loses the thread.
@@ -37,6 +51,7 @@ integration build green.
 
 | Concern | File |
 |---|---|
+| Host safety (no OOM) | `docs/HOST-SAFETY.md` |
 | Current status / handoff | `docs/STATUS.md` |
 | Design (source of truth) | `design/` |
 | Code architecture | `docs/ARCHITECTURE.md` |
