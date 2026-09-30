@@ -49,6 +49,7 @@ public final class CorruptionSystem {
     public static double setTaint(net.minecraft.world.level.chunk.LevelChunk chunk, double value) {
         double v = Math.clamp(value, 0.0, 1.0);
         chunk.setData(ModAttachments.TAINT.get(), v);
+        chunk.markUnsaved();
         return v;
     }
 

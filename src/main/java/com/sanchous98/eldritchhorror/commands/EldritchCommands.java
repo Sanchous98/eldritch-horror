@@ -40,6 +40,40 @@ public final class EldritchCommands {
                                 .then(getNode("corruption", CorruptionSystem::get))
                                 .then(setNode("corruption", CorruptionSystem::set))
                                 .then(addNode("corruption", CorruptionSystem::add)))
+                        .then(Commands.literal("taint")
+                                .then(Commands.literal("get").executes(ctx -> {
+                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                    net.minecraft.world.level.chunk.LevelChunk chunk =
+                                            p.level().getChunkAt(p.blockPosition());
+                                    double v = CorruptionSystem.getTaint(chunk);
+                                    ctx.getSource().sendSuccess(
+                                            () -> Component.literal("taint = " + fmt(v)), false);
+                                    return 1;
+                                }))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("value", DoubleArgumentType.doubleArg())
+                                                .executes(ctx -> {
+                                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                                    net.minecraft.world.level.chunk.LevelChunk chunk =
+                                                            p.level().getChunkAt(p.blockPosition());
+                                                    double v = DoubleArgumentType.getDouble(ctx, "value");
+                                                    CorruptionSystem.setTaint(chunk, v);
+                                                    ctx.getSource().sendSuccess(
+                                                            () -> Component.literal("taint set to " + fmt(v)), true);
+                                                    return 1;
+                                                })))
+                                .then(Commands.literal("add")
+                                        .then(Commands.argument("delta", DoubleArgumentType.doubleArg())
+                                                .executes(ctx -> {
+                                                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                                                    net.minecraft.world.level.chunk.LevelChunk chunk =
+                                                            p.level().getChunkAt(p.blockPosition());
+                                                    double d = DoubleArgumentType.getDouble(ctx, "delta");
+                                                    double now = CorruptionSystem.addTaint(chunk, d);
+                                                    ctx.getSource().sendSuccess(
+                                                            () -> Component.literal("taint = " + fmt(now)), true);
+                                                    return 1;
+                                                }))))
                         .then(Commands.literal("rep")
                                 .then(Commands.literal("get")
                                         .then(Commands.argument("cult", StringArgumentType.word())

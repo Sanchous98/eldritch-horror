@@ -36,7 +36,7 @@ public final class Cults {
                 "hollow_choir", "The Hollow Choir",
                 "Deep places, rifts, the Veil",
                 List.of("Aspirant", "Vessel", "Hollowed", "Chorus-Speaker"),
-                List.of(),
+                List.of("drowned_choir", "unblinking_eye"),
                 "summon_star_spawn",
                 "The cult that wants the horror summoned."));
     }
