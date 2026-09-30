@@ -183,6 +183,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
                                      ChunkAccess chunk,
                                      StructureManager structureManager) {
         super.applyBiomeDecoration(level, chunk, structureManager);
+        SurfaceDecorator.decorate(level, chunk);
         Locations.place(level, chunk);
     }
 
