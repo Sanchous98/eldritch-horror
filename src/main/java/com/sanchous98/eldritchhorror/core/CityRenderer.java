@@ -681,7 +681,10 @@ public final class CityRenderer {
 
     private static void write(BufferedImage image, File dir, String name) {
         try {
-            File out = new File(dir, name);
+            // Location ids carry a namespace and a ':' or '/' (e.g. eldritch_horror:site/rift_scar);
+            // flatten them so the PNG lands directly in run/render instead of a missing subdir.
+            String safe = name.replace(':', '_').replace('/', '_').replace('\\', '_');
+            File out = new File(dir, safe);
             ImageIO.write(image, "png", out);
             EldritchHorror.LOGGER.info("CityRenderer: wrote {} ({}x{})",
                     out.getAbsolutePath(), image.getWidth(), image.getHeight());
