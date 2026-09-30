@@ -10,6 +10,7 @@ import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -43,6 +44,12 @@ public final class CityLocation implements Location {
     private static final int PLAZA = 30;
     /** Radius kept clear of ordinary buildings so the (now large) landmark has room. */
     private static final int INNER_CLEAR = 46;
+    /**
+     * Height above the surface cleared of vanilla vegetation inside the district, so a forest or
+     * jungle city is not buried by the biome's own trees (which run before this generator's city
+     * pass). Taller than the tallest tree we expect to remove; buildings are placed afterwards.
+     */
+    private static final int CLEAR_ABOVE = 14;
 
     private final City city;
 
@@ -158,19 +165,53 @@ public final class CityLocation implements Location {
                 }
                 int gy = b.groundY(x, z);
                 b.put(x, gy, z, p.ground());
+                // Clear the vanilla vegetation the biome decoration planted here (trees/leaves/
+                // grass) above the paving, so a jungle city is not swallowed by its own biome.
+                for (int y = gy + 1; y <= gy + 1 + CLEAR_ABOVE; y++) {
+                    b.put(x, y, z, Blocks.AIR.defaultBlockState());
+                }
             }
         }
     }
 
-    /** One building: quoined shell, tall windows, a steep ridge, optional spire/buttress, decay. */
+    /** One lot: an ordinary house, a tall tower, an open square, or a walled garden. */
     private static void building(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
                                  CityStyle style) {
         if (!b.isLand(x, z)) {
             return; // never build on water
         }
-        int w = 5 + rng.nextInt(4);   // 5..8 across X
-        int d = 5 + rng.nextInt(4);   // 5..8 across Z
-        int h = 4 + rng.nextInt(6);   // wall height 4..9
+        // Break the "carpet of identical roofs": a few lots are not buildings at all, and the
+        // rest vary strongly in height and roof silhouette.
+        float lot = rng.nextFloat();
+        if (lot < 0.05f) {
+            square(b, rng, x, z, p);
+            return;
+        }
+        if (lot < 0.10f) {
+            garden(b, rng, x, z, p);
+            return;
+        }
+        if (lot < 0.17f) {
+            tower(b, rng, x, z, p, style);
+            return;
+        }
+        house(b, rng, x, z, p, style);
+    }
+
+    /** An ordinary building: varied footprint, strongly varied height, flat or pitched roof. */
+    private static void house(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
+                              CityStyle style) {
+        int w = 5 + rng.nextInt(5);   // 5..9 across X
+        int d = 5 + rng.nextInt(5);   // 5..9 across Z
+        int h;
+        float hr = rng.nextFloat();
+        if (hr < 0.15f) {
+            h = 2 + rng.nextInt(3);        // low shed / workshop
+        } else if (hr < 0.75f) {
+            h = 4 + rng.nextInt(4);        // 4..7 ordinary house
+        } else {
+            h = 7 + rng.nextInt(4);        // 7..10 tenement, taller than its neighbours
+        }
         int x1 = x + w - 1;
         int z1 = z + d - 1;
 
@@ -198,10 +239,22 @@ public final class CityLocation implements Location {
         // Real door at the doorway (the room carving leaves air).
         placeDoor(b, p, x, z, x1, z1, y0 + 1, doorSide, doorOffset);
 
-        // Steep pitched roof; ridge follows the longer side.
-        int roofH = 3 + rng.nextInt(3);
-        int axis = w >= d ? 0 : 1;
-        b.pitchedRoof(x - 1, z - 1, x1 + 1, z1 + 1, y1, roofH, axis);
+        // Roof silhouette: a low flat parapet here and there, otherwise a steep ridge whose
+        // height varies a lot; some get a chimney.
+        if (rng.nextFloat() < 0.28f) {
+            b.fill(x - 1, y1, z - 1, x1 + 1, y1, z1 + 1, p.roofSlab());
+            b.crenellations(x - 1, z - 1, x1 + 1, z1 + 1, y1 + 1);
+        } else {
+            int roofH = 2 + rng.nextInt(6);
+            int axis = w >= d ? 0 : 1;
+            b.pitchedRoof(x - 1, z - 1, x1 + 1, z1 + 1, y1, roofH, axis);
+            if (rng.nextFloat() < 0.5f) {
+                int chx = x + 1 + rng.nextInt(Math.max(1, w - 2));
+                int chz = z + 1 + rng.nextInt(Math.max(1, d - 2));
+                b.put(chx, y1 + roofH, chz, p.accent());
+                b.put(chx, y1 + roofH + 1, chz, p.accent());
+            }
+        }
 
         // Tall narrow windows, a row on each wall.
         int wy = y0 + 2;
@@ -217,7 +270,7 @@ public final class CityLocation implements Location {
         // Some buildings sprout a small spire or lean on a buttress.
         float roll = rng.nextFloat();
         if (roll < 0.18f) {
-            b.spire((x + x1) / 2, (z + z1) / 2, y1 + roofH - 1, 4 + rng.nextInt(4));
+            b.spire((x + x1) / 2, (z + z1) / 2, y1 + 1, 4 + rng.nextInt(4));
         } else if (roll < 0.5f) {
             Side out = Side.values()[rng.nextInt(4)];
             switch (out) {
@@ -229,13 +282,92 @@ public final class CityLocation implements Location {
         }
 
         decay(b, rng, x, y0, z, x1, y1, z1, p);
-
-        // Cultural flourish (signs, balconies, verandas…) — default does nothing.
         style.flourish(b, rng, x, y0, z, x1, y1, z1, p);
 
         // A single guttering light in some buildings only.
         if (rng.nextFloat() < 0.3f) {
             b.put((x + x1) / 2, y1 - 2, (z + z1) / 2, p.light());
+        }
+    }
+
+    /** A tall, narrow tower/watchtower: the vertical accents that break the roofline. */
+    private static void tower(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
+                              CityStyle style) {
+        int w = 4 + rng.nextInt(3);   // 4..6
+        int d = 4 + rng.nextInt(3);   // 4..6
+        int h = 12 + rng.nextInt(9);  // 12..20 — well above the houses
+        int x1 = x + w - 1;
+        int z1 = z + d - 1;
+
+        int gy = b.groundY(x, z);
+        int y0 = gy + 1;
+        int y1 = y0 + h;
+
+        b.ground(x - 1, z - 1, x1 + 1, z1 + 1, gy - 1, gy, p.ground());
+        Side doorSide = Side.values()[rng.nextInt(4)];
+        int doorOffset = 1 + rng.nextInt(Math.max(1, (doorSide == Side.N || doorSide == Side.S ? w : d) - 2));
+        b.room(x, y0, z, x1, y1, z1, new StructureBuilder.Doorway(doorSide, doorOffset));
+        b.fill(x, y0, z, x1, y0, z1, p.foundation());
+        for (int y = y0; y <= y1; y++) {
+            b.put(x, y, z, p.accent());
+            b.put(x1, y, z, p.accent());
+            b.put(x, y, z1, p.accent());
+            b.put(x1, y, z1, p.accent());
+        }
+        placeDoor(b, p, x, z, x1, z1, y0 + 1, doorSide, doorOffset);
+
+        // Stacked windows up the shaft, and small lights near the top (a beacon).
+        for (int yy = y0 + 3; yy <= y1 - 3; yy += 4) {
+            b.window((x + x1) / 2, yy, z, 2, 1, true);
+            b.window((x + x1) / 2, yy, z1, 2, 1, true);
+            b.window(x, yy, (z + z1) / 2, 2, 1, true);
+            b.window(x1, yy, (z + z1) / 2, 2, 1, true);
+        }
+        b.crenellations(x - 1, z - 1, x1 + 1, z1 + 1, y1 + 1);
+        b.spire((x + x1) / 2, (z + z1) / 2, y1 + 2, 6 + rng.nextInt(6));
+        b.put((x + x1) / 2, y1 - 1, (z + z1) / 2, p.light());
+
+        // A weathered skirt and rubble so it does not look freshly built.
+        b.scatter(x - 1, z - 1, x1 + 1, z1 + 1, y0, y0, p.rubble(), 0.15f);
+        style.flourish(b, rng, x, y0, z, x1, y1, z1, p);
+    }
+
+    /**
+     * An open square: paved, with a low well/curb and a pair of lights. Deliberately leaves a
+     * hole in the built fabric so a district does not read as one solid carpet of roofs.
+     */
+    private static void square(StructureBuilder b, RandomSource rng, int x, int z, Palette p) {
+        int half = 5 + rng.nextInt(3);   // a 10..16-wide paved court
+        int gy = b.groundY(x, z);
+        b.ground(x - half, z - half, x + half, z + half, gy - 1, gy, p.ground());
+        // A low curb ring with a dark mouth — a well.
+        b.fill(x - 1, gy + 1, z - 1, x + 1, gy + 1, z + 1, p.foundation());
+        b.put(x, gy + 1, z, p.ground());
+        b.put(x, gy + 1, z - 2, p.light());
+        b.put(x, gy + 1, z + 2, p.light());
+        if (p.overgrowth() != null) {
+            b.scatter(x - half, z - half, x + half, z + half, gy + 1, gy + 1, p.overgrowth(), 0.03f);
+        }
+    }
+
+    /** A walled garden/courtyard: low walls, overgrowth and a single stunted tree. */
+    private static void garden(StructureBuilder b, RandomSource rng, int x, int z, Palette p) {
+        int w = 6 + rng.nextInt(4);   // 6..9
+        int d = 6 + rng.nextInt(4);
+        int x1 = x + w - 1;
+        int z1 = z + d - 1;
+        int gy = b.groundY(x, z);
+        b.ground(x - 1, z - 1, x1 + 1, z1 + 1, gy - 1, gy, p.ground());
+        b.walls(x, gy + 1, z, x1, gy + 2, z1, p.weathered());
+        BlockState leaf = p.overgrowth() != null ? p.overgrowth() : p.accent();
+        b.scatter(x, z, x1, z1, gy + 1, gy + 2, leaf, 0.20f);
+        int tx = (x + x1) / 2;
+        int tz = (z + z1) / 2;
+        b.put(tx, gy + 1, tz, p.accent());
+        b.put(tx, gy + 2, tz, leaf);
+        b.put(tx, gy + 3, tz, leaf);
+        if (rng.nextFloat() < 0.5f) {
+            b.put(x + 1, gy + 1, z + 1, p.light());
         }
     }
 

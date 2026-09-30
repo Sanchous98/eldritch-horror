@@ -6,11 +6,12 @@ import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * London — cultural city style. Victorian: soot-red brick with dark stone banding, grey slate
- * roofs, tall chimneys, iron railings, tall narrow sash windows and a gaslit fog mood.
+ * London — cultural city style. Victorian: soot-dark red/brown brick with white stone trim, near-black
+ * slate roofs, tall chimneys, iron railings, tall narrow sash windows and a gaslit fog mood.
  *
  * <p>Landmark: a domed cathedral with a square clock tower (St Paul's / Big Ben). Street props:
  * gaslit lamp posts and a few obelisks and statues on the plaza.
@@ -31,9 +32,9 @@ public final class LondonStyle implements CityStyle {
                 Blocks.STONE_BRICKS.defaultBlockState(),            // ground: grey flagstone paving
                 Blocks.COBBLESTONE.defaultBlockState(),             // foundation: granite setts
                 Blocks.BRICKS.defaultBlockState(),                  // wall: soot-red London brick
-                Materials.redTerracotta(),                          // weathered brick/terracotta
-                Blocks.DEEPSLATE_BRICKS.defaultBlockState(),        // accent: dark stone banding
-                Blocks.DEEPSLATE_TILES.defaultBlockState(),         // roof: grey slate
+                Materials.terracotta(DyeColor.BROWN),               // weathered: soot-brown brick
+                Materials.whiteConcrete(),                          // accent: white stone trim / banding
+                Blocks.DEEPSLATE_TILES.defaultBlockState(),         // roof: near-black slate
                 Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(),   // roof stairs
                 Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState(),     // roof slabs / eaves
                 Blocks.GLASS_PANE.defaultBlockState(),              // window: narrow sash glazing

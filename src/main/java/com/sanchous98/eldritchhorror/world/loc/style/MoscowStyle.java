@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Moscow — Russian style. Red-brick (Kremlin) walls with white-stone trim, steep pyramidal
- * (tent) towers and bulging onion domes, under snow, lit by warm lanterns.
+ * Moscow — Russian style. Bright red-brick (Kremlin) walls with white-limestone trim, steep
+ * pyramidal (tent) towers and bulging onion domes, under snow, lit by warm lanterns.
  *
  * <p>Landmark: a St Basil's-style cluster — a tall red-brick tent tower crowned by a gold onion,
  * ringed by smaller onion domes on drums, each a shrinking stack of {@link StructureBuilder#fill}
@@ -26,7 +26,10 @@ public final class MoscowStyle implements CityStyle {
             Materials.glazed(DyeColor.WHITE),
             Materials.glazed(DyeColor.BLUE),
             Materials.glazed(DyeColor.YELLOW),
-            Materials.glazed(DyeColor.PURPLE)
+            Materials.glazed(DyeColor.PURPLE),
+            Materials.glazed(DyeColor.LIGHT_BLUE),
+            Materials.glazed(DyeColor.ORANGE),
+            Materials.glazed(DyeColor.CYAN)
     };
 
     @Override
@@ -36,18 +39,18 @@ public final class MoscowStyle implements CityStyle {
 
     @Override
     public Palette palette(int koppenClass, boolean coastal) {
-        // Culture leads: red brick + white stone whatever the climate. Köppen only tints the
+        // Culture leads: bright red brick + white stone whatever the climate. Köppen only tints the
         // overgrowth; the coast swaps it for kelp.
         Palette bio = Palette.fromBiome(koppenClass, coastal);
         return new Palette(
                 Blocks.SNOW_BLOCK.defaultBlockState(),              // ground: trodden snow plaza
-                Blocks.DEEPSLATE_BRICKS.defaultBlockState(),        // foundation: grey wall footing
-                Blocks.BRICKS.defaultBlockState(),                  // wall: red brick (Kremlin)
+                Blocks.STONE_BRICKS.defaultBlockState(),            // foundation: white-stone footing
+                Blocks.BRICKS.defaultBlockState(),                  // wall: bright red brick (Kremlin)
                 Materials.terracotta(DyeColor.RED),                 // weathered brick course
-                Blocks.SMOOTH_QUARTZ.defaultBlockState(),           // accent: white-stone trim
-                Blocks.DEEPSLATE_TILES.defaultBlockState(),         // roof: dark slate
-                Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(),   // roof stairs
-                Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState(),     // roof slabs / eaves
+                Blocks.SMOOTH_QUARTZ.defaultBlockState(),           // accent: white limestone trim
+                Blocks.RED_NETHER_BRICKS.defaultBlockState(),       // roof: vivid red tile, not London slate
+                Blocks.RED_NETHER_BRICK_STAIRS.defaultBlockState(), // roof stairs
+                Blocks.RED_NETHER_BRICK_SLAB.defaultBlockState(),   // roof slabs / eaves
                 Blocks.GLASS_PANE.defaultBlockState(),              // window
                 Blocks.SPRUCE_TRAPDOOR.defaultBlockState(),         // frame: timber mullions
                 Blocks.SPRUCE_DOOR.defaultBlockState(),             // door

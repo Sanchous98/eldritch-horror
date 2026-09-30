@@ -37,11 +37,11 @@ public final class JakartaStyle implements CityStyle {
                 Materials.whiteConcrete(),                          // wall: whitewashed plaster
                 Materials.lightGrayConcrete(),                      // weathered: aged whitewash
                 Blocks.STRIPPED_JUNGLE_LOG.defaultBlockState(),     // accent: Javanese teak
-                Blocks.BRICKS.defaultBlockState(),                  // roof: red tile body
+                Materials.terracotta(DyeColor.RED),                 // roof: red clay tile body
                 Blocks.BRICK_STAIRS.defaultBlockState(),            // roof stairs: red tile
                 Blocks.BRICK_SLAB.defaultBlockState(),              // roof slabs / eaves
                 Blocks.GLASS_PANE.defaultBlockState(),              // window
-                Blocks.JUNGLE_TRAPDOOR.defaultBlockState(),         // frame: louvred shutters
+                Materials.concrete(DyeColor.CYAN),                  // frame: teal louvred shutters
                 Blocks.JUNGLE_DOOR.defaultBlockState(),             // door
                 Blocks.JUNGLE_FENCE.defaultBlockState(),            // rail: veranda railing
                 Blocks.LANTERN.defaultBlockState(),                 // light: oil lantern

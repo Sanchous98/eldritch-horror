@@ -11,9 +11,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Buenos Aires — cultural city style. European-flavoured South America: cream/pastel stucco walls,
- * pale stone trim, grey mansard roofs, wrought-iron balconies, grand avenues and the colourful
- * painted houses of La Boca.
+ * Buenos Aires — cultural city style. Mediterranean / porteno: pastel rendered plaster (rose, blue,
+ * ochre) with white trim, orange terracotta tile roofs, wrought-iron balconies, grand avenues and
+ * the colourful painted houses of La Boca.
  *
  * <p>Landmark: a grand beaux-arts palace/congress — a colonnaded portico under a high slate dome
  * (Congress, the Colón). Street props: iron lamp posts, statues and the Obelisk on the avenue.
@@ -29,18 +29,18 @@ public final class BuenosAiresStyle implements CityStyle {
 
     @Override
     public Palette palette(int koppenClass, boolean coastal) {
-        // Culture leads: cream stucco + pale stone + grey mansard, whatever the Köppen class.
+        // Culture leads: pastel rendered plaster + terracotta tile, whatever the Köppen class.
         // Climate only varies the damp overgrowth (moss/vines, kelp on the coast).
         Palette bio = Palette.fromBiome(koppenClass, coastal);
         return new Palette(
                 Blocks.SMOOTH_STONE.defaultBlockState(),            // ground: paved grand avenue
-                Blocks.STONE_BRICKS.defaultBlockState(),            // foundation: stone base course
-                Materials.whiteConcrete(),                          // wall: cream stucco
-                Materials.lightGrayConcrete(),                      // weathered stucco
-                Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState(),   // accent: pale stone ornament
-                Blocks.DEEPSLATE_TILES.defaultBlockState(),         // roof: grey slate mansard
-                Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(),   // roof stairs
-                Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState(),     // roof slabs / eaves
+                Blocks.CUT_SANDSTONE.defaultBlockState(),           // foundation: rendered warm base course
+                Materials.terracotta(DyeColor.PINK),                // wall: pastel rose plaster render
+                Materials.terracotta(DyeColor.WHITE),               // weathered: sun-faded plaster
+                Materials.whiteConcrete(),                          // accent: white trim / quoins
+                Materials.terracotta(DyeColor.ORANGE),              // roof: orange terracotta tile
+                Blocks.BRICK_STAIRS.defaultBlockState(),            // roof stairs
+                Blocks.BRICK_SLAB.defaultBlockState(),              // roof slabs / eaves
                 Blocks.GLASS_PANE.defaultBlockState(),              // window: tall French glazing
                 Blocks.BIRCH_TRAPDOOR.defaultBlockState(),          // frame: pale timber mullions
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door: dark porte-cochère
@@ -175,12 +175,13 @@ public final class BuenosAiresStyle implements CityStyle {
 
     /** A bright pastel paint block for a La Boca facade (colour-safe via {@link Materials}). */
     private static BlockState pastel(RandomSource rng) {
-        return switch (rng.nextInt(5)) {
-            case 0 -> Materials.concrete(DyeColor.PINK);
-            case 1 -> Materials.concrete(DyeColor.LIGHT_BLUE);
+        return switch (rng.nextInt(6)) {
+            case 0 -> Materials.terracotta(DyeColor.PINK);
+            case 1 -> Materials.glazed(DyeColor.LIGHT_BLUE);   // azulejo blue
             case 2 -> Materials.concrete(DyeColor.YELLOW);
-            case 3 -> Materials.concrete(DyeColor.LIME);
-            default -> Materials.terracotta(DyeColor.ORANGE);
+            case 3 -> Materials.terracotta(DyeColor.ORANGE);   // terracotta render
+            case 4 -> Materials.concrete(DyeColor.WHITE);
+            default -> Materials.terracotta(DyeColor.LIGHT_BLUE);
         };
     }
 }

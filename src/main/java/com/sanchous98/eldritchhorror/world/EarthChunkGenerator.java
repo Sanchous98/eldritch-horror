@@ -155,7 +155,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
             } else if (y > surfaceY) {
                 states[i] = Blocks.WATER.defaultBlockState();
             } else if (y == surfaceY) {
-                states[i] = Blocks.GRASS_BLOCK.defaultBlockState();
+                states[i] = surfaceBlock(EarthMaps.get(), x, z, surfaceY);
             } else if (y >= surfaceY - 3) {
                 states[i] = Blocks.DIRT.defaultBlockState();
             } else {

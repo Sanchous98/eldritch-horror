@@ -33,7 +33,7 @@ public final class ParisStyle implements CityStyle {
         return new Palette(
                 Blocks.SMOOTH_STONE.defaultBlockState(),            // ground: grey boulevard paving
                 Blocks.STONE_BRICKS.defaultBlockState(),            // foundation: ashlar base course
-                Materials.concrete(DyeColor.WHITE),                 // wall: cream limestone
+                Materials.terracotta(DyeColor.WHITE),               // wall: cream Haussmann limestone
                 Blocks.CALCITE.defaultBlockState(),                 // weathered limestone
                 Blocks.POLISHED_DIORITE.defaultBlockState(),        // accent: grey stone quoins / trim
                 Blocks.DEEPSLATE_TILES.defaultBlockState(),         // roof: zinc/slate mansard

@@ -4,12 +4,13 @@ import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 
 /**
  * Los Angeles — cultural city style. Spanish-colonial / Mission Revival and pastel Art-Deco:
- * white stucco bungalows under terracotta tile, arcaded colonnades, palm-lined boulevards,
- * glassy modern towers.
+ * sun-bleached tan/cream stucco bungalows under terracotta tile, white revival bell tower,
+ * arcaded colonnades, palm-lined boulevards, glassy modern towers.
  *
  * <p>Landmark: a Spanish mission church — white stucco nave with a terracotta pitched roof,
  * an arched arcade along its front and a red-tile bell tower. Street props: palm posts, lamp
@@ -25,16 +26,16 @@ public final class LosAngelesStyle implements CityStyle {
 
     @Override
     public Palette palette(int koppenClass, boolean coastal) {
-        // Culture leads: white stucco + terracotta tile, whatever the Köppen class. Climate only
-        // supplies the overgrowth; the coast swaps it for kelp.
+        // Culture leads: sun-bleached stucco + terracotta tile, whatever the Köppen class. Climate
+        // only supplies the overgrowth; the coast swaps it for kelp.
         Palette bio = Palette.fromBiome(koppenClass, coastal);
         return new Palette(
                 Blocks.SMOOTH_SANDSTONE.defaultBlockState(),        // ground: pale boulevard paving
                 Blocks.CUT_SANDSTONE.defaultBlockState(),           // foundation: stone base course
-                Materials.whiteConcrete(),                          // wall: white stucco
-                Blocks.SMOOTH_SANDSTONE.defaultBlockState(),        // weathered: sun-bleached stucco
-                Materials.redTerracotta(),                          // accent: terracotta trim / arches
-                Blocks.BRICKS.defaultBlockState(),                  // roof: red tile bed
+                Materials.terracotta(DyeColor.WHITE),               // wall: sun-bleached tan/cream stucco
+                Blocks.SMOOTH_SANDSTONE.defaultBlockState(),        // weathered: bleached stucco
+                Materials.terracotta(DyeColor.ORANGE),              // accent: terracotta / mission trim
+                Blocks.TERRACOTTA.defaultBlockState(),              // roof: terracotta tile bed
                 Blocks.BRICK_STAIRS.defaultBlockState(),            // roof stairs
                 Blocks.BRICK_SLAB.defaultBlockState(),              // roof slabs / eaves
                 Blocks.GLASS_PANE.defaultBlockState(),              // window: mission glazing
@@ -151,6 +152,8 @@ public final class LosAngelesStyle implements CityStyle {
         int y0 = ground + 1;
         int y1 = y0 + 18;
         b.room(x - 1, y0, z - 1, x + 1, y1, z + 1);
+        // White revival stucco shaft (contrasts with the tan nave).
+        b.walls(x - 1, y0, z - 1, x + 1, y1, z + 1, Materials.terracotta(DyeColor.WHITE));
         for (int y = y0; y <= y1; y++) {
             b.put(x - 1, y, z - 1, p.accent());
             b.put(x + 1, y, z - 1, p.accent());

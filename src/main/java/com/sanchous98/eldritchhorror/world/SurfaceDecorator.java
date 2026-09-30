@@ -138,7 +138,8 @@ public final class SurfaceDecorator {
     /** True if (x,z) lies inside a curated city's built footprint (keep it clear). */
     private static boolean inCity(EarthMap map, int x, int z) {
         for (City c : Cities.all()) {
-            int r = 170; // a little beyond the ~150 built district
+            // Match the city's own scaled radius (it can reach 400) plus a small margin.
+            int r = Math.min(400, (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0)) + 24;
             long dx = (long) x - c.x();
             long dz = (long) z - c.z();
             if (dx * dx + dz * dz <= (long) r * r) {

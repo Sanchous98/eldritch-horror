@@ -106,8 +106,23 @@ public final class EarthMap {
         return sample(land, worldX, worldZ) != 0;
     }
 
-    /** Real elevation in metres at world (x,z). Bilinear. Negative = ocean floor. */
+    /**
+     * Real elevation in metres at world (x,z). Bilinear. Negative = ocean floor.
+     *
+     * <p>The <b>landmask is authoritative</b>: the ETOPO layer is coarse (1° in places) and its
+     * positive shelf elevations would otherwise surface as land on a pixel the mask calls water
+     * (e.g. the Rio de la Plata estuary, the Yellow Sea). Water pixels are forced to a depth that
+     * maps below sea level, so shallow shelf can never become ground. This one rule fixes both the
+     * terrain surface and {@link #isLand}, which every other system (cities, sites) trusts.
+     */
     public double elevationMetres(double worldX, double worldZ) {
+        if (!isLand((int) Math.floor(worldX), (int) Math.floor(worldZ))) {
+            return Math.min(sampledElevationMetres(worldX, worldZ), -ELEVATION_METRES_PER_LEVEL);
+        }
+        return sampledElevationMetres(worldX, worldZ);
+    }
+
+    private double sampledElevationMetres(double worldX, double worldZ) {
         double px = (worldX + HALF_WIDTH) / BLOCKS_PER_PIXEL;
         double py = (worldZ + HALF_HEIGHT) / BLOCKS_PER_PIXEL;
         double v = bilinear(elevation, px, py);
