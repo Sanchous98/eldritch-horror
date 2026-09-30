@@ -30,6 +30,14 @@ public final class EarthMap {
     public static final int ELEVATION_OFFSET = 127;
     /** Metres represented by one stored elevation level. */
     public static final double ELEVATION_METRES_PER_LEVEL = 75.0;
+    /**
+     * The world is a <b>cylinder</b>: longitude wraps (east–west closes), latitude does not (the
+     * poles are ends). Sampled column = {@code floorMod(rawPixelX, width)}, so the join sits on the
+     * antimeridian (lon ±180°), which is open ocean in the populated band (|lat|&lt;60° has ~0.3%
+     * land there). Origin is not shifted, so city coordinates stay valid. See
+     * {@code design/23-boundary-and-travel.md}.
+     */
+    private static final boolean WRAP_LONGITUDE = true;
 
     private final int width;
     private final int height;
@@ -113,7 +121,7 @@ public final class EarthMap {
 
     // ------------------------------------------------------------------ sampling
     private int sample(BufferedImage img, int worldX, int worldZ) {
-        int px = clamp((worldX + HALF_WIDTH) / BLOCKS_PER_PIXEL, width - 1);
+        int px = wrapX((worldX + HALF_WIDTH) / BLOCKS_PER_PIXEL);
         int py = clamp((worldZ + HALF_HEIGHT) / BLOCKS_PER_PIXEL, height - 1);
         return img.getRaster().getSample(px, py, 0);
     }
@@ -131,9 +139,17 @@ public final class EarthMap {
     }
 
     private double at(BufferedImage img, int px, int py) {
-        int x = Math.max(0, Math.min(width - 1, px));
+        int x = wrapX(px);
         int y = Math.max(0, Math.min(height - 1, py));
         return img.getRaster().getSample(x, y, 0);
+    }
+
+    /** Longitude wraps (cylinder) or clamps at the map edge, depending on {@link #WRAP_LONGITUDE}. */
+    private int wrapX(int px) {
+        if (WRAP_LONGITUDE) {
+            return Math.floorMod(px, width);
+        }
+        return px < 0 ? 0 : Math.min(px, width - 1);
     }
 
     private static int clamp(int v, int max) {

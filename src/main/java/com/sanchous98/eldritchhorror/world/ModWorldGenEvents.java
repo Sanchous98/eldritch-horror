@@ -15,6 +15,9 @@ import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class ModWorldGenEvents {
 
+    /** Extra border room past the longitude wrap line so the seam warp fires first. */
+    private static final int SEAM_MARGIN = 64;
+
     private ModWorldGenEvents() {
     }
 
@@ -39,9 +42,12 @@ public final class ModWorldGenEvents {
             net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         var border = event.getServer().overworld().getWorldBorder();
         border.setCenter(0.0, 0.0);
-        border.setSize(2.0 * EarthMap.HALF_WIDTH);
-        EldritchHorror.LOGGER.info("world border set to {}x{} blocks",
-                2L * EarthMap.HALF_WIDTH, 2L * EarthMap.HALF_HEIGHT);
+        // Give the longitude seam a little margin *past* the wrap line so the seam warp in
+        // BoundaryTravel fires before the border can stop the player. The world is a cylinder
+        // east–west; the polar ends are bounded by Morok, not by a visible wall.
+        border.setSize(2.0 * (EarthMap.HALF_WIDTH + SEAM_MARGIN));
+        EldritchHorror.LOGGER.info("world border: X wraps at ±{} (warp), Morok past ±{} (no wall)",
+                EarthMap.HALF_WIDTH, EarthMap.HALF_HEIGHT);
     }
 
     /**
