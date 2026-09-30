@@ -31,12 +31,16 @@ public final class CityLocation implements Location {
 
     /** Layout pitch of the jittered building grid (blocks). */
     private static final int CELL = 13;
-    /** Hard cap on buildings per city, to keep per-chunk generation cheap. */
-    private static final int MAX_BUILDINGS = 240;
-    /** Built district half-extent (blocks); the cull radius can be much larger. */
-    private static final int DISTRICT_CAP = 150;
-    /** Plaza half-extent. */
-    private static final int PLAZA = 18;
+    /**
+     * Hard cap on buildings per city. Raised from 240 so the much larger district still fills:
+     * the loop rebuilds the whole (chunk-clipped) layout for every generating chunk, so this
+     * bounds the worst-case per-chunk cost. Density is kept comparable to the old city.
+     */
+    private static final int MAX_BUILDINGS = 1100;
+    /** Built district half-extent (blocks); the cull radius ({@link #radius()}) can be larger. */
+    private static final int DISTRICT_CAP = 380;
+    /** Plaza half-extent: wide enough to seat the enlarged style landmarks on paving. */
+    private static final int PLAZA = 30;
 
     private final City city;
 

@@ -72,27 +72,27 @@ public final class ModWorldGenEvents {
     }
 
     /**
-     * Dev aid: if {@code -Deh.renderCities} is set to {@code true}/{@code all} or a comma list of
-     * city names, render those cities to PNG on the server thread (see
-     * {@link com.sanchous98.eldritchhorror.core.CityRenderer}). Inert unless the property is set.
+     * Dev aid: if {@code -Deh.renderCities} is set, schedule the server-side PNG renderer (see
+     * {@link com.sanchous98.eldritchhorror.core.CityRenderer}). The value is {@code true}/{@code all}
+     * for every city, a comma list of city names, or {@code batch=I/N} (equivalently {@code I/N})
+     * to render only slice I of N — the renderer then walks one or two cities per tick so it can
+     * never trip the server watchdog.
+     *
+     * <p>{@code -Deh.renderExit=true} shuts the server down when the selected slice is finished
+     * (handy for a one-shot render run).
      */
     private static void maybeRenderCities(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         String prop = System.getProperty("eh.renderCities");
         if (prop == null || prop.isBlank()) {
             return;
         }
-        java.util.List<String> names = new java.util.ArrayList<>();
-        if (!"true".equalsIgnoreCase(prop) && !"all".equalsIgnoreCase(prop)) {
-            for (String part : prop.split(",")) {
-                String trimmed = part.trim();
-                if (!trimmed.isEmpty()) {
-                    names.add(trimmed);
-                }
-            }
+        boolean exit = Boolean.parseBoolean(System.getProperty("eh.renderExit", "false"));
+        EldritchHorror.LOGGER.info("render: starting render session '{}' -> run/render (exitWhenDone={})",
+                prop, exit);
+        int count = com.sanchous98.eldritchhorror.core.CityRenderer.begin(
+                event.getServer(), prop, exit);
+        if (count == 0) {
+            EldritchHorror.LOGGER.warn("render: no cities selected for '{}'", prop);
         }
-        EldritchHorror.LOGGER.info("render: rendering cities {} -> run/render",
-                names.isEmpty() ? "ALL" : names);
-        var rendered = com.sanchous98.eldritchhorror.core.CityRenderer.render(event.getServer(), names);
-        EldritchHorror.LOGGER.info("render: done ({} png city pairs)", rendered.size());
     }
 }
