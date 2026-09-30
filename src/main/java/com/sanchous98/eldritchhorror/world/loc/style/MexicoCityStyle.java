@@ -2,16 +2,23 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Mexico City — Spanish-colonial + Aztec. Warm cream plaster over stone bases, red clay-tile and
- * flat-parapet roofs, wrought-iron balconies and lanterns, courtyards, and bright blue talavera
- * tile; a colonial cathedral with twin towers and a dome dominates the plaza (the Aztec
- * {@link StyleKit#steppedTemple} is the alternate silhouette).
+ * Mexico City — Spanish-colonial + Aztec. Warm cream plaster over cut-stone bases, red clay-tile
+ * and flat-parapet roofs, wrought-iron balconies and lanterns, courtyards and bright blue talavera
+ * tile.
+ *
+ * <p>Landmark: a <b>colonial cathedral dominated by a great tiled dome</b> — a long, low nave with
+ * a flat parapet (no gothic verticality), a high domed crossing, and two <b>low square bell towers
+ * with tiled pyramidal caps</b> (bell openings, no spire, no gothic crenellation). An <b>Aztec
+ * stepped platform</b> sits on the plaza edge as the cultural signature. This deliberately does not
+ * share Paris's flying-buttress / crenellated-twin gothic silhouette.
  *
  * <p>Street props: arcaded colonnades, wrought-iron lantern posts and statues. All deterministic
  * (only {@link StructureBuilder#rng()}) and built from {@link Palette} / {@link Materials} blocks.
@@ -48,33 +55,60 @@ public final class MexicoCityStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // Colonial cathedral: the shared nave, then a matching twin tower and a domed crossing.
-        StyleKit.cathedral(b, rng, cx, cz, ground, p);
         int y0 = ground + 1;
-        int towerTop = y0 + 26;
-        twinTower(b, p, cx, cz + 11, cz + 16, y0, towerTop);
-        StyleKit.dome(b, cx, cz, y0 + 16, 5, p);
+
+        // 1. Long, low nave with a flat parapet — colonial, not gothic.
+        int nx0 = cx - 6;
+        int nx1 = cx + 6;
+        int nz0 = cz - 16;
+        int nz1 = cz + 8;
+        b.ground(nx0 - 2, nz0 - 2, nx1 + 2, nz1 + 2, ground, ground, p.foundation());
+        b.room(nx0, y0, nz0, nx1, y0 + 10, nz1, new Doorway(Side.N, 6));
+        // Flat parapet roof with a one-block tiled skirt.
+        b.fill(nx0 - 1, y0 + 11, nz0 - 1, nx1 + 1, y0 + 11, nz1 + 1, p.roof());
+        // Round-arch windows down both flanks.
+        for (int z = nz0 + 3; z <= nz1 - 3; z += 4) {
+            b.window(nx0, y0 + 4, z, 3, 1, true);
+            b.window(nx1, y0 + 4, z, 3, 1, true);
+        }
+
+        // 2. The dominant feature: a great tiled dome on a drum at the crossing.
+        int drumTop = y0 + 13;
+        b.room(cx - 4, drumTop, cz - 4, cx + 4, drumTop + 3, cz + 4,
+                new Doorway(Side.N, 4), new Doorway(Side.S, 4),
+                new Doorway(Side.E, 4), new Doorway(Side.W, 4));
+        for (int y = drumTop; y <= drumTop + 3; y++) {
+            b.put(cx - 4, y, cz - 4, p.accent());
+            b.put(cx + 4, y, cz - 4, p.accent());
+            b.put(cx - 4, y, cz + 4, p.accent());
+            b.put(cx + 4, y, cz + 4, p.accent());
+        }
+        StyleKit.dome(b, cx, cz, drumTop + 4, 7, p);
+
+        // 3. Two low square bell towers with tiled pyramidal caps.
+        bellTower(b, cx - 5, nz0 - 3, ground, p);
+        bellTower(b, cx + 5, nz0 - 3, ground, p);
+
+        // 4. An Aztec stepped platform on the plaza edge — the cultural signature.
+        StyleKit.steppedTemple(b, cx - 24, cz + 22, ground, 4, p);
     }
 
-    /** The second of the cathedral's twin bell towers (mirrors the shared north tower). */
-    private static void twinTower(StructureBuilder b, Palette p, int cx, int tz0, int tz1,
-                                  int y0, int towerTop) {
-        int tx0 = cx - 4;
-        int tx1 = cx + 4;
-        b.room(tx0, y0, tz0, tx1, towerTop, tz1);
-        for (int y = y0; y <= towerTop; y++) {
-            b.put(tx0, y, tz0, p.accent());
-            b.put(tx1, y, tz0, p.accent());
-            b.put(tx0, y, tz1, p.accent());
-            b.put(tx1, y, tz1, p.accent());
+    /** A low square bell tower: plastered shaft, a high dark bell opening, a tiled pyramid cap. */
+    private static void bellTower(StructureBuilder b, int x, int z, int ground, Palette p) {
+        int y0 = ground + 1;
+        int top = y0 + 16;
+        b.room(x - 2, y0, z - 2, x + 2, top, z + 2);
+        for (int y = y0; y <= top; y++) {
+            b.put(x - 2, y, z - 2, p.accent());
+            b.put(x + 2, y, z - 2, p.accent());
+            b.put(x - 2, y, z + 2, p.accent());
+            b.put(x + 2, y, z + 2, p.accent());
         }
-        for (int y = y0 + 5; y <= towerTop - 4; y += 5) {
-            b.window(tx0, y, (tz0 + tz1) / 2, 3, 1, true);
-            b.window(tx1, y, (tz0 + tz1) / 2, 3, 1, true);
-            b.window((tx0 + tx1) / 2, y, tz1, 3, 1, true);
-        }
-        b.crenellations(tx0 - 1, tz0 - 1, tx1 + 1, tz1 + 1, towerTop + 1);
-        b.spire(cx, (tz0 + tz1) / 2, towerTop + 3, 20);
+        // Bell opening (a dark arch) high up, on two faces.
+        b.window(x, top - 5, z - 2, 4, 1, true);
+        b.window(x, top - 5, z + 2, 4, 1, true);
+        // Tiled pyramidal cap.
+        b.pitchedRoof(x - 2, z - 2, x + 2, z + 2, top, 3, 0);
     }
 
     @Override

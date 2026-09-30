@@ -46,10 +46,53 @@ public final class CairoStyle implements CityStyle {
 
     @Override
     public void landmark(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        // A domed prayer hall flanked by two crenellated minarets.
-        StyleKit.mosque(b, rng, cx, cz, ground, p);
-        // Arcaded courtyard on the south side, clear of the northern minarets.
-        arcade(b, cx - 12, cx + 12, cz + 14, ground, p);
+        int y0 = ground + 1;
+        // A Mamluk madrasa: a low rectangular prayer hall with a grand pointed-arch portal and a
+        // flat parapet. No central Ottoman dome-mosque silhouette — that belongs to Istanbul.
+        int hx = 14;
+        int hz = 12;
+        int wallTop = y0 + 9;
+        b.ground(cx - hx - 3, cz - hz - 3, cx + hx + 3, cz + hz + 3, ground, ground, p.foundation());
+        b.room(cx - hx, y0, cz - hz, cx + hx, wallTop, cz + hz,
+                new StructureBuilder.Doorway(StructureBuilder.Side.S, hx));
+        // Flat terrace roof with a low parapet.
+        b.fill(cx - hx - 1, wallTop + 1, cz - hz - 1, cx + hx + 1, wallTop + 1, cz + hz + 1, p.roof());
+        // Mashrabiya lattice high on the outer walls.
+        for (int x = cx - hx + 3; x <= cx + hx - 3; x += 4) {
+            b.window(x, y0 + 5, cz - hz, 3, 1, true);
+            b.window(x, y0 + 5, cz + hz, 3, 1, true);
+        }
+        // An ogee entrance portal in front of the south gate.
+        b.fill(cx - 3, y0, cz + hz + 1, cx + 3, y0 + 6, cz + hz + 1, p.accent());
+        b.put(cx, y0 + 1, cz + hz + 1, p.door());
+        b.crenellations(cx - 3, cz + hz + 1, cx + 3, cz + hz + 1, y0 + 7);
+
+        // A carved stone dome over the south-east corner (a mausoleum chamber), on a short drum.
+        int mx = cx + hx - 5;
+        int mz = cz - hz + 5;
+        b.room(mx - 4, y0, mz - 4, mx + 4, y0 + 10, mz + 4);
+        StyleKit.dome(b, mx, mz, y0 + 11, 6, p);
+
+        // One tall, slender Mamluk minaret in the north-west corner (multi-balcony).
+        mamlukMinaret(b, cx - hx + 3, cz + hz - 3, ground, p);
+    }
+
+    /** A slender Mamluk minaret: a tall square shaft with two balcony rings and a ribbed cap. */
+    private static void mamlukMinaret(StructureBuilder b, int x, int z, int ground, Palette p) {
+        int y0 = ground + 1;
+        int top = y0 + 30;
+        b.room(x - 1, y0, z - 1, x + 1, top, z + 1);
+        for (int y = y0; y <= top; y++) {
+            b.put(x - 1, y, z - 1, p.accent());
+            b.put(x + 1, y, z - 1, p.accent());
+            b.put(x - 1, y, z + 1, p.accent());
+            b.put(x + 1, y, z + 1, p.accent());
+        }
+        // Balcony rings at two heights, then a ribbed lantern cap and finial.
+        b.crenellations(x - 2, z - 2, x + 2, z + 2, y0 + 14);
+        b.crenellations(x - 2, z - 2, x + 2, z + 2, y0 + 24);
+        b.pitchedRoof(x - 1, z - 1, x + 1, z + 1, top, 3, 0);
+        b.spire(x, z, top + 3, 5);
     }
 
     @Override
