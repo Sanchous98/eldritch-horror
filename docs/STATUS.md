@@ -30,6 +30,22 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - **Cities at contract size**: district 380 (~760 across), bigger landmarks, decay pass.
 - **City renderer** (`core/CityRenderer`, dev-only `-Deh.renderCities`): PNGs to `run/render/`,
   tick-sliced. Used to review without a client.
+- **All 24 cities rendered and reviewed** (Phase 1). Verdict: culture reads by colour; then the
+  systemic issues below were fixed and all 24 re-rendered.
+- **Style fixes**: duplicated landmarks separated (Paris gothic cathedral vs Mexico City colonial
+  dome + low bell towers + Aztec platform; Istanbul Ottoman mosque vs Cairo Mamluk madrasa);
+  **landmarks scaled 2–3×** so they dominate; the district is **paved into urban fabric**; cities
+  **never build on water**.
+- **Surface decoration** (`world/SurfaceDecorator`): deterministic grass/flowers/trees/cactus/
+  bamboo chosen by Köppen, chunk-clipped, skips city footprints.
+- **Cylinder + Morok** (`world/BoundaryTravel`, `EarthMap`): longitude wraps (`floorMod`), the
+  seam warp carries a player across `|x|>=HALF_WIDTH`, and a lethal escalating polar debuff
+  (darkness/nausea/weakness/slowness → magic damage) past `|z|>HALF_HEIGHT`. Morok never casts
+  you back.
+- **Second-echelon sites** (`world/loc/site/`): `cult_stronghold`, `order_vault`, `drowned_temple`,
+  `ritual_altar_site`, `rift_scar` — 5 `Location`s registered as fixed coordinates (29 locations).
+- **Tests**: JUnit via `./gradlew test` — `EarthMapCylinderTest` (2 tests) guards the longitude
+  wrap and the ocean seam, loading the real baked layers.
 - **Design**: `design/23-boundary-and-travel.md` (cylinder + Morok);
   `docs/STRUCTURES-CONTRACT.md`; `AGENTS.md`; `docs/HOST-SAFETY.md`.
 - **Safety**: hard caps in `docker-compose.yml`, `scripts/guarded-run.sh`.
@@ -42,12 +58,16 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 
 ## Known limitations / deferred
 
-- Terrain is **surface-only** and **undecorated** (no grass/trees/flowers) — Phase 3.
 - Cities have **no services/state** yet (deferred until those features exist).
 - **No combat, mobs, bosses, rituals, sanity, corruption** implemented — design only.
-- **Landmark duplicates** not yet separated (Paris/Mexico City; Istanbul/Cairo) — Phase 2.
-- Only ~4–10 of 24 cities visually reviewed so far — Phase 1.
+  (Morok itself is implemented; it is the first sanity/health-escalation hook.)
+- Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
+  now largely distinguished by their differing landmarks, but colour separation is still loose.
+- Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,
+  so it is judged in-game rather than on the map PNGs.
 - Spawn is vanilla-chosen; a pinned coastal spawn is a tracked task.
+- **Rootless docker** starts manually each session (see `docs/HOST-SAFETY.md`); it does not
+  auto-start.
 
 ## Open incident
 
