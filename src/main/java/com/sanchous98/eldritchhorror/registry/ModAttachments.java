@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -21,17 +22,19 @@ public final class ModAttachments {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, EldritchHorror.MODID);
 
-    /** Per-player sanity, 0..{@code SanitySystem.DEFAULT_MAX}. */
+    /** Per-player sanity, 0..{@code SanitySystem.DEFAULT_MAX}. Synced to the owner for the HUD. */
     public static final Supplier<AttachmentType<Double>> SANITY =
             ATTACHMENT_TYPES.register("sanity", () -> AttachmentType.<Double>builder(() -> 100.0)
                     .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("value"))
+                    .sync(ByteBufCodecs.DOUBLE)
                     .copyOnDeath()
                     .build());
 
-    /** Per-player corruption, 0..{@code CorruptionSystem.DEFAULT_MAX}. */
+    /** Per-player corruption, 0..{@code CorruptionSystem.DEFAULT_MAX}. Synced to the owner. */
     public static final Supplier<AttachmentType<Double>> CORRUPTION =
             ATTACHMENT_TYPES.register("corruption", () -> AttachmentType.<Double>builder(() -> 0.0)
                     .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("value"))
+                    .sync(ByteBufCodecs.DOUBLE)
                     .copyOnDeath()
                     .build());
 
