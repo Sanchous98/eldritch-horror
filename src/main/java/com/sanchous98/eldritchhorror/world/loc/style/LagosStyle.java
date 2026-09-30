@@ -60,7 +60,7 @@ public final class LagosStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),            // door: heavy carved gate leaf
                 Blocks.ACACIA_FENCE.defaultBlockState(),             // rail
                 Blocks.LANTERN.defaultBlockState(),                  // light: hanging lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.COARSE_DIRT.defaultBlockState());             // rubble: dry earth
     }
 

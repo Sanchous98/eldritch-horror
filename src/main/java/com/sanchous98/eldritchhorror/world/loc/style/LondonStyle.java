@@ -42,7 +42,7 @@ public final class LondonStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door
                 Blocks.IRON_BARS.defaultBlockState(),               // rail: iron railings
                 Blocks.LANTERN.defaultBlockState(),                 // light: gas lamp
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

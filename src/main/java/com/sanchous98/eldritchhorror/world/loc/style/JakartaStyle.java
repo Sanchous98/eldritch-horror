@@ -45,7 +45,7 @@ public final class JakartaStyle implements CityStyle {
                 Blocks.JUNGLE_DOOR.defaultBlockState(),             // door
                 Blocks.JUNGLE_FENCE.defaultBlockState(),            // rail: veranda railing
                 Blocks.LANTERN.defaultBlockState(),                 // light: oil lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

@@ -49,7 +49,7 @@ public final class CityLocation implements Location {
      * jungle city is not buried by the biome's own trees (which run before this generator's city
      * pass). Taller than the tallest tree we expect to remove; buildings are placed afterwards.
      */
-    private static final int CLEAR_ABOVE = 14;
+    private static final int CLEAR_ABOVE = 40;
 
     private final City city;
 

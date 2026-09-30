@@ -49,7 +49,7 @@ public final class MexicoCityStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door: heavy timber
                 Blocks.IRON_BARS.defaultBlockState(),               // rail: wrought-iron balcony
                 Blocks.LANTERN.defaultBlockState(),                 // light: hanging lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

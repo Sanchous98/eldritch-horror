@@ -211,11 +211,12 @@ public final class StyleKit {
 
     // ------------------------------------------------------------------ generic props
 
-    /** A lamp / lantern post beside a street. */
+    /** A lamp / lantern post beside a street. Sits on the ground at its own column. */
     public static void lanternPost(StructureBuilder b, int x, int z, int ground, Palette p) {
-        b.put(x, ground + 1, z, p.rail());
-        b.put(x, ground + 2, z, p.rail());
-        b.put(x, ground + 3, z, p.light());
+        int g = b.groundY(x, z);
+        b.put(x, g + 1, z, p.rail());
+        b.put(x, g + 2, z, p.rail());
+        b.put(x, g + 3, z, p.light());
     }
 
     /** A tall obelisk (monument/plinth) at a plaza. */

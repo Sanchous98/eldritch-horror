@@ -36,7 +36,7 @@ public final class ShanghaiStyle implements CityStyle {
         // Culture leads: grey treaty-port masonry with dark slate roofs. Climate only nudges the
         // overgrowth; the coast swaps it for kelp (the Huangpu riverfront).
         Palette bio = Palette.fromBiome(koppenClass, coastal);
-        BlockState overgrowth = coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth();
+        BlockState overgrowth = bio.overgrowth();
         return new Palette(
                 Blocks.POLISHED_ANDESITE.defaultBlockState(),        // ground: grey stone paving
                 Blocks.POLISHED_DIORITE.defaultBlockState(),         // foundation: stone plinth

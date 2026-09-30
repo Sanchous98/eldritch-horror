@@ -40,7 +40,7 @@ public final class IstanbulStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door
                 Blocks.IRON_BARS.defaultBlockState(),               // rail / grille
                 Blocks.LANTERN.defaultBlockState(),                 // light: oil lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

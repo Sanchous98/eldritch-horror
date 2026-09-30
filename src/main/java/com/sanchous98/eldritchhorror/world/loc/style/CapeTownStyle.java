@@ -45,7 +45,7 @@ public final class CapeTownStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door
                 Blocks.DARK_OAK_FENCE.defaultBlockState(),          // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble: harbour gravel
     }
 

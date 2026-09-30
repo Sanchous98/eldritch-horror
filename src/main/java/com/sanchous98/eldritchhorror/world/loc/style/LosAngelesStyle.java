@@ -43,7 +43,7 @@ public final class LosAngelesStyle implements CityStyle {
                 Blocks.ACACIA_DOOR.defaultBlockState(),             // door
                 Blocks.ACACIA_FENCE.defaultBlockState(),            // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light: patio lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble: dry debris
     }
 

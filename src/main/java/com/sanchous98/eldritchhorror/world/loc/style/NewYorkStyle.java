@@ -41,7 +41,7 @@ public final class NewYorkStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door
                 Blocks.IRON_BARS.defaultBlockState(),               // rail: fire-escape rails
                 Blocks.LANTERN.defaultBlockState(),                 // light: gas lamp
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

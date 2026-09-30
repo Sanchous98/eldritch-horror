@@ -49,7 +49,7 @@ public final class RomeStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door: heavy timber gate
                 Blocks.IRON_BARS.defaultBlockState(),               // rail: bronze/iron grille
                 Blocks.LANTERN.defaultBlockState(),                 // light: hanging lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

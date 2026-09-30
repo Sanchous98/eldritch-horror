@@ -44,7 +44,7 @@ public final class ParisStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door
                 Blocks.IRON_BARS.defaultBlockState(),               // rail: wrought-iron balcony
                 Blocks.LANTERN.defaultBlockState(),                 // light: gas lamp
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

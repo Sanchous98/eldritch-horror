@@ -46,7 +46,7 @@ public final class BuenosAiresStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door: dark porte-cochère
                 Blocks.IRON_BARS.defaultBlockState(),               // rail: wrought-iron balcony
                 Blocks.LANTERN.defaultBlockState(),                 // light: gas/electric lamp
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

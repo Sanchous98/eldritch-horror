@@ -56,7 +56,7 @@ public final class MoscowStyle implements CityStyle {
                 Blocks.SPRUCE_DOOR.defaultBlockState(),             // door
                 Blocks.SPRUCE_FENCE.defaultBlockState(),            // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light: warm street lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

@@ -42,7 +42,7 @@ public final class RioStyle implements CityStyle {
                 Blocks.OAK_DOOR.defaultBlockState(),                // door
                 Blocks.OAK_FENCE.defaultBlockState(),               // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light
-                coastal ? Blocks.KELP.defaultBlockState() : Blocks.JUNGLE_LEAVES.defaultBlockState(),
+                Blocks.JUNGLE_LEAVES.defaultBlockState(),           // overgrowth (never kelp: waterlogged)
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

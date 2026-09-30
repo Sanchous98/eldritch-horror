@@ -40,7 +40,7 @@ public final class CairoStyle implements CityStyle {
                 Blocks.ACACIA_DOOR.defaultBlockState(),             // door: pointed-arch gate
                 Blocks.ACACIA_FENCE.defaultBlockState(),            // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light: hanging lamp
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.COARSE_DIRT.defaultBlockState());            // rubble: dry debris
     }
 

@@ -140,10 +140,10 @@ public record Palette(
         }
 
         if (coastal) {
-            // Harbour sites read differently: prismarine trim and kelp growth on top of the region.
+            // Harbour sites read differently: prismarine trim only. Overgrowth stays a *land*
+            // plant — KELP is waterlogged and would flood every block it is scattered onto.
             accent = s(Blocks.PRISMARINE_BRICKS);
             weathered = s(Blocks.DARK_PRISMARINE);
-            overgrowth = s(Blocks.KELP);
         }
         return new Palette(ground, foundation, wall, weathered, accent, roof, roofStairs, roofSlab,
                 window, frame, door, rail, light, overgrowth, rubble);

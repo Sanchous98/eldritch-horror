@@ -46,7 +46,7 @@ public final class SeoulStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door: dark timber gate
                 Blocks.DARK_OAK_FENCE.defaultBlockState(),          // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light: lantern glow
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 

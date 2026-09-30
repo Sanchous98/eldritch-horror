@@ -55,7 +55,7 @@ public final class BangkokStyle implements CityStyle {
                 Blocks.CRIMSON_DOOR.defaultBlockState(),             // door: vermilion gate leaf
                 Blocks.CRIMSON_FENCE.defaultBlockState(),            // rail
                 Blocks.LANTERN.defaultBlockState(),                  // light: hanging lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                  // rubble
     }
 

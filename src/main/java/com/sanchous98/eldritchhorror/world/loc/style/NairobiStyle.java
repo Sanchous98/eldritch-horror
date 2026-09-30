@@ -46,7 +46,7 @@ public final class NairobiStyle implements CityStyle {
                 Blocks.ACACIA_DOOR.defaultBlockState(),             // door
                 Blocks.ACACIA_FENCE.defaultBlockState(),            // rail / timber post
                 Blocks.LANTERN.defaultBlockState(),                 // light: street lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.COARSE_DIRT.defaultBlockState());            // rubble: dry red debris
     }
 

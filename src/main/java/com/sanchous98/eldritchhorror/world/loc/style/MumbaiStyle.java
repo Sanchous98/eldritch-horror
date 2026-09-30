@@ -44,7 +44,7 @@ public final class MumbaiStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),            // door
                 Blocks.IRON_BARS.defaultBlockState(),                // rail: Victorian / Deco ironwork
                 Blocks.LANTERN.defaultBlockState(),                  // light
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                  // rubble
     }
 

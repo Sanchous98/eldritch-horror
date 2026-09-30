@@ -46,7 +46,7 @@ public final class LimaStyle implements CityStyle {
                 Blocks.DARK_OAK_DOOR.defaultBlockState(),           // door
                 Blocks.DARK_OAK_FENCE.defaultBlockState(),          // rail
                 Blocks.LANTERN.defaultBlockState(),                 // light: lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.COARSE_DIRT.defaultBlockState());            // rubble: dry coastal dirt
     }
 

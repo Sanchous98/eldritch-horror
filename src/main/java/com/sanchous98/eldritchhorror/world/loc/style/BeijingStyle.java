@@ -56,7 +56,7 @@ public final class BeijingStyle implements CityStyle {
                 Blocks.CRIMSON_DOOR.defaultBlockState(),             // door: red gate leaf
                 Blocks.CRIMSON_FENCE.defaultBlockState(),            // rail
                 Blocks.LANTERN.defaultBlockState(),                  // light: paper/stone lantern
-                coastal ? Blocks.KELP.defaultBlockState() : bio.overgrowth(),
+                bio.overgrowth(),
                 Blocks.GRAVEL.defaultBlockState());                  // rubble
     }
 
