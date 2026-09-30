@@ -55,8 +55,13 @@ All rates are multiplied by `sanityDrainMultiplier` (config) and difficulty scal
 
 ## Items that move sanity
 
-See `16-items.md`: restoratives (food/reagents) and tomes (cost). The `investigator_coat`
-reduces darkness drain.
+See `16-items.md`: restoratives (tonics/reagents — **not food**; see below) and tomes (cost).
+The `investigator_coat` reduces darkness drain.
+
+**There is no hunger system.** Food is not a survival meter: it is removed as a mechanic
+(vanilla hunger is disabled) and the **sanity meter takes its place** on the HUD. Crops,
+animals and fish still exist only as **offerings/reagents** for rites, never as a food bar.
+This matches the tabletop, which has no food track. See `24-sanity-and-corruption.md`.
 
 ## Tuning knobs
 

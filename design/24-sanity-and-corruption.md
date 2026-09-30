@@ -16,6 +16,15 @@ tonight; corruption is the tab you can never fully close (see `04-pillars.md`: p
 price). The two interlock: high corruption suppresses sanity recovery and unlocks the worst
 effects.
 
+## Sanity replaces hunger (decided)
+
+There is **no hunger/food system**. Vanilla hunger is disabled (the player's `FoodData` is
+pinned full — no food drain, no starvation, no hunger-based weakness) and the **sanity meter
+occupies the food bar's HUD position**. This mirrors the tabletop, which has no food track.
+Food is therefore **not a survival resource**: crops/animals/fish remain only as
+offerings/reagents for rites. Health regeneration is decoupled from food (see Implementation
+notes).
+
 ## Sanity model (decided)
 
 - **Server-authoritative, per player.** The client only renders the synced value; it never
@@ -130,5 +139,8 @@ where sanity is what tonight costs, corruption is what the run costs.
 - **Threshold effects:** a table (config/data) mapping state → debuff set; apply/clear on
   transitions, not every tick.
 - **Client half:** HUD meter, whisper/particle overlay and hallucinations — no gameplay state.
+- **Replaces hunger:** on the client, hide the vanilla `FOOD` layer and draw the sanity meter in
+  its place; on the server, pin `FoodData` full each tick (no mixin required if the GUI-layer
+  event and `FoodData` accessors are available in 26.3 — verify at build time).
 - **Config (`SERVER` type):** `enableSanity`, `enableCorruption`, `sanityDrainMultiplier`,
   per-source rates, stage thresholds, pooled-vs-individual mode.

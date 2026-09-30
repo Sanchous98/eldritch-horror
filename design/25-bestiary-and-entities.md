@@ -25,7 +25,7 @@ Ordered by the progression the player meets them in:
 
 | Family | What it is | Examples | Threat |
 |---|---|---|---|
-| **Mundane wildlife** | baseline, uncorrupted animals | deer, wolves, fish | none / food |
+| **Mundane wildlife** | baseline, uncorrupted animals | deer, wolves, fish | none (not food; no hunger system) |
 | **Tainted fauna** | corrupted versions of the mundane | `tainted_fauna`, corrupted birds | low, corruption vector |
 | **Cultists** | human faction agents | `worshipper`, `cult_zealot` | social / low combat |
 | **Lesser horrors** | the first truly wrong things | `lesser_swarm`, `watcher` | sanity / ambush |
