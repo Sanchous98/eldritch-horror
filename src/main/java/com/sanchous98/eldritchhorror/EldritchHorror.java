@@ -49,6 +49,9 @@ public final class EldritchHorror {
         // Content registries. Add new DeferredRegisters here (and in registry/).
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        ModItems.TABS.register(modEventBus);
+        ModItems.registerCategories();
+        ModBlocks.registerCategories();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModEffects.MOB_EFFECTS.register(modEventBus);

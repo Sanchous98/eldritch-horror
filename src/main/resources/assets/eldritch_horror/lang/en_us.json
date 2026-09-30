@@ -260,5 +260,20 @@
   "item.eldritch_horror.water_skin.tooltip": "Water skin; carries drinking water.",
   "item.eldritch_horror.field_journal.tooltip": "Field journal; records discoveries, lore and sanity notes.",
   "item.eldritch_horror.rope_coil.tooltip": "Rope coil; climbing and traversal aid.",
-  "item.eldritch_horror.debug_tool.tooltip": "Developer tool; dev-only, shows sanity/corruption."
+  "item.eldritch_horror.debug_tool.tooltip": "Developer tool; dev-only, shows sanity/corruption.",
+  "block.eldritch_horror.ritual_chalk": "Ritual Chalk",
+  "block.eldritch_horror.rune_stone": "Rune Stone",
+  "block.eldritch_horror.altar_core": "Altar Core",
+  "block.eldritch_horror.sacrificial_altar": "Sacrificial Altar",
+  "block.eldritch_horror.offering_bowl": "Offering Bowl",
+  "block.eldritch_horror.incense_brazier": "Incense Brazier",
+  "block.eldritch_horror.candle_cluster": "Candle Cluster",
+  "block.eldritch_horror.veil_gate_frame": "Veil Gate Frame",
+  "block.eldritch_horror.rift_anchor": "Rift Anchor",
+  "block.eldritch_horror.black_monolith": "Black Monolith",
+  "block.eldritch_horror.corrupt_stone": "Corrupt Stone",
+  "block.eldritch_horror.tainted_soil": "Tainted Soil",
+  "block.eldritch_horror.glyph_tile": "Glyph Tile",
+  "block.eldritch_horror.ossuary_block": "Ossuary Block",
+  "block.eldritch_horror.seal_stone": "Seal Stone"
 }
