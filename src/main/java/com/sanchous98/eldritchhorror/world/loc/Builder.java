@@ -463,6 +463,21 @@ public final class Builder implements StructureBuilder {
     }
 
     @Override
+    public boolean isLand(int x, int z) {
+        return EarthMaps.get().isLand(x, z);
+    }
+
+    @Override
+    public int chunkMinX() {
+        return this.chunk.getMinBlockX();
+    }
+
+    @Override
+    public int chunkMinZ() {
+        return this.chunk.getMinBlockZ();
+    }
+
+    @Override
     public RandomSource rng() {
         return this.rng;
     }

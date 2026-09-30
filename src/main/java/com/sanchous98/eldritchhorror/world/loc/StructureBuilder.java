@@ -70,6 +70,15 @@ public interface StructureBuilder {
     /** Terrain surface Y at (x,z), clamped to the buildable range. */
     int groundY(int x, int z);
 
+    /** True if (x,z) is real land (not ocean) per the baked landmask. */
+    boolean isLand(int x, int z);
+
+    /** Minimum block X of the chunk currently generating (inclusive). */
+    int chunkMinX();
+
+    /** Minimum block Z of the chunk currently generating (inclusive). */
+    int chunkMinZ();
+
     /** The palette chosen from the real biome/terrain at this location. */
     Palette palette();
 

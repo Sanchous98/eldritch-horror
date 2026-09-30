@@ -90,6 +90,10 @@ public final class CityLocation implements Location {
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground + 1, ground + 1, p.ground());
 
+        // 1b. Pave the whole district on land, so the city reads as urban fabric rather than
+        // scattered buildings on wild terrain. Chunk-clipped: only this chunk's columns write.
+        paveDistrict(b, rng, cx, cz, district, p);
+
         // 2. Landmark: the cultural skyline piece (cathedral / temple / mosque / pagoda …).
         style.landmark(b, rng, cx, cz, ground, p);
 
@@ -128,9 +132,42 @@ public final class CityLocation implements Location {
 
     // ------------------------------------------------------------------ pieces
 
+    /**
+     * Paves the district on land only: a ground course on every land column within the district
+     * radius. This gives the city a continuous urban surface (streets and courts) instead of
+     * buildings floating on untouched terrain. Deterministic and chunk-clipped.
+     */
+    private static void paveDistrict(StructureBuilder b, RandomSource rng, int cx, int cz,
+                                     int district, Palette p) {
+        // Only the columns of the chunk currently generating are visited (O(256) per chunk),
+        // so paving costs the same regardless of district size.
+        int x0 = b.chunkMinX();
+        int z0 = b.chunkMinZ();
+        for (int x = x0; x < x0 + 16; x++) {
+            int dx = x - cx;
+            if (Math.abs(dx) > district) {
+                continue;
+            }
+            for (int z = z0; z < z0 + 16; z++) {
+                int dz = z - cz;
+                if (dx * dx + dz * dz > district * district) {
+                    continue;
+                }
+                if (!b.isLand(x, z)) {
+                    continue;
+                }
+                int gy = b.groundY(x, z);
+                b.put(x, gy, z, p.ground());
+            }
+        }
+    }
+
     /** One building: quoined shell, tall windows, a steep ridge, optional spire/buttress, decay. */
     private static void building(StructureBuilder b, RandomSource rng, int x, int z, Palette p,
                                  CityStyle style) {
+        if (!b.isLand(x, z)) {
+            return; // never build on water
+        }
         int w = 5 + rng.nextInt(4);   // 5..8 across X
         int d = 5 + rng.nextInt(4);   // 5..8 across Z
         int h = 4 + rng.nextInt(6);   // wall height 4..9
