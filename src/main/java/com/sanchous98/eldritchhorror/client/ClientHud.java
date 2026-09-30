@@ -5,11 +5,9 @@ import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -85,19 +83,12 @@ public final class ClientHud {
 
         int width = 182;
         int x = g.guiWidth() / 2 - width / 2;
-        int y = g.guiHeight() - 32;
+        int y = g.guiHeight() - 29; // exactly the vanilla experience-bar slot
         g.fill(RenderPipelines.GUI, x, y, x + width, y + 5, 0xCC101018);
         int filled = (int) (width * frac);
         if (filled > 0) {
             g.fill(RenderPipelines.GUI, x, y, x + filled, y + 5, corruptionColour(frac));
         }
-
-        // Numeric readout (small) centred above the bar.
-        Font font = Minecraft.getInstance().font;
-        Component label = Component.literal(
-                String.format(java.util.Locale.ROOT, "SAN %.0f   COR %.0f",
-                        player.getData(ModAttachments.SANITY.get()), corruption));
-        g.text(font, label, g.guiWidth() / 2 - font.width(label) / 2, y - 10, 0xFFB0B0C0, true);
     }
 
     private static int sanityColour(double frac) {
