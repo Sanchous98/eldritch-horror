@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.registry;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.items.Artifacts;
 import com.sanchous98.eldritchhorror.registry.items.Conditions;
+import com.sanchous98.eldritchhorror.registry.items.ConsumableItem;
 import com.sanchous98.eldritchhorror.registry.items.Consumables;
 import com.sanchous98.eldritchhorror.registry.items.Currency;
 import com.sanchous98.eldritchhorror.registry.items.Factions;
@@ -32,9 +33,9 @@ import java.util.List;
  * files can be authored in parallel) and collects everything into {@link #ALL} for the creative
  * tab.
  *
- * <p>These items are <b>content stubs</b>: they exist, stack and appear in the creative tab, and
- * their intended sanity/corruption effects are recorded in {@code design/16-items.md} and the
- * item's own javadoc — but no behaviour is wired yet (see {@code design/27-systems-framework.md}).
+ * <p>Most items are <b>content stubs</b> (exist, stack, appear in the creative tab); consumables
+ * and tomes are wired to the sanity/corruption systems via the {@link #add(String, int, double,
+ * double)} overload. See {@code design/16-items.md} and {@code design/27-systems-framework.md}.
  */
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(EldritchHorror.MODID);
@@ -53,6 +54,43 @@ public final class ModItems {
      */
     public static DeferredItem<Item> add(String id, int maxStack) {
         DeferredItem<Item> item = ITEMS.registerSimpleItem(id, p -> p.stacksTo(maxStack));
+        ALL.add(item);
+        return item;
+    }
+
+    /**
+     * Registers a consumed {@link ConsumableItem} (fixed sanity/corruption deltas on use) and
+     * records it in {@link #ALL}.
+     *
+     * <p>This overload is deliberately also named {@code add}: {@code tools/gen_item_assets.py}
+     * discovers item ids with the regex {@code ModItems\.add\("([a-z_]+)"}, which matches this call
+     * shape unchanged, so these items keep getting models/textures/item definitions with no change
+     * to the (frozen) generator.
+     *
+     * <p>Consumables apply their deltas <b>server-side only</b> via {@code SanityAPI}/
+     * {@code CorruptionAPI} and shrink the stack by one per use (creative excepted).
+     *
+     * @param id         the item path (snake_case), namespaced under the mod id
+     * @param maxStack   the max stack size
+     * @param sanity     the sanity delta applied on use (may be negative)
+     * @param corruption the corruption delta applied on use (may be negative)
+     */
+    public static DeferredItem<ConsumableItem> add(String id, int maxStack,
+                                                   double sanity, double corruption) {
+        return add(id, maxStack, sanity, corruption, true);
+    }
+
+    /**
+     * Registers a {@link ConsumableItem} with explicit consumption: {@code consumed=false} is for
+     * knowledge items (tomes) that pay a cost but persist. Also named {@code add} so the asset
+     * generator's regex still discovers the id.
+     *
+     * @param consumed whether using the item removes one from the stack
+     */
+    public static DeferredItem<ConsumableItem> add(String id, int maxStack, double sanity,
+                                                   double corruption, boolean consumed) {
+        DeferredItem<ConsumableItem> item = ITEMS.registerItem(id,
+                p -> new ConsumableItem(p.stacksTo(maxStack), sanity, corruption, consumed));
         ALL.add(item);
         return item;
     }
