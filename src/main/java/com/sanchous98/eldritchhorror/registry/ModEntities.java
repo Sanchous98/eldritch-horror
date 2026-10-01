@@ -6,12 +6,16 @@ import com.sanchous98.eldritchhorror.entity.BoneChoir;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
+import com.sanchous98.eldritchhorror.entity.CultRaider;
+import com.sanchous98.eldritchhorror.entity.CultZealot;
 import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.NightHag;
+import com.sanchous98.eldritchhorror.entity.PlagueCrone;
 import com.sanchous98.eldritchhorror.entity.RiftMite;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
+import com.sanchous98.eldritchhorror.entity.RiteBinder;
 import com.sanchous98.eldritchhorror.entity.ShamblerOoze;
 import com.sanchous98.eldritchhorror.entity.ShoggothMass;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
@@ -20,6 +24,7 @@ import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
 import com.sanchous98.eldritchhorror.entity.Watcher;
 import com.sanchous98.eldritchhorror.entity.WeaverSpawn;
+import com.sanchous98.eldritchhorror.entity.Worshipper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -262,6 +267,72 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("night_hag_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(NIGHT_HAG.get())));
 
+    // --- Cult faction (design/09-cults.md, design/25 cultist family) --------------------------
+
+    /** Worshipper: 0.6 x 1.95, a passive humanoid NPC (the villager footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Worshipper>> WORSHIPPER =
+            ENTITY_TYPES.register("worshipper", () ->
+                    EntityType.Builder.<Worshipper>of(Worshipper::new, MobCategory.CREATURE)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("worshipper"))));
+
+    public static final DeferredItem<SpawnEggItem> WORSHIPPER_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("worshipper_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(WORSHIPPER.get())));
+
+    /** Cult zealot: 0.6 x 1.95, hostile melee elite (matching vanilla vindicator). */
+    public static final DeferredHolder<EntityType<?>, EntityType<CultZealot>> CULT_ZEALOT =
+            ENTITY_TYPES.register("cult_zealot", () ->
+                    EntityType.Builder.<CultZealot>of(CultZealot::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("cult_zealot"))));
+
+    public static final DeferredItem<SpawnEggItem> CULT_ZEALOT_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("cult_zealot_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CULT_ZEALOT.get())));
+
+    /** Cult raider: 0.6 x 1.95, hostile fast melee skirmisher (matching vanilla pillager). */
+    public static final DeferredHolder<EntityType<?>, EntityType<CultRaider>> CULT_RAIDER =
+            ENTITY_TYPES.register("cult_raider", () ->
+                    EntityType.Builder.<CultRaider>of(CultRaider::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("cult_raider"))));
+
+    public static final DeferredItem<SpawnEggItem> CULT_RAIDER_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("cult_raider_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CULT_RAIDER.get())));
+
+    /** Rite binder: 0.6 x 1.95, hostile caster (matching vanilla evoker). */
+    public static final DeferredHolder<EntityType<?>, EntityType<RiteBinder>> RITE_BINDER =
+            ENTITY_TYPES.register("rite_binder", () ->
+                    EntityType.Builder.<RiteBinder>of(RiteBinder::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("rite_binder"))));
+
+    public static final DeferredItem<SpawnEggItem> RITE_BINDER_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("rite_binder_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(RITE_BINDER.get())));
+
+    /** Plague crone: 0.6 x 1.95, hostile debuffer (matching vanilla witch). */
+    public static final DeferredHolder<EntityType<?>, EntityType<PlagueCrone>> PLAGUE_CRONE =
+            ENTITY_TYPES.register("plague_crone", () ->
+                    EntityType.Builder.<PlagueCrone>of(PlagueCrone::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("plague_crone"))));
+
+    public static final DeferredItem<SpawnEggItem> PLAGUE_CRONE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("plague_crone_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(PLAGUE_CRONE.get())));
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
@@ -328,6 +399,11 @@ public final class ModEntities {
             event.accept(SHAMBLER_OOZE_SPAWN_EGG.get());
             event.accept(CHOIR_SPITE_SPAWN_EGG.get());
             event.accept(NIGHT_HAG_SPAWN_EGG.get());
+            event.accept(WORSHIPPER_SPAWN_EGG.get());
+            event.accept(CULT_ZEALOT_SPAWN_EGG.get());
+            event.accept(CULT_RAIDER_SPAWN_EGG.get());
+            event.accept(RITE_BINDER_SPAWN_EGG.get());
+            event.accept(PLAGUE_CRONE_SPAWN_EGG.get());
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
@@ -356,6 +432,11 @@ public final class ModEntities {
         event.put(SHAMBLER_OOZE.get(), ShamblerOoze.createAttributes().build());
         event.put(CHOIR_SPITE.get(), ChoirSpite.createAttributes().build());
         event.put(NIGHT_HAG.get(), NightHag.createAttributes().build());
+        event.put(WORSHIPPER.get(), Worshipper.createAttributes().build());
+        event.put(CULT_ZEALOT.get(), CultZealot.createAttributes().build());
+        event.put(CULT_RAIDER.get(), CultRaider.createAttributes().build());
+        event.put(RITE_BINDER.get(), RiteBinder.createAttributes().build());
+        event.put(PLAGUE_CRONE.get(), PlagueCrone.createAttributes().build());
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());

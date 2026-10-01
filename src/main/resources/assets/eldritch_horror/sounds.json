@@ -286,5 +286,50 @@
         "type": "event"
       }
     ]
+  },
+  "entity.worshipper.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.worshipper.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.villager.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.cult_zealot.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.cult_zealot.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vindicator.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.cult_raider.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.cult_raider.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.pillager.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.rite_binder.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.rite_binder.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.evoker.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.plague_crone.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.plague_crone.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.witch.ambient",
+        "type": "event"
+      }
+    ]
   }
 }

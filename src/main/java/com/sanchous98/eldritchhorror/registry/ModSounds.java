@@ -101,6 +101,28 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> NIGHT_HAG_AMBIENT =
             register("entity.night_hag.ambient");
 
+    // --- Cult faction (design/09-cults.md, design/25 cultist family) --------------------------
+
+    /** The worshipper's murmured prayer (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> WORSHIPPER_AMBIENT =
+            register("entity.worshipper.ambient");
+
+    /** The cult zealot's barked devotion (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CULT_ZEALOT_AMBIENT =
+            register("entity.cult_zealot.ambient");
+
+    /** The cult raider's skirmish cry (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CULT_RAIDER_AMBIENT =
+            register("entity.cult_raider.ambient");
+
+    /** The rite binder's intonation (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RITE_BINDER_AMBIENT =
+            register("entity.rite_binder.ambient");
+
+    /** The plague crone's rasping (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> PLAGUE_CRONE_AMBIENT =
+            register("entity.plague_crone.ambient");
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu's dream-leak vocalisation (ambient). */

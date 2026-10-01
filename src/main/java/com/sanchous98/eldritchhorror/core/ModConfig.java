@@ -1049,6 +1049,206 @@ public final class ModConfig {
             BUILDER.comment("Minimum Y at which a night hag may spawn (fliers stay above the deep dark).")
                     .defineInRange("nightHagSpawnMinY", 50, -64, 320);
 
+    // --- Cult faction (design/09-cults.md, design/25 cultist family) --------------------------
+
+    /**
+     * Reputation below which a cult mob treats a player as hostile. Default {@code 0} is the
+     * {@code OUTSIDER} band — a player with zero or positive standing is passed by; a negative one
+     * is attacked/refused. Applies to every cult mob via the shared reputation read.
+     */
+    public static final ModConfigSpec.IntValue CULT_HOSTILE_BELOW =
+            BUILDER.comment("Reputation below which a cult mob is hostile to a player (0 = the Outsider band).")
+                    .defineInRange("cultHostileBelow", 0, -100, 100);
+
+    /** Whether a cultist's health/attack scale with its owning cult's rank band at spawn. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CULT_RANK_SCALING =
+            BUILDER.comment("Scale cult_zealot health/attack with its rank band (design/09 rank ladder).")
+                    .define("enableCultRankScaling", true);
+
+    /** Per-band multiplier added to health/attack: {@code 1 + rank.ordinal() * this}. */
+    public static final ModConfigSpec.DoubleValue CULT_RANK_SCALE_PER_BAND =
+            BUILDER.comment("Extra health/attack per rank band above Neutral (0.10 = +10% per band).")
+                    .defineInRange("cultRankScalePerBand", 0.10, 0.0, 1.0);
+
+    /** Radius (blocks) a worshipper keeps to its spawn point (guards a location). */
+    public static final ModConfigSpec.IntValue WORSHIPPER_HOME_RADIUS =
+            BUILDER.comment("Radius (blocks) a worshipper guards around its spawn point.")
+                    .defineInRange("worshipperHomeRadius", 16, 1, 64);
+
+    // --- Bestiary: cult_zealot / cult_raider (cult combatants) -------------------------------
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_CULT_ZEALOT =
+            BUILDER.comment("Enable the 'cult_zealot' sanity source (a cult soldier drains sanity).")
+                    .define("enableSanityCultZealot", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_CULT_ZEALOT_RATE =
+            BUILDER.comment("Sanity change per second per nearby cult zealot (negative drains).")
+                    .defineInRange("sanityCultZealotRate", -0.08, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_CULT_ZEALOT_RADIUS =
+            BUILDER.comment("Radius (blocks) in which cult zealots contribute to the sanity drain.")
+                    .defineInRange("sanityCultZealotRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_CULT_ZEALOT_MAX =
+            BUILDER.comment("Maximum cult zealots counted toward the sanity drain at once.")
+                    .defineInRange("sanityCultZealotMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_CULT_RAIDER =
+            BUILDER.comment("Enable the 'cult_raider' sanity source (a war-band skirmisher drains sanity).")
+                    .define("enableSanityCultRaider", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_CULT_RAIDER_RATE =
+            BUILDER.comment("Sanity change per second per nearby cult raider (negative drains).")
+                    .defineInRange("sanityCultRaiderRate", -0.07, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_CULT_RAIDER_RADIUS =
+            BUILDER.comment("Radius (blocks) in which cult raiders contribute to the sanity drain.")
+                    .defineInRange("sanityCultRaiderRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_CULT_RAIDER_MAX =
+            BUILDER.comment("Maximum cult raiders counted toward the sanity drain at once.")
+                    .defineInRange("sanityCultRaiderMax", 3, 1, 32);
+
+    /** Ambient raider war-bands near cult_stronghold sites (dark/tainted ground). On by default. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CULT_RAIDER_SPAWNS =
+            BUILDER.comment("Allow cult raiders to spawn in dark/tainted terrain near a cult_stronghold.")
+                    .define("enableCultRaiderSpawns", true);
+
+    public static final ModConfigSpec.IntValue CULT_RAIDER_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which cult raiders may spawn.")
+                    .defineInRange("cultRaiderSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue CULT_RAIDER_SPAWN_COUNT =
+            BUILDER.comment("Max cult raiders spawned per player per pass.")
+                    .defineInRange("cultRaiderSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue CULT_RAIDER_SPAWN_CAP =
+            BUILDER.comment("Max cult raiders allowed near one player before spawning pauses.")
+                    .defineInRange("cultRaiderSpawnCap", 4, 1, 64);
+
+    /** Ambient zealot guards near cult_stronghold sites. Off by default (rare site elite). */
+    public static final ModConfigSpec.BooleanValue ENABLE_CULT_ZEALOT_SPAWNS =
+            BUILDER.comment("Allow cult zealots to spawn near a cult_stronghold (default OFF; eggs still work).")
+                    .define("enableCultZealotSpawns", false);
+
+    public static final ModConfigSpec.IntValue CULT_ZEALOT_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which cult zealots may spawn.")
+                    .defineInRange("cultZealotSpawnRadius", 24, 8, 96);
+
+    public static final ModConfigSpec.IntValue CULT_ZEALOT_SPAWN_COUNT =
+            BUILDER.comment("Max cult zealots spawned per player per pass.")
+                    .defineInRange("cultZealotSpawnCount", 1, 0, 8);
+
+    public static final ModConfigSpec.IntValue CULT_ZEALOT_SPAWN_CAP =
+            BUILDER.comment("Max cult zealots allowed near one player before spawning pauses.")
+                    .defineInRange("cultZealotSpawnCap", 2, 1, 32);
+
+    /** Shared interval for the cult war-band spawn pass. */
+    public static final ModConfigSpec.IntValue CULT_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between cult war-band spawn passes (minimum 20).")
+                    .defineInRange("cultSpawnIntervalTicks", 300, 20, 24000);
+
+    /** How near a cult_stronghold site a cult ambient spawn must be (blocks). */
+    public static final ModConfigSpec.IntValue CULT_SPAWN_SITE_RADIUS =
+            BUILDER.comment("Radius (blocks) around a cult_stronghold within which the war-band may spawn.")
+                    .defineInRange("cultSpawnSiteRadius", 64, 8, 160);
+
+    /**
+     * Ambient worshipper spawns. Off by default: per {@code design/25}, the NPC worshipper is a
+     * <b>site population</b> (a later batch); the spawn egg and commands are available now.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_WORSHIPPER_SPAWNS =
+            BUILDER.comment("Allow ambient worshipper spawns (default OFF; site populations and eggs work).")
+                    .define("enableWorshipperSpawns", false);
+
+    public static final ModConfigSpec.IntValue WORSHIPPER_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which a worshipper may spawn.")
+                    .defineInRange("worshipperSpawnRadius", 24, 8, 96);
+
+    public static final ModConfigSpec.IntValue WORSHIPPER_SPAWN_COUNT =
+            BUILDER.comment("Max worshippers spawned per player per pass.")
+                    .defineInRange("worshipperSpawnCount", 1, 0, 8);
+
+    public static final ModConfigSpec.IntValue WORSHIPPER_SPAWN_CAP =
+            BUILDER.comment("Max worshippers allowed near one player before spawning pauses.")
+                    .defineInRange("worshipperSpawnCap", 2, 1, 16);
+
+    // --- Bestiary: rite_binder (raises the dead) ---------------------------------------------
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_RITE_BINDER =
+            BUILDER.comment("Enable the 'rite_binder' corruption vector (nearby binder taints).")
+                    .define("enableCorruptionRiteBinder", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_RITE_BINDER_RATE =
+            BUILDER.comment("Corruption per second per nearby rite binder (positive taints).")
+                    .defineInRange("corruptionRiteBinderRate", 0.06, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_RITE_BINDER_RADIUS =
+            BUILDER.comment("Radius (blocks) in which rite binders contribute corruption.")
+                    .defineInRange("corruptionRiteBinderRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_RITE_BINDER_MAX =
+            BUILDER.comment("Maximum rite binders counted toward the corruption vector at once.")
+                    .defineInRange("corruptionRiteBinderMax", 2, 1, 16);
+
+    /** Master switch for the binder's raise-the-dead rite (its signature hook). */
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_BINDER_RAISING =
+            BUILDER.comment("Allow a rite binder to raise risen husks on a cooldown (bounded).")
+                    .define("enableRiteBinderRaising", true);
+
+    public static final ModConfigSpec.IntValue RITE_BINDER_COOLDOWN_TICKS =
+            BUILDER.comment("Ticks between a rite binder's raise-the-dead rites (minimum 20).")
+                    .defineInRange("riteBinderCooldownTicks", 200, 20, 24000);
+
+    /** Hard cap of husks a single rite may raise, before the standing cap is applied. */
+    public static final ModConfigSpec.IntValue RITE_BINDER_RAISE_COUNT =
+            BUILDER.comment("Max risen husks raised by one rite (0 disables the rite).")
+                    .defineInRange("riteBinderRaiseCount", 2, 0, 4);
+
+    /** No rite raises more than this many husks standing near the binder at once. */
+    public static final ModConfigSpec.IntValue RITE_BINDER_RAISE_CAP =
+            BUILDER.comment("Max risen husks allowed standing near a binder before it stops raising.")
+                    .defineInRange("riteBinderRaiseCap", 4, 0, 16);
+
+    public static final ModConfigSpec.IntValue RITE_BINDER_RAISE_RADIUS =
+            BUILDER.comment("Radius (blocks) around a binder in which raised husks appear and are counted.")
+                    .defineInRange("riteBinderRaiseRadius", 10, 2, 32);
+
+    // --- Bestiary: plague_crone (hag-alchemist debuffer) -------------------------------------
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_PLAGUE_CRONE =
+            BUILDER.comment("Enable the 'plague_crone' corruption vector (nearby crone taints).")
+                    .define("enableCorruptionPlagueCrone", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_PLAGUE_CRONE_RATE =
+            BUILDER.comment("Corruption per second per nearby plague crone (positive taints).")
+                    .defineInRange("corruptionPlagueCroneRate", 0.05, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_PLAGUE_CRONE_RADIUS =
+            BUILDER.comment("Radius (blocks) in which plague crones contribute corruption.")
+                    .defineInRange("corruptionPlagueCroneRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_PLAGUE_CRONE_MAX =
+            BUILDER.comment("Maximum plague crones counted toward the corruption vector at once.")
+                    .defineInRange("corruptionPlagueCroneMax", 3, 1, 16);
+
+    /** Master switch for the crone's curse (its signature debuff). */
+    public static final ModConfigSpec.BooleanValue ENABLE_PLAGUE_CRONE_CURSE =
+            BUILDER.comment("Allow a plague crone to curse a hostile player on a cooldown (bounded).")
+                    .define("enablePlagueCroneCurse", true);
+
+    public static final ModConfigSpec.IntValue PLAGUE_CRONE_CURSE_COOLDOWN_TICKS =
+            BUILDER.comment("Ticks between a plague crone's curses (minimum 20).")
+                    .defineInRange("plagueCroneCurseCooldownTicks", 120, 20, 24000);
+
+    public static final ModConfigSpec.IntValue PLAGUE_CRONE_CURSE_RADIUS =
+            BUILDER.comment("Radius (blocks) within which a plague crone may curse a hostile player.")
+                    .defineInRange("plagueCroneCurseRadius", 8, 2, 24);
+
+    public static final ModConfigSpec.IntValue PLAGUE_CRONE_CURSE_DURATION_TICKS =
+            BUILDER.comment("Duration (ticks) of each curse effect the crone applies (fixed, short).")
+                    .defineInRange("plagueCroneCurseDurationTicks", 100, 20, 1200);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {
