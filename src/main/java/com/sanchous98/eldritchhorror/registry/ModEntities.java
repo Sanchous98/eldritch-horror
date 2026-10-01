@@ -1,17 +1,26 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AshFowl;
 import com.sanchous98.eldritchhorror.entity.BlightPod;
+import com.sanchous98.eldritchhorror.entity.BogBear;
 import com.sanchous98.eldritchhorror.entity.BoneChoir;
+import com.sanchous98.eldritchhorror.entity.Burrowling;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
 import com.sanchous98.eldritchhorror.entity.CultRaider;
 import com.sanchous98.eldritchhorror.entity.CultZealot;
+import com.sanchous98.eldritchhorror.entity.Deer;
 import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
+import com.sanchous98.eldritchhorror.entity.GreyFox;
+import com.sanchous98.eldritchhorror.entity.HearthCat;
+import com.sanchous98.eldritchhorror.entity.HillHound;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
+import com.sanchous98.eldritchhorror.entity.MireSow;
 import com.sanchous98.eldritchhorror.entity.NightHag;
+import com.sanchous98.eldritchhorror.entity.PackBeast;
 import com.sanchous98.eldritchhorror.entity.PlagueCrone;
 import com.sanchous98.eldritchhorror.entity.RiftMite;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
@@ -19,11 +28,16 @@ import com.sanchous98.eldritchhorror.entity.RiteBinder;
 import com.sanchous98.eldritchhorror.entity.ShamblerOoze;
 import com.sanchous98.eldritchhorror.entity.ShoggothMass;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
+import com.sanchous98.eldritchhorror.entity.SporeBee;
 import com.sanchous98.eldritchhorror.entity.StarSpawn;
+import com.sanchous98.eldritchhorror.entity.StoneSentinel;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
+import com.sanchous98.eldritchhorror.entity.TideGrazer;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
 import com.sanchous98.eldritchhorror.entity.Watcher;
 import com.sanchous98.eldritchhorror.entity.WeaverSpawn;
+import com.sanchous98.eldritchhorror.entity.WoolBeast;
+import com.sanchous98.eldritchhorror.entity.WoolHare;
 import com.sanchous98.eldritchhorror.entity.Worshipper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -333,6 +347,96 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("plague_crone_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(PLAGUE_CRONE.get())));
 
+    // --- Passive (mundane) fauna (design/25 passive role table) ------------------------------
+    // Registered through the compact register()/egg() helpers below; all are our namespace, so
+    // MobSuppressor allows them. Sizes match the vanilla role each replaces.
+
+    /** Deer: 0.9 x 1.4 (cow footprint). Family: mundane. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Deer>> DEER =
+            register("deer", Deer::new, MobCategory.CREATURE, 0.9F, 1.4F, 10);
+    public static final DeferredItem<SpawnEggItem> DEER_SPAWN_EGG = egg("deer", DEER);
+
+    /** Wool hare: 0.9 x 1.0 (sheep-ish, smaller). Family: mundane. */
+    public static final DeferredHolder<EntityType<?>, EntityType<WoolHare>> WOOL_HARE =
+            register("wool_hare", WoolHare::new, MobCategory.CREATURE, 0.9F, 1.0F, 10);
+    public static final DeferredItem<SpawnEggItem> WOOL_HARE_SPAWN_EGG = egg("wool_hare", WOOL_HARE);
+
+    /** Mire sow: 0.9 x 1.0 (pig footprint). Family: mundane (taint vector). */
+    public static final DeferredHolder<EntityType<?>, EntityType<MireSow>> MIRE_SOW =
+            register("mire_sow", MireSow::new, MobCategory.CREATURE, 0.9F, 1.0F, 10);
+    public static final DeferredItem<SpawnEggItem> MIRE_SOW_SPAWN_EGG = egg("mire_sow", MIRE_SOW);
+
+    /** Ash fowl: 0.5 x 0.7 (chicken footprint). Family: mundane (warning). */
+    public static final DeferredHolder<EntityType<?>, EntityType<AshFowl>> ASH_FOWL =
+            register("ash_fowl", AshFowl::new, MobCategory.CREATURE, 0.5F, 0.7F, 10);
+    public static final DeferredItem<SpawnEggItem> ASH_FOWL_SPAWN_EGG = egg("ash_fowl", ASH_FOWL);
+
+    /** Burrowling: 0.4 x 0.5 (rabbit footprint). Family: mundane. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Burrowling>> BURROWLING =
+            register("burrowling", Burrowling::new, MobCategory.CREATURE, 0.4F, 0.5F, 10);
+    public static final DeferredItem<SpawnEggItem> BURROWLING_SPAWN_EGG = egg("burrowling", BURROWLING);
+
+    /** Pack beast: 1.4 x 1.6 (horse-ish). Family: mundane (travel). */
+    public static final DeferredHolder<EntityType<?>, EntityType<PackBeast>> PACK_BEAST =
+            register("pack_beast", PackBeast::new, MobCategory.CREATURE, 1.4F, 1.6F, 10);
+    public static final DeferredItem<SpawnEggItem> PACK_BEAST_SPAWN_EGG = egg("pack_beast", PACK_BEAST);
+
+    /** Grey fox: 0.6 x 0.7 (fox footprint). Family: mundane (contrast). */
+    public static final DeferredHolder<EntityType<?>, EntityType<GreyFox>> GREY_FOX =
+            register("grey_fox", GreyFox::new, MobCategory.CREATURE, 0.6F, 0.7F, 10);
+    public static final DeferredItem<SpawnEggItem> GREY_FOX_SPAWN_EGG = egg("grey_fox", GREY_FOX);
+
+    /** Hill hound: 0.6 x 0.85 (wolf footprint). Family: mundane (taint vector). */
+    public static final DeferredHolder<EntityType<?>, EntityType<HillHound>> HILL_HOUND =
+            register("hill_hound", HillHound::new, MobCategory.CREATURE, 0.6F, 0.85F, 10);
+    public static final DeferredItem<SpawnEggItem> HILL_HOUND_SPAWN_EGG = egg("hill_hound", HILL_HOUND);
+
+    /** Hearth cat: 0.6 x 0.7 (cat footprint). Family: mundane (warning). */
+    public static final DeferredHolder<EntityType<?>, EntityType<HearthCat>> HEARTH_CAT =
+            register("hearth_cat", HearthCat::new, MobCategory.CREATURE, 0.6F, 0.7F, 10);
+    public static final DeferredItem<SpawnEggItem> HEARTH_CAT_SPAWN_EGG = egg("hearth_cat", HEARTH_CAT);
+
+    /** Wool beast: 0.9 x 1.87 (llama footprint). Family: mundane (travel). */
+    public static final DeferredHolder<EntityType<?>, EntityType<WoolBeast>> WOOL_BEAST =
+            register("wool_beast", WoolBeast::new, MobCategory.CREATURE, 0.9F, 1.87F, 10);
+    public static final DeferredItem<SpawnEggItem> WOOL_BEAST_SPAWN_EGG = egg("wool_beast", WOOL_BEAST);
+
+    /** Bog bear: 1.3 x 1.4 (panda footprint). Family: mundane (taint vector). */
+    public static final DeferredHolder<EntityType<?>, EntityType<BogBear>> BOG_BEAR =
+            register("bog_bear", BogBear::new, MobCategory.CREATURE, 1.3F, 1.4F, 10);
+    public static final DeferredItem<SpawnEggItem> BOG_BEAR_SPAWN_EGG = egg("bog_bear", BOG_BEAR);
+
+    /** Tide grazer: 1.2 x 0.4 (turtle footprint). Family: mundane (Choir contrast). */
+    public static final DeferredHolder<EntityType<?>, EntityType<TideGrazer>> TIDE_GRAZER =
+            register("tide_grazer", TideGrazer::new, MobCategory.CREATURE, 1.2F, 0.4F, 10);
+    public static final DeferredItem<SpawnEggItem> TIDE_GRAZER_SPAWN_EGG = egg("tide_grazer", TIDE_GRAZER);
+
+    /** Spore bee: 0.7 x 0.6 (bee footprint), tainted flier. Family: tainted. */
+    public static final DeferredHolder<EntityType<?>, EntityType<SporeBee>> SPORE_BEE =
+            register("spore_bee", SporeBee::new, MobCategory.CREATURE, 0.7F, 0.6F, 10);
+    public static final DeferredItem<SpawnEggItem> SPORE_BEE_SPAWN_EGG = egg("spore_bee", SPORE_BEE);
+
+    /** Stone sentinel: 1.4 x 2.7 (iron-golem footprint), Order construct. Family: order. */
+    public static final DeferredHolder<EntityType<?>, EntityType<StoneSentinel>> STONE_SENTINEL =
+            register("stone_sentinel", StoneSentinel::new, MobCategory.MISC, 1.4F, 2.7F, 10);
+    public static final DeferredItem<SpawnEggItem> STONE_SENTINEL_SPAWN_EGG = egg("stone_sentinel", STONE_SENTINEL);
+
+    private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> register(
+            String id, net.minecraft.world.entity.EntityType.EntityFactory<T> factory, MobCategory category,
+            float width, float height, int trackingRange) {
+        return ENTITY_TYPES.register(id, () ->
+                EntityType.Builder.of(factory, category)
+                        .sized(width, height)
+                        .clientTrackingRange(trackingRange)
+                        .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id(id))));
+    }
+
+    private static DeferredItem<SpawnEggItem> egg(
+            String id, DeferredHolder<EntityType<?>, ? extends EntityType<?>> type) {
+        return ModItems.ITEMS.registerItem(id + "_spawn_egg",
+                properties -> new SpawnEggItem(properties.spawnEgg(type.get())));
+    }
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
@@ -404,6 +508,20 @@ public final class ModEntities {
             event.accept(CULT_RAIDER_SPAWN_EGG.get());
             event.accept(RITE_BINDER_SPAWN_EGG.get());
             event.accept(PLAGUE_CRONE_SPAWN_EGG.get());
+            event.accept(DEER_SPAWN_EGG.get());
+            event.accept(WOOL_HARE_SPAWN_EGG.get());
+            event.accept(MIRE_SOW_SPAWN_EGG.get());
+            event.accept(ASH_FOWL_SPAWN_EGG.get());
+            event.accept(BURROWLING_SPAWN_EGG.get());
+            event.accept(PACK_BEAST_SPAWN_EGG.get());
+            event.accept(GREY_FOX_SPAWN_EGG.get());
+            event.accept(HILL_HOUND_SPAWN_EGG.get());
+            event.accept(HEARTH_CAT_SPAWN_EGG.get());
+            event.accept(WOOL_BEAST_SPAWN_EGG.get());
+            event.accept(BOG_BEAR_SPAWN_EGG.get());
+            event.accept(TIDE_GRAZER_SPAWN_EGG.get());
+            event.accept(SPORE_BEE_SPAWN_EGG.get());
+            event.accept(STONE_SENTINEL_SPAWN_EGG.get());
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
@@ -437,6 +555,20 @@ public final class ModEntities {
         event.put(CULT_RAIDER.get(), CultRaider.createAttributes().build());
         event.put(RITE_BINDER.get(), RiteBinder.createAttributes().build());
         event.put(PLAGUE_CRONE.get(), PlagueCrone.createAttributes().build());
+        event.put(DEER.get(), Deer.createAttributes().build());
+        event.put(WOOL_HARE.get(), WoolHare.createAttributes().build());
+        event.put(MIRE_SOW.get(), MireSow.createAttributes().build());
+        event.put(ASH_FOWL.get(), AshFowl.createAttributes().build());
+        event.put(BURROWLING.get(), Burrowling.createAttributes().build());
+        event.put(PACK_BEAST.get(), PackBeast.createAttributes().build());
+        event.put(GREY_FOX.get(), GreyFox.createAttributes().build());
+        event.put(HILL_HOUND.get(), HillHound.createAttributes().build());
+        event.put(HEARTH_CAT.get(), HearthCat.createAttributes().build());
+        event.put(WOOL_BEAST.get(), WoolBeast.createAttributes().build());
+        event.put(BOG_BEAR.get(), BogBear.createAttributes().build());
+        event.put(TIDE_GRAZER.get(), TideGrazer.createAttributes().build());
+        event.put(SPORE_BEE.get(), SporeBee.createAttributes().build());
+        event.put(STONE_SENTINEL.get(), StoneSentinel.createAttributes().build());
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());

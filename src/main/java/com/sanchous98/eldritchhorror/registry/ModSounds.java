@@ -155,6 +155,23 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SHUB_NIGGURATH_DEATH =
             register("entity.shub_niggurath.death");
 
+    // --- Passive (mundane) fauna (design/25 passive role table) --------------------------------
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEER_AMBIENT = register("entity.deer.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WOOL_HARE_AMBIENT = register("entity.wool_hare.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIRE_SOW_AMBIENT = register("entity.mire_sow.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_FOWL_AMBIENT = register("entity.ash_fowl.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BURROWLING_AMBIENT = register("entity.burrowling.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PACK_BEAST_AMBIENT = register("entity.pack_beast.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GREY_FOX_AMBIENT = register("entity.grey_fox.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HILL_HOUND_AMBIENT = register("entity.hill_hound.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HEARTH_CAT_AMBIENT = register("entity.hearth_cat.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WOOL_BEAST_AMBIENT = register("entity.wool_beast.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOG_BEAR_AMBIENT = register("entity.bog_bear.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_GRAZER_AMBIENT = register("entity.tide_grazer.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPORE_BEE_AMBIENT = register("entity.spore_bee.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STONE_SENTINEL_AMBIENT = register("entity.stone_sentinel.ambient");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(EldritchHorror.id(name)));
     }

@@ -34,6 +34,8 @@ public final class DreadAuraTicker {
             if (!player.level().dimension().equals(Level.OVERWORLD)) {
                 continue;
             }
+            BestiarySupport.tickAura(player, AshFowl.class, ModConfig.SANITY_ASH_FOWL_RADIUS.get());
+            BestiarySupport.tickAura(player, HearthCat.class, ModConfig.SANITY_HEARTH_CAT_RADIUS.get());
             BestiarySupport.tickAura(player, TaintedFauna.class, ModConfig.CORRUPTION_TAINTED_FAUNA_RADIUS.get());
             BestiarySupport.tickAura(player, LesserSwarm.class, ModConfig.SANITY_LESSER_SWARM_RADIUS.get());
             BestiarySupport.tickAura(player, Watcher.class, ModConfig.SANITY_WATCHER_RADIUS.get());

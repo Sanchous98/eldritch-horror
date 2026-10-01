@@ -1249,6 +1249,178 @@ public final class ModConfig {
             BUILDER.comment("Duration (ticks) of each curse effect the crone applies (fixed, short).")
                     .defineInRange("plagueCroneCurseDurationTicks", 100, 20, 1200);
 
+    // --- Bestiary: passive (mundane) fauna (design/25 passive role table) ----------------------
+
+    /**
+     * The single bounded "turns tainted" conversion used by {@code mire_sow}, {@code hill_hound}
+     * and {@code bog_bear}: when the animal stands in a sufficiently tainted loaded chunk it may be
+     * replaced in place by one {@code tainted_fauna}. Per-entity cooldown + per-check chance keep a
+     * herd from flipping wholesale.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_TAINT_CONVERSION =
+            BUILDER.comment("Allow taintable passives (mire_sow/hill_hound/bog_bear) to turn tainted_fauna.")
+                    .define("enableTaintConversion", true);
+
+    public static final ModConfigSpec.DoubleValue TAINT_CONVERSION_CHANCE =
+            BUILDER.comment("Chance per eligible check that a taintable passive converts (0..1).")
+                    .defineInRange("taintConversionChance", 0.08, 0.0, 1.0);
+
+    public static final ModConfigSpec.IntValue TAINT_CONVERSION_COOLDOWN_TICKS =
+            BUILDER.comment("Ticks before the same animal may be checked for taint conversion again.")
+                    .defineInRange("taintConversionCooldownTicks", 600, 20, 24000);
+
+    /** Shared ambient pass for the passive roster. */
+    public static final ModConfigSpec.IntValue PASSIVE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between mundane-fauna spawn passes (minimum 20).")
+                    .defineInRange("passiveSpawnIntervalTicks", 300, 20, 24000);
+
+    public static final ModConfigSpec.IntValue PASSIVE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which passive fauna may spawn.")
+                    .defineInRange("passiveSpawnRadius", 40, 8, 96);
+
+    public static final ModConfigSpec.IntValue PASSIVE_SPAWN_COUNT =
+            BUILDER.comment("Max passive fauna spawned per player per pass.")
+                    .defineInRange("passiveSpawnCount", 1, 0, 8);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_DEER_SPAWNS =
+            BUILDER.comment("Allow deer to spawn on clean ground near players.").define("enableDeerSpawns", true);
+    public static final ModConfigSpec.IntValue DEER_SPAWN_CAP =
+            BUILDER.comment("Max deer allowed near one player before spawning pauses.")
+                    .defineInRange("deerSpawnCap", 6, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_WOOL_HARE_SPAWNS =
+            BUILDER.comment("Allow wool hares to spawn on clean ground near players.").define("enableWoolHareSpawns", true);
+    public static final ModConfigSpec.IntValue WOOL_HARE_SPAWN_CAP =
+            BUILDER.comment("Max wool hares allowed near one player before spawning pauses.")
+                    .defineInRange("woolHareSpawnCap", 6, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_MIRE_SOW_SPAWNS =
+            BUILDER.comment("Allow mire sows to spawn on clean ground near players.").define("enableMireSowSpawns", true);
+    public static final ModConfigSpec.IntValue MIRE_SOW_SPAWN_CAP =
+            BUILDER.comment("Max mire sows allowed near one player before spawning pauses.")
+                    .defineInRange("mireSowSpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_ASH_FOWL_SPAWNS =
+            BUILDER.comment("Allow ash fowl to spawn on clean ground near players.").define("enableAshFowlSpawns", true);
+    public static final ModConfigSpec.IntValue ASH_FOWL_SPAWN_CAP =
+            BUILDER.comment("Max ash fowl allowed near one player before spawning pauses.")
+                    .defineInRange("ashFowlSpawnCap", 6, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_BURROWLING_SPAWNS =
+            BUILDER.comment("Allow burrowlings to spawn on clean ground near players.").define("enableBurrowlingSpawns", true);
+    public static final ModConfigSpec.IntValue BURROWLING_SPAWN_CAP =
+            BUILDER.comment("Max burrowlings allowed near one player before spawning pauses.")
+                    .defineInRange("burrowlingSpawnCap", 5, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_PACK_BEAST_SPAWNS =
+            BUILDER.comment("Allow pack beasts to spawn on clean ground near players.").define("enablePackBeastSpawns", true);
+    public static final ModConfigSpec.IntValue PACK_BEAST_SPAWN_CAP =
+            BUILDER.comment("Max pack beasts allowed near one player before spawning pauses.")
+                    .defineInRange("packBeastSpawnCap", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_GREY_FOX_SPAWNS =
+            BUILDER.comment("Allow grey foxes to spawn on clean ground near players.").define("enableGreyFoxSpawns", true);
+    public static final ModConfigSpec.IntValue GREY_FOX_SPAWN_CAP =
+            BUILDER.comment("Max grey foxes allowed near one player before spawning pauses.")
+                    .defineInRange("greyFoxSpawnCap", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_HILL_HOUND_SPAWNS =
+            BUILDER.comment("Allow hill hounds to spawn on clean ground near players.").define("enableHillHoundSpawns", true);
+    public static final ModConfigSpec.IntValue HILL_HOUND_SPAWN_CAP =
+            BUILDER.comment("Max hill hounds allowed near one player before spawning pauses.")
+                    .defineInRange("hillHoundSpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_HEARTH_CAT_SPAWNS =
+            BUILDER.comment("Allow hearth cats to spawn on clean ground near players.").define("enableHearthCatSpawns", true);
+    public static final ModConfigSpec.IntValue HEARTH_CAT_SPAWN_CAP =
+            BUILDER.comment("Max hearth cats allowed near one player before spawning pauses.")
+                    .defineInRange("hearthCatSpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_WOOL_BEAST_SPAWNS =
+            BUILDER.comment("Allow wool beasts to spawn on clean ground near players.").define("enableWoolBeastSpawns", true);
+    public static final ModConfigSpec.IntValue WOOL_BEAST_SPAWN_CAP =
+            BUILDER.comment("Max wool beasts allowed near one player before spawning pauses.")
+                    .defineInRange("woolBeastSpawnCap", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_BOG_BEAR_SPAWNS =
+            BUILDER.comment("Allow bog bears to spawn on clean ground near water (rare).").define("enableBogBearSpawns", true);
+    public static final ModConfigSpec.IntValue BOG_BEAR_SPAWN_CAP =
+            BUILDER.comment("Max bog bears allowed near one player before spawning pauses.")
+                    .defineInRange("bogBearSpawnCap", 2, 1, 16);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_TIDE_GRAZER_SPAWNS =
+            BUILDER.comment("Allow tide grazers to spawn on clean ground near water (coastal).").define("enableTideGrazerSpawns", true);
+    public static final ModConfigSpec.IntValue TIDE_GRAZER_SPAWN_CAP =
+            BUILDER.comment("Max tide grazers allowed near one player before spawning pauses.")
+                    .defineInRange("tideGrazerSpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SPORE_BEE_SPAWNS =
+            BUILDER.comment("Allow tainted spore bees to spawn in tainted loaded terrain.").define("enableSporeBeeSpawns", true);
+    public static final ModConfigSpec.IntValue SPORE_BEE_SPAWN_CAP =
+            BUILDER.comment("Max spore bees allowed near one player before spawning pauses.")
+                    .defineInRange("sporeBeeSpawnCap", 6, 1, 32);
+
+    /**
+     * Stone sentinel ambient spawns are OFF by default: it is an Order-built vault guard, populated
+     * by sites/commands later; the egg works now.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_STONE_SENTINEL_SPAWNS =
+            BUILDER.comment("Allow ambient stone-sentinel spawns (default OFF; vaults and eggs work).")
+                    .define("enableStoneSentinelSpawns", false);
+    public static final ModConfigSpec.IntValue STONE_SENTINEL_SPAWN_CAP =
+            BUILDER.comment("Max stone sentinels allowed near one player before spawning pauses.")
+                    .defineInRange("stoneSentinelSpawnCap", 1, 1, 8);
+
+    /** The spore bee's sting carries a small, bounded corruption add to a struck player. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SPORE_BEE_STING =
+            BUILDER.comment("Enable the spore bee sting's corruption add (server-side, per hit).")
+                    .define("enableCorruptionSporeBeeSting", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_SPORE_BEE_STING =
+            BUILDER.comment("Corruption added to a player struck by a spore bee (positive taints).")
+                    .defineInRange("corruptionSporeBeeSting", 0.5, 0.0, 10.0);
+
+    /** Ash fowl warning hush: its silence-before-a-presence is a very small sanity drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_ASH_FOWL =
+            BUILDER.comment("Enable the 'ash_fowl' sanity source (its hush before a presence unsettles).")
+                    .define("enableSanityAshFowl", true);
+    public static final ModConfigSpec.DoubleValue SANITY_ASH_FOWL_RATE =
+            BUILDER.comment("Sanity change per second per nearby ash fowl (negative drains).")
+                    .defineInRange("sanityAshFowlRate", -0.02, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_ASH_FOWL_RADIUS =
+            BUILDER.comment("Radius (blocks) in which ash fowl contribute to the sanity drain.")
+                    .defineInRange("sanityAshFowlRadius", 6, 1, 32);
+    public static final ModConfigSpec.IntValue SANITY_ASH_FOWL_MAX =
+            BUILDER.comment("Maximum ash fowl counted toward the sanity drain at once.")
+                    .defineInRange("sanityAshFowlMax", 2, 1, 32);
+
+    /** Hearth cat: unsettled by the wrong, not the dark. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_HEARTH_CAT =
+            BUILDER.comment("Enable the 'hearth_cat' sanity source (the cat's unease unsettles).")
+                    .define("enableSanityHearthCat", true);
+    public static final ModConfigSpec.DoubleValue SANITY_HEARTH_CAT_RATE =
+            BUILDER.comment("Sanity change per second per nearby hearth cat (negative drains).")
+                    .defineInRange("sanityHearthCatRate", -0.03, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_HEARTH_CAT_RADIUS =
+            BUILDER.comment("Radius (blocks) in which hearth cats contribute to the sanity drain.")
+                    .defineInRange("sanityHearthCatRadius", 6, 1, 32);
+    public static final ModConfigSpec.IntValue SANITY_HEARTH_CAT_MAX =
+            BUILDER.comment("Maximum hearth cats counted toward the sanity drain at once.")
+                    .defineInRange("sanityHearthCatMax", 2, 1, 32);
+
+    /** Stone sentinel warding deterrent. */
+    public static final ModConfigSpec.BooleanValue ENABLE_STONE_SENTINEL_WARD =
+            BUILDER.comment("Allow the stone sentinel to ward nearby lesser spawns (bounded).")
+                    .define("enableStoneSentinelWard", true);
+    public static final ModConfigSpec.IntValue STONE_SENTINEL_WARD_RADIUS =
+            BUILDER.comment("Radius (blocks) within which the sentinel wards lesser spawns.")
+                    .defineInRange("stoneSentinelWardRadius", 12, 2, 32);
+    public static final ModConfigSpec.IntValue STONE_SENTINEL_WARD_MAX =
+            BUILDER.comment("Max lesser mobs warded per pass (keeps a horde bounded).")
+                    .defineInRange("stoneSentinelWardMax", 4, 0, 16);
+    public static final ModConfigSpec.DoubleValue STONE_SENTINEL_WARD_PUSH =
+            BUILDER.comment("Outward nudge strength the sentinel applies to a warded mob.")
+                    .defineInRange("stoneSentinelWardPush", 0.25, 0.0, 2.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

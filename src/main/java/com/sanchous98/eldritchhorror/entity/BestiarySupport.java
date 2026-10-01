@@ -6,14 +6,17 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.block.PathBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -240,5 +243,71 @@ public final class BestiarySupport {
             case SANITY -> SanityAPI.add(player, total);
             case CORRUPTION -> CorruptionAPI.add(player, total);
         }
+    }
+
+    /**
+     * Per-entity taint-conversion cooldown, stored in the entity's persistent data. Kept as a string
+     * (not a field) so the mundane animals need no per-class save/load boilerplate.
+     */
+    public static final String TAINT_CONVERT_AT = "eldritch_horror:taint_convert_at";
+
+    /**
+     * Whether {@code entity} stands in a loaded chunk whose taint is at or above the spread
+     * threshold. Loaded chunks only; never force-loads.
+     */
+    public static boolean tainted(net.minecraft.world.entity.Entity entity) {
+        if (!(entity.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        BlockPos pos = entity.blockPosition();
+        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        return chunk != null && CorruptionSystem.getTaint(chunk) >= ModConfig.TAINT_SPREAD_THRESHOLD.get();
+    }
+
+    /**
+     * The single bounded <b>"turns tainted"</b> conversion shared by the taintable passives
+     * ({@code mire_sow}, {@code hill_hound}, {@code bog_bear}). When the animal stands in a loaded
+     * chunk whose taint is at or above the spread threshold and its per-entity cooldown has elapsed,
+     * it is replaced in place by exactly one {@code taintedType} with the configured chance. Uses
+     * {@link RandomSource} off the animal (never {@code Math.random}), touches loaded chunks only,
+     * and is cooldown-limited so a herd cannot flip wholesale in one pass.
+     *
+     * @param animal       the mundane animal to convert (server-side)
+     * @param taintedType  the replacement type, e.g. {@code ModEntities.TAINTED_FAUNA}
+     * @param enabled      config master switch for conversions
+     * @param chance       per-check chance in {@code [0,1]}
+     * @param cooldownTicks ticks before this same animal may be checked again
+     * @param tick         current game tick (from the server tick event)
+     * @return whether the animal was converted
+     */
+    public static <T extends Mob> boolean maybeTaintConvert(Animal animal, EntityType<T> taintedType,
+                                                            boolean enabled, double chance,
+                                                            int cooldownTicks, int tick) {
+        if (!enabled || animal.level().isClientSide() || !animal.isAlive()) {
+            return false;
+        }
+        if (!(animal.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        BlockPos pos = animal.blockPosition();
+        LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null) {
+            return false; // never force-load a chunk just to convert
+        }
+        if (CorruptionSystem.getTaint(chunk) < ModConfig.TAINT_SPREAD_THRESHOLD.get()) {
+            return false;
+        }
+        CompoundTag data = animal.getPersistentData();
+        long next = data.getLongOr(TAINT_CONVERT_AT, 0L);
+        if (tick < next) {
+            return false;
+        }
+        data.putLong(TAINT_CONVERT_AT, (long) tick + Math.max(0, cooldownTicks));
+        if (animal.getRandom().nextDouble() >= chance) {
+            return false;
+        }
+        T converted = animal.convertTo(taintedType, ConversionParams.single(animal, false, false),
+                mob -> mob.setPersistenceRequired());
+        return converted != null;
     }
 }

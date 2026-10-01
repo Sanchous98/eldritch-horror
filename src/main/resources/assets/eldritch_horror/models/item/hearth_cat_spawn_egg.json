@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "eldritch_horror:item/hearth_cat_spawn_egg"
+  }
+}

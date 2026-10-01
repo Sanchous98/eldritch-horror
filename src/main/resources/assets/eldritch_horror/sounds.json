@@ -331,5 +331,131 @@
         "type": "event"
       }
     ]
+  },
+  "entity.deer.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.deer.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.horse.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.wool_hare.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.wool_hare.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.rabbit.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.mire_sow.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.mire_sow.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.llama.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.ash_fowl.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.ash_fowl.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.parrot.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.burrowling.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.burrowling.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.rabbit.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.pack_beast.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.pack_beast.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.horse.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.grey_fox.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.grey_fox.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.fox.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.hill_hound.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.hill_hound.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.fox.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.hearth_cat.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.hearth_cat.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ocelot.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.wool_beast.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.wool_beast.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.llama.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.bog_bear.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.bog_bear.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.panda.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.tide_grazer.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.tide_grazer.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.turtle.ambient_land",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.spore_bee.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.spore_bee.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.bee.loop",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.stone_sentinel.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.stone_sentinel.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.damage",
+        "type": "event"
+      }
+    ]
   }
 }
