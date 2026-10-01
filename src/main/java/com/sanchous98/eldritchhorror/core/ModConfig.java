@@ -148,13 +148,34 @@ public final class ModConfig {
                     .define("suppressVanillaMobs", true);
 
     /**
-     * Vanilla entity ids exempt from suppression, e.g. {@code ["minecraft:villager"]}. Empty by
-     * default; mod entities are always allowed regardless.
+     * Vanilla entity ids exempt from suppression, e.g. {@code ["minecraft:villager"]}. Defaults to
+     * {@code minecraft:villager} (humans stay); mod entities are always allowed regardless.
      */
     public static final ModConfigSpec.ConfigValue<List<? extends String>> SUPPRESSED_MOB_ALLOWLIST =
             BUILDER.comment("Vanilla entity ids exempt from mob suppression (default: villagers only).")
                     .defineListAllowEmpty("suppressedMobAllowlist", List.of("minecraft:villager"),
                             () -> "minecraft:villager", String.class::isInstance);
+
+    // --- City population --------------------------------------------------------------------
+
+    /**
+     * Master switch for {@code world/CityPopulation}: actively spawns persistent villagers on the
+     * paved streets of curated city districts so the streets feel busy. Vanilla natural village
+     * spawning does not apply to these custom structures, so they would otherwise be empty.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_POPULATION =
+            BUILDER.comment("Populate curated city districts with villagers so the streets feel busy.")
+                    .define("enableCityPopulation", true);
+
+    /** Maximum villagers spawned per city per population pass (a pass runs about every 5 seconds). */
+    public static final ModConfigSpec.IntValue CITY_POPULATION_PER_TICK =
+            BUILDER.comment("Max villagers spawned per city per population pass (pass ~ every 5 s).")
+                    .defineInRange("cityPopulationPerTick", 4, 0, 64);
+
+    /** Real population per target villager; target = clamp(population / this, 8, 60). */
+    public static final ModConfigSpec.IntValue CITY_POPULATION_DENSITY =
+            BUILDER.comment("Real population per villager; target = clamp(population / this, 8, 60).")
+                    .defineInRange("cityPopulationDensity", 250000, 1000, 10000000);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 
