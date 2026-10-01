@@ -98,6 +98,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   owner and ranks are localised (`rank.eldritch_horror.*`).
 - **City polish**: varied street paving, a soft rim that fades into the wild (no hard circular
   cut), generic street dressing (stalls/crates/wells) placed before buildings and occupancy-gated.
+- **City generation fixes (player-reported):** the city level is the mean terrain over the interior
+  (not the centre point) and an `EDGE_RING` blend grades the rim into the wild instead of a cliff;
+  buildings are placed chunk-locally on a grid-canonical hash (no global cap, so the whole district
+  fills); vegetation is cleared to the original surface height (no floating trees); every storey
+  gets windows (no blank facades); `buttress` is a solid stepped wedge (no floating columns); every
+  walk-in landmark has a ground-level door.
 - **Site renderer**: `CityRenderer` can render the second-echelon `Location`s (`-Deh.renderCities=sites`),
   with each site's true radius.
 - **Item registry**: **128 content-stub items** across 11 category files
