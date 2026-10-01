@@ -7,14 +7,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
+import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import com.sanchous98.eldritchhorror.rite.Rites;
-import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -147,9 +146,9 @@ public final class EldritchCommands {
     }
 
     /**
-     * {@code /eh rite <id>}: performs a known rite for the caller. The framework applies the
-     * documented sanity/corruption cost and reports the outcome; the outcome's world effect is
-     * <b>not yet implemented</b> and is reported as such (never a silent no-op).
+     * {@code /eh rite <id>}: performs a known rite for the caller through {@link RiteEngine}. The
+     * engine applies the documented sanity/corruption cost and reports exactly what happened —
+     * success or an explicit not-implemented/failure reason (never a silent no-op).
      */
     private static int performRite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         String id = StringArgumentType.getString(ctx, "id");
@@ -163,16 +162,15 @@ public final class EldritchCommands {
             ctx.getSource().sendFailure(Component.literal("You do not know the rite: " + id));
             return 0;
         }
-        if (rite.sanity() != 0) {
-            SanityAPI.add(p, rite.sanity());
+        RiteEngine.Result result = RiteEngine.perform(p, rite);
+        if (result.ok()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("[")
+                    .append(rite.name()).append("] ").append(result.message()), true);
+            return 1;
         }
-        if (rite.corruption() != 0) {
-            CorruptionAPI.add(p, rite.corruption());
-        }
-        ctx.getSource().sendSuccess(() -> Component.literal("Performed " + rite.id()
-                + " (" + rite.name().getString() + ", tier " + rite.tier() + "): outcome "
-                + rite.outcome() + " — NOT YET IMPLEMENTED."), true);
-        return 1;
+        ctx.getSource().sendFailure(Component.literal("[")
+                .append(rite.name()).append("] ").append(result.message()));
+        return 0;
     }
 
     /** {@code /eh rites}: lists the rites the caller knows. */
