@@ -52,5 +52,86 @@
         "type": "event"
       }
     ]
+  },
+  "entity.cthulhu.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.cthulhu.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.elder_guardian.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.cthulhu.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.cthulhu.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.elder_guardian.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.cthulhu.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.cthulhu.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.elder_guardian.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.dunwich_horror.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.dunwich_horror.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.roar",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.dunwich_horror.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.dunwich_horror.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.dunwich_horror.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.dunwich_horror.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shub_niggurath.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.shub_niggurath.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shub_niggurath.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.shub_niggurath.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shub_niggurath.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.shub_niggurath.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.death",
+        "type": "event"
+      }
+    ]
   }
 }

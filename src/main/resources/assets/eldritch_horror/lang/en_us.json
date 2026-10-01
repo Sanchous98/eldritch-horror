@@ -331,5 +331,20 @@
   "subtitles.entity.eldritch_horror.tainted_fauna.hurt": "Tainted fauna cries out",
   "subtitles.entity.eldritch_horror.tainted_fauna.death": "Tainted fauna goes quiet",
   "subtitles.entity.eldritch_horror.lesser_swarm.ambient": "Something skitters in the dark",
-  "subtitles.entity.eldritch_horror.watcher.ambient": "You are being watched"
+  "subtitles.entity.eldritch_horror.watcher.ambient": "You are being watched",
+  "entity.eldritch_horror.cthulhu": "Cthulhu",
+  "item.eldritch_horror.cthulhu_spawn_egg": "Cthulhu Spawn Egg",
+  "entity.eldritch_horror.dunwich_horror": "The Dunwich Horror",
+  "item.eldritch_horror.dunwich_horror_spawn_egg": "The Dunwich Horror Spawn Egg",
+  "entity.eldritch_horror.shub_niggurath": "Shub-Niggurath",
+  "item.eldritch_horror.shub_niggurath_spawn_egg": "Shub-Niggurath Spawn Egg",
+  "subtitles.entity.eldritch_horror.cthulhu.ambient": "Something vast dreams in the flooded hall",
+  "subtitles.entity.eldritch_horror.cthulhu.hurt": "Cthulhu is roused",
+  "subtitles.entity.eldritch_horror.cthulhu.death": "The dream recedes",
+  "subtitles.entity.eldritch_horror.dunwich_horror.ambient": "A roar rolls down from the hills",
+  "subtitles.entity.eldritch_horror.dunwich_horror.hurt": "The Dunwich Horror bellows",
+  "subtitles.entity.eldritch_horror.dunwich_horror.death": "The hills go quiet",
+  "subtitles.entity.eldritch_horror.shub_niggurath.ambient": "The woods breathe",
+  "subtitles.entity.eldritch_horror.shub_niggurath.hurt": "Shub-Niggurath stirs",
+  "subtitles.entity.eldritch_horror.shub_niggurath.death": "The woods fall still"
 }

@@ -1,8 +1,11 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.Cthulhu;
+import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
+import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.Watcher;
 import net.minecraft.core.registries.Registries;
@@ -91,6 +94,47 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("watcher_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(WATCHER.get())));
 
+    // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
+
+    /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Cthulhu>> CTHULHU =
+            ENTITY_TYPES.register("cthulhu", () ->
+                    EntityType.Builder.<Cthulhu>of(Cthulhu::new, MobCategory.MONSTER)
+                            .sized(3.0F, 4.0F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("cthulhu"))));
+
+    public static final DeferredItem<SpawnEggItem> CTHULHU_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("cthulhu_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CTHULHU.get())));
+
+    /** The Dunwich Horror: 1.9 x 2.4, the mobile settlement threat. */
+    public static final DeferredHolder<EntityType<?>, EntityType<DunwichHorror>> DUNWICH_HORROR =
+            ENTITY_TYPES.register("dunwich_horror", () ->
+                    EntityType.Builder.<DunwichHorror>of(DunwichHorror::new, MobCategory.MONSTER)
+                            .sized(1.9F, 2.4F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("dunwich_horror"))));
+
+    public static final DeferredItem<SpawnEggItem> DUNWICH_HORROR_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("dunwich_horror_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(DUNWICH_HORROR.get())));
+
+    /** Shub-Niggurath: 4.0 x 5.0, the pure biome presence (large, slow). */
+    public static final DeferredHolder<EntityType<?>, EntityType<ShubNiggurath>> SHUB_NIGGURATH =
+            ENTITY_TYPES.register("shub_niggurath", () ->
+                    EntityType.Builder.<ShubNiggurath>of(ShubNiggurath::new, MobCategory.MONSTER)
+                            .sized(4.0F, 5.0F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("shub_niggurath"))));
+
+    public static final DeferredItem<SpawnEggItem> SHUB_NIGGURATH_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("shub_niggurath_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(SHUB_NIGGURATH.get())));
+
     /**
      * Adds the spawn egg to the mod's creative tab. The tab is built once at registration from
      * {@code ModItems.ALL}, before items exist, so this event (fired while the tab populates) is the
@@ -104,6 +148,9 @@ public final class ModEntities {
             event.accept(TAINTED_FAUNA_SPAWN_EGG.get());
             event.accept(LESSER_SWARM_SPAWN_EGG.get());
             event.accept(WATCHER_SPAWN_EGG.get());
+            event.accept(CTHULHU_SPAWN_EGG.get());
+            event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
+            event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
         }
     }
 
@@ -117,6 +164,9 @@ public final class ModEntities {
         event.put(TAINTED_FAUNA.get(), TaintedFauna.createAttributes().build());
         event.put(LESSER_SWARM.get(), LesserSwarm.createAttributes().build());
         event.put(WATCHER.get(), Watcher.createAttributes().build());
+        event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
+        event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
+        event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());
     }
 
     private ModEntities() {

@@ -38,6 +38,38 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> WATCHER_AMBIENT =
             register("entity.watcher.ambient");
 
+    // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
+
+    /** Cthulhu's dream-leak vocalisation (ambient). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CTHULHU_AMBIENT =
+            register("entity.cthulhu.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CTHULHU_HURT =
+            register("entity.cthulhu.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CTHULHU_DEATH =
+            register("entity.cthulhu.death");
+
+    /** The Dunwich Horror's distant roar (ambient) — the tell before the sighting. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> DUNWICH_HORROR_AMBIENT =
+            register("entity.dunwich_horror.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> DUNWICH_HORROR_HURT =
+            register("entity.dunwich_horror.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> DUNWICH_HORROR_DEATH =
+            register("entity.dunwich_horror.death");
+
+    /** Shub-Niggurath's vast breathing (ambient) — the woods themselves. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHUB_NIGGURATH_AMBIENT =
+            register("entity.shub_niggurath.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHUB_NIGGURATH_HURT =
+            register("entity.shub_niggurath.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHUB_NIGGURATH_DEATH =
+            register("entity.shub_niggurath.death");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(EldritchHorror.id(name)));
     }

@@ -365,6 +365,125 @@ public final class ModConfig {
             BUILDER.comment("Allow the Watcher to take damage. False = permanently invulnerable.")
                     .define("watcherKillable", false);
 
+    // --- Ancient Ones (boss framework, design/28-ancient-ones.md) -----------------------------
+
+    /** Health fraction at or below which any Ancient One enters its middle phase. */
+    public static final ModConfigSpec.DoubleValue BOSS_PHASE_TWO_HEALTH =
+            BUILDER.comment("Health fraction at or below which an Ancient One enters phase two.")
+                    .defineInRange("bossPhaseTwoHealth", 0.5, 0.05, 1.0);
+
+    /** Health fraction at or below which any Ancient One enters its enraged phase. */
+    public static final ModConfigSpec.DoubleValue BOSS_ENRAGE_HEALTH =
+            BUILDER.comment("Health fraction at or below which an Ancient One becomes enraged.")
+                    .defineInRange("bossEnrageHealth", 0.25, 0.01, 1.0);
+
+    /** Global difficulty knob: multiplies every Ancient One's max health at spawn. */
+    public static final ModConfigSpec.DoubleValue BOSS_HEALTH_MULTIPLIER =
+            BUILDER.comment("Multiplies every Ancient One's max health (difficulty knob; 1.0 = base).")
+                    .defineInRange("bossHealthMultiplier", 1.0, 0.25, 4.0);
+
+    /** Master switch for the bounded, once-per-site boss triggers (Cthulhu at drowned_temple). */
+    public static final ModConfigSpec.BooleanValue ENABLE_BOSS_SITE_TRIGGERS =
+            BUILDER.comment("Allow a site boss to appear once when a player nears its fixed site.")
+                    .define("enableBossSiteTriggers", true);
+
+    /** Player proximity (blocks) that arms a site boss trigger; loaded chunks only. */
+    public static final ModConfigSpec.IntValue BOSS_SITE_TRIGGER_RADIUS =
+            BUILDER.comment("Radius (blocks) around a site within which its boss may once appear.")
+                    .defineInRange("bossSiteTriggerRadius", 64, 16, 160);
+
+    /** Cthulhu: the drowned-temple Ancient One. */
+    public static final ModConfigSpec.BooleanValue CTHULHU_KILLABLE =
+            BUILDER.comment("Allow Cthulhu to be killed. False = permanently invulnerable.")
+                    .define("cthulhuKillable", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_CTHULHU =
+            BUILDER.comment("Enable the Cthulhu sanity source (the dream-leak drains sanity nearby).")
+                    .define("enableSanityCthulhu", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_CTHULHU_RATE =
+            BUILDER.comment("Sanity change per second while near Cthulhu (negative drains).")
+                    .defineInRange("sanityCthulhuRate", -0.35, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_CTHULHU_RADIUS =
+            BUILDER.comment("Radius (blocks) in which Cthulhu contributes to the sanity drain.")
+                    .defineInRange("sanityCthulhuRadius", 32, 1, 96);
+
+    /** The Dunwich Horror: a mobile settlement threat near tainted woods. */
+    public static final ModConfigSpec.BooleanValue DUNWICH_HORROR_KILLABLE =
+            BUILDER.comment("Allow the Dunwich Horror to be killed. False = invulnerable.")
+                    .define("dunwichHorrorKillable", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_DUNWICH_HORROR_SPAWNS =
+            BUILDER.comment("Allow the Dunwich Horror to stalk players in dark/tainted loaded terrain.")
+                    .define("enableDunwichHorrorSpawns", true);
+
+    public static final ModConfigSpec.IntValue DUNWICH_HORROR_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Dunwich Horror spawn passes (minimum 20).")
+                    .defineInRange("dunwichHorrorSpawnIntervalTicks", 2400, 20, 72000);
+
+    public static final ModConfigSpec.IntValue DUNWICH_HORROR_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which the Horror may appear.")
+                    .defineInRange("dunwichHorrorSpawnRadius", 48, 8, 128);
+
+    public static final ModConfigSpec.IntValue DUNWICH_HORROR_SPAWN_CAP =
+            BUILDER.comment("Max Dunwich Horrors allowed near one player before spawning pauses.")
+                    .defineInRange("dunwichHorrorSpawnCap", 1, 1, 4);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_DUNWICH_HORROR =
+            BUILDER.comment("Enable the Dunwich Horror corruption vector (nearby Horror taints).")
+                    .define("enableCorruptionDunwichHorror", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_DUNWICH_HORROR_RATE =
+            BUILDER.comment("Corruption per second while near the Dunwich Horror (positive taints).")
+                    .defineInRange("corruptionDunwichHorrorRate", 0.08, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_DUNWICH_HORROR_RADIUS =
+            BUILDER.comment("Radius (blocks) in which the Dunwich Horror contributes corruption.")
+                    .defineInRange("corruptionDunwichHorrorRadius", 20, 1, 64);
+
+    /** Shub-Niggurath: a slow, massive biome presence. */
+    public static final ModConfigSpec.BooleanValue SHUB_NIGGURATH_KILLABLE =
+            BUILDER.comment("Allow Shub-Niggurath to be killed. False = invulnerable.")
+                    .define("shubNiggurathKillable", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SHUB_NIGGURATH_SPAWNS =
+            BUILDER.comment("Allow Shub-Niggurath to appear in tainted loaded terrain (rare).")
+                    .define("enableShubNiggurathSpawns", true);
+
+    public static final ModConfigSpec.IntValue SHUB_NIGGURATH_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Shub-Niggurath spawn passes (minimum 20; long, it is rare).")
+                    .defineInRange("shubNiggurathSpawnIntervalTicks", 3600, 20, 144000);
+
+    public static final ModConfigSpec.IntValue SHUB_NIGGURATH_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Shub-Niggurath may appear.")
+                    .defineInRange("shubNiggurathSpawnRadius", 48, 8, 128);
+
+    public static final ModConfigSpec.IntValue SHUB_NIGGURATH_SPAWN_CAP =
+            BUILDER.comment("Max Shub-Nigguraths allowed near one player before spawning pauses.")
+                    .defineInRange("shubNiggurathSpawnCap", 1, 1, 4);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SHUB_NIGGURATH =
+            BUILDER.comment("Enable the Shub-Niggurath corruption aura (the woods breathe taint).")
+                    .define("enableCorruptionShubNiggurath", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_SHUB_NIGGURATH_RATE =
+            BUILDER.comment("Corruption per second while within Shub-Niggurath's aura (positive taints).")
+                    .defineInRange("corruptionShubNiggurathRate", 0.15, 0.0, 10.0);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_SHUB_NIGGURATH_SPRINT_RATE =
+            BUILDER.comment("Extra corruption per second while sprinting near Shub-Niggurath.")
+                    .defineInRange("corruptionShubNiggurathSprintRate", 0.20, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_SHUB_NIGGURATH_RADIUS =
+            BUILDER.comment("Radius (blocks) of Shub-Niggurath's corruption aura; wide by design.")
+                    .defineInRange("corruptionShubNiggurathRadius", 40, 4, 128);
+
+    /** Sanity drain while standing still near Shub-Niggurath (running costs corruption instead). */
+    public static final ModConfigSpec.DoubleValue SANITY_SHUB_NIGGURATH_STILL_RATE =
+            BUILDER.comment("Sanity change per second while standing still near Shub-Niggurath.")
+                    .defineInRange("sanityShubNiggurathStillRate", -0.12, -10.0, 0.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

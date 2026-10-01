@@ -149,7 +149,7 @@ public final class BestiarySupport {
         }
         double total = 0.0;
         for (int i = 0; i < count; i++) {
-            total += auras.get(i).auraRate();
+            total += auras.get(i).auraRateFor(player);
         }
         if (total == 0.0) {
             return;

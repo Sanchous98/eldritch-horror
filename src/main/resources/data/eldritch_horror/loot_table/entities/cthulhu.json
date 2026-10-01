@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:pearl_reagent",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 4
+            }
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:ichor_vial"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:void_reagent",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

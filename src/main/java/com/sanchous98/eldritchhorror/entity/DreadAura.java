@@ -30,6 +30,14 @@ public interface DreadAura {
     /** Meter change per second contributed per counted aura (negative drains sanity). */
     double auraRate();
 
+    /**
+     * Meter change per second for a specific player; by default the flat {@link #auraRate()}. Bosses
+     * override this to make the drain worse while the player sleeps (the dream-leak).
+     */
+    default double auraRateFor(net.minecraft.server.level.ServerPlayer player) {
+        return auraRate();
+    }
+
     /** Radius (blocks) within which this aura counts for a player. */
     double auraRadius();
 
