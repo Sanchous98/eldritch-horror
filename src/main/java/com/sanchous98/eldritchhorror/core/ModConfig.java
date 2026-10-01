@@ -789,6 +789,266 @@ public final class ModConfig {
             BUILDER.comment("Max shoggoth masses allowed near one player before spawning pauses.")
                     .defineInRange("shoggothSpawnCap", 1, 1, 4);
 
+    // --- Bestiary: weaver_spawn (spider-role nest-guard that webs a room shut) ----------------
+
+    /** The weaver's skittering dread: a small sanity drain while it is near. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_WEAVER_SPAWN =
+            BUILDER.comment("Enable the 'weaver_spawn' sanity source (a nest-guard drains sanity).")
+                    .define("enableSanityWeaverSpawn", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_WEAVER_SPAWN_RATE =
+            BUILDER.comment("Sanity change per second per nearby weaver (negative drains).")
+                    .defineInRange("sanityWeaverSpawnRate", -0.09, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_WEAVER_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) in which weavers contribute to the sanity drain.")
+                    .defineInRange("sanityWeaverSpawnRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_WEAVER_SPAWN_MAX =
+            BUILDER.comment("Maximum weavers counted toward the sanity drain at once.")
+                    .defineInRange("sanityWeaverSpawnMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_WEAVER_SPAWN_SPAWNS =
+            BUILDER.comment("Allow weavers to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableWeaverSpawnSpawns", true);
+
+    public static final ModConfigSpec.IntValue WEAVER_SPAWN_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between weaver spawn passes (minimum 20).")
+                    .defineInRange("weaverSpawnSpawnIntervalTicks", 300, 20, 24000);
+
+    public static final ModConfigSpec.IntValue WEAVER_SPAWN_SPAWN_COUNT =
+            BUILDER.comment("Max weavers spawned per player per pass.")
+                    .defineInRange("weaverSpawnSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue WEAVER_SPAWN_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which weavers may spawn.")
+                    .defineInRange("weaverSpawnSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue WEAVER_SPAWN_SPAWN_CAP =
+            BUILDER.comment("Max weavers allowed near one player before spawning pauses.")
+                    .defineInRange("weaverSpawnSpawnCap", 4, 1, 64);
+
+    /** Whether the weaver climbs walls (its nest-guard mobility; distinct from the veil stalker). */
+    public static final ModConfigSpec.BooleanValue ENABLE_WEAVER_CLIMBING =
+            BUILDER.comment("Allow the weaver spawn to climb walls (its nest-guard mobility).")
+                    .define("enableWeaverClimbing", true);
+
+    /** Master switch for the weaver's bounded web placement (its signature hook). */
+    public static final ModConfigSpec.BooleanValue ENABLE_WEAVER_WEBS =
+            BUILDER.comment("Allow weavers to place cobwebs near their nest (bounded, loaded chunks only).")
+                    .define("enableWeaverWebs", true);
+
+    /** Hard cap on web blocks a single weaver may place, ever (the placement is one-shot). */
+    public static final ModConfigSpec.IntValue WEAVER_WEB_MAX_BLOCKS =
+            BUILDER.comment("Maximum cobwebs one weaver places near its spawn point (0 disables).")
+                    .defineInRange("weaverWebMaxBlocks", 8, 0, 32);
+
+    /** Whether the weaver's bite slows the target (the cave-spider shape). */
+    public static final ModConfigSpec.BooleanValue ENABLE_WEAVER_SLOW_BITE =
+            BUILDER.comment("Weaver bites apply slowness (the web in the wound).")
+                    .define("enableWeaverSlowBite", true);
+
+    // --- Bestiary: rift_mite (silverfish/endermite-role tainted-chunk vermin) ----------------
+
+    /** The rift mite's swarm dread: it only bites in numbers, so the aura stacks a little. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_RIFT_MITE =
+            BUILDER.comment("Enable the 'rift_mite' corruption vector (a mite swarm taints).")
+                    .define("enableCorruptionRiftMite", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_RIFT_MITE_RATE =
+            BUILDER.comment("Corruption per second per nearby rift mite (positive taints).")
+                    .defineInRange("corruptionRiftMiteRate", 0.03, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_RIFT_MITE_RADIUS =
+            BUILDER.comment("Radius (blocks) in which rift mites contribute corruption.")
+                    .defineInRange("corruptionRiftMiteRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_RIFT_MITE_MAX =
+            BUILDER.comment("Maximum rift mites counted toward the corruption vector at once.")
+                    .defineInRange("corruptionRiftMiteMax", 6, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_RIFT_MITE_SPAWNS =
+            BUILDER.comment("Allow rift mites to spawn in tainted loaded terrain (pack vermin).")
+                    .define("enableRiftMiteSpawns", true);
+
+    public static final ModConfigSpec.IntValue RIFT_MITE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between rift-mite spawn passes (minimum 20).")
+                    .defineInRange("riftMiteSpawnIntervalTicks", 200, 20, 24000);
+
+    public static final ModConfigSpec.IntValue RIFT_MITE_SPAWN_COUNT =
+            BUILDER.comment("Max rift mites spawned per player per pass (they arrive in a group).")
+                    .defineInRange("riftMiteSpawnCount", 5, 0, 24);
+
+    public static final ModConfigSpec.IntValue RIFT_MITE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which rift mites may spawn.")
+                    .defineInRange("riftMiteSpawnRadius", 24, 8, 96);
+
+    public static final ModConfigSpec.IntValue RIFT_MITE_SPAWN_CAP =
+            BUILDER.comment("Max rift mites allowed near one player before spawning pauses.")
+                    .defineInRange("riftMiteSpawnCap", 12, 1, 64);
+
+    // --- Bestiary: shambler_ooze (slime-role splitter, tainted residue) -----------------------
+
+    /** The shambler's residue: standing near one taints you slowly. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SHAMBLER_OOZE =
+            BUILDER.comment("Enable the 'shambler_ooze' corruption vector (nearby oozes taint).")
+                    .define("enableCorruptionShamblerOoze", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_SHAMBLER_OOZE_RATE =
+            BUILDER.comment("Corruption per second per nearby shambler ooze (positive taints).")
+                    .defineInRange("corruptionShamblerOozeRate", 0.04, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_SHAMBLER_OOZE_RADIUS =
+            BUILDER.comment("Radius (blocks) in which shambler oozes contribute corruption.")
+                    .defineInRange("corruptionShamblerOozeRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_SHAMBLER_OOZE_MAX =
+            BUILDER.comment("Maximum shambler oozes counted toward the corruption vector at once.")
+                    .defineInRange("corruptionShamblerOozeMax", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SHAMBLER_OOZE_SPAWNS =
+            BUILDER.comment("Allow shambler oozes to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableShamblerOozeSpawns", true);
+
+    public static final ModConfigSpec.IntValue SHAMBLER_OOZE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between shambler-ooze spawn passes (minimum 20).")
+                    .defineInRange("shamblerOozeSpawnIntervalTicks", 260, 20, 24000);
+
+    public static final ModConfigSpec.IntValue SHAMBLER_OOZE_SPAWN_COUNT =
+            BUILDER.comment("Max shambler oozes spawned per player per pass.")
+                    .defineInRange("shamblerOozeSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue SHAMBLER_OOZE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which shambler oozes may spawn.")
+                    .defineInRange("shamblerOozeSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue SHAMBLER_OOZE_SPAWN_CAP =
+            BUILDER.comment("Max shambler oozes allowed near one player before spawning pauses.")
+                    .defineInRange("shamblerOozeSpawnCap", 6, 1, 64);
+
+    /** How many smaller copies a struck shambler splits into on death (0 disables the split). */
+    public static final ModConfigSpec.IntValue SHAMBLER_OOZE_SPLIT_COUNT =
+            BUILDER.comment("Copies spawned when a shambler ooze dies (bounded; 0 = no split).")
+                    .defineInRange("shamblerOozeSplitCount", 2, 0, 4);
+
+    /** The smallest size a split copy may be; at or below this it dies without splitting. */
+    public static final ModConfigSpec.IntValue SHAMBLER_OOZE_MIN_SPLIT_SIZE =
+            BUILDER.comment("Smallest size a shambler copy may have; below it the split stops.")
+                    .defineInRange("shamblerOozeMinSplitSize", 1, 0, 3);
+
+    /** Whether a shambler death also leaves a little taint behind (its residue). */
+    public static final ModConfigSpec.BooleanValue ENABLE_SHAMBLER_OOZE_RESIDUE =
+            BUILDER.comment("A shambler's death leaves a small taint residue in its chunk.")
+                    .define("enableShamblerOozeResidue", true);
+
+    public static final ModConfigSpec.DoubleValue SHAMBLER_OOZE_RESIDUE_TAINT =
+            BUILDER.comment("Taint added to the shambler's chunk on death (bounded).")
+                    .defineInRange("shamblerOozeResidueTaint", 0.06, 0.0, 1.0);
+
+    // --- Bestiary: choir_spite (vex-role wall-passing focus drain) ----------------------------
+
+    /** The spite's focus drain: it passes walls and sips sanity while it lasts. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_CHOIR_SPITE =
+            BUILDER.comment("Enable the 'choir_spite' sanity source (a wall-passing mote drains focus).")
+                    .define("enableSanityChoirSpite", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_CHOIR_SPITE_RATE =
+            BUILDER.comment("Sanity change per second per nearby choir spite (negative drains).")
+                    .defineInRange("sanityChoirSpiteRate", -0.14, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_CHOIR_SPITE_RADIUS =
+            BUILDER.comment("Radius (blocks) in which choir spites contribute to the sanity drain.")
+                    .defineInRange("sanityChoirSpiteRadius", 10, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_CHOIR_SPITE_MAX =
+            BUILDER.comment("Maximum choir spites counted toward the sanity drain at once.")
+                    .defineInRange("sanityChoirSpiteMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CHOIR_SPITE_SPAWNS =
+            BUILDER.comment("Allow choir spites to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableChoirSpiteSpawns", true);
+
+    public static final ModConfigSpec.IntValue CHOIR_SPITE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between choir-spite spawn passes (minimum 20).")
+                    .defineInRange("choirSpiteSpawnIntervalTicks", 400, 20, 24000);
+
+    public static final ModConfigSpec.IntValue CHOIR_SPITE_SPAWN_COUNT =
+            BUILDER.comment("Max choir spites spawned per player per pass.")
+                    .defineInRange("choirSpiteSpawnCount", 2, 0, 8);
+
+    public static final ModConfigSpec.IntValue CHOIR_SPITE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which choir spites may appear.")
+                    .defineInRange("choirSpiteSpawnRadius", 36, 8, 128);
+
+    public static final ModConfigSpec.IntValue CHOIR_SPITE_SPAWN_CAP =
+            BUILDER.comment("Max choir spites allowed near one player before spawning pauses.")
+                    .defineInRange("choirSpiteSpawnCap", 3, 1, 16);
+
+    public static final ModConfigSpec.IntValue CHOIR_SPITE_SPAWN_MIN_Y =
+            BUILDER.comment("Minimum Y at which a choir spite may spawn (fliers stay above the deep dark).")
+                    .defineInRange("choirSpiteSpawnMinY", 50, -64, 320);
+
+    /** Whether the spite passes through walls (its defining movement). */
+    public static final ModConfigSpec.BooleanValue ENABLE_CHOIR_SPITE_PHASING =
+            BUILDER.comment("Allow the choir spite to pass through walls (no physics).")
+                    .define("enableChoirSpitePhasing", true);
+
+    /** How long (seconds) a spite lasts before it gutters out; bounded so it never accumulates. */
+    public static final ModConfigSpec.IntValue CHOIR_SPITE_LIFETIME_SECONDS =
+            BUILDER.comment("Seconds a choir spite exists before it gutters out (bounded).")
+                    .defineInRange("choirSpiteLifetimeSeconds", 60, 5, 600);
+
+    // --- Bestiary: night_hag (phantom-role, gated on LOW SANITY not low sleep) ----------------
+
+    /** The night hag feeds on the frayed: approaching it drains sanity. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_NIGHT_HAG =
+            BUILDER.comment("Enable the 'night_hag' sanity source (a swooping hag drains sanity).")
+                    .define("enableSanityNightHag", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_NIGHT_HAG_RATE =
+            BUILDER.comment("Sanity change per second per nearby night hag (negative drains).")
+                    .defineInRange("sanityNightHagRate", -0.20, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_NIGHT_HAG_RADIUS =
+            BUILDER.comment("Radius (blocks) in which night hags contribute to the sanity drain.")
+                    .defineInRange("sanityNightHagRadius", 12, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_NIGHT_HAG_MAX =
+            BUILDER.comment("Maximum night hags counted toward the sanity drain at once.")
+                    .defineInRange("sanityNightHagMax", 2, 1, 16);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_NIGHT_HAG_SPAWNS =
+            BUILDER.comment("Allow night hags to spawn above players whose sanity is low (the real gate).")
+                    .define("enableNightHagSpawns", true);
+
+    /**
+     * The night hag's gate: it only appears when a nearby player's sanity is at or below this
+     * fraction of their maximum. This is the design's "swoops at low sanity, not low sleep".
+     */
+    public static final ModConfigSpec.DoubleValue NIGHT_HAG_SANITY_THRESHOLD =
+            BUILDER.comment("Sanity fraction (0..1) at or below which a night hag may spawn near a player.")
+                    .defineInRange("nightHagSanityThreshold", 0.5, 0.0, 1.0);
+
+    public static final ModConfigSpec.IntValue NIGHT_HAG_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between night-hag spawn passes (minimum 20).")
+                    .defineInRange("nightHagSpawnIntervalTicks", 600, 20, 24000);
+
+    public static final ModConfigSpec.IntValue NIGHT_HAG_SPAWN_COUNT =
+            BUILDER.comment("Max night hags spawned per player per pass.")
+                    .defineInRange("nightHagSpawnCount", 2, 0, 8);
+
+    public static final ModConfigSpec.IntValue NIGHT_HAG_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which night hags may appear.")
+                    .defineInRange("nightHagSpawnRadius", 40, 8, 128);
+
+    public static final ModConfigSpec.IntValue NIGHT_HAG_SPAWN_CAP =
+            BUILDER.comment("Max night hags allowed near one player before spawning pauses.")
+                    .defineInRange("nightHagSpawnCap", 2, 1, 8);
+
+    public static final ModConfigSpec.IntValue NIGHT_HAG_SPAWN_MIN_Y =
+            BUILDER.comment("Minimum Y at which a night hag may spawn (fliers stay above the deep dark).")
+                    .defineInRange("nightHagSpawnMinY", 50, -64, 320);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

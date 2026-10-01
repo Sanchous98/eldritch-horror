@@ -4,17 +4,22 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.entity.BlightPod;
 import com.sanchous98.eldritchhorror.entity.BoneChoir;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
+import com.sanchous98.eldritchhorror.entity.ChoirSpite;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
 import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
+import com.sanchous98.eldritchhorror.entity.NightHag;
+import com.sanchous98.eldritchhorror.entity.RiftMite;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
+import com.sanchous98.eldritchhorror.entity.ShamblerOoze;
 import com.sanchous98.eldritchhorror.entity.ShoggothMass;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
 import com.sanchous98.eldritchhorror.entity.StarSpawn;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
 import com.sanchous98.eldritchhorror.entity.Watcher;
+import com.sanchous98.eldritchhorror.entity.WeaverSpawn;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -192,6 +197,71 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("shoggoth_mass_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(SHOGGOTH_MASS.get())));
 
+    /** Weaver spawn: 1.4 x 0.9, hostile nest-guard (matching vanilla spider's footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<WeaverSpawn>> WEAVER_SPAWN =
+            ENTITY_TYPES.register("weaver_spawn", () ->
+                    EntityType.Builder.<WeaverSpawn>of(WeaverSpawn::new, MobCategory.MONSTER)
+                            .sized(1.4F, 0.9F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("weaver_spawn"))));
+
+    public static final DeferredItem<SpawnEggItem> WEAVER_SPAWN_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("weaver_spawn_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(WEAVER_SPAWN.get())));
+
+    /** Rift mite: 0.3 x 0.2, the tiny hostile vermin hitbox (matching the endermite's). */
+    public static final DeferredHolder<EntityType<?>, EntityType<RiftMite>> RIFT_MITE =
+            ENTITY_TYPES.register("rift_mite", () ->
+                    EntityType.Builder.<RiftMite>of(RiftMite::new, MobCategory.MONSTER)
+                            .sized(0.3F, 0.2F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("rift_mite"))));
+
+    public static final DeferredItem<SpawnEggItem> RIFT_MITE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("rift_mite_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(RIFT_MITE.get())));
+
+    /** Shambler ooze: 0.9 x 0.9, hostile splitter (a medium slime footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<ShamblerOoze>> SHAMBLER_OOZE =
+            ENTITY_TYPES.register("shambler_ooze", () ->
+                    EntityType.Builder.<ShamblerOoze>of(ShamblerOoze::new, MobCategory.MONSTER)
+                            .sized(0.9F, 0.9F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("shambler_ooze"))));
+
+    public static final DeferredItem<SpawnEggItem> SHAMBLER_OOZE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("shambler_ooze_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(SHAMBLER_OOZE.get())));
+
+    /** Choir spite: 0.4 x 0.4, hostile wall-passing flier (matching the vex's tiny hitbox). */
+    public static final DeferredHolder<EntityType<?>, EntityType<ChoirSpite>> CHOIR_SPITE =
+            ENTITY_TYPES.register("choir_spite", () ->
+                    EntityType.Builder.<ChoirSpite>of(ChoirSpite::new, MobCategory.MONSTER)
+                            .sized(0.4F, 0.4F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("choir_spite"))));
+
+    public static final DeferredItem<SpawnEggItem> CHOIR_SPITE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("choir_spite_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CHOIR_SPITE.get())));
+
+    /** Night hag: 0.9 x 0.5, hostile swooper (matching the phantom's low, wide footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<NightHag>> NIGHT_HAG =
+            ENTITY_TYPES.register("night_hag", () ->
+                    EntityType.Builder.<NightHag>of(NightHag::new, MobCategory.MONSTER)
+                            .sized(0.9F, 0.5F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("night_hag"))));
+
+    public static final DeferredItem<SpawnEggItem> NIGHT_HAG_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("night_hag_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(NIGHT_HAG.get())));
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
@@ -253,6 +323,11 @@ public final class ModEntities {
             event.accept(BYAKHEE_SPAWN_EGG.get());
             event.accept(STAR_SPAWN_SPAWN_EGG.get());
             event.accept(SHOGGOTH_MASS_SPAWN_EGG.get());
+            event.accept(WEAVER_SPAWN_SPAWN_EGG.get());
+            event.accept(RIFT_MITE_SPAWN_EGG.get());
+            event.accept(SHAMBLER_OOZE_SPAWN_EGG.get());
+            event.accept(CHOIR_SPITE_SPAWN_EGG.get());
+            event.accept(NIGHT_HAG_SPAWN_EGG.get());
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
@@ -276,6 +351,11 @@ public final class ModEntities {
         event.put(BYAKHEE.get(), Byakhee.createAttributes().build());
         event.put(STAR_SPAWN.get(), StarSpawn.createAttributes().build());
         event.put(SHOGGOTH_MASS.get(), ShoggothMass.createAttributes().build());
+        event.put(WEAVER_SPAWN.get(), WeaverSpawn.createAttributes().build());
+        event.put(RIFT_MITE.get(), RiftMite.createAttributes().build());
+        event.put(SHAMBLER_OOZE.get(), ShamblerOoze.createAttributes().build());
+        event.put(CHOIR_SPITE.get(), ChoirSpite.createAttributes().build());
+        event.put(NIGHT_HAG.get(), NightHag.createAttributes().build());
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());

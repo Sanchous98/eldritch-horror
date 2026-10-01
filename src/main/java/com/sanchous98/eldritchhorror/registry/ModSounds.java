@@ -75,6 +75,32 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SHOGGOTH_DEATH =
             register("entity.shoggoth.death");
 
+    /** The weaver spawn's skitter (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> WEAVER_SPAWN_AMBIENT =
+            register("entity.weaver_spawn.ambient");
+
+    /** The rift mite's chittering (ambient/hurt/death); small, but never alone. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RIFT_MITE_AMBIENT =
+            register("entity.rift_mite.ambient");
+
+    /** The shambler ooze's wet settle (ambient/hurt); its death is the split. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHAMBLER_OOZE_AMBIENT =
+            register("entity.shambler_ooze.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHAMBLER_OOZE_DEATH =
+            register("entity.shambler_ooze.death");
+
+    /** The choir spite's thin, spiteful note (ambient/hurt); its death is a snuffed hum. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHOIR_SPITE_AMBIENT =
+            register("entity.choir_spite.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHOIR_SPITE_DEATH =
+            register("entity.choir_spite.death");
+
+    /** The night hag's ragged cry (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIGHT_HAG_AMBIENT =
+            register("entity.night_hag.ambient");
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu's dream-leak vocalisation (ambient). */

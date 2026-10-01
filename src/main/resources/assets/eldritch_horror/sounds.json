@@ -223,5 +223,68 @@
         "type": "event"
       }
     ]
+  },
+  "entity.weaver_spawn.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.weaver_spawn.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.spider.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.rift_mite.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.rift_mite.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shambler_ooze.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.shambler_ooze.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.slime.squish",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shambler_ooze.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.shambler_ooze.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.slime.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.choir_spite.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.choir_spite.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vex.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.choir_spite.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.choir_spite.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.vex.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.night_hag.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.night_hag.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.ambient",
+        "type": "event"
+      }
+    ]
   }
 }

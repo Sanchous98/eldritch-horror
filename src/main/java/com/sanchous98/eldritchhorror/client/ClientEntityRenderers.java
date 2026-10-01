@@ -34,6 +34,11 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.BYAKHEE.get(), ByakheeRenderer::new);
         event.registerEntityRenderer(ModEntities.STAR_SPAWN.get(), StarSpawnRenderer::new);
         event.registerEntityRenderer(ModEntities.SHOGGOTH_MASS.get(), ShoggothMassRenderer::new);
+        event.registerEntityRenderer(ModEntities.WEAVER_SPAWN.get(), WeaverSpawnRenderer::new);
+        event.registerEntityRenderer(ModEntities.RIFT_MITE.get(), RiftMiteRenderer::new);
+        event.registerEntityRenderer(ModEntities.SHAMBLER_OOZE.get(), ShamblerOozeRenderer::new);
+        event.registerEntityRenderer(ModEntities.CHOIR_SPITE.get(), ChoirSpiteRenderer::new);
+        event.registerEntityRenderer(ModEntities.NIGHT_HAG.get(), NightHagRenderer::new);
         event.registerEntityRenderer(ModEntities.CTHULHU.get(), CthulhuRenderer::new);
         event.registerEntityRenderer(ModEntities.DUNWICH_HORROR.get(), DunwichHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.SHUB_NIGGURATH.get(), ShubNiggurathRenderer::new);
