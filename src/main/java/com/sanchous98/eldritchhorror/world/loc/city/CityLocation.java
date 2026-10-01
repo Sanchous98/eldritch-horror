@@ -216,8 +216,10 @@ public final class CityLocation implements Location {
         }
 
         // 5. Street furniture for the culture (lanterns, torii, neon, statues…). Also before the
-        // buildings, so it cannot overwrite them, and bounded to the flattened interior.
-        style.streetProps(b, rng, cx, cz, buildRadius, ground, p);
+        // buildings, so it cannot overwrite them, and bounded to the FLAT heart: styles place their
+        // props at the city level, which is wrong on a terrace, so keeping them on the flat heart
+        // avoids floating or buried lanterns/statues.
+        style.streetProps(b, rng, cx, cz, propRadius, ground, p);
 
         b.marker("city_center", cx, ground + 1, cz);
     }

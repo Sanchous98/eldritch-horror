@@ -98,6 +98,9 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   owner and ranks are localised (`rank.eldritch_horror.*`).
 - **City polish**: varied street paving, a soft rim that fades into the wild (no hard circular
   cut), generic street dressing (stalls/crates/wells) placed before buildings and occupancy-gated.
+- **City terraces**: the district is a hillside city, not one flat plate - 24-block terrace tiles
+  take the local terrain level (quantised to 2 blocks), joined by steps, with a flat plaza/landmark
+  heart; each lot is levelled on a small pad so buildings sit flat while the tiles around them step.
 - **City generation fixes (player-reported):** the city level is the mean terrain over the interior
   (not the centre point) and an `EDGE_RING` blend grades the rim into the wild instead of a cliff;
   buildings are placed chunk-locally on a grid-canonical hash (no global cap, so the whole district
