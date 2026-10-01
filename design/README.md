@@ -44,8 +44,9 @@ is the complete specification.
 25. [23-boundary-and-travel.md](23-boundary-and-travel.md) — the cylinder world, Morok, travel.
 26. [24-sanity-and-corruption.md](24-sanity-and-corruption.md) — sanity & corruption (consolidates 03a/03b).
 27. [25-bestiary-and-entities.md](25-bestiary-and-entities.md) — the entity roster (consolidates 17/18).
-28. [26-rituals-and-occult.md](26-rituals-and-occult.md) — the occult systems (consolidates 05/08).
-29. [27-systems-framework.md](27-systems-framework.md) — the technical shape of sanity/corruption/cult.
+28. [28-ancient-ones.md](28-ancient-ones.md) — the Ancient One bosses that replace vanilla bosses.
+29. [26-rituals-and-occult.md](26-rituals-and-occult.md) — the occult systems (consolidates 05/08).
+30. [27-systems-framework.md](27-systems-framework.md) — the technical shape of sanity/corruption/cult.
 
 ## The one-paragraph summary
 
