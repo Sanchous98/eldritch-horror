@@ -91,6 +91,18 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   `/eh rite <id>` and `/eh rites`, and tome-reading grants knowledge of the rite (main-hand only).
   Performing a rite charges its cost and reports the outcome as **not yet implemented** — the
   resolution engine (wards, spawns, rifts, reputation) is the next layer.
+- **Rite resolution** (`rite/RiteEngine`): performing a known rite charges its cost then resolves the
+  outcome server-side - wards, water blessing, a skill reset, a capped hostile summon, rift
+  opening/closing (rift_anchor + chunk taint), and cleansing (lowers the player's corruption and
+  local taint). `altar_core` is an interactive block that lists your known rites.
+- **Taint changes the world** (`corruption/TaintWorld`): a tainted loaded chunk converts a capped
+  few natural surface blocks to `tainted_soil`/`corrupt_stone` (deterministic, open-sky only, never
+  builds), with `/eh taint purify` as the debug stop.
+- **Bestiary** (`entity/`, `design/25`, `design/28`): vanilla bosses are replaced by **Ancient
+  Ones** (Cthulhu, the Dunwich Horror, Shub-Niggurath first) and every vanilla mob is replaced by a
+  monster — vanilla mobs are suppressed except villagers. Implemented: the framework + `risen_husk`,
+  `tainted_fauna`, `lesser_swarm`, `watcher`, sharing a dread-aura trait, a follow goal and a bounded
+  spawner. Cities are populated with crowds of villagers.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
