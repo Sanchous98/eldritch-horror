@@ -1517,6 +1517,85 @@ public final class ModConfig {
             BUILDER.comment("Squishy mobs flee when hurt and below a health fraction rather than stand.")
                     .define("enableBestiaryRetreat", true);
 
+    // --- Site populations (design/25 "site-based" spawns) --------------------------------------
+    // ONE shared, bounded pass (entity/SitePopulationSpawner) keeps the five fixed second-echelon
+    // sites inhabited while a player is near them. It reuses the shared BestiarySupport primitives
+    // (loaded chunks only, deterministic RandomSource, per-player caps) and confines every spawn to
+    // the site's built footprint. Numbers below are the site tables; ritual_altar_site deliberately
+    // has no ambient population (the rite engine owns what appears there).
+
+    /** Master switch for the single site-population pass. Off = no site populations at all. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_POPULATIONS =
+            BUILDER.comment("Keep the fixed sites (stronghold/temple/vault/rift) inhabited near players.")
+                    .define("enableSitePopulations", true);
+
+    public static final ModConfigSpec.IntValue SITE_POPULATION_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between shared site-population passes (minimum 20).")
+                    .defineInRange("sitePopulationIntervalTicks", 100, 20, 24000);
+
+    public static final ModConfigSpec.IntValue SITE_POPULATION_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around a player in which site inhabitants may spawn.")
+                    .defineInRange("sitePopulationSpawnRadius", 32, 8, 96);
+
+    // cult_stronghold: cultists (zealot/raider, a few) + worshippers guarding the altar.
+    public static final ModConfigSpec.IntValue SITE_CULT_ZEALOT_COUNT =
+            BUILDER.comment("Max cult zealots spawned per site pass (cult_stronghold).")
+                    .defineInRange("siteCultZealotCount", 1, 0, 8);
+    public static final ModConfigSpec.IntValue SITE_CULT_ZEALOT_CAP =
+            BUILDER.comment("Max cult zealots near one player at a cult_stronghold before pausing.")
+                    .defineInRange("siteCultZealotCap", 2, 1, 32);
+    public static final ModConfigSpec.IntValue SITE_CULT_RAIDER_COUNT =
+            BUILDER.comment("Max cult raiders spawned per site pass (cult_stronghold).")
+                    .defineInRange("siteCultRaiderCount", 2, 0, 8);
+    public static final ModConfigSpec.IntValue SITE_CULT_RAIDER_CAP =
+            BUILDER.comment("Max cult raiders near one player at a cult_stronghold before pausing.")
+                    .defineInRange("siteCultRaiderCap", 3, 1, 32);
+    public static final ModConfigSpec.IntValue SITE_WORSHIPPER_COUNT =
+            BUILDER.comment("Max worshippers spawned per site pass (cult_stronghold).")
+                    .defineInRange("siteWorshipperCount", 1, 0, 8);
+    public static final ModConfigSpec.IntValue SITE_WORSHIPPER_CAP =
+            BUILDER.comment("Max worshippers near one player at a cult_stronghold before pausing.")
+                    .defineInRange("siteWorshipperCap", 2, 1, 16);
+
+    // drowned_temple: tide-thralls (the Cthulhu boss trigger is separate and untouched).
+    public static final ModConfigSpec.IntValue SITE_DROWNED_THRALL_COUNT =
+            BUILDER.comment("Max drowned thralls spawned per site pass (drowned_temple).")
+                    .defineInRange("siteDrownedThrallCount", 2, 0, 8);
+    public static final ModConfigSpec.IntValue SITE_DROWNED_THRALL_CAP =
+            BUILDER.comment("Max drowned thralls near one player at a drowned_temple before pausing.")
+                    .defineInRange("siteDrownedThrallCap", 4, 1, 32);
+
+    // order_vault: stone sentinels (the Order guards; their ambient pass stays off).
+    public static final ModConfigSpec.IntValue SITE_STONE_SENTINEL_COUNT =
+            BUILDER.comment("Max stone sentinels spawned per site pass (order_vault).")
+                    .defineInRange("siteStoneSentinelCount", 1, 0, 8);
+    public static final ModConfigSpec.IntValue SITE_STONE_SENTINEL_CAP =
+            BUILDER.comment("Max stone sentinels near one player at an order_vault before pausing.")
+                    .defineInRange("siteStoneSentinelCap", 2, 1, 16);
+
+    // rift_scar: rift vermin + swarm; a star-spawn only on the long inner cadence.
+    public static final ModConfigSpec.IntValue SITE_LESSER_SWARM_COUNT =
+            BUILDER.comment("Max lesser swarms spawned per site pass (rift_scar).")
+                    .defineInRange("siteLesserSwarmCount", 3, 0, 16);
+    public static final ModConfigSpec.IntValue SITE_LESSER_SWARM_CAP =
+            BUILDER.comment("Max lesser swarms near one player at a rift_scar before pausing.")
+                    .defineInRange("siteLesserSwarmCap", 6, 1, 32);
+    public static final ModConfigSpec.IntValue SITE_RIFT_MITE_COUNT =
+            BUILDER.comment("Max rift mites spawned per site pass (rift_scar; they arrive in a group).")
+                    .defineInRange("siteRiftMiteCount", 4, 0, 24);
+    public static final ModConfigSpec.IntValue SITE_RIFT_MITE_CAP =
+            BUILDER.comment("Max rift mites near one player at a rift_scar before pausing.")
+                    .defineInRange("siteRiftMiteCap", 8, 1, 64);
+    public static final ModConfigSpec.IntValue SITE_STAR_SPAWN_COUNT =
+            BUILDER.comment("Max star-spawns spawned per rift-scar star pass.")
+                    .defineInRange("siteStarSpawnCount", 1, 0, 4);
+    public static final ModConfigSpec.IntValue SITE_STAR_SPAWN_CAP =
+            BUILDER.comment("Max star-spawns near one player at a rift_scar before pausing.")
+                    .defineInRange("siteStarSpawnCap", 1, 1, 8);
+    public static final ModConfigSpec.IntValue SITE_STAR_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between the rift_scar's occasional star-spawn attempts (minimum 20).")
+                    .defineInRange("siteStarSpawnIntervalTicks", 2400, 20, 72000);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {
