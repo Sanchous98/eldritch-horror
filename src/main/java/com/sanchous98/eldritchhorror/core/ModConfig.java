@@ -1421,6 +1421,78 @@ public final class ModConfig {
             BUILDER.comment("Outward nudge strength the sentinel applies to a warded mob.")
                     .defineInRange("stoneSentinelWardPush", 0.25, 0.0, 2.0);
 
+    // --- Ambient (ambience) fauna (design/25 ambient role table) ----------------------------
+    // Six non-combat drifters carried by the single AmbientSpawner pass. The interval/radius/count
+    // below mirror the mundane pass, so both reuse BestiarySupport without a second scan loop.
+
+    public static final ModConfigSpec.IntValue AMBIENT_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between ambient-drifer spawn passes (minimum 20).")
+                    .defineInRange("ambientSpawnIntervalTicks", 600, 20, 24000);
+
+    public static final ModConfigSpec.IntValue AMBIENT_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which ambient drifters may spawn.")
+                    .defineInRange("ambientSpawnRadius", 40, 8, 96);
+
+    public static final ModConfigSpec.IntValue AMBIENT_SPAWN_COUNT =
+            BUILDER.comment("Max ambient drifters spawned per player per pass.")
+                    .defineInRange("ambientSpawnCount", 1, 0, 8);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CAVE_DRIFTER_SPAWNS =
+            BUILDER.comment("Allow cave drifters to spawn in dark loaded terrain (the bat role).")
+                    .define("enableCaveDrifterSpawns", true);
+    public static final ModConfigSpec.IntValue CAVE_DRIFTER_SPAWN_CAP =
+            BUILDER.comment("Max cave drifters allowed near one player before spawning pauses.")
+                    .defineInRange("caveDrifterSpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_PALE_DRIFTER_SPAWNS =
+            BUILDER.comment("Allow pale drifters to spawn in still water (the squid role).")
+                    .define("enablePaleDrifterSpawns", true);
+    public static final ModConfigSpec.IntValue PALE_DRIFTER_SPAWN_CAP =
+            BUILDER.comment("Max pale drifters allowed near one player before spawning pauses.")
+                    .defineInRange("paleDrifterSpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_LANTERN_JELLY_SPAWNS =
+            BUILDER.comment("Allow lantern jellies to spawn in still water (the glow squid role).")
+                    .define("enableLanternJellySpawns", true);
+    public static final ModConfigSpec.IntValue LANTERN_JELLY_SPAWN_CAP =
+            BUILDER.comment("Max lantern jellies allowed near one player before spawning pauses.")
+                    .defineInRange("lanternJellySpawnCap", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_MARSH_MOTE_SPAWNS =
+            BUILDER.comment("Allow marsh motes to spawn on wet loaded ground (the marsh drift-life role).")
+                    .define("enableMarshMoteSpawns", true);
+    public static final ModConfigSpec.IntValue MARSH_MOTE_SPAWN_CAP =
+            BUILDER.comment("Max marsh motes allowed near one player before spawning pauses.")
+                    .defineInRange("marshMoteSpawnCap", 5, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_DROWNED_MINNOW_SPAWNS =
+            BUILDER.comment("Allow drowned minnows to spawn in still water (the fish-shoal role).")
+                    .define("enableDrownedMinnowSpawns", true);
+    public static final ModConfigSpec.IntValue DROWNED_MINNOW_SPAWN_CAP =
+            BUILDER.comment("Max drowned minnows allowed near one player before spawning pauses.")
+                    .defineInRange("drownedMinnowSpawnCap", 6, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_FROST_WISP_SPAWNS =
+            BUILDER.comment("Allow frost wisps to spawn in cold loaded terrain (the polar-mote role).")
+                    .define("enableFrostWispSpawns", true);
+    public static final ModConfigSpec.IntValue FROST_WISP_SPAWN_CAP =
+            BUILDER.comment("Max frost wisps allowed near one player before spawning pauses.")
+                    .defineInRange("frostWispSpawnCap", 4, 1, 32);
+
+    /** Lantern jelly: a faint light in the deep whose false comfort unsettles. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_LANTERN_JELLY =
+            BUILDER.comment("Enable the 'lantern_jelly' sanity source (its false comfort unsettles).")
+                    .define("enableSanityLanternJelly", true);
+    public static final ModConfigSpec.DoubleValue SANITY_LANTERN_JELLY_RATE =
+            BUILDER.comment("Sanity change per second per nearby lantern jelly (negative drains).")
+                    .defineInRange("sanityLanternJellyRate", -0.02, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_LANTERN_JELLY_RADIUS =
+            BUILDER.comment("Radius (blocks) in which lantern jellies contribute to the sanity drain.")
+                    .defineInRange("sanityLanternJellyRadius", 7, 1, 32);
+    public static final ModConfigSpec.IntValue SANITY_LANTERN_JELLY_MAX =
+            BUILDER.comment("Maximum lantern jellies counted toward the sanity drain at once.")
+                    .defineInRange("sanityLanternJellyMax", 2, 1, 32);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

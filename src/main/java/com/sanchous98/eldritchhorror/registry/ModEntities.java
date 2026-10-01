@@ -7,20 +7,26 @@ import com.sanchous98.eldritchhorror.entity.BogBear;
 import com.sanchous98.eldritchhorror.entity.BoneChoir;
 import com.sanchous98.eldritchhorror.entity.Burrowling;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
+import com.sanchous98.eldritchhorror.entity.CaveDrifter;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
 import com.sanchous98.eldritchhorror.entity.CultRaider;
 import com.sanchous98.eldritchhorror.entity.CultZealot;
 import com.sanchous98.eldritchhorror.entity.Deer;
+import com.sanchous98.eldritchhorror.entity.DrownedMinnow;
 import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
+import com.sanchous98.eldritchhorror.entity.FrostWisp;
 import com.sanchous98.eldritchhorror.entity.GreyFox;
 import com.sanchous98.eldritchhorror.entity.HearthCat;
 import com.sanchous98.eldritchhorror.entity.HillHound;
+import com.sanchous98.eldritchhorror.entity.LanternJelly;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
+import com.sanchous98.eldritchhorror.entity.MarshMote;
 import com.sanchous98.eldritchhorror.entity.MireSow;
 import com.sanchous98.eldritchhorror.entity.NightHag;
 import com.sanchous98.eldritchhorror.entity.PackBeast;
+import com.sanchous98.eldritchhorror.entity.PaleDrifter;
 import com.sanchous98.eldritchhorror.entity.PlagueCrone;
 import com.sanchous98.eldritchhorror.entity.RiftMite;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
@@ -421,6 +427,40 @@ public final class ModEntities {
             register("stone_sentinel", StoneSentinel::new, MobCategory.MISC, 1.4F, 2.7F, 10);
     public static final DeferredItem<SpawnEggItem> STONE_SENTINEL_SPAWN_EGG = egg("stone_sentinel", STONE_SENTINEL);
 
+    // --- Ambient (ambience) fauna (design/25 ambient role table) ------------------------------
+    // Non-combat drifters: peaceful (no notInPeaceful()), ambient/water_ambient where they fit the
+    // vanilla role, creature for the marsh flier. Sizes match the vanilla role each replaces.
+
+    /** Cave drifter: 0.5 x 0.9 (bat footprint), ambient flier. Family: ambient. */
+    public static final DeferredHolder<EntityType<?>, EntityType<CaveDrifter>> CAVE_DRIFTER =
+            register("cave_drifter", CaveDrifter::new, MobCategory.AMBIENT, 0.5F, 0.9F, 8);
+    public static final DeferredItem<SpawnEggItem> CAVE_DRIFTER_SPAWN_EGG = egg("cave_drifter", CAVE_DRIFTER);
+
+    /** Pale drifter: 0.8 x 0.8 (squid-ish), water ambient. Family: ambient. */
+    public static final DeferredHolder<EntityType<?>, EntityType<PaleDrifter>> PALE_DRIFTER =
+            register("pale_drifter", PaleDrifter::new, MobCategory.WATER_AMBIENT, 0.8F, 0.8F, 8);
+    public static final DeferredItem<SpawnEggItem> PALE_DRIFTER_SPAWN_EGG = egg("pale_drifter", PALE_DRIFTER);
+
+    /** Lantern jelly: 0.8 x 0.8 (glow-squid role), water ambient. Family: ambient. */
+    public static final DeferredHolder<EntityType<?>, EntityType<LanternJelly>> LANTERN_JELLY =
+            register("lantern_jelly", LanternJelly::new, MobCategory.WATER_AMBIENT, 0.8F, 0.8F, 8);
+    public static final DeferredItem<SpawnEggItem> LANTERN_JELLY_SPAWN_EGG = egg("lantern_jelly", LANTERN_JELLY);
+
+    /** Marsh mote: 0.5 x 0.5 (allay/tadpole scale), creature flier. Family: ambient. */
+    public static final DeferredHolder<EntityType<?>, EntityType<MarshMote>> MARSH_MOTE =
+            register("marsh_mote", MarshMote::new, MobCategory.CREATURE, 0.5F, 0.5F, 8);
+    public static final DeferredItem<SpawnEggItem> MARSH_MOTE_SPAWN_EGG = egg("marsh_mote", MARSH_MOTE);
+
+    /** Drowned minnow: 0.5 x 0.4 (fish footprint), water ambient. Family: ambient. */
+    public static final DeferredHolder<EntityType<?>, EntityType<DrownedMinnow>> DROWNED_MINNOW =
+            register("drowned_minnow", DrownedMinnow::new, MobCategory.WATER_AMBIENT, 0.5F, 0.4F, 8);
+    public static final DeferredItem<SpawnEggItem> DROWNED_MINNOW_SPAWN_EGG = egg("drowned_minnow", DROWNED_MINNOW);
+
+    /** Frost wisp: 0.4 x 0.4 (motey), ambient flier. Family: ambient. */
+    public static final DeferredHolder<EntityType<?>, EntityType<FrostWisp>> FROST_WISP =
+            register("frost_wisp", FrostWisp::new, MobCategory.AMBIENT, 0.4F, 0.4F, 8);
+    public static final DeferredItem<SpawnEggItem> FROST_WISP_SPAWN_EGG = egg("frost_wisp", FROST_WISP);
+
     private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> register(
             String id, net.minecraft.world.entity.EntityType.EntityFactory<T> factory, MobCategory category,
             float width, float height, int trackingRange) {
@@ -522,6 +562,12 @@ public final class ModEntities {
             event.accept(TIDE_GRAZER_SPAWN_EGG.get());
             event.accept(SPORE_BEE_SPAWN_EGG.get());
             event.accept(STONE_SENTINEL_SPAWN_EGG.get());
+            event.accept(CAVE_DRIFTER_SPAWN_EGG.get());
+            event.accept(PALE_DRIFTER_SPAWN_EGG.get());
+            event.accept(LANTERN_JELLY_SPAWN_EGG.get());
+            event.accept(MARSH_MOTE_SPAWN_EGG.get());
+            event.accept(DROWNED_MINNOW_SPAWN_EGG.get());
+            event.accept(FROST_WISP_SPAWN_EGG.get());
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
@@ -569,6 +615,12 @@ public final class ModEntities {
         event.put(TIDE_GRAZER.get(), TideGrazer.createAttributes().build());
         event.put(SPORE_BEE.get(), SporeBee.createAttributes().build());
         event.put(STONE_SENTINEL.get(), StoneSentinel.createAttributes().build());
+        event.put(CAVE_DRIFTER.get(), CaveDrifter.createAttributes().build());
+        event.put(PALE_DRIFTER.get(), PaleDrifter.createAttributes().build());
+        event.put(LANTERN_JELLY.get(), LanternJelly.createAttributes().build());
+        event.put(MARSH_MOTE.get(), MarshMote.createAttributes().build());
+        event.put(DROWNED_MINNOW.get(), DrownedMinnow.createAttributes().build());
+        event.put(FROST_WISP.get(), FrostWisp.createAttributes().build());
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());

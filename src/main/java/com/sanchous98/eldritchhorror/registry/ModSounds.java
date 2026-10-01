@@ -172,6 +172,15 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SPORE_BEE_AMBIENT = register("entity.spore_bee.ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_SENTINEL_AMBIENT = register("entity.stone_sentinel.ambient");
 
+    // --- Ambient (ambience) fauna (design/25 ambient role table) -------------------------------
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CAVE_DRIFTER_AMBIENT = register("entity.cave_drifter.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PALE_DRIFTER_AMBIENT = register("entity.pale_drifter.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LANTERN_JELLY_AMBIENT = register("entity.lantern_jelly.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MARSH_MOTE_AMBIENT = register("entity.marsh_mote.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DROWNED_MINNOW_AMBIENT = register("entity.drowned_minnow.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FROST_WISP_AMBIENT = register("entity.frost_wisp.ambient");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(EldritchHorror.id(name)));
     }

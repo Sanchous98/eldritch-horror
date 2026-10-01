@@ -457,5 +457,59 @@
         "type": "event"
       }
     ]
+  },
+  "entity.cave_drifter.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.cave_drifter.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.bat.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.pale_drifter.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.pale_drifter.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.squid.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.lantern_jelly.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.lantern_jelly.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.glow_squid.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.marsh_mote.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.marsh_mote.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.ambient_without_item",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.drowned_minnow.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.drowned_minnow.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cod.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.frost_wisp.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.frost_wisp.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.snow_golem.ambient",
+        "type": "event"
+      }
+    ]
   }
 }

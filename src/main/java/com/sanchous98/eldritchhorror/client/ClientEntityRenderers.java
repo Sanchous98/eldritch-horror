@@ -58,6 +58,12 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.TIDE_GRAZER.get(), PassiveRenderers.TideGrazerRenderer::new);
         event.registerEntityRenderer(ModEntities.SPORE_BEE.get(), PassiveRenderers.SporeBeeRenderer::new);
         event.registerEntityRenderer(ModEntities.STONE_SENTINEL.get(), PassiveRenderers.StoneSentinelRenderer::new);
+        event.registerEntityRenderer(ModEntities.CAVE_DRIFTER.get(), AmbientRenderers.CaveDrifterRenderer::new);
+        event.registerEntityRenderer(ModEntities.PALE_DRIFTER.get(), AmbientRenderers.PaleDrifterRenderer::new);
+        event.registerEntityRenderer(ModEntities.LANTERN_JELLY.get(), AmbientRenderers.LanternJellyRenderer::new);
+        event.registerEntityRenderer(ModEntities.MARSH_MOTE.get(), AmbientRenderers.MarshMoteRenderer::new);
+        event.registerEntityRenderer(ModEntities.DROWNED_MINNOW.get(), AmbientRenderers.DrownedMinnowRenderer::new);
+        event.registerEntityRenderer(ModEntities.FROST_WISP.get(), AmbientRenderers.FrostWispRenderer::new);
         event.registerEntityRenderer(ModEntities.CTHULHU.get(), CthulhuRenderer::new);
         event.registerEntityRenderer(ModEntities.DUNWICH_HORROR.get(), DunwichHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.SHUB_NIGGURATH.get(), ShubNiggurathRenderer::new);
