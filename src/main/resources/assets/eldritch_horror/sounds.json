@@ -1,0 +1,11 @@
+{
+  "entity.risen_husk.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.risen_husk.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.zombie.ambient",
+        "type": "event"
+      }
+    ]
+  }
+}

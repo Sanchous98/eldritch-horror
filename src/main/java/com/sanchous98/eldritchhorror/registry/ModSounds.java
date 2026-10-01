@@ -14,8 +14,9 @@ public final class ModSounds {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
             DeferredRegister.create(Registries.SOUND_EVENT, EldritchHorror.MODID);
 
-    // public static final DeferredHolder<SoundEvent, SoundEvent> WHISPER =
-    //         register("whisper");
+    /** The risen husk's vocalisation (ambient/hurt/death). Backed by a real ogg under sounds/. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RISEN_HUSK_AMBIENT =
+            register("entity.risen_husk.ambient");
 
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(EldritchHorror.id(name)));

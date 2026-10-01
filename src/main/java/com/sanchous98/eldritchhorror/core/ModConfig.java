@@ -48,6 +48,28 @@ public final class ModConfig {
             BUILDER.comment("Enable the 'morok' sanity source (polar drain past the charted edge).")
                     .define("enableSanityMorok", true);
 
+    // --- Bestiary sanity source (risen husk) ------------------------------------------------
+
+    /** Source: standing near one or more risen husks drains sanity (a presence, not a fight). */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_RISEN_HUSK =
+            BUILDER.comment("Enable the 'risen_husk' sanity source (nearby husks drain sanity).")
+                    .define("enableSanityRisenHusk", true);
+
+    /** Drain per counted husk per second; negative drains. */
+    public static final ModConfigSpec.DoubleValue SANITY_RISEN_HUSK_RATE =
+            BUILDER.comment("Sanity change per second per nearby risen husk (negative drains).")
+                    .defineInRange("sanityRisenHuskRate", -0.08, -10.0, 0.0);
+
+    /** Radius (blocks) within which a risen husk counts; loaded chunks only. */
+    public static final ModConfigSpec.IntValue SANITY_RISEN_HUSK_RADIUS =
+            BUILDER.comment("Radius (blocks) in which risen husks contribute to the sanity drain.")
+                    .defineInRange("sanityRisenHuskRadius", 8, 1, 32);
+
+    /** Most husks counted at once; keeps the drain bounded when a horde is present. */
+    public static final ModConfigSpec.IntValue SANITY_RISEN_HUSK_MAX =
+            BUILDER.comment("Maximum risen husks counted toward the sanity drain at once.")
+                    .defineInRange("sanityRisenHuskMax", 4, 1, 32);
+
     // --- Sanity stage cut-offs (fractions of max sanity) -----------------------------------
 
     /** Below this fraction → Uneasy. */
@@ -171,6 +193,37 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue CITY_POPULATION_PER_TICK =
             BUILDER.comment("Max villagers spawned per city per population pass (pass ~ every 5 s).")
                     .defineInRange("cityPopulationPerTick", 4, 0, 64);
+
+    // --- Bestiary spawns (risen husk) -------------------------------------------------------
+
+    /**
+     * Enable the bounded risen-husk spawner near players. Vanilla mobs are suppressed, so our
+     * creatures need their own pass; it spawns only in already-loaded chunks, in the dark or in
+     * tainted terrain, capped per pass and per player.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_RISEN_HUSK_SPAWNS =
+            BUILDER.comment("Allow risen husks to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableRisenHuskSpawns", true);
+
+    /** Spawner pass interval, in ticks. */
+    public static final ModConfigSpec.IntValue RISEN_HUSK_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between risen-husk spawn passes (minimum 20).")
+                    .defineInRange("risenHuskSpawnIntervalTicks", 200, 20, 24000);
+
+    /** Max husks spawned per player per pass. */
+    public static final ModConfigSpec.IntValue RISEN_HUSK_SPAWN_COUNT =
+            BUILDER.comment("Max risen husks spawned per player per pass.")
+                    .defineInRange("risenHuskSpawnCount", 2, 0, 16);
+
+    /** Radius (blocks) around a player in which spawns are attempted. */
+    public static final ModConfigSpec.IntValue RISEN_HUSK_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which husks may spawn.")
+                    .defineInRange("risenHuskSpawnRadius", 32, 8, 96);
+
+    /** Per-player cap: no spawn pass runs while a player already has this many husks nearby. */
+    public static final ModConfigSpec.IntValue RISEN_HUSK_SPAWN_CAP =
+            BUILDER.comment("Max risen husks allowed near one player before spawning pauses.")
+                    .defineInRange("risenHuskSpawnCap", 8, 1, 64);
 
     /** Real population per target villager; target = clamp(population / this, 8, 60). */
     public static final ModConfigSpec.IntValue CITY_POPULATION_DENSITY =
