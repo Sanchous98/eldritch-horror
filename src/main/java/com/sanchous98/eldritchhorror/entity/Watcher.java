@@ -30,11 +30,13 @@ import org.jspecify.annotations.Nullable;
  * distance, drains sanity, and has <b>no attack</b>: its whole existence is the attention
  * ({@code design/25-bestiary-and-entities.md}). Early on it cannot be killed — it is permanently
  * invulnerable until the config flag {@code watcherKillable} is set, and even then it takes no
- * melee loot. The design's "hides when directly watched" is deferred (documented as an
- * uncertainty), since it would need ray-casting not yet built.
+ * melee loot. The design's "hides when directly watched" is implemented by {@link StalkGoal}: it
+ * approaches only while unobserved and holds or slips away while the player's gaze is on it
+ * (config-gated by {@code watcherStalkEnabled}).
  *
- * <p>Behaviour composes from the shared goals library: {@link RangedFollowGoal} to hold distance and
- * {@link NearestAttackableTargetGoal} to acquire the player without a {@code MeleeAttackGoal}.
+ * <p>Behaviour composes from the shared goals library: {@link StalkGoal} (or {@link RangedFollowGoal}
+ * when stalking is off) to hold distance and {@link NearestAttackableTargetGoal} to acquire the
+ * player without a {@code MeleeAttackGoal}.
  */
 public final class Watcher extends Monster implements DreadAura {
 
@@ -53,7 +55,13 @@ public final class Watcher extends Monster implements DreadAura {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(4, new RangedFollowGoal(this, 1.0, 4.0F, 10.0F));
+        // It follows at a distance: with stalking on it only closes while the player is not looking;
+        // otherwise it holds arm's length (the original behaviour) as a safe fallback.
+        if (ModConfig.WATCHER_STALK_ENABLED.get()) {
+            this.goalSelector.addGoal(4, new StalkGoal(this, 1.0, 4.0F, 10.0F));
+        } else {
+            this.goalSelector.addGoal(4, new RangedFollowGoal(this, 1.0, 4.0F, 10.0F));
+        }
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 32.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 

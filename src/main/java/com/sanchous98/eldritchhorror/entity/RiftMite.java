@@ -51,6 +51,11 @@ public final class RiftMite extends Monster implements DreadAura {
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
+        if (ModConfig.BESTIARY_PACK_ALERT_ENABLED.get()) {
+            // A tainted chunk's mites answer as a swarm when one of them spots you.
+            this.goalSelector.addGoal(2, new PackAlertGoal<>(this, RiftMite.class, 14.0, 10.0F, 4));
+        }
+
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }

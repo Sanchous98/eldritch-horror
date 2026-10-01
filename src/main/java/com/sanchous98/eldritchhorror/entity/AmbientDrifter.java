@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.entity;
 
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -33,10 +34,13 @@ public abstract class AmbientDrifter extends PathfinderMob {
         this.xpReward = 0;
     }
 
-    /** Drift, watch, never chase: no panic, no target goals. */
+    /** Drift, watch, never chase: no target goals. Flee if badly wounded (config-gated). */
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        if (ModConfig.BESTIARY_RETREAT_ENABLED.get()) {
+            this.goalSelector.addGoal(1, new RetreatWhenHurtGoal(this, 1.3, 0.5F));
+        }
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.6));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));

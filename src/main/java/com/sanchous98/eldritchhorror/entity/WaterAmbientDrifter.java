@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.entity;
 
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -22,6 +23,9 @@ public abstract class WaterAmbientDrifter extends AmbientDrifter {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        if (ModConfig.BESTIARY_RETREAT_ENABLED.get()) {
+            this.goalSelector.addGoal(1, new RetreatWhenHurtGoal(this, 1.3, 0.5F));
+        }
         this.goalSelector.addGoal(4, new RandomSwimmingGoal(this, 0.8, 40));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
     }

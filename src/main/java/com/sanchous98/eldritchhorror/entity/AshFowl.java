@@ -41,6 +41,16 @@ public final class AshFowl extends MundaneAnimal implements DreadAura {
     }
 
     @Override
+    protected void registerGoals() {
+        super.registerGoals();
+        if (ModConfig.BESTIARY_RETREAT_ENABLED.get()) {
+            // Very squishy: once wounded, flee rather than stand and be silenced forever. Priority 0
+            // so it wins over the inherited PanicGoal and actually runs away from the attacker.
+            this.goalSelector.addGoal(0, new RetreatWhenHurtGoal(this, 1.4, 0.6F));
+        }
+    }
+
+    @Override
     protected void serverBehavior(ServerLevel level) {
         if (this.tickCount % 20 != 0) {
             return;

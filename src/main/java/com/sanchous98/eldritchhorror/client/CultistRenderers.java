@@ -46,6 +46,9 @@ public final class CultistRenderers {
         public void extractRenderState(CultZealot entity, IllagerRenderState state, float partialTicks) {
             super.extractRenderState(entity, state, partialTicks);
             state.isAggressive = entity.isAggressive();
+            state.armPose = entity.isAggressive()
+                    ? net.minecraft.world.entity.monster.illager.AbstractIllager.IllagerArmPose.ATTACKING
+                    : net.minecraft.world.entity.monster.illager.AbstractIllager.IllagerArmPose.NEUTRAL;
         }
 
         @Override
@@ -72,6 +75,9 @@ public final class CultistRenderers {
         public void extractRenderState(CultRaider entity, IllagerRenderState state, float partialTicks) {
             super.extractRenderState(entity, state, partialTicks);
             state.isAggressive = entity.isAggressive();
+            state.armPose = entity.isAggressive()
+                    ? net.minecraft.world.entity.monster.illager.AbstractIllager.IllagerArmPose.ATTACKING
+                    : net.minecraft.world.entity.monster.illager.AbstractIllager.IllagerArmPose.NEUTRAL;
         }
 
         @Override

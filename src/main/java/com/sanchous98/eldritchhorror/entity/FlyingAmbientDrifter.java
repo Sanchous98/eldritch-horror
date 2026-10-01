@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.entity;
 
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -30,6 +31,9 @@ public abstract class FlyingAmbientDrifter extends AmbientDrifter {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        if (ModConfig.BESTIARY_RETREAT_ENABLED.get()) {
+            this.goalSelector.addGoal(1, new RetreatWhenHurtGoal(this, 1.3, 0.5F));
+        }
         this.goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 0.8));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));

@@ -128,6 +128,12 @@ public final class Cthulhu extends AncientOne {
         return 2.5F;
     }
 
+    /** Rarer than the default: a slow, vast presence, not a chatterbox. */
+    @Override
+    public int getAmbientSoundInterval() {
+        return 160;
+    }
+
     @Override
     protected void playStepSound(BlockPos pos, BlockState blockState) {
         this.playSound(SoundEvents.ELDER_GUARDIAN_FLOP, 0.25F, 0.6F);

@@ -1493,6 +1493,30 @@ public final class ModConfig {
             BUILDER.comment("Maximum lantern jellies counted toward the sanity drain at once.")
                     .defineInRange("sanityLanternJellyMax", 2, 1, 32);
 
+    // --- Bestiary polish (step 3): goals / cadence ----------------------------------------------
+    // Every key below defaults to ON, so the polish ships active; turn one off to fall back to the
+    // previous standing behaviour for that single feature.
+
+    /** Watcher: approach only while unobserved, hold/withdraw while the player looks at it. */
+    public static final ModConfigSpec.BooleanValue WATCHER_STALK_ENABLED =
+            BUILDER.comment("Watcher stalks (approaches unseen, hides when watched); off = old follow-at-range.")
+                    .define("watcherStalkEnabled", true);
+
+    /** Veil stalker: a short leap at the target in addition to its wall climb. */
+    public static final ModConfigSpec.BooleanValue VEIL_STALKER_LEAP_ENABLED =
+            BUILDER.comment("Allow the veil stalker to leap at its target (ambush) in addition to climbing.")
+                    .define("enableVeilStalkerLeap", true);
+
+    /** Gregarious mobs (lesser swarm, rift mite): one that spots a player alerts nearby kin. */
+    public static final ModConfigSpec.BooleanValue BESTIARY_PACK_ALERT_ENABLED =
+            BUILDER.comment("Gregarious lesser mobs alert nearby kin when one of them spots a player.")
+                    .define("enableBestiaryPackAlert", true);
+
+    /** Squishy mobs (ash fowl, ambient drifters) flee once wounded below a health fraction. */
+    public static final ModConfigSpec.BooleanValue BESTIARY_RETREAT_ENABLED =
+            BUILDER.comment("Squishy mobs flee when hurt and below a health fraction rather than stand.")
+                    .define("enableBestiaryRetreat", true);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

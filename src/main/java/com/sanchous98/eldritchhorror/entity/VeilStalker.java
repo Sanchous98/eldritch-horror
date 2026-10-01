@@ -16,6 +16,7 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -38,8 +39,8 @@ import org.jspecify.annotations.Nullable;
  * no vanilla spider behaviour comes with it) and waits above the line of sight. Its hook is a small,
  * quiet sanity whisper on the shared {@link DreadAura} framework.
  *
- * <p>Base {@link Monster}. The leap-at-target goal is deliberately omitted: the whisper is the
- * threat, and a plain melee rush reads better as an ambush than a jump.
+ * <p>Base {@link Monster}. Its ambush is a leap at the target ({@link LeapAtTargetGoal}, config-gated
+ * by {@code enableVeilStalkerLeap}) layered over the melee rush and the wall climb.
  */
 public final class VeilStalker extends Monster implements DreadAura {
 
@@ -55,6 +56,10 @@ public final class VeilStalker extends Monster implements DreadAura {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        if (ModConfig.VEIL_STALKER_LEAP_ENABLED.get()) {
+            // Ambush: a short leap from concealment, on top of the wall climb.
+            this.goalSelector.addGoal(3, new LeapAtTargetGoal(this, 0.42F));
+        }
         this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.1, false));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.9));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));

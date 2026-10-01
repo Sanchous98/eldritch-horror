@@ -131,6 +131,12 @@ public final class ShubNiggurath extends AncientOne {
         return 4.0F;
     }
 
+    /** Rarer than the default: a biome presence, not a resident that chatters. */
+    @Override
+    public int getAmbientSoundInterval() {
+        return 200;
+    }
+
     @Override
     protected void playStepSound(BlockPos pos, BlockState blockState) {
         this.playSound(SoundEvents.RAVAGER_STEP, 0.5F, 0.4F);
