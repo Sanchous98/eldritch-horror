@@ -1,13 +1,17 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.BlightPod;
 import com.sanchous98.eldritchhorror.entity.BoneChoir;
+import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
 import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
+import com.sanchous98.eldritchhorror.entity.ShoggothMass;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
+import com.sanchous98.eldritchhorror.entity.StarSpawn;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
 import com.sanchous98.eldritchhorror.entity.Watcher;
@@ -136,6 +140,58 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("veil_stalker_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(VEIL_STALKER.get())));
 
+    /** Blight pod: 0.6 x 1.7, hostile corruption vector (creeper footprint, a little shorter). */
+    public static final DeferredHolder<EntityType<?>, EntityType<BlightPod>> BLIGHT_POD =
+            ENTITY_TYPES.register("blight_pod", () ->
+                    EntityType.Builder.<BlightPod>of(BlightPod::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.7F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("blight_pod"))));
+
+    public static final DeferredItem<SpawnEggItem> BLIGHT_POD_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("blight_pod_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(BLIGHT_POD.get())));
+
+    /** Byakhee: 0.9 x 0.5, hostile flier (matching the phantom's low, wide footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Byakhee>> BYAKHEE =
+            ENTITY_TYPES.register("byakhee", () ->
+                    EntityType.Builder.<Byakhee>of(Byakhee::new, MobCategory.MONSTER)
+                            .sized(0.9F, 0.5F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("byakhee"))));
+
+    public static final DeferredItem<SpawnEggItem> BYAKHEE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("byakhee_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(BYAKHEE.get())));
+
+    /** Star-spawn: 0.6 x 2.9, tall hostile minion (the Watcher's silhouette). */
+    public static final DeferredHolder<EntityType<?>, EntityType<StarSpawn>> STAR_SPAWN =
+            ENTITY_TYPES.register("star_spawn", () ->
+                    EntityType.Builder.<StarSpawn>of(StarSpawn::new, MobCategory.MONSTER)
+                            .sized(0.6F, 2.9F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("star_spawn"))));
+
+    public static final DeferredItem<SpawnEggItem> STAR_SPAWN_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("star_spawn_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(STAR_SPAWN.get())));
+
+    /** Shoggoth mass: 1.6 x 1.6, hostile slow elite (a large amorphous blob). */
+    public static final DeferredHolder<EntityType<?>, EntityType<ShoggothMass>> SHOGGOTH_MASS =
+            ENTITY_TYPES.register("shoggoth_mass", () ->
+                    EntityType.Builder.<ShoggothMass>of(ShoggothMass::new, MobCategory.MONSTER)
+                            .sized(1.6F, 1.6F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("shoggoth_mass"))));
+
+    public static final DeferredItem<SpawnEggItem> SHOGGOTH_MASS_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("shoggoth_mass_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(SHOGGOTH_MASS.get())));
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
@@ -193,6 +249,10 @@ public final class ModEntities {
             event.accept(BONE_CHOIR_SPAWN_EGG.get());
             event.accept(DROWNED_THRALL_SPAWN_EGG.get());
             event.accept(VEIL_STALKER_SPAWN_EGG.get());
+            event.accept(BLIGHT_POD_SPAWN_EGG.get());
+            event.accept(BYAKHEE_SPAWN_EGG.get());
+            event.accept(STAR_SPAWN_SPAWN_EGG.get());
+            event.accept(SHOGGOTH_MASS_SPAWN_EGG.get());
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
@@ -212,6 +272,10 @@ public final class ModEntities {
         event.put(BONE_CHOIR.get(), BoneChoir.createAttributes().build());
         event.put(DROWNED_THRALL.get(), DrownedThrall.createAttributes().build());
         event.put(VEIL_STALKER.get(), VeilStalker.createAttributes().build());
+        event.put(BLIGHT_POD.get(), BlightPod.createAttributes().build());
+        event.put(BYAKHEE.get(), Byakhee.createAttributes().build());
+        event.put(STAR_SPAWN.get(), StarSpawn.createAttributes().build());
+        event.put(SHOGGOTH_MASS.get(), ShoggothMass.createAttributes().build());
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());

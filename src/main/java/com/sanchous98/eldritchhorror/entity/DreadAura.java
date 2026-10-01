@@ -43,4 +43,14 @@ public interface DreadAura {
 
     /** Most auras of this type counted for one player at once, so a horde stays bounded. */
     int auraMaxStack();
+
+    /**
+     * Whether the aura only applies when the mob can actually see the player. The default is
+     * proximity alone (the husk/choir/swarm shape); the star-spawn overrides this to true so its
+     * heavy drain is a <b>line-of-sight</b> threat you can break by breaking sight
+     * ({@code design/25-bestiary-and-entities.md}, "witnessing/line-of-sight is the primary drain").
+     */
+    default boolean auraRequiresLineOfSight() {
+        return false;
+    }
 }

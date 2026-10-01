@@ -36,6 +36,9 @@ public final class BestiarySupport {
     /** Candidate attempts per desired spawn; unsuitable columns are simply retried. */
     public static final int PROBE_FACTOR = 16;
 
+    /** How far above the terrain surface a flying spawn may appear. */
+    public static final int AIR_CLEARANCE = 4;
+
     private BestiarySupport() {
     }
 
@@ -43,6 +46,12 @@ public final class BestiarySupport {
     @FunctionalInterface
     public interface SpawnGate {
         boolean allows(ServerLevel level, BlockPos spot, boolean dark, boolean tainted);
+    }
+
+    /** Air-spawn gate for flying mobs: the spot is above the terrain, so only darkness applies. */
+    @FunctionalInterface
+    public interface AirGate {
+        boolean allows(ServerLevel level, BlockPos spot, boolean dark);
     }
 
     /**
@@ -127,6 +136,58 @@ public final class BestiarySupport {
     }
 
     /**
+     * Tops {@code player} up towards {@code cap} with up to {@code perPass} <b>flying</b> mobs of
+     * {@code type}, placed in air above the terrain. The shared loop cannot be reused directly
+     * because it only places mobs on the ground, so this is the one extra shared placement helper
+     * (no second scan pattern is duplicated per flier). Same contract as {@link #topUp}:
+     * server-authoritative, loaded chunks only, deterministic sampling, and it never force-loads.
+     * {@code minY} keeps a flier above the deep dark; {@code airGate} receives whether the spot is
+     * dark (the only context an air spot has).
+     */
+    public static <T extends Mob> void topUpAir(ServerLevel level, ServerChunkCache cache, ServerPlayer player,
+                                                EntityType<T> type, Class<T> typeClass,
+                                                int radius, int cap, int perPass, int minY, int tick,
+                                                AirGate airGate) {
+        if (cap <= 0 || perPass <= 0) {
+            return;
+        }
+        BlockPos origin = player.blockPosition();
+        AABB box = player.getBoundingBox().inflate(radius);
+        int present = level.getEntitiesOfClass(typeClass, box, mob -> mob.isAlive()).size();
+        int budget = Math.min(perPass, cap - present);
+        if (budget <= 0) {
+            return;
+        }
+        RandomSource random = RandomSource.create(
+                player.getUUID().getMostSignificantBits() ^ tick * 0x9E3779B97F4A7C15L);
+        int spawned = 0;
+        int attempts = budget * PROBE_FACTOR;
+        for (int i = 0; i < attempts && spawned < budget; i++) {
+            int x = origin.getX() + random.nextInt(radius * 2 + 1) - radius;
+            int z = origin.getZ() + random.nextInt(radius * 2 + 1) - radius;
+            if (cache.getChunkNow(x >> 4, z >> 4) == null) {
+                continue; // never load/generate a chunk just to spawn
+            }
+            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) + AIR_CLEARANCE;
+            BlockPos spot = new BlockPos(x, y, z);
+            if (y < minY || !level.isLoaded(spot)
+                    || !level.getBlockState(spot).isAir()
+                    || !level.getBlockState(spot.above()).isAir()) {
+                continue;
+            }
+            if (!airGate.allows(level, spot, Monster.isDarkEnoughToSpawn(level, spot, random))) {
+                continue;
+            }
+            T mob = type.spawn(level, spot, EntitySpawnReason.EVENT);
+            if (mob == null) {
+                continue;
+            }
+            mob.setPersistenceRequired();
+            spawned++;
+        }
+    }
+
+    /**
      * Whether any water sits within a few blocks of {@code spot} (all three axes). Used as a spawn
      * gate so a coastal mob appears at the tide line and not inland. Loaded chunks only.
      */
@@ -158,7 +219,8 @@ public final class BestiarySupport {
         AABB box = player.getBoundingBox().inflate(queryRadius);
         List<T> auras = player.level().getEntitiesOfClass(type, box,
                 aura -> aura.isAlive() && aura.isAuraActive()
-                        && aura.distanceToSqr(player) <= aura.auraRadius() * aura.auraRadius());
+                        && aura.distanceToSqr(player) <= aura.auraRadius() * aura.auraRadius()
+                        && (!aura.auraRequiresLineOfSight() || aura.hasLineOfSight(player)));
         if (auras.isEmpty()) {
             return;
         }

@@ -606,6 +606,189 @@ public final class ModConfig {
             BUILDER.comment("Sanity change per second while standing still near Shub-Niggurath.")
                     .defineInRange("sanityShubNiggurathStillRate", -0.12, -10.0, 0.0);
 
+    // --- Bestiary: blight_pod (creeper-role corruption vector) --------------------------------
+
+    /** The blight pod's spore aura: standing near one taints you slowly. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_BLIGHT_POD =
+            BUILDER.comment("Enable the 'blight_pod' corruption vector (nearby pods taint).")
+                    .define("enableCorruptionBlightPod", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_BLIGHT_POD_RATE =
+            BUILDER.comment("Corruption per second per nearby blight pod (positive taints).")
+                    .defineInRange("corruptionBlightPodRate", 0.05, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_BLIGHT_POD_RADIUS =
+            BUILDER.comment("Radius (blocks) in which blight pods contribute corruption.")
+                    .defineInRange("corruptionBlightPodRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_BLIGHT_POD_MAX =
+            BUILDER.comment("Maximum blight pods counted toward the corruption vector at once.")
+                    .defineInRange("corruptionBlightPodMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_BLIGHT_POD_SPAWNS =
+            BUILDER.comment("Allow blight pods to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableBlightPodSpawns", true);
+
+    public static final ModConfigSpec.IntValue BLIGHT_POD_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between blight-pod spawn passes (minimum 20).")
+                    .defineInRange("blightPodSpawnIntervalTicks", 260, 20, 24000);
+
+    public static final ModConfigSpec.IntValue BLIGHT_POD_SPAWN_COUNT =
+            BUILDER.comment("Max blight pods spawned per player per pass.")
+                    .defineInRange("blightPodSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue BLIGHT_POD_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which blight pods may spawn.")
+                    .defineInRange("blightPodSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue BLIGHT_POD_SPAWN_CAP =
+            BUILDER.comment("Max blight pods allowed near one player before spawning pauses.")
+                    .defineInRange("blightPodSpawnCap", 4, 1, 64);
+
+    /** Taint added to each loaded chunk in the burst radius when a blight pod dies. */
+    public static final ModConfigSpec.DoubleValue BLIGHT_POD_BURST_TAINT =
+            BUILDER.comment("Taint added per chunk in a blight pod's death burst (bounded).")
+                    .defineInRange("blightPodBurstTaint", 0.12, 0.0, 1.0);
+
+    /** Chunk half-width of the blight pod's death burst (1 = a 3x3 chunk patch). */
+    public static final ModConfigSpec.IntValue BLIGHT_POD_BURST_RADIUS =
+            BUILDER.comment("Chunk radius of a blight pod's death burst (1 = 3x3 chunks).")
+                    .defineInRange("blightPodBurstRadius", 1, 0, 4);
+
+    /** Hard cap on blocks placed per burst, so the terrain edit stays tiny. */
+    public static final ModConfigSpec.IntValue BLIGHT_POD_BURST_MAX_BLOCKS =
+            BUILDER.comment("Maximum sculk/tainted-soil blocks a single blight pod burst may place.")
+                    .defineInRange("blightPodBurstMaxBlocks", 6, 0, 24);
+
+    // --- Bestiary: byakhee (flying ambusher / phantom-role) -----------------------------------
+
+    /** The byakhee's dive: approaching it drains sanity. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_BYAKHEE =
+            BUILDER.comment("Enable the 'byakhee' sanity source (a nearby flier drains sanity).")
+                    .define("enableSanityByakhee", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_BYAKHEE_RATE =
+            BUILDER.comment("Sanity change per second per nearby byakhee (negative drains).")
+                    .defineInRange("sanityByakheeRate", -0.12, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_BYAKHEE_RADIUS =
+            BUILDER.comment("Radius (blocks) in which byakhees contribute to the sanity drain.")
+                    .defineInRange("sanityByakheeRadius", 12, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_BYAKHEE_MAX =
+            BUILDER.comment("Maximum byakhees counted toward the sanity drain at once.")
+                    .defineInRange("sanityByakheeMax", 2, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_BYAKHEE_SPAWNS =
+            BUILDER.comment("Allow byakhees to spawn above players at night (dark sky).")
+                    .define("enableByakheeSpawns", true);
+
+    public static final ModConfigSpec.IntValue BYAKHEE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between byakhee spawn passes (minimum 20).")
+                    .defineInRange("byakheeSpawnIntervalTicks", 600, 20, 24000);
+
+    public static final ModConfigSpec.IntValue BYAKHEE_SPAWN_COUNT =
+            BUILDER.comment("Max byakhees spawned per player per pass.")
+                    .defineInRange("byakheeSpawnCount", 2, 0, 8);
+
+    public static final ModConfigSpec.IntValue BYAKHEE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which byakhees may appear.")
+                    .defineInRange("byakheeSpawnRadius", 40, 8, 128);
+
+    public static final ModConfigSpec.IntValue BYAKHEE_SPAWN_CAP =
+            BUILDER.comment("Max byakhees allowed near one player before spawning pauses.")
+                    .defineInRange("byakheeSpawnCap", 3, 1, 16);
+
+    /** Lowest Y a byakhee may spawn at; keeps them above the deep dark below the surface. */
+    public static final ModConfigSpec.IntValue BYAKHEE_SPAWN_MIN_Y =
+            BUILDER.comment("Minimum Y at which a byakhee may spawn (fliers stay high).")
+                    .defineInRange("byakheeSpawnMinY", 50, -64, 320);
+
+    // --- Bestiary: star_spawn (minion, sound-hunter, resists mundane weapons) -----------------
+
+    /** The star-spawn's heavy line-of-sight drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_STAR_SPAWN =
+            BUILDER.comment("Enable the 'star_spawn' sanity source (in-sight drain, heavy).")
+                    .define("enableSanityStarSpawn", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_STAR_SPAWN_RATE =
+            BUILDER.comment("Sanity change per second per visible star-spawn (negative drains).")
+                    .defineInRange("sanityStarSpawnRate", -0.45, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_STAR_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) in which star-spawns contribute to the sanity drain.")
+                    .defineInRange("sanityStarSpawnRadius", 24, 1, 64);
+
+    public static final ModConfigSpec.IntValue SANITY_STAR_SPAWN_MAX =
+            BUILDER.comment("Maximum star-spawns counted toward the sanity drain at once.")
+                    .defineInRange("sanityStarSpawnMax", 1, 1, 8);
+
+    /** Whether the star-spawn resists mundane weapons (only ward-breaker items wound it). */
+    public static final ModConfigSpec.BooleanValue STAR_SPAWN_RESISTS_MUNDANE =
+            BUILDER.comment("Star-spawn resists mundane weapons; only #eldritch_horror:ward_breakers wound it.")
+                    .define("starSpawnResistsMundane", true);
+
+    /** Ambient spawns are OFF by default: star-spawns are summoned by rites, not wandered into. */
+    public static final ModConfigSpec.BooleanValue ENABLE_STAR_SPAWN_SPAWNS =
+            BUILDER.comment("Allow ambient star-spawn spawns (default OFF; rites/eggs still work).")
+                    .define("enableStarSpawnSpawns", false);
+
+    public static final ModConfigSpec.IntValue STAR_SPAWN_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between ambient star-spawn passes (minimum 20).")
+                    .defineInRange("starSpawnSpawnIntervalTicks", 2400, 20, 72000);
+
+    public static final ModConfigSpec.IntValue STAR_SPAWN_SPAWN_COUNT =
+            BUILDER.comment("Max star-spawns spawned per player per pass.")
+                    .defineInRange("starSpawnSpawnCount", 1, 0, 4);
+
+    public static final ModConfigSpec.IntValue STAR_SPAWN_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which star-spawns may appear.")
+                    .defineInRange("starSpawnSpawnRadius", 40, 8, 128);
+
+    public static final ModConfigSpec.IntValue STAR_SPAWN_SPAWN_CAP =
+            BUILDER.comment("Max star-spawns allowed near one player before spawning pauses.")
+                    .defineInRange("starSpawnSpawnCap", 2, 1, 8);
+
+    // --- Bestiary: shoggoth_mass (minion, slow elite, wide corruption aura) -------------------
+
+    /** The shoggoth mass's wide corruption aura. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SHOGGOTH =
+            BUILDER.comment("Enable the 'shoggoth_mass' corruption aura (a wide, slow taint).")
+                    .define("enableCorruptionShoggoth", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_SHOGGOTH_RATE =
+            BUILDER.comment("Corruption per second per nearby shoggoth mass (positive taints).")
+                    .defineInRange("corruptionShoggothRate", 0.10, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_SHOGGOTH_RADIUS =
+            BUILDER.comment("Radius (blocks) of the shoggoth mass's corruption aura; wide by design.")
+                    .defineInRange("corruptionShoggothRadius", 20, 1, 64);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_SHOGGOTH_MAX =
+            BUILDER.comment("Maximum shoggoth masses counted toward the corruption aura at once.")
+                    .defineInRange("corruptionShoggothMax", 1, 1, 8);
+
+    /** Ambient spawns are OFF by default: shoggoth masses are summoned by rites/events. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SHOGGOTH_SPAWNS =
+            BUILDER.comment("Allow ambient shoggoth-mass spawns (default OFF; rites/eggs still work).")
+                    .define("enableShoggothSpawns", false);
+
+    public static final ModConfigSpec.IntValue SHOGGOTH_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between ambient shoggoth-mass passes (minimum 20).")
+                    .defineInRange("shoggothSpawnIntervalTicks", 2400, 20, 72000);
+
+    public static final ModConfigSpec.IntValue SHOGGOTH_SPAWN_COUNT =
+            BUILDER.comment("Max shoggoth masses spawned per player per pass.")
+                    .defineInRange("shoggothSpawnCount", 1, 0, 4);
+
+    public static final ModConfigSpec.IntValue SHOGGOTH_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which shoggoth masses may appear.")
+                    .defineInRange("shoggothSpawnRadius", 40, 8, 128);
+
+    public static final ModConfigSpec.IntValue SHOGGOTH_SPAWN_CAP =
+            BUILDER.comment("Max shoggoth masses allowed near one player before spawning pauses.")
+                    .defineInRange("shoggothSpawnCap", 1, 1, 4);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

@@ -160,5 +160,68 @@
         "type": "event"
       }
     ]
+  },
+  "entity.blight_pod.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.blight_pod.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creeper.primed",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.blight_pod.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.blight_pod.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.creeper.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.byakhee.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.byakhee.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.star_spawn.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.star_spawn.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.star_spawn.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.star_spawn.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shoggoth.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.shoggoth.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.slime.squish",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.shoggoth.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.shoggoth.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.slime.death",
+        "type": "event"
+      }
+    ]
   }
 }

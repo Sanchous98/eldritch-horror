@@ -50,6 +50,31 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> VEIL_STALKER_AMBIENT =
             register("entity.veil_stalker.ambient");
 
+    /** The blight pod's wet spore-swell (ambient/hurt); its death is the burst. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> BLIGHT_POD_AMBIENT =
+            register("entity.blight_pod.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> BLIGHT_POD_DEATH =
+            register("entity.blight_pod.death");
+
+    /** The byakhee's leathery cry (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> BYAKHEE_AMBIENT =
+            register("entity.byakhee.ambient");
+
+    /** The star-spawn's wrong chime (ambient/hurt); its death is the fall of a star. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAR_SPAWN_AMBIENT =
+            register("entity.star_spawn.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAR_SPAWN_DEATH =
+            register("entity.star_spawn.death");
+
+    /** The shoggoth mass's bubbling (ambient/hurt); its death is a collapse. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHOGGOTH_AMBIENT =
+            register("entity.shoggoth.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHOGGOTH_DEATH =
+            register("entity.shoggoth.death");
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu's dream-leak vocalisation (ambient). */

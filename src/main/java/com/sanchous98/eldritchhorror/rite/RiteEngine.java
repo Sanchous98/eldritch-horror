@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.rite;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,7 +17,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
@@ -53,13 +53,13 @@ public final class RiteEngine {
     /** Block radius searched when removing rift markers (design/08: a rift within 8 blocks). */
     private static final int RIFT_REMOVE_RADIUS = 8;
 
-    /** Lesser summon: 3 drowned, refused past {@value #LESSER_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
-    private static final EntityType<?> LESSER_TYPE = EntityTypes.DROWNED;
+    /** Lesser summon: 3 lesser swarm, refused past {@value #LESSER_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
+    private static final EntityType<?> LESSER_TYPE = ModEntities.LESSER_SWARM.get();
     private static final int LESSER_COUNT = 3;
     private static final int LESSER_CAP = 8;
-    /** Star-spawn summon: 2 endermen, refused past {@value #STAR_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
-    private static final EntityType<?> STAR_TYPE = EntityTypes.ENDERMAN;
-    private static final int STAR_COUNT = 2;
+    /** Star-spawn summon: 1 star-spawn, refused past {@value #STAR_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
+    private static final EntityType<?> STAR_TYPE = ModEntities.STAR_SPAWN.get();
+    private static final int STAR_COUNT = 1;
     private static final int STAR_CAP = 4;
     private static final int SPAWN_RADIUS = 6;
     private static final int SPAWN_CAP_RADIUS = 16;
