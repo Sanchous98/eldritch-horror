@@ -38,6 +38,18 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> WATCHER_AMBIENT =
             register("entity.watcher.ambient");
 
+    /** The bone choir's rattling hymn (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_CHOIR_AMBIENT =
+            register("entity.bone_choir.ambient");
+
+    /** The drowned thrall's sodden gurgle (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> DROWNED_THRALL_AMBIENT =
+            register("entity.drowned_thrall.ambient");
+
+    /** The veil stalker's whisper from above (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> VEIL_STALKER_AMBIENT =
+            register("entity.veil_stalker.ambient");
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu's dream-leak vocalisation (ambient). */

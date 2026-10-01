@@ -37,6 +37,9 @@ public final class DreadAuraTicker {
             BestiarySupport.tickAura(player, TaintedFauna.class, ModConfig.CORRUPTION_TAINTED_FAUNA_RADIUS.get());
             BestiarySupport.tickAura(player, LesserSwarm.class, ModConfig.SANITY_LESSER_SWARM_RADIUS.get());
             BestiarySupport.tickAura(player, Watcher.class, ModConfig.SANITY_WATCHER_RADIUS.get());
+            BestiarySupport.tickAura(player, BoneChoir.class, ModConfig.SANITY_BONE_CHOIR_RADIUS.get());
+            BestiarySupport.tickAura(player, VeilStalker.class, ModConfig.SANITY_VEIL_STALKER_RADIUS.get());
+            BestiarySupport.tickAura(player, DrownedThrall.class, ModConfig.CORRUPTION_DROWNED_THRALL_RADIUS.get());
             // Ancient Ones with a single-axis shared aura. Shub-Niggurath is deliberately absent:
             // it runs its own two-axis pulse (corruption by motion, sanity at rest) in its own tick.
             BestiarySupport.tickAura(player, Cthulhu.class, ModConfig.SANITY_CTHULHU_RADIUS.get());

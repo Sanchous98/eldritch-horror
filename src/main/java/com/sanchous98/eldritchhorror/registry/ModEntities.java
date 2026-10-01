@@ -1,12 +1,15 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.BoneChoir;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
+import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
+import com.sanchous98.eldritchhorror.entity.VeilStalker;
 import com.sanchous98.eldritchhorror.entity.Watcher;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -94,6 +97,45 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("watcher_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(WATCHER.get())));
 
+    /** Bone choir: 0.6 x 1.9, hostile, tracking range 8 (matching vanilla skeleton). */
+    public static final DeferredHolder<EntityType<?>, EntityType<BoneChoir>> BONE_CHOIR =
+            ENTITY_TYPES.register("bone_choir", () ->
+                    EntityType.Builder.<BoneChoir>of(BoneChoir::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.9F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("bone_choir"))));
+
+    public static final DeferredItem<SpawnEggItem> BONE_CHOIR_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("bone_choir_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(BONE_CHOIR.get())));
+
+    /** Drowned thrall: 0.6 x 1.95, hostile coastal mob (matching vanilla drowned). */
+    public static final DeferredHolder<EntityType<?>, EntityType<DrownedThrall>> DROWNED_THRALL =
+            ENTITY_TYPES.register("drowned_thrall", () ->
+                    EntityType.Builder.<DrownedThrall>of(DrownedThrall::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("drowned_thrall"))));
+
+    public static final DeferredItem<SpawnEggItem> DROWNED_THRALL_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("drowned_thrall_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(DROWNED_THRALL.get())));
+
+    /** Veil stalker: 1.4 x 0.9, hostile ambusher (matching vanilla spider's footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<VeilStalker>> VEIL_STALKER =
+            ENTITY_TYPES.register("veil_stalker", () ->
+                    EntityType.Builder.<VeilStalker>of(VeilStalker::new, MobCategory.MONSTER)
+                            .sized(1.4F, 0.9F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("veil_stalker"))));
+
+    public static final DeferredItem<SpawnEggItem> VEIL_STALKER_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("veil_stalker_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(VEIL_STALKER.get())));
+
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
     /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
@@ -148,6 +190,9 @@ public final class ModEntities {
             event.accept(TAINTED_FAUNA_SPAWN_EGG.get());
             event.accept(LESSER_SWARM_SPAWN_EGG.get());
             event.accept(WATCHER_SPAWN_EGG.get());
+            event.accept(BONE_CHOIR_SPAWN_EGG.get());
+            event.accept(DROWNED_THRALL_SPAWN_EGG.get());
+            event.accept(VEIL_STALKER_SPAWN_EGG.get());
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
@@ -164,6 +209,9 @@ public final class ModEntities {
         event.put(TAINTED_FAUNA.get(), TaintedFauna.createAttributes().build());
         event.put(LESSER_SWARM.get(), LesserSwarm.createAttributes().build());
         event.put(WATCHER.get(), Watcher.createAttributes().build());
+        event.put(BONE_CHOIR.get(), BoneChoir.createAttributes().build());
+        event.put(DROWNED_THRALL.get(), DrownedThrall.createAttributes().build());
+        event.put(VEIL_STALKER.get(), VeilStalker.createAttributes().build());
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());

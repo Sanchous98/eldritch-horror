@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -123,6 +124,25 @@ public final class BestiarySupport {
             }
         }
         return null;
+    }
+
+    /**
+     * Whether any water sits within a few blocks of {@code spot} (all three axes). Used as a spawn
+     * gate so a coastal mob appears at the tide line and not inland. Loaded chunks only.
+     */
+    public static boolean nearWater(ServerLevel level, BlockPos spot) {
+        BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
+                for (int dy = -2; dy <= 0; dy++) {
+                    probe.set(spot.getX() + dx, spot.getY() + dy, spot.getZ() + dz);
+                    if (level.isLoaded(probe) && level.getFluidState(probe).is(FluidTags.WATER)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**

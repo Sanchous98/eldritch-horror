@@ -27,6 +27,9 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.TAINTED_FAUNA.get(), TaintedFaunaRenderer::new);
         event.registerEntityRenderer(ModEntities.LESSER_SWARM.get(), LesserSwarmRenderer::new);
         event.registerEntityRenderer(ModEntities.WATCHER.get(), WatcherRenderer::new);
+        event.registerEntityRenderer(ModEntities.BONE_CHOIR.get(), BoneChoirRenderer::new);
+        event.registerEntityRenderer(ModEntities.DROWNED_THRALL.get(), DrownedThrallRenderer::new);
+        event.registerEntityRenderer(ModEntities.VEIL_STALKER.get(), VeilStalkerRenderer::new);
         event.registerEntityRenderer(ModEntities.CTHULHU.get(), CthulhuRenderer::new);
         event.registerEntityRenderer(ModEntities.DUNWICH_HORROR.get(), DunwichHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.SHUB_NIGGURATH.get(), ShubNiggurathRenderer::new);

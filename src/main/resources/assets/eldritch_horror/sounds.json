@@ -53,6 +53,33 @@
       }
     ]
   },
+  "entity.bone_choir.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.bone_choir.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.skeleton.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.drowned_thrall.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.drowned_thrall.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.drowned.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.veil_stalker.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.veil_stalker.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.spider.ambient",
+        "type": "event"
+      }
+    ]
+  },
   "entity.cthulhu.ambient": {
     "subtitle": "subtitles.entity.eldritch_horror.cthulhu.ambient",
     "sounds": [

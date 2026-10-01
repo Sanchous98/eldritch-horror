@@ -365,6 +365,128 @@ public final class ModConfig {
             BUILDER.comment("Allow the Watcher to take damage. False = permanently invulnerable.")
                     .define("watcherKillable", false);
 
+    // --- Bestiary: bone_choir (skeleton-role melee undead) -----------------------------------
+
+    /** The bone choir's low hymn: a weak, low-rate sanity drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_BONE_CHOIR =
+            BUILDER.comment("Enable the 'bone_choir' sanity source (nearby choirs hum a low hymn).")
+                    .define("enableSanityBoneChoir", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_BONE_CHOIR_RATE =
+            BUILDER.comment("Sanity change per second per nearby bone choir (negative drains).")
+                    .defineInRange("sanityBoneChoirRate", -0.06, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_BONE_CHOIR_RADIUS =
+            BUILDER.comment("Radius (blocks) in which bone choirs contribute to the sanity drain.")
+                    .defineInRange("sanityBoneChoirRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_BONE_CHOIR_MAX =
+            BUILDER.comment("Maximum bone choirs counted toward the sanity drain at once.")
+                    .defineInRange("sanityBoneChoirMax", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_BONE_CHOIR_SPAWNS =
+            BUILDER.comment("Allow bone choirs to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableBoneChoirSpawns", true);
+
+    public static final ModConfigSpec.IntValue BONE_CHOIR_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between bone-choir spawn passes (minimum 20).")
+                    .defineInRange("boneChoirSpawnIntervalTicks", 240, 20, 24000);
+
+    public static final ModConfigSpec.IntValue BONE_CHOIR_SPAWN_COUNT =
+            BUILDER.comment("Max bone choirs spawned per player per pass.")
+                    .defineInRange("boneChoirSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue BONE_CHOIR_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which bone choirs may spawn.")
+                    .defineInRange("boneChoirSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue BONE_CHOIR_SPAWN_CAP =
+            BUILDER.comment("Max bone choirs allowed near one player before spawning pauses.")
+                    .defineInRange("boneChoirSpawnCap", 6, 1, 64);
+
+    // --- Bestiary: drowned_thrall (coastal / drowned-role corruption vector) -----------------
+
+    /** The drowned thrall's corruption vector: standing near one taints you slowly. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_DROWNED_THRALL =
+            BUILDER.comment("Enable the 'drowned_thrall' corruption vector (nearby thralls taint).")
+                    .define("enableCorruptionDrownedThrall", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_DROWNED_THRALL_RATE =
+            BUILDER.comment("Corruption per second per nearby drowned thrall (positive taints).")
+                    .defineInRange("corruptionDrownedThrallRate", 0.04, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_DROWNED_THRALL_RADIUS =
+            BUILDER.comment("Radius (blocks) in which drowned thralls contribute corruption.")
+                    .defineInRange("corruptionDrownedThrallRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_DROWNED_THRALL_MAX =
+            BUILDER.comment("Maximum drowned thralls counted toward the corruption vector at once.")
+                    .defineInRange("corruptionDrownedThrallMax", 4, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_DROWNED_THRALL_SPAWNS =
+            BUILDER.comment("Allow drowned thralls to spawn near players in/near water (coastal).")
+                    .define("enableDrownedThrallSpawns", true);
+
+    public static final ModConfigSpec.IntValue DROWNED_THRALL_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between drowned-thrall spawn passes (minimum 20).")
+                    .defineInRange("drownedThrallSpawnIntervalTicks", 240, 20, 24000);
+
+    public static final ModConfigSpec.IntValue DROWNED_THRALL_SPAWN_COUNT =
+            BUILDER.comment("Max drowned thralls spawned per player per pass.")
+                    .defineInRange("drownedThrallSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue DROWNED_THRALL_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which drowned thralls may spawn.")
+                    .defineInRange("drownedThrallSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue DROWNED_THRALL_SPAWN_CAP =
+            BUILDER.comment("Max drowned thralls allowed near one player before spawning pauses.")
+                    .defineInRange("drownedThrallSpawnCap", 6, 1, 64);
+
+    // --- Bestiary: veil_stalker (ambusher / spider-role sanity whisper) ----------------------
+
+    /** The veil stalker's whisper: a small, quiet sanity drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_VEIL_STALKER =
+            BUILDER.comment("Enable the 'veil_stalker' sanity source (a whisper from above drains sanity).")
+                    .define("enableSanityVeilStalker", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_VEIL_STALKER_RATE =
+            BUILDER.comment("Sanity change per second per nearby veil stalker (negative drains).")
+                    .defineInRange("sanityVeilStalkerRate", -0.10, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_VEIL_STALKER_RADIUS =
+            BUILDER.comment("Radius (blocks) in which veil stalkers contribute to the sanity drain.")
+                    .defineInRange("sanityVeilStalkerRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_VEIL_STALKER_MAX =
+            BUILDER.comment("Maximum veil stalkers counted toward the sanity drain at once.")
+                    .defineInRange("sanityVeilStalkerMax", 2, 1, 32);
+
+    /** Whether the veil stalker climbs walls (its ambush hook). */
+    public static final ModConfigSpec.BooleanValue ENABLE_VEIL_STALKER_CLIMBING =
+            BUILDER.comment("Allow the veil stalker to climb walls (its ambush hook).")
+                    .define("enableVeilStalkerClimbing", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_VEIL_STALKER_SPAWNS =
+            BUILDER.comment("Allow veil stalkers to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableVeilStalkerSpawns", true);
+
+    public static final ModConfigSpec.IntValue VEIL_STALKER_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between veil-stalker spawn passes (minimum 20).")
+                    .defineInRange("veilStalkerSpawnIntervalTicks", 300, 20, 24000);
+
+    public static final ModConfigSpec.IntValue VEIL_STALKER_SPAWN_COUNT =
+            BUILDER.comment("Max veil stalkers spawned per player per pass.")
+                    .defineInRange("veilStalkerSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue VEIL_STALKER_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which veil stalkers may spawn.")
+                    .defineInRange("veilStalkerSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue VEIL_STALKER_SPAWN_CAP =
+            BUILDER.comment("Max veil stalkers allowed near one player before spawning pauses.")
+                    .defineInRange("veilStalkerSpawnCap", 4, 1, 64);
+
     // --- Ancient Ones (boss framework, design/28-ancient-ones.md) -----------------------------
 
     /** Health fraction at or below which any Ancient One enters its middle phase. */
