@@ -51,11 +51,14 @@ public final class CityLocation implements Location {
     /** Width of the graded ramp that steps the flat heart out into the terrace field. */
     private static final int HEART_RAMP = TILE;
     /**
-     * Half-width of the flat pad levelled under each lot before it is built, so a building always
-     * sits on flat ground (its terrace) even where the surrounding tiles step. Covers the largest
-     * lot footprint (a 9-wide house plus a 1-block roof margin) with a little slack.
+     * Half-width of the flat pad levelled under each lot before it is built. A lot is placed by its
+     * origin but grows only in +X/+Z (a 9-wide house reaches origin+9 with its roof), so the pad is
+     * centred at {@code origin + LOT_CENTER} and must cover that far edge: {@code LOT_CENTER +
+     * LOT_PAD >= 9}.
      */
-    private static final int LOT_PAD = 6;
+    private static final int LOT_PAD = 7;
+    /** Offset from a lot's origin to the centre of its flattened pad (lots grow in +X/+Z). */
+    private static final int LOT_CENTER = 4;
     /**
      * Height above the surface cleared of vanilla vegetation inside the district, so a forest or
      * jungle city is not buried by the biome's own trees (which run before this generator's city
@@ -158,30 +161,33 @@ public final class CityLocation implements Location {
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
         // Chunk-local and grid-canonical: each cell's jitter and vacancy come from a position hash
-        // (not the per-chunk rng), and we only build cells whose jittered origin lands inside THIS
-        // chunk. The layout is therefore identical in every chunk that overlaps a building, costs
-        // O(chunk), and never leaves half the district empty the way a global "built < MAX" cap did.
-        int cellMinX = -buildRadius - 2;
-        int cellMaxX = buildRadius + 2;
-        int cellMinZ = -buildRadius - 2;
-        int cellMaxZ = buildRadius + 2;
-        int chunkMaxX = b.chunkMinX() + 15;
-        int chunkMaxZ = b.chunkMinZ() + 15;
+        // (not the per-chunk rng), so the layout is identical in every chunk. Every chunk that a lot
+        // reaches into runs the lot with its OWN deterministic rng, so a building crossing a chunk
+        // border is drawn (clipped) by both chunks instead of only the origin's — otherwise its far
+        // slice would be missing.
+        int cellMinX = -buildRadius - LOT_PAD - 2;
+        int cellMaxX = buildRadius + LOT_PAD + 2;
+        int cellMinZ = -buildRadius - LOT_PAD - 2;
+        int cellMaxZ = buildRadius + LOT_PAD + 2;
+        int reach = LOT_PAD + 2;
         for (int gx = cellMinX; gx <= cellMaxX; gx += CELL) {
             int bx = cx + gx;
-            if (bx + 2 < b.chunkMinX() || bx - 2 > chunkMaxX) {
-                continue; // no jitter of this cell can fall in this chunk
+            if (bx + reach < b.chunkMinX() || bx - reach > b.chunkMinX() + 15) {
+                continue; // neither the origin nor any pad cell of this lot can fall in this chunk
             }
             for (int gz = cellMinZ; gz <= cellMaxZ; gz += CELL) {
                 int bz = cz + gz;
-                if (bz + 2 < b.chunkMinZ() || bz - 2 > chunkMaxZ) {
+                if (bz + reach < b.chunkMinZ() || bz - reach > b.chunkMinZ() + 15) {
                     continue;
                 }
                 int h = hash(cx, cz, gx, gz);
                 int x = bx + ((h >>> 8) % 5) - 2;
                 int z = bz + ((h >>> 13) % 5) - 2;
-                if (x < b.chunkMinX() || x > chunkMaxX || z < b.chunkMinZ() || z > chunkMaxZ) {
-                    continue; // this building is drawn by the chunk that owns its origin
+                // Skip only when the lot's PAD cannot touch this chunk at all; a lot may legitimately
+                // straddle the border, and each chunk draws its own slice.
+                if (x + LOT_PAD < b.chunkMinX() || x - LOT_PAD > b.chunkMinX() + 15
+                        || z + LOT_PAD < b.chunkMinZ() || z - LOT_PAD > b.chunkMinZ() + 15) {
+                    continue;
                 }
                 int dx = x - cx;
                 int dz = z - cz;
@@ -194,15 +200,18 @@ public final class CityLocation implements Location {
                 if (((h >>> 5) & 0xFF) > 209) {
                     continue; // ~18% vacant lots
                 }
-                // The lot stands on its terrace: flatten a pad of LOT_PAD blocks around the origin to
-                // the terrace level (cut/fill), so the building itself is always on flat ground while
-                // the surrounding tiles keep their steps. Pads of neighbouring lots touch only in the
-                // street between them, where a step is exactly what we want.
+                // A deterministic per-cell rng so this lot is identical in every chunk that draws it.
+                RandomSource lotRng = RandomSource.create(h);
+                // The lot stands on its terrace: flatten a pad large enough for the whole building to
+                // the terrace level (cut/fill), so it always sits on flat ground while the tiles
+                // around it keep their steps. The pad is centred where the building actually grows.
+                int padCx = x + LOT_CENTER;
+                int padCz = z + LOT_CENTER;
                 int lotY = (dx * dx + dz * dz <= flatHeart * flatHeart)
                         ? ground
-                        : terraceY(b, cx, cz, ground, x, z);
-                flattenLot(b, x, z, LOT_PAD, lotY, p);
-                building(b, rng, x, z, lotY, p, style);
+                        : terraceY(b, cx, cz, ground, padCx, padCz);
+                flattenLot(b, padCx, padCz, LOT_PAD, lotY, p);
+                building(b, lotRng, x, z, lotY, p, style);
             }
         }
 
@@ -431,49 +440,28 @@ public final class CityLocation implements Location {
     }
 
     /**
-     * The terrace surface height at {@code (x,z)}: with tile-local coordinates
-     * {@code fx = (x - cx)/TILE - 0.5} and {@code fz = (z - cz)/TILE - 0.5}, bilinearly interpolate
-     * the four surrounding {@link #tileLevel}s and then quantise to the nearest multiple of
-     * {@link #STEP} — flat tiles joined by STEP-block steps. Clamped to {@code [ground-12,
-     * ground+12]}. Pure and chunk-independent.
+     * The terrace surface height at {@code (x,z)}: the level of the {@link #TILE}-block tile the
+     * column falls in, so tiles are flat plates joined by {@link #STEP}-block steps. Pure and
+     * chunk-independent.
      */
     private static int terraceY(StructureBuilder b, int cx, int cz, int ground, int x, int z) {
-        int tx0 = Math.floorDiv(x - cx, TILE) - 1;
-        int tz0 = Math.floorDiv(z - cz, TILE) - 1;
-        int[][] tiles = new int[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                tiles[i][j] = tileLevel(b, cx, cz, ground, tx0 + i, tz0 + j);
-            }
-        }
-        return terraceAt(tiles, tx0, tz0, cx, cz, ground, x, z);
+        int tx = Math.floorDiv(x - cx, TILE);
+        int tz = Math.floorDiv(z - cz, TILE);
+        return tileLevel(b, cx, cz, ground, tx, tz);
     }
 
     /**
-     * Shared bilinear core: samples the cached terrace-level grid {@code tiles} (whose [0][0] is
-     * tile {@code (tbx,tbz)}), quantises to {@link #STEP} and clamps. Kept separate from
-     * {@link #terraceY} so {@link #paveDistrict} can reuse one 4x4 cache for a whole chunk instead
-     * of re-sampling {@code groundY} per column.
+     * Shared plateau core: returns the cached terrace level of the tile containing {@code (x,z)}.
+     * The grid {@code tiles} has {@code [0][0]} at tile {@code (tbx,tbz)}; kept separate from
+     * {@link #terraceY} so {@link #paveDistrict} reuses one cache for a whole chunk. Pure.
      */
     private static int terraceAt(int[][] tiles, int tbx, int tbz, int cx, int cz,
                                  int ground, int x, int z) {
-        double fx = (x - cx) / (double) TILE - 0.5;
-        double fz = (z - cz) / (double) TILE - 0.5;
-        int fi = (int) Math.floor(fx);
-        int fj = (int) Math.floor(fz);
-        int i = fi - tbx;
-        int j = fj - tbz;
-        double u = fx - fi;
-        double v = fz - fj;
-        int a = tiles[i][j];
-        int b0 = tiles[i + 1][j];
-        int c = tiles[i][j + 1];
-        int d = tiles[i + 1][j + 1];
-        double top = a + (b0 - a) * u;
-        double bot = c + (d - c) * u;
-        int value = (int) Math.round(top + (bot - top) * v);
-        value = Math.round(value / (float) STEP) * STEP;
-        return Math.clamp(value, ground - 12, ground + 12);
+        int tx = Math.floorDiv(x - cx, TILE);
+        int tz = Math.floorDiv(z - cz, TILE);
+        int i = Math.clamp(tx - tbx, 0, tiles.length - 1);
+        int j = Math.clamp(tz - tbz, 0, tiles[0].length - 1);
+        return tiles[i][j];
     }
 
     /**
