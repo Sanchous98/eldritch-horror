@@ -97,6 +97,23 @@ public final class ModConfig {
             BUILDER.comment("Taint a chunk must exceed before it spreads to neighbouring chunks.")
                     .defineInRange("taintSpreadThreshold", 0.1, 0.0, 1.0);
 
+    // --- Taint world effect (terrain conversion) --------------------------------------------
+
+    /** Master switch for the visible world effect of the taint field (surface block conversion). */
+    public static final ModConfigSpec.BooleanValue ENABLE_TAINT_WORLD =
+            BUILDER.comment("Allow tainted chunks to convert a few natural surface blocks per second.")
+                    .define("enableTaintWorld", true);
+
+    /** Maximum natural surface blocks converted per loaded tainted chunk per second. Kept gentle. */
+    public static final ModConfigSpec.IntValue TAINT_WORLD_RATE =
+            BUILDER.comment("Max natural surface blocks converted per tainted chunk per second.")
+                    .defineInRange("taintWorldRate", 3, 0, 64);
+
+    /** A chunk must reach this taint before its terrain starts to convert. */
+    public static final ModConfigSpec.DoubleValue TAINT_WORLD_THRESHOLD =
+            BUILDER.comment("Taint a chunk must reach before its surface blocks convert.")
+                    .defineInRange("taintWorldThreshold", 0.25, 0.0, 1.0);
+
     // --- Corruption stage cut-offs (fractions of DEFAULT_MAX) --------------------------------
 
     /** At or above this fraction → Touched. */

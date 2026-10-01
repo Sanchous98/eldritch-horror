@@ -8,6 +8,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
+import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
@@ -18,7 +19,9 @@ import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -50,8 +53,11 @@ public final class EldritchCommands {
                         .then(Commands.literal("taint")
                                 .then(Commands.literal("get").executes(ctx -> {
                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
-                                    net.minecraft.world.level.chunk.LevelChunk chunk =
-                                            p.level().getChunkAt(p.blockPosition());
+                                    net.minecraft.world.level.chunk.LevelChunk chunk = ownChunk(p);
+                                    if (chunk == null) {
+                                        ctx.getSource().sendFailure(Component.literal("chunk not loaded"));
+                                        return 0;
+                                    }
                                     double v = CorruptionSystem.getTaint(chunk);
                                     ctx.getSource().sendSuccess(
                                             () -> Component.literal("taint = " + fmt(v)), false);
@@ -61,8 +67,11 @@ public final class EldritchCommands {
                                         .then(Commands.argument("value", DoubleArgumentType.doubleArg())
                                                 .executes(ctx -> {
                                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
-                                                    net.minecraft.world.level.chunk.LevelChunk chunk =
-                                                            p.level().getChunkAt(p.blockPosition());
+                                                    net.minecraft.world.level.chunk.LevelChunk chunk = ownChunk(p);
+                                                    if (chunk == null) {
+                                                        ctx.getSource().sendFailure(Component.literal("chunk not loaded"));
+                                                        return 0;
+                                                    }
                                                     double v = DoubleArgumentType.getDouble(ctx, "value");
                                                     CorruptionSystem.setTaint(chunk, v);
                                                     ctx.getSource().sendSuccess(
@@ -73,14 +82,18 @@ public final class EldritchCommands {
                                         .then(Commands.argument("delta", DoubleArgumentType.doubleArg())
                                                 .executes(ctx -> {
                                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
-                                                    net.minecraft.world.level.chunk.LevelChunk chunk =
-                                                            p.level().getChunkAt(p.blockPosition());
+                                                    net.minecraft.world.level.chunk.LevelChunk chunk = ownChunk(p);
+                                                    if (chunk == null) {
+                                                        ctx.getSource().sendFailure(Component.literal("chunk not loaded"));
+                                                        return 0;
+                                                    }
                                                     double d = DoubleArgumentType.getDouble(ctx, "delta");
                                                     double now = CorruptionSystem.addTaint(chunk, d);
                                                     ctx.getSource().sendSuccess(
                                                             () -> Component.literal("taint = " + fmt(now)), true);
                                                     return 1;
-                                                }))))
+                                                })))
+                                .then(Commands.literal("purify").executes(EldritchCommands::purifyTaint)))
                         .then(Commands.literal("rep")
                                 .then(Commands.literal("get")
                                         .then(Commands.argument("cult", StringArgumentType.word())
@@ -186,6 +199,34 @@ public final class EldritchCommands {
         return 1;
     }
 
+    /**
+     * {@code /eh taint purify}: zeroes the taint of every loaded chunk near the caller. A
+     * debug tool to observe the terrain effect stopping; unloaded chunks are left untouched and
+     * no chunk is ever forced to load.
+     */
+    private static int purifyTaint(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        if (!(p.level() instanceof ServerLevel level)) {
+            return 0;
+        }
+        ChunkPos centre = p.chunkPosition();
+        int cleared = 0;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                ChunkPos pos = new ChunkPos(centre.x() + dx, centre.z() + dz);
+                double before = TaintAPI.get(level, pos);
+                if (before > 0.0) {
+                    TaintAPI.set(level, pos, 0.0);
+                    cleared++;
+                }
+            }
+        }
+        int n = cleared;
+        ctx.getSource().sendSuccess(() -> Component.literal("taint purified in " + n
+                + " loaded chunk(s)"), true);
+        return 1;
+    }
+
     /** Sends a failure message and returns {@code true} when {@code cultId} is not a known cult. */
     private static boolean unknownCult(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String cultId) {
         if (Cults.byId(cultId) == null) {
@@ -193,6 +234,15 @@ public final class EldritchCommands {
             return true;
         }
         return false;
+    }
+
+    /**
+     * The player's own chunk without ever loading/generating one. It is always loaded (the player
+     * stands in it), but {@code getChunkNow} is nullable, so callers get {@code null} rather than an NPE.
+     */
+    private static net.minecraft.world.level.chunk.LevelChunk ownChunk(ServerPlayer p) {
+        var cp = p.chunkPosition();
+        return p.level().getChunkSource().getChunkNow(cp.x(), cp.z());
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> getNode(String label, Meter meter) {
