@@ -39,6 +39,24 @@ public final class CityLocation implements Location {
     /** Radius kept clear of ordinary buildings so the (now large) landmark has room. */
     private static final int INNER_CLEAR = 46;
     /**
+     * Terrace tile side (blocks). The district surface is quantised into TILE-sized tiles whose
+     * level is the mean terrain under them, joined by {@link #STEP}-high steps, so a district on a
+     * slope becomes a hillside city rather than one flat plate.
+     */
+    private static final int TILE = 24;
+    /** Terrace height quantum (blocks): every tile level and terrace coordinate is a multiple. */
+    private static final int STEP = 2;
+    /** Radius of the intentionally flat heart (plaza + landmark) held at {@code ground}. */
+    private static final int FLAT_HEART = PLAZA + TILE;
+    /** Width of the graded ramp that steps the flat heart out into the terrace field. */
+    private static final int HEART_RAMP = TILE;
+    /**
+     * Half-width of the flat pad levelled under each lot before it is built, so a building always
+     * sits on flat ground (its terrace) even where the surrounding tiles step. Covers the largest
+     * lot footprint (a 9-wide house plus a 1-block roof margin) with a little slack.
+     */
+    private static final int LOT_PAD = 6;
+    /**
      * Height above the surface cleared of vanilla vegetation inside the district, so a forest or
      * jungle city is not buried by the biome's own trees (which run before this generator's city
      * pass). Taller than the tallest tree we expect to remove; buildings are placed afterwards.
@@ -106,10 +124,17 @@ public final class CityLocation implements Location {
         CityStyle style = CityStyles.forCity(this.city.name());
 
         int inner = INNER_CLEAR;
-        // The flat interior is edgeRing smaller than the district, and lots need another ~10 blocks
-        // for their footprint/roof overhang, so buildings and street furniture stay fully on the
-        // flat ground and off the graded transition ring.
+        // The terraced interior is edgeRing smaller than the district, and lots need another ~10
+        // blocks for their footprint/roof overhang, so buildings and street furniture stay off the
+        // graded transition ring. Individual lots are additionally gated to a single flat terrace.
         int buildRadius = district - edgeRing - 10;
+        // The intentional flat heart (plaza + landmark) plus a ramp that steps it down into the
+        // terrace field, so the plaza edge meets the first terrace without a floating lip. Shared
+        // by paveDistrict and the building gate below so the two always agree.
+        int flat = district - edgeRing;
+        int flatHeart = Math.min(FLAT_HEART, Math.max(0, flat - HEART_RAMP - TILE));
+        // Street furniture is kept on the flat heart, so no prop can hover on a terrace step.
+        int propRadius = Math.max(0, Math.min(buildRadius, flatHeart - 6));
 
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
@@ -127,9 +152,9 @@ public final class CityLocation implements Location {
 
         // 3b. Generic street dressing shared by every culture: stalls, crates and a courtyard well
         // or two. Placed BEFORE buildings, so it can never punch through a wall, a door or a road;
-        // every write is also gated on the cell being air/replaceable. Off the landmark plaza and
-        // inside the paved fabric, deterministic like the rest.
-        streetDetails(b, rng, cx, cz, buildRadius, inner, ground, p);
+        // every write is also gated on the cell being air/replaceable. Bounded to the flat heart so
+        // no prop can hover over a terrace step, deterministic like the rest.
+        streetDetails(b, rng, cx, cz, propRadius, inner, ground, p);
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
         // Chunk-local and grid-canonical: each cell's jitter and vacancy come from a position hash
@@ -169,7 +194,15 @@ public final class CityLocation implements Location {
                 if (((h >>> 5) & 0xFF) > 209) {
                     continue; // ~18% vacant lots
                 }
-                building(b, rng, x, z, ground, p, style);
+                // The lot stands on its terrace: flatten a pad of LOT_PAD blocks around the origin to
+                // the terrace level (cut/fill), so the building itself is always on flat ground while
+                // the surrounding tiles keep their steps. Pads of neighbouring lots touch only in the
+                // street between them, where a step is exactly what we want.
+                int lotY = (dx * dx + dz * dz <= flatHeart * flatHeart)
+                        ? ground
+                        : terraceY(b, cx, cz, ground, x, z);
+                flattenLot(b, x, z, LOT_PAD, lotY, p);
+                building(b, rng, x, z, lotY, p, style);
             }
         }
 
@@ -193,6 +226,33 @@ public final class CityLocation implements Location {
         h *= 0x2C1B3C6D;
         h ^= h >>> 12;
         return h;
+    }
+
+    /**
+     * Levels a square pad of half-width {@code pad} around (x,z) to {@code y}: cuts above, fills
+     * below, caps with paving and clears a little vegetation. Chunk-clipped. Lets a building stand
+     * on flat ground on any terrace without flattening the whole district.
+     */
+    private static void flattenLot(StructureBuilder b, int x, int z, int pad, int y, Palette p) {
+        BlockState air = Blocks.AIR.defaultBlockState();
+        for (int px = x - pad; px <= x + pad; px++) {
+            for (int pz = z - pad; pz <= z + pad; pz++) {
+                if (!b.isLand(px, pz)) {
+                    continue;
+                }
+                int surface = b.groundY(px, pz);
+                if (surface > y) {
+                    b.fill(px, y + 1, pz, px, surface, pz, air);
+                } else if (surface < y) {
+                    b.fill(px, surface + 1, pz, px, y, pz, p.foundation());
+                }
+                b.put(px, y, pz, p.ground());
+                int clearTop = Math.max(surface, y) + 4;
+                for (int cy = y + 1; cy <= clearTop; cy++) {
+                    b.put(px, cy, pz, air);
+                }
+            }
+        }
     }
 
     /**
@@ -247,9 +307,11 @@ public final class CityLocation implements Location {
 
     /**
      * Paves the district on land only: a ground course on every land column within the district
-     * radius. This gives the city a continuous urban surface (streets and courts) instead of
-     * buildings floating on untouched terrain. The rim grades the height from the city level out to
-     * the natural terrain over {@code edgeRing} blocks. Deterministic and chunk-clipped.
+     * radius. Instead of one flat plate at {@code ground}, the surface follows the terrain in
+     * broad {@link #TILE}-block terraces (levels quantised to {@link #STEP}), with an intentionally
+     * flat heart (plaza/landmark) at {@code ground}. The outer rim grades the terrace level at the
+     * interior boundary out to the natural terrain over {@code edgeRing} blocks. Deterministic and
+     * chunk-clipped.
      */
     private static void paveDistrict(StructureBuilder b, int cx, int cz,
                                      int district, int plaza, Palette p, int ground, int edgeRing) {
@@ -257,6 +319,25 @@ public final class CityLocation implements Location {
         // so paving costs the same regardless of district size.
         int x0 = b.chunkMinX();
         int z0 = b.chunkMinZ();
+        int flat = district - edgeRing;
+        int flat2 = flat * flat;
+        // The intentional flat heart (plaza + landmark) plus a ramp of HEART_RAMP blocks that
+        // steps the heart down/up into the terrace field, so the plaza never ends in a lip.
+        int flatHeart = Math.min(FLAT_HEART, Math.max(0, flat - HEART_RAMP - TILE));
+        int rampOuter = flatHeart + HEART_RAMP;
+        int heart2 = flatHeart * flatHeart;
+        int ramp2 = rampOuter * rampOuter;
+        // Cache the 4x4 terrace levels covering this chunk's column range once. 16 columns span at
+        // most two tile indices, and bilinear sampling needs one tile of bleed on each side, so
+        // 4x4 (16 samples) suffices for the whole chunk — no per-column re-sampling of groundY.
+        int tbx = Math.min(Math.floorDiv(x0 - cx, TILE), Math.floorDiv(x0 + 15 - cx, TILE)) - 1;
+        int tbz = Math.min(Math.floorDiv(z0 - cz, TILE), Math.floorDiv(z0 + 15 - cz, TILE)) - 1;
+        int[][] tiles = new int[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                tiles[i][j] = tileLevel(b, cx, cz, ground, tbx + i, tbz + j);
+            }
+        }
         for (int x = x0; x < x0 + 16; x++) {
             int dx = x - cx;
             if (Math.abs(dx) > district) {
@@ -264,21 +345,22 @@ public final class CityLocation implements Location {
             }
             for (int z = z0; z < z0 + 16; z++) {
                 int dz = z - cz;
-                if (dx * dx + dz * dz > district * district) {
+                int dist2 = dx * dx + dz * dz;
+                if (dist2 > district * district) {
                     continue;
                 }
                 if (!b.isLand(x, z)) {
                     continue;
                 }
                 int surface = b.groundY(x, z);
-                int dist2 = dx * dx + dz * dz;
-                int flat = district - edgeRing;
-                int flat2 = flat * flat;
+                int target;
                 if (dist2 > flat2) {
-                    // Transition ring: blend from the flat city level to the natural terrain
-                    // instead of cutting a vertical wall. 0 at the flat edge, 1 at the rim.
+                    // Transition ring: blend from the terrace level at the interior boundary
+                    // (terraceAt continued, so it matches the interior exactly) out to the
+                    // natural terrain instead of cutting a vertical wall. 0 at flat, 1 at the rim.
                     double t = Math.clamp((Math.sqrt(dist2) - flat) / (double) edgeRing, 0.0, 1.0);
-                    int target = (int) Math.round(ground * (1.0 - t) + surface * t);
+                    int inner = terraceAt(tiles, tbx, tbz, cx, cz, ground, x, z);
+                    target = (int) Math.round(inner * (1.0 - t) + surface * t);
                     if (surface > target) {
                         b.fill(x, target + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
                     } else if (surface < target) {
@@ -291,24 +373,107 @@ public final class CityLocation implements Location {
                     }
                     continue;
                 }
-                // Flat interior: cut hills down, fill hollows up, then cap every column with one
-                // paving course.
-                if (surface > ground) {
-                    b.fill(x, ground + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
-                } else if (surface < ground) {
-                    b.fill(x, surface + 1, z, x, ground, z, p.foundation());
+                // Terrace field: flat tiles joined by STEP-high steps.
+                target = terraceAt(tiles, tbx, tbz, cx, cz, ground, x, z);
+                if (dist2 <= heart2) {
+                    target = ground; // intentional flat heart: plaza and landmark stay level
+                } else if (dist2 <= ramp2) {
+                    // Ramp the heart into the terrace field: continuous at both ends, so the
+                    // plaza edge just meets the first terrace with no floating lip.
+                    double t = Math.clamp((Math.sqrt(dist2) - flatHeart) / (double) HEART_RAMP, 0.0, 1.0);
+                    target = (int) Math.round(ground * (1.0 - t) + target * t);
                 }
-                b.put(x, ground, z, streetSurface(x, z, cx, cz, plaza, p));
+                // Cut hills down / fill hollows up, then cap every column with one paving course.
+                if (surface > target) {
+                    b.fill(x, target + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
+                } else if (surface < target) {
+                    b.fill(x, surface + 1, z, x, target, z, p.foundation());
+                }
+                b.put(x, target, z, streetSurface(x, z, cx, cz, plaza, p));
                 // Clear the vanilla vegetation the biome decoration planted here (trees/leaves/
                 // grass). Clear all the way up to the ORIGINAL surface plus CLEAR_ABOVE, not a
                 // fixed cap: where a hill was cut down, its trees sat above the old surface, so a
                 // ground-relative cap left their trunks dangling in the air.
-                int clearTop = Math.max(surface, ground) + CLEAR_ABOVE;
-                for (int y = ground + 1; y <= clearTop; y++) {
+                int clearTop = Math.max(surface, target) + CLEAR_ABOVE;
+                for (int y = target + 1; y <= clearTop; y++) {
                     b.put(x, y, z, Blocks.AIR.defaultBlockState());
                 }
             }
         }
+    }
+
+    /**
+     * The terrace level of one {@link #TILE}-block tile: the mean of {@code b.groundY} sampled at
+     * four points inside the tile centred on {@code (cx + tx*TILE + TILE/2, cz + tz*TILE + TILE/2)}
+     * (non-land samples skipped, falling back to {@code ground} if none), quantised to the nearest
+     * multiple of {@link #STEP} and clamped to {@code [ground - 12, ground + 12]}. Pure (no rng),
+     * so every chunk computes the same level for the same tile.
+     */
+    private static int tileLevel(StructureBuilder b, int cx, int cz, int ground, int tx, int tz) {
+        int baseX = cx + tx * TILE;
+        int baseZ = cz + tz * TILE;
+        int lo = TILE / 4;
+        int hi = TILE - lo;
+        int[][] pts = {{lo, lo}, {hi, lo}, {lo, hi}, {hi, hi}};
+        long sum = 0;
+        int n = 0;
+        for (int[] pt : pts) {
+            int x = baseX + pt[0];
+            int z = baseZ + pt[1];
+            if (b.isLand(x, z)) {
+                sum += b.groundY(x, z);
+                n++;
+            }
+        }
+        int level = n == 0 ? ground : (int) Math.round(sum / (double) n);
+        level = Math.round(level / (float) STEP) * STEP;
+        return Math.clamp(level, ground - 12, ground + 12);
+    }
+
+    /**
+     * The terrace surface height at {@code (x,z)}: with tile-local coordinates
+     * {@code fx = (x - cx)/TILE - 0.5} and {@code fz = (z - cz)/TILE - 0.5}, bilinearly interpolate
+     * the four surrounding {@link #tileLevel}s and then quantise to the nearest multiple of
+     * {@link #STEP} — flat tiles joined by STEP-block steps. Clamped to {@code [ground-12,
+     * ground+12]}. Pure and chunk-independent.
+     */
+    private static int terraceY(StructureBuilder b, int cx, int cz, int ground, int x, int z) {
+        int tx0 = Math.floorDiv(x - cx, TILE) - 1;
+        int tz0 = Math.floorDiv(z - cz, TILE) - 1;
+        int[][] tiles = new int[3][3];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                tiles[i][j] = tileLevel(b, cx, cz, ground, tx0 + i, tz0 + j);
+            }
+        }
+        return terraceAt(tiles, tx0, tz0, cx, cz, ground, x, z);
+    }
+
+    /**
+     * Shared bilinear core: samples the cached terrace-level grid {@code tiles} (whose [0][0] is
+     * tile {@code (tbx,tbz)}), quantises to {@link #STEP} and clamps. Kept separate from
+     * {@link #terraceY} so {@link #paveDistrict} can reuse one 4x4 cache for a whole chunk instead
+     * of re-sampling {@code groundY} per column.
+     */
+    private static int terraceAt(int[][] tiles, int tbx, int tbz, int cx, int cz,
+                                 int ground, int x, int z) {
+        double fx = (x - cx) / (double) TILE - 0.5;
+        double fz = (z - cz) / (double) TILE - 0.5;
+        int fi = (int) Math.floor(fx);
+        int fj = (int) Math.floor(fz);
+        int i = fi - tbx;
+        int j = fj - tbz;
+        double u = fx - fi;
+        double v = fz - fj;
+        int a = tiles[i][j];
+        int b0 = tiles[i + 1][j];
+        int c = tiles[i][j + 1];
+        int d = tiles[i + 1][j + 1];
+        double top = a + (b0 - a) * u;
+        double bot = c + (d - c) * u;
+        int value = (int) Math.round(top + (bot - top) * v);
+        value = Math.round(value / (float) STEP) * STEP;
+        return Math.clamp(value, ground - 12, ground + 12);
     }
 
     /**
