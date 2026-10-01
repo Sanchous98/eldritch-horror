@@ -66,6 +66,15 @@ public final class CultSystem {
     }
 
     /**
+     * The typed, cult-independent rank for a player, derived from the same bands as
+     * {@link #rank}: below {@code 0} is {@link CultRank#OUTSIDER}, otherwise the ladder band. Use
+     * this to branch on rank without string matching; {@link #rank} remains for display.
+     */
+    public static CultRank rankOf(ServerPlayer player, String cultId) {
+        return CultRank.of(get(player, cultId));
+    }
+
+    /**
      * The cult-specific rank for a player: an {@code Outsider}/{@code Neutral} translatable
      * component below the first band, otherwise the cult's ladder rank for the band. Unknown
      * cult ⇒ the neutral component.

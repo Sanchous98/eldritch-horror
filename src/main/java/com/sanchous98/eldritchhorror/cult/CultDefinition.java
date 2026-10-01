@@ -19,6 +19,7 @@ import java.util.List;
  * @param opposed      ids of cults this one opposes (cross-reputation cost)
  * @param signatureRite the rite that grants reputation with this cult
  * @param fantasy      one-line pitch
+ * @param services     rank-gated services this cult offers (see {@link CultService})
  */
 public record CultDefinition(
         String id,
@@ -27,10 +28,26 @@ public record CultDefinition(
         List<Component> ranks,
         List<String> opposed,
         String signatureRite,
-        String fantasy) {
+        String fantasy,
+        List<CultService> services) {
 
     /** Rank names in ladder order. */
     public List<Component> ranks() {
         return List.copyOf(ranks);
+    }
+
+    /** Rank-gated services, in declaration order. */
+    public List<CultService> services() {
+        return List.copyOf(services);
+    }
+
+    /** @return the service with {@code serviceId}, or {@code null} if this cult does not offer it. */
+    public CultService service(String serviceId) {
+        for (CultService service : services) {
+            if (service.id().equals(serviceId)) {
+                return service;
+            }
+        }
+        return null;
     }
 }

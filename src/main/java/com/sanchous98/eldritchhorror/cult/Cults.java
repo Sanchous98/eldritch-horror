@@ -14,7 +14,6 @@ import java.util.Map;
  * reputation attachment).
  */
 public final class Cults {
-
     private static final Map<String, CultDefinition> BY_ID = new LinkedHashMap<>();
 
     static {
@@ -27,7 +26,10 @@ public final class Cults {
                         Component.translatable("rank.eldritch_horror.drowned_choir.3")),
                 List.of("unblinking_eye"),
                 "drowned_blessing",
-                "Tide-worshippers who trade breath for devotion."));
+                "Tide-worshippers who trade breath for devotion.",
+                List.of(
+                        new CultService("teach_drowned_blessing", CultRank.INITIATE,
+                                CultService.Kind.TEACH, "drowned_blessing"))));
 
         register(new CultDefinition(
                 "unblinking_eye", "The Order of the Unblinking Eye",
@@ -38,7 +40,12 @@ public final class Cults {
                         Component.translatable("rank.eldritch_horror.unblinking_eye.3")),
                 List.of("drowned_choir"),
                 "ward_of_the_eye",
-                "Scholars who catalogue the horror to survive it."));
+                "Scholars who catalogue the horror to survive it.",
+                List.of(
+                        new CultService("teach_ward_of_the_eye", CultRank.INITIATE,
+                                CultService.Kind.TEACH, "ward_of_the_eye"),
+                        new CultService("cleansing", CultRank.DEVOTED,
+                                CultService.Kind.CLEANSE, ""))));
 
         register(new CultDefinition(
                 "hollow_choir", "The Hollow Choir",
@@ -49,7 +56,14 @@ public final class Cults {
                         Component.translatable("rank.eldritch_horror.hollow_choir.3")),
                 List.of("drowned_choir", "unblinking_eye"),
                 "summon_star_spawn",
-                "The cult that wants the horror summoned."));
+                "The cult that wants the horror summoned.",
+                List.of(
+                        new CultService("teach_call_the_lesser", CultRank.INITIATE,
+                                CultService.Kind.TEACH, "call_the_lesser"),
+                        new CultService("teach_summon_star_spawn", CultRank.DEVOTED,
+                                CultService.Kind.TEACH, "summon_star_spawn"),
+                        new CultService("teach_open_rift", CultRank.INNER_CIRCLE,
+                                CultService.Kind.TEACH, "open_rift"))));
     }
 
     private Cults() {

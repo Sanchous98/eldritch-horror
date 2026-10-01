@@ -305,6 +305,17 @@
   "rite.eldritch_horror.close_rift": "Close the Way",
   "rite.eldritch_horror.rite_of_cleansing": "Rite of Cleansing",
   "rite.eldritch_horror.respec": "Rite of Unmaking",
+  "service.eldritch_horror.teach_drowned_blessing": "Teach: Drowned Blessing",
+  "service.eldritch_horror.teach_open_rift": "Teach: Open the Way",
+  "service.eldritch_horror.teach_ward_of_the_eye": "Teach: Ward of the Eye",
+  "service.eldritch_horror.cleansing": "Cleansing Rite",
+  "service.eldritch_horror.teach_call_the_lesser": "Teach: Call the Lesser",
+  "service.eldritch_horror.teach_summon_star_spawn": "Teach: Summon Star-Spawn",
+  "service.eldritch_horror.requires": "requires %s",
+  "service.eldritch_horror.fail.rank": "%s requires %s (%s).",
+  "service.eldritch_horror.teach.success": "%s — you learn %s.",
+  "service.eldritch_horror.teach.known": "%s — you already know %s.",
+  "service.eldritch_horror.cleanse.success": "%s — corruption %s → %s, taint %s.",
   "tooltip.eldritch_horror.sanity": "Sanity %s",
   "tooltip.eldritch_horror.corruption": "Corruption %s"
 }

@@ -9,6 +9,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
+import com.sanchous98.eldritchhorror.cult.CultDefinition;
+import com.sanchous98.eldritchhorror.cult.CultRank;
+import com.sanchous98.eldritchhorror.cult.CultService;
+import com.sanchous98.eldritchhorror.cult.CultServices;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
@@ -155,7 +159,14 @@ public final class EldritchCommands {
                         .then(Commands.literal("rite")
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> performRite(ctx))))
-                        .then(Commands.literal("rites").executes(ctx -> listRites(ctx))));
+                        .then(Commands.literal("rites").executes(ctx -> listRites(ctx)))
+                        .then(Commands.literal("cult")
+                                .then(Commands.argument("id", StringArgumentType.word())
+                                        .executes(ctx -> cultInfo(ctx))))
+                        .then(Commands.literal("service")
+                                .then(Commands.argument("cult", StringArgumentType.word())
+                                        .then(Commands.argument("service", StringArgumentType.word())
+                                                .executes(ctx -> performService(ctx))))));
     }
 
     /**
@@ -197,6 +208,67 @@ public final class EldritchCommands {
         String line = String.join(" ", new java.util.TreeSet<>(known));
         ctx.getSource().sendSuccess(() -> Component.literal("Known rites: " + line), false);
         return 1;
+    }
+
+    /**
+     * {@code /eh cult <id>}: prints the cult's domain, the caller's reputation and rank, and every
+     * service with its required rank — marking which are unlocked at the current standing.
+     */
+    private static int cultInfo(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String id = StringArgumentType.getString(ctx, "id");
+        CultDefinition def = Cults.byId(id);
+        if (def == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown cult: " + id));
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        int rep = CultSystem.get(p, id);
+        CultRank rank = CultSystem.rankOf(p, id);
+        ctx.getSource().sendSuccess(() -> Component.empty()
+                .append(Component.translatable("cult.eldritch_horror." + id))
+                .append(Component.literal(" — " + def.domain())), false);
+        ctx.getSource().sendSuccess(() -> Component.literal("rep = " + rep + " (")
+                .append(rank.display()).append(Component.literal(")")), false);
+        for (CultService service : def.services()) {
+            boolean unlocked = rank.atLeast(service.minRank());
+            Component req = Component.translatable("service.eldritch_horror.requires",
+                    service.minRank().display());
+            String mark = unlocked ? "[x] " : "[ ] ";
+            ctx.getSource().sendSuccess(() -> Component.literal(mark)
+                    .append(service.name())
+                    .append(Component.literal(" ("))
+                    .append(req)
+                    .append(Component.literal(")")), false);
+        }
+        return 1;
+    }
+
+    /**
+     * {@code /eh service <cult> <service>}: performs a rank-gated service for the caller. A rank
+     * shortfall is an explicit failure naming the requirement — never a silent no-op.
+     */
+    private static int performService(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String cultId = StringArgumentType.getString(ctx, "cult");
+        CultDefinition def = Cults.byId(cultId);
+        if (def == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown cult: " + cultId));
+            return 0;
+        }
+        String serviceId = StringArgumentType.getString(ctx, "service");
+        CultService service = def.service(serviceId);
+        if (service == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown service: "
+                    + serviceId + " for cult " + cultId));
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        CultServices.Outcome outcome = CultServices.perform(p, cultId, service);
+        if (outcome.ok()) {
+            ctx.getSource().sendSuccess(() -> outcome.message(), true);
+            return 1;
+        }
+        ctx.getSource().sendFailure(outcome.message());
+        return 0;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.core;
 
+import java.util.List;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
@@ -134,6 +135,26 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue RITUAL_COOLDOWN_TICKS =
             BUILDER.comment("Minimum ticks between ritual attempts at the same altar.")
                     .defineInRange("ritualCooldownTicks", 40, 0, 72000);
+
+    // --- Mob suppression --------------------------------------------------------------------
+
+    /**
+     * Master switch that removes every vanilla mob from the world — natural spawns, monster
+     * spawners, structure spawns, spawn eggs and {@code /summon}. Only mod entities and the
+     * player remain. See {@code world/MobSuppressor}.
+     */
+    public static final ModConfigSpec.BooleanValue SUPPRESS_VANILLA_MOBS =
+            BUILDER.comment("Remove all vanilla mobs from the world (spawns, spawners, eggs, /summon).")
+                    .define("suppressVanillaMobs", true);
+
+    /**
+     * Vanilla entity ids exempt from suppression, e.g. {@code ["minecraft:villager"]}. Empty by
+     * default; mod entities are always allowed regardless.
+     */
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> SUPPRESSED_MOB_ALLOWLIST =
+            BUILDER.comment("Vanilla entity ids exempt from mob suppression (default: villagers only).")
+                    .defineListAllowEmpty("suppressedMobAllowlist", List.of("minecraft:villager"),
+                            () -> "minecraft:villager", String.class::isInstance);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 
