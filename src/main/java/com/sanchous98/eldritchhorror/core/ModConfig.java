@@ -230,6 +230,141 @@ public final class ModConfig {
             BUILDER.comment("Real population per villager; target = clamp(population / this, 8, 60).")
                     .defineInRange("cityPopulationDensity", 250000, 1000, 10000000);
 
+    // --- Bestiary dread auras (tainted_fauna / lesser_swarm / watcher) -----------------------
+
+    /** Corruption vector: standing near tainted fauna adds corruption (mirrors the husk drain). */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_TAINTED_FAUNA =
+            BUILDER.comment("Enable the 'tainted_fauna' corruption vector (nearby fauna add corruption).")
+                    .define("enableCorruptionTaintedFauna", true);
+
+    /** Corruption per second per nearby tainted fauna; positive taints. */
+    public static final ModConfigSpec.DoubleValue CORRUPTION_TAINTED_FAUNA_RATE =
+            BUILDER.comment("Corruption per second per nearby tainted fauna (positive taints).")
+                    .defineInRange("corruptionTaintedFaunaRate", 0.03, 0.0, 10.0);
+
+    /** Radius (blocks) within which tainted fauna add corruption; loaded chunks only. */
+    public static final ModConfigSpec.IntValue CORRUPTION_TAINTED_FAUNA_RADIUS =
+            BUILDER.comment("Radius (blocks) in which tainted fauna contribute corruption.")
+                    .defineInRange("corruptionTaintedFaunaRadius", 6, 1, 32);
+
+    /** Most tainted fauna counted at once, bounding a herd. */
+    public static final ModConfigSpec.IntValue CORRUPTION_TAINTED_FAUNA_MAX =
+            BUILDER.comment("Maximum tainted fauna counted toward the corruption vector at once.")
+                    .defineInRange("corruptionTaintedFaunaMax", 4, 1, 32);
+
+    /** Sanity source: a swarm of lesser horrors drains sanity faster the more of them there are. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_LESSER_SWARM =
+            BUILDER.comment("Enable the 'lesser_swarm' sanity source (nearby swarms drain sanity in numbers).")
+                    .define("enableSanityLesserSwarm", true);
+
+    /** Drain per counted swarm member per second; negative drains. */
+    public static final ModConfigSpec.DoubleValue SANITY_LESSER_SWARM_RATE =
+            BUILDER.comment("Sanity change per second per nearby lesser swarm (negative drains).")
+                    .defineInRange("sanityLesserSwarmRate", -0.10, -10.0, 0.0);
+
+    /** Radius (blocks) within which lesser swarms count; loaded chunks only. */
+    public static final ModConfigSpec.IntValue SANITY_LESSER_SWARM_RADIUS =
+            BUILDER.comment("Radius (blocks) in which lesser swarms contribute to the sanity drain.")
+                    .defineInRange("sanityLesserSwarmRadius", 8, 1, 32);
+
+    /** Most swarm members counted at once; keeps the pack drain bounded. */
+    public static final ModConfigSpec.IntValue SANITY_LESSER_SWARM_MAX =
+            BUILDER.comment("Maximum lesser swarm members counted toward the sanity drain at once.")
+                    .defineInRange("sanityLesserSwarmMax", 8, 1, 32);
+
+    /** Sanity source: the Watcher is a presence — a steady, strong, single-target drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_WATCHER =
+            BUILDER.comment("Enable the 'watcher' sanity source (the presence drains sanity).")
+                    .define("enableSanityWatcher", true);
+
+    /** Drain per second while a Watcher is near; negative drains. */
+    public static final ModConfigSpec.DoubleValue SANITY_WATCHER_RATE =
+            BUILDER.comment("Sanity change per second per nearby Watcher (negative drains).")
+                    .defineInRange("sanityWatcherRate", -0.25, -10.0, 0.0);
+
+    /** Radius (blocks) within which a Watcher counts; loaded chunks only. */
+    public static final ModConfigSpec.IntValue SANITY_WATCHER_RADIUS =
+            BUILDER.comment("Radius (blocks) in which a Watcher contributes to the sanity drain.")
+                    .defineInRange("sanityWatcherRadius", 16, 1, 48);
+
+    /** Most Watchers counted at once (a presence is meant to be singular). */
+    public static final ModConfigSpec.IntValue SANITY_WATCHER_MAX =
+            BUILDER.comment("Maximum Watchers counted toward the sanity drain at once.")
+                    .defineInRange("sanityWatcherMax", 1, 1, 8);
+
+    // --- Bestiary spawns (tainted_fauna / lesser_swarm / watcher) ----------------------------
+
+    /** Enable the bounded tainted-fauna spawner (tainted terrain, or darkness as a wrong wanderer). */
+    public static final ModConfigSpec.BooleanValue ENABLE_TAINTED_FAUNA_SPAWNS =
+            BUILDER.comment("Allow tainted fauna to spawn near players in tainted/dark loaded terrain.")
+                    .define("enableTaintedFaunaSpawns", true);
+
+    public static final ModConfigSpec.IntValue TAINTED_FAUNA_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between tainted-fauna spawn passes (minimum 20).")
+                    .defineInRange("taintedFaunaSpawnIntervalTicks", 200, 20, 24000);
+
+    public static final ModConfigSpec.IntValue TAINTED_FAUNA_SPAWN_COUNT =
+            BUILDER.comment("Max tainted fauna spawned per player per pass.")
+                    .defineInRange("taintedFaunaSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue TAINTED_FAUNA_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which tainted fauna may spawn.")
+                    .defineInRange("taintedFaunaSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue TAINTED_FAUNA_SPAWN_CAP =
+            BUILDER.comment("Max tainted fauna allowed near one player before spawning pauses.")
+                    .defineInRange("taintedFaunaSpawnCap", 6, 1, 64);
+
+    /** Enable the bounded lesser-swarm spawner (dark/tainted; numerous by design). */
+    public static final ModConfigSpec.BooleanValue ENABLE_LESSER_SWARM_SPAWNS =
+            BUILDER.comment("Allow lesser swarms to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableLesserSwarmSpawns", true);
+
+    public static final ModConfigSpec.IntValue LESSER_SWARM_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between lesser-swarm spawn passes (minimum 20).")
+                    .defineInRange("lesserSwarmSpawnIntervalTicks", 200, 20, 24000);
+
+    public static final ModConfigSpec.IntValue LESSER_SWARM_SPAWN_COUNT =
+            BUILDER.comment("Max lesser swarms spawned per player per pass.")
+                    .defineInRange("lesserSwarmSpawnCount", 4, 0, 24);
+
+    public static final ModConfigSpec.IntValue LESSER_SWARM_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which lesser swarms may spawn.")
+                    .defineInRange("lesserSwarmSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue LESSER_SWARM_SPAWN_CAP =
+            BUILDER.comment("Max lesser swarms allowed near one player before spawning pauses.")
+                    .defineInRange("lesserSwarmSpawnCap", 12, 1, 64);
+
+    /** Enable the bounded Watcher spawner (rare; one presence at a time by default). */
+    public static final ModConfigSpec.BooleanValue ENABLE_WATCHER_SPAWNS =
+            BUILDER.comment("Allow the Watcher to appear near players in tainted/dark loaded terrain (rare).")
+                    .define("enableWatcherSpawns", true);
+
+    public static final ModConfigSpec.IntValue WATCHER_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Watcher spawn passes (minimum 20; long, it is rare).")
+                    .defineInRange("watcherSpawnIntervalTicks", 1200, 20, 72000);
+
+    public static final ModConfigSpec.IntValue WATCHER_SPAWN_COUNT =
+            BUILDER.comment("Max Watchers spawned per player per pass (keep this at 1).")
+                    .defineInRange("watcherSpawnCount", 1, 0, 4);
+
+    public static final ModConfigSpec.IntValue WATCHER_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which the Watcher may appear.")
+                    .defineInRange("watcherSpawnRadius", 48, 8, 128);
+
+    public static final ModConfigSpec.IntValue WATCHER_SPAWN_CAP =
+            BUILDER.comment("Max Watchers allowed near one player before spawning pauses.")
+                    .defineInRange("watcherSpawnCap", 1, 1, 8);
+
+    /**
+     * Whether the Watcher can be killed at all. False (default) makes it permanently invulnerable —
+     * "very hard/impossible to kill early". Set true to make it a very tough fight (40 HP, no loot).
+     */
+    public static final ModConfigSpec.BooleanValue WATCHER_KILLABLE =
+            BUILDER.comment("Allow the Watcher to take damage. False = permanently invulnerable.")
+                    .define("watcherKillable", false);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

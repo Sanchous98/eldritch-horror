@@ -7,5 +7,50 @@
         "type": "event"
       }
     ]
+  },
+  "entity.tainted_fauna.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.tainted_fauna.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cow.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.tainted_fauna.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.tainted_fauna.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cow.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.tainted_fauna.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.tainted_fauna.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cow.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.lesser_swarm.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.lesser_swarm.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.watcher.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.watcher.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.stare",
+        "type": "event"
+      }
+    ]
   }
 }

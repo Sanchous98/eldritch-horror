@@ -2,6 +2,12 @@
   "itemGroup.eldritch_horror": "Eldritch Horror",
   "entity.eldritch_horror.risen_husk": "Risen Husk",
   "item.eldritch_horror.risen_husk_spawn_egg": "Risen Husk Spawn Egg",
+  "entity.eldritch_horror.tainted_fauna": "Tainted Fauna",
+  "item.eldritch_horror.tainted_fauna_spawn_egg": "Tainted Fauna Spawn Egg",
+  "entity.eldritch_horror.lesser_swarm": "Lesser Swarm",
+  "item.eldritch_horror.lesser_swarm_spawn_egg": "Lesser Swarm Spawn Egg",
+  "entity.eldritch_horror.watcher": "The Watcher",
+  "item.eldritch_horror.watcher_spawn_egg": "The Watcher Spawn Egg",
   "block.eldritch_horror.eldritch_stone": "Eldritch Stone",
   "item.eldritch_horror.grasping_idol": "Grasping Idol",
   "attribute.eldritch_horror.max_sanity": "Max Sanity",
@@ -320,5 +326,10 @@
   "service.eldritch_horror.cleanse.success": "%s — corruption %s → %s, taint %s.",
   "tooltip.eldritch_horror.sanity": "Sanity %s",
   "tooltip.eldritch_horror.corruption": "Corruption %s",
-  "subtitles.entity.eldritch_horror.risen_husk.ambient": "Something dried drags itself along"
+  "subtitles.entity.eldritch_horror.risen_husk.ambient": "Something dried drags itself along",
+  "subtitles.entity.eldritch_horror.tainted_fauna.ambient": "An animal calls, wrong",
+  "subtitles.entity.eldritch_horror.tainted_fauna.hurt": "Tainted fauna cries out",
+  "subtitles.entity.eldritch_horror.tainted_fauna.death": "Tainted fauna goes quiet",
+  "subtitles.entity.eldritch_horror.lesser_swarm.ambient": "Something skitters in the dark",
+  "subtitles.entity.eldritch_horror.watcher.ambient": "You are being watched"
 }

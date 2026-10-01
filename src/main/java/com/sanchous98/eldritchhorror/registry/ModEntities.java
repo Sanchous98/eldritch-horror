@@ -1,7 +1,10 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
+import com.sanchous98.eldritchhorror.entity.TaintedFauna;
+import com.sanchous98.eldritchhorror.entity.Watcher;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -50,6 +53,44 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("risen_husk_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(RISEN_HUSK.get())));
 
+    /** Tainted fauna: 0.9 x 1.4, creature category (an animal made wrong). */
+    public static final DeferredHolder<EntityType<?>, EntityType<TaintedFauna>> TAINTED_FAUNA =
+            ENTITY_TYPES.register("tainted_fauna", () ->
+                    EntityType.Builder.<TaintedFauna>of(TaintedFauna::new, MobCategory.CREATURE)
+                            .sized(0.9F, 1.4F)
+                            .clientTrackingRange(8)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("tainted_fauna"))));
+
+    public static final DeferredItem<SpawnEggItem> TAINTED_FAUNA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("tainted_fauna_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(TAINTED_FAUNA.get())));
+
+    /** Lesser swarm: 0.4 x 0.3, tiny hostile hitbox. */
+    public static final DeferredHolder<EntityType<?>, EntityType<LesserSwarm>> LESSER_SWARM =
+            ENTITY_TYPES.register("lesser_swarm", () ->
+                    EntityType.Builder.<LesserSwarm>of(LesserSwarm::new, MobCategory.MONSTER)
+                            .sized(0.4F, 0.3F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("lesser_swarm"))));
+
+    public static final DeferredItem<SpawnEggItem> LESSER_SWARM_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("lesser_swarm_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(LESSER_SWARM.get())));
+
+    /** The Watcher: 0.6 x 2.9, tall hostile presence. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Watcher>> WATCHER =
+            ENTITY_TYPES.register("watcher", () ->
+                    EntityType.Builder.<Watcher>of(Watcher::new, MobCategory.MONSTER)
+                            .sized(0.6F, 2.9F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("watcher"))));
+
+    public static final DeferredItem<SpawnEggItem> WATCHER_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("watcher_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(WATCHER.get())));
+
     /**
      * Adds the spawn egg to the mod's creative tab. The tab is built once at registration from
      * {@code ModItems.ALL}, before items exist, so this event (fired while the tab populates) is the
@@ -60,6 +101,9 @@ public final class ModEntities {
     public static void onBuildTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ResourceKey.create(Registries.CREATIVE_MODE_TAB, EldritchHorror.id("main")))) {
             event.accept(RISEN_HUSK_SPAWN_EGG.get());
+            event.accept(TAINTED_FAUNA_SPAWN_EGG.get());
+            event.accept(LESSER_SWARM_SPAWN_EGG.get());
+            event.accept(WATCHER_SPAWN_EGG.get());
         }
     }
 
@@ -70,6 +114,9 @@ public final class ModEntities {
     @SubscribeEvent
     public static void onAttributeCreation(EntityAttributeCreationEvent event) {
         event.put(RISEN_HUSK.get(), RisenHusk.createAttributes().build());
+        event.put(TAINTED_FAUNA.get(), TaintedFauna.createAttributes().build());
+        event.put(LESSER_SWARM.get(), LesserSwarm.createAttributes().build());
+        event.put(WATCHER.get(), Watcher.createAttributes().build());
     }
 
     private ModEntities() {

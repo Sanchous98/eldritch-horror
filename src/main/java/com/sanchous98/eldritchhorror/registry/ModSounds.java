@@ -18,6 +18,26 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> RISEN_HUSK_AMBIENT =
             register("entity.risen_husk.ambient");
 
+    /** Tainted fauna's distorted animal call (ambient). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> TAINTED_FAUNA_AMBIENT =
+            register("entity.tainted_fauna.ambient");
+
+    /** Tainted fauna's distorted cry when struck. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> TAINTED_FAUNA_HURT =
+            register("entity.tainted_fauna.hurt");
+
+    /** Tainted fauna's distorted death cry. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> TAINTED_FAUNA_DEATH =
+            register("entity.tainted_fauna.death");
+
+    /** The lesser swarm's skittering vocalisation (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> LESSER_SWARM_AMBIENT =
+            register("entity.lesser_swarm.ambient");
+
+    /** The Watcher's vocalisation — near-absent, heard more than seen. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> WATCHER_AMBIENT =
+            register("entity.watcher.ambient");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(EldritchHorror.id(name)));
     }
