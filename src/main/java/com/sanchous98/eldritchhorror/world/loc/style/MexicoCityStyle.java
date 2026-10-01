@@ -98,7 +98,8 @@ public final class MexicoCityStyle implements CityStyle {
     private static void bellTower(StructureBuilder b, int x, int z, int ground, Palette p) {
         int y0 = ground + 1;
         int top = y0 + 16;
-        b.room(x - 2, y0, z - 2, x + 2, top, z + 2);
+        // Bell towers are walk-in: a south doorway at ground level.
+        b.room(x - 2, y0, z - 2, x + 2, top, z + 2, new Doorway(Side.S, 2));
         for (int y = y0; y <= top; y++) {
             b.put(x - 2, y, z - 2, p.accent());
             b.put(x + 2, y, z - 2, p.accent());

@@ -92,7 +92,13 @@ public final class StyleKit {
             int x1 = cx + s;
             int z0 = cz - s;
             int z1 = cz + s;
-            b.room(x0, y, z0, x1, y + storey - 1, z1);
+            // The ground storey is a walk-in shaft: give it a south entrance so the pagoda
+            // is not a sealed tower. Upper storeys stay closed (no internal stair).
+            if (lv == 0) {
+                b.room(x0, y, z0, x1, y + storey - 1, z1, new Doorway(Side.S, s));
+            } else {
+                b.room(x0, y, z0, x1, y + storey - 1, z1);
+            }
             // Corner pillars in the accent (vermilion) colour.
             for (int yy = y; yy <= y + storey - 1; yy++) {
                 b.put(x0, yy, z0, p.accent());

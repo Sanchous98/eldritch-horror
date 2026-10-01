@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -167,10 +169,16 @@ public final class NewYorkStyle implements CityStyle {
         // tier: {halfWidth, height}
         int[][] tiers = {{8, 14}, {6, 10}, {4, 9}, {2, 8}};
         int y = y0;
-        for (int[] t : tiers) {
+        for (int tier = 0; tier < tiers.length; tier++) {
+            int[] t = tiers[tier];
             int r = t[0];
             int top = y + t[1] - 1;
-            b.room(cx - r, y, cz - r, cx + r, top, cz + r);
+            // The base tier is a street lobby: give it a south entrance. Setback floors stay closed.
+            if (tier == 0) {
+                b.room(cx - r, y, cz - r, cx + r, top, cz + r, new Doorway(Side.S, r));
+            } else {
+                b.room(cx - r, y, cz - r, cx + r, top, cz + r);
+            }
             cornerPilasters(b, cx, cz, r, y, top, p);
             windowBands(b, cx, cz, r, y, top, p);
             // Cornice / setback ledge in the limestone crown colour.

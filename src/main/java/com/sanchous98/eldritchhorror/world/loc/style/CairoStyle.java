@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 
@@ -104,7 +106,8 @@ public final class CairoStyle implements CityStyle {
     private static void mamlukMinaret(StructureBuilder b, int x, int z, int ground, Palette p) {
         int y0 = ground + 1;
         int top = y0 + 30;
-        b.room(x - 1, y0, z - 1, x + 1, top, z + 1);
+        // A ground-level doorway so the shaft is a real (walk-in) minaret rather than a sealed box.
+        b.room(x - 1, y0, z - 1, x + 1, top, z + 1, new Doorway(Side.S, 1));
         for (int y = y0; y <= top; y++) {
             b.put(x - 1, y, z - 1, p.accent());
             b.put(x + 1, y, z - 1, p.accent());

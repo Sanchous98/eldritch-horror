@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -195,7 +197,8 @@ public final class MoscowStyle implements CityStyle {
         int r = 2;
         int base = ground + 1;
         int top = base + 20;
-        b.room(cx - r, base, cz - r, cx + r, top, cz + r);
+        // Clock tower is walk-in: a south doorway at ground level.
+        b.room(cx - r, base, cz - r, cx + r, top, cz + r, new Doorway(Side.S, r));
         for (int y = base; y <= top; y++) {
             b.put(cx - r, y, cz - r, p.accent());
             b.put(cx + r, y, cz - r, p.accent());

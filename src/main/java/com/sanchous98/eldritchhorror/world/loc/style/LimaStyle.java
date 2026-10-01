@@ -77,7 +77,8 @@ public final class LimaStyle implements CityStyle {
             b.window(x0, y0 + 12, z, 9, 1, true);
             b.window(x1, y0 + 12, z, 9, 1, true);
         }
-        b.room(x0, y0, z0, x1, y1, z1);
+        // A south doorway at the west front (the twoHighDoor at cx sits against this wall).
+        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, (x1 - x0) / 2));
         // Cream quoins and a warm plaster band under the eaves.
         b.fill(x0, y1, z0, x0, y1, z1, p.weathered());
         b.fill(x1, y1, z0, x1, y1, z1, p.weathered());
@@ -147,9 +148,9 @@ public final class LimaStyle implements CityStyle {
                 b.put(tx + tr, y, tz - 1, p.frame());
                 b.put(tx + tr, y, tz + 1, p.frame());
             }
-            // Pointed tiled cap.
+            // Pointed tiled cap; the finial light crowns the roof apex (not floating above it).
             b.pitchedRoof(tx - tr - 1, tz - tr - 1, tx + tr + 1, tz + tr + 1, tTop, 9, 0);
-            b.put(tx, tTop + 10, tz, p.light());
+            b.put(tx, tTop + 7, tz, p.light());
         }
     }
 
@@ -192,9 +193,9 @@ public final class LimaStyle implements CityStyle {
             b.put(cx + r, y, cz - 1, p.frame());
             b.put(cx + r, y, cz + 1, p.frame());
         }
-        // Pointed tiled cap.
+        // Pointed tiled cap; the finial light sits on the roof apex.
         b.pitchedRoof(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, top, 7, 0);
-        b.put(cx, top + 8, cz, p.light());
+        b.put(cx, top + 5, cz, p.light());
     }
 
     @Override

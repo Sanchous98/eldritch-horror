@@ -181,7 +181,8 @@ public final class BeijingStyle implements CityStyle {
         // Tier 2.
         int ty2 = gy0 + t1h + 6;
         int t2h = 15;
-        b.room(cx - 6, ty2, gt - 3, cx + 6, ty2 + t2h, gt + 3);
+        // Carry the gate axis up: an upper doorway on each gallery so the tower is not sealed.
+        b.room(cx - 6, ty2, gt - 3, cx + 6, ty2 + t2h, gt + 3, new Doorway(Side.S, 6));
         for (int y = ty2; y <= ty2 + t2h; y++) {
             b.put(cx - 6, y, gt - 3, p.accent());
             b.put(cx + 6, y, gt - 3, p.accent());
@@ -197,7 +198,7 @@ public final class BeijingStyle implements CityStyle {
         // Tier 3 — the crowning pavilion.
         int ty3 = ty2 + t2h + 5;
         int t3h = 14;
-        b.room(cx - 4, ty3, gt - 2, cx + 4, ty3 + t3h, gt + 2);
+        b.room(cx - 4, ty3, gt - 2, cx + 4, ty3 + t3h, gt + 2, new Doorway(Side.S, 4));
         for (int y = ty3; y <= ty3 + t3h; y++) {
             b.put(cx - 4, y, gt - 2, p.accent());
             b.put(cx + 4, y, gt - 2, p.accent());
@@ -320,7 +321,7 @@ public final class BeijingStyle implements CityStyle {
         b.pitchedRoof(cx - 3, cz - 2, cx + 3, cz + 2, uy + 3, 3, 0);
         b.window(cx - 2, uy + 1, cz - 1, 2, 1, true);
         b.window(cx + 2, uy + 1, cz - 1, 2, 1, true);
-        b.put(cx, uy + 7, cz, p.light());
+        b.put(cx, uy + 6, cz, p.light());   // on the roof apex, not floating above it
     }
 
     /** A wide palace hall on a raised stone terrace, with a tiered golden hipped roof. */

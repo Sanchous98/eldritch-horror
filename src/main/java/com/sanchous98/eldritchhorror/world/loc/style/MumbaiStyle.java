@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -287,7 +289,7 @@ public final class MumbaiStyle implements CityStyle {
         int top = y0 + 18;
 
         b.ground(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, ground, ground, p.foundation());
-        b.room(cx - r, y0, cz - r, cx + r, top, cz + r);
+        b.room(cx - r, y0, cz - r, cx + r, top, cz + r, new Doorway(Side.S, r));
 
         // A pale clock dial on each of the four faces, high up.
         int dy = top - 5;

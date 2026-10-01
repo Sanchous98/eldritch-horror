@@ -293,7 +293,9 @@ public final class Builder implements StructureBuilder {
         if (height < 1) {
             return;
         }
-        // Stepped leaning column: each step moves one block outward from the wall and one up.
+        // A SOLID stepped wedge leaning against the wall: each outward step is a full column from
+        // the base up to its own height, so nothing floats. (The old version placed a diagonal line
+        // of single blocks that hovered in mid-air — the "floating columns" on houses.)
         Direction dir = switch (outward) {
             case N -> Direction.NORTH;
             case S -> Direction.SOUTH;
@@ -304,11 +306,9 @@ public final class Builder implements StructureBuilder {
         for (int i = 0; i < height; i++) {
             int px = x + dir.getStepX() * i;
             int pz = z + dir.getStepZ() * i;
-            int y = baseY + i;
-            put(px, y, pz, i == 0 ? p.foundation() : p.wall());
-            // Give the lower third a sloped shoulder.
-            if (i < Math.max(1, height / 3)) {
-                put(x + dir.getStepX() * (i + 1), y, z + dir.getStepZ() * (i + 1), p.weathered());
+            int top = baseY + (height - 1 - i); // tall at the wall, tapering to the base outward
+            for (int y = baseY; y <= top; y++) {
+                put(px, y, pz, y == baseY ? p.foundation() : p.wall());
             }
         }
     }

@@ -2,6 +2,9 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
+import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 
@@ -87,6 +90,28 @@ public final class TokyoStyle implements CityStyle {
             }
         }
 
+        // A real, walk-in gate: cut a stepped passage up through the stone base on the south
+        // face, from the plaza to the keep floor, so the tenshu-dai is entered, not sealed.
+        for (int i = 0; i <= baseH; i++) {
+            int z = cz + 20 - i;                 // one course higher for each block inward
+            b.fill(cx - 1, y0 + i, z, cx + 1, y0 + i, z, p.foundation());   // tread
+        }
+        // Clear the headroom above the rising treads so the stair is walkable, not buried.
+        for (int i = 0; i <= baseH - 1; i++) {
+            int z = cz + 20 - i;
+            for (int y = y0 + i + 1; y <= y0 + baseH; y++) {
+                b.put(cx - 1, y, z, Blocks.AIR.defaultBlockState());
+                b.put(cx, y, z, Blocks.AIR.defaultBlockState());
+                b.put(cx + 1, y, z, Blocks.AIR.defaultBlockState());
+            }
+        }
+        // Dark timber posts flank the gate mouth; the gate leaves sit in the keep wall at floor level.
+        for (int y = y0; y <= y0 + 4; y++) {
+            b.put(cx - 2, y, cz + 20, p.accent());
+            b.put(cx + 2, y, cz + 20, p.accent());
+        }
+        StyleKit.twoHighDoor(b, p, cx, cz + 13, y0 + baseH + 1, Direction.SOUTH);
+
         // Five white-walled tiers, each smaller than the last, over dark flared tile eaves.
         int y = y0 + baseH;                       // first tier floor, sits on the stone base
         int half = 13;
@@ -96,7 +121,8 @@ public final class TokyoStyle implements CityStyle {
             int x1 = cx + half;
             int z0 = cz - half;
             int z1 = cz + half;
-            b.room(x0, y, z0, x1, y + h - 1, z1);
+            // Every tier keeps a south doorway on the gate axis (x = cx), so the keep is walk-in.
+            b.room(x0, y, z0, x1, y + h - 1, z1, new Doorway(Side.S, half));
             // Himeji's black-and-white banding: dark timber sill and lintel round each tier.
             b.walls(x0, y, z0, x1, y, z1, p.accent());
             b.walls(x0, y + h - 1, z0, x1, y + h - 1, z1, p.accent());

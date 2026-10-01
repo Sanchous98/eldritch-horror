@@ -310,7 +310,8 @@ public final class SeoulStyle implements CityStyle {
         int r = 7;
         int y0 = ground + 3;
         b.ground(cx - r - 2, cz - r - 2, cx + r + 2, cz + r + 2, ground, ground + 2, p.foundation());
-        b.room(cx - r, y0, cz - r, cx + r, y0 + 6, cz + r);
+        // A south entrance, consistent with the throne hall and gate.
+        b.room(cx - r, y0, cz - r, cx + r, y0 + 6, cz + r, new Doorway(Side.S, r));
         // Dark timber corner and mid posts.
         for (int y = y0 + 1; y <= y0 + 6; y++) {
             b.put(cx - r, y, cz - r, p.accent());

@@ -32,12 +32,6 @@ public final class CityLocation implements Location {
 
     /** Layout pitch of the jittered building grid (blocks). */
     private static final int CELL = 13;
-    /**
-     * Hard cap on buildings per city. Raised from 240 so the much larger district still fills:
-     * the loop rebuilds the whole (chunk-clipped) layout for every generating chunk, so this
-     * bounds the worst-case per-chunk cost. Density is kept comparable to the old city.
-     */
-    private static final int MAX_BUILDINGS = 1100;
     /** Built district half-extent (blocks); the cull radius ({@link #radius()}) can be larger. */
     private static final int DISTRICT_CAP = 380;
     /** Plaza half-extent: wide enough to seat the enlarged style landmarks on paving. */
@@ -51,11 +45,11 @@ public final class CityLocation implements Location {
      */
     private static final int CLEAR_ABOVE = 40;
     /**
-     * Width (blocks) of the outer fade ring. Inside this ring the district no longer carves or
-     * fills: it lays a paving course only on columns that already sit at the city level, so the
-     * paved fabric dissolves into the wild terrain instead of ending on a hard circular cut.
+     * Width (blocks) of the outer fade ring. The district blends from the flat city level to the
+     * natural terrain across this ring (a graded slope), so the edge is never a vertical cliff;
+     * buildings stay inside the flat interior, {@code district - EDGE_RING}.
      */
-    private static final int EDGE_RING = 6;
+    private static final int EDGE_RING = 28;
 
     private final City city;
 
@@ -96,17 +90,24 @@ public final class CityLocation implements Location {
     public void build(StructureBuilder b) {
         int cx = this.city.x();
         int cz = this.city.z();
-        int ground = b.groundY(cx, cz);
+        int district = Math.min(radius(), DISTRICT_CAP);
+        int plaza = PLAZA;
+        // The city level is the MEAN terrain over the flat interior, not the single centre point:
+        // a centre-only level can sit far above or below most of a district that sprawls over a
+        // hill, forcing a huge cut and a terraced edge. The mean balances cut and fill so the
+        // flattening stays shallow wherever possible (e.g. Lima cuts 115 blocks at the centre
+        // alone, but only a few with the mean). b.groundY is pure (no rng), so this stays
+        // deterministic per column and the chunk-local loop below can reuse it.
+        int ground = meanLevel(b, cx, cz, district - EDGE_RING);
         Palette p = b.palette();
         RandomSource rng = b.rng();
         CityStyle style = CityStyles.forCity(this.city.name());
 
-        int district = Math.min(radius(), DISTRICT_CAP);
-        int plaza = PLAZA;
         int inner = INNER_CLEAR;
-        // The flattened interior is EDGE_RING smaller than the district; buildings and street
-        // furniture stay inside it so nothing sits on the un-levelled fade ring.
-        int buildRadius = district - EDGE_RING;
+        // The flat interior is EDGE_RING smaller than the district, and lots need another ~10 blocks
+        // for their footprint/roof overhang, so buildings and street furniture stay fully on the
+        // flat ground and off the graded transition ring.
+        int buildRadius = district - EDGE_RING - 10;
 
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
@@ -129,15 +130,32 @@ public final class CityLocation implements Location {
         streetDetails(b, rng, cx, cz, district, inner, ground, p);
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
-        // Bounded to the flattened interior: the outer EDGE_RING is no longer levelled, so a lot
-        // whose far corner reached into it would float over un-flattened terrain.
-        int built = 0;
-        for (int gx = -buildRadius; gx <= buildRadius && built < MAX_BUILDINGS; gx += CELL) {
-            for (int gz = -buildRadius; gz <= buildRadius && built < MAX_BUILDINGS; gz += CELL) {
-                int jx = gx + rng.nextInt(5) - 2;
-                int jz = gz + rng.nextInt(5) - 2;
-                int x = cx + jx;
-                int z = cz + jz;
+        // Chunk-local and grid-canonical: each cell's jitter and vacancy come from a position hash
+        // (not the per-chunk rng), and we only build cells whose jittered origin lands inside THIS
+        // chunk. The layout is therefore identical in every chunk that overlaps a building, costs
+        // O(chunk), and never leaves half the district empty the way a global "built < MAX" cap did.
+        int cellMinX = -buildRadius - 2;
+        int cellMaxX = buildRadius + 2;
+        int cellMinZ = -buildRadius - 2;
+        int cellMaxZ = buildRadius + 2;
+        int chunkMaxX = b.chunkMinX() + 15;
+        int chunkMaxZ = b.chunkMinZ() + 15;
+        for (int gx = cellMinX; gx <= cellMaxX; gx += CELL) {
+            int bx = cx + gx;
+            if (bx + 2 < b.chunkMinX() || bx - 2 > chunkMaxX) {
+                continue; // no jitter of this cell can fall in this chunk
+            }
+            for (int gz = cellMinZ; gz <= cellMaxZ; gz += CELL) {
+                int bz = cz + gz;
+                if (bz + 2 < b.chunkMinZ() || bz - 2 > chunkMaxZ) {
+                    continue;
+                }
+                int h = hash(cx, cz, gx, gz);
+                int x = bx + ((h >>> 8) % 5) - 2;
+                int z = bz + ((h >>> 13) % 5) - 2;
+                if (x < b.chunkMinX() || x > chunkMaxX || z < b.chunkMinZ() || z > chunkMaxZ) {
+                    continue; // this building is drawn by the chunk that owns its origin
+                }
                 int dx = x - cx;
                 int dz = z - cz;
                 if (dx * dx + dz * dz > buildRadius * buildRadius) {
@@ -146,11 +164,10 @@ public final class CityLocation implements Location {
                 if (Math.abs(dx) < inner && Math.abs(dz) < inner) {
                     continue; // keep the landmark and plaza clear
                 }
-                if (rng.nextFloat() > 0.82f) {
-                    continue; // a few vacant lots
+                if (((h >>> 5) & 0xFF) > 209) {
+                    continue; // ~18% vacant lots
                 }
                 building(b, rng, x, z, ground, p, style);
-                built++;
             }
         }
 
@@ -162,6 +179,45 @@ public final class CityLocation implements Location {
     }
 
     // ------------------------------------------------------------------ pieces
+
+    /**
+     * A stable position hash for the building grid: mixes the city centre and cell coordinates into
+     * a 32-bit value, so cell jitter and vacancy are pure functions of (city, cell) and the layout
+     * is identical in every chunk that overlaps a lot.
+     */
+    private static int hash(int cx, int cz, int gx, int gz) {
+        int h = cx * 0x9E3779B9 ^ cz * 0x85EBCA6B ^ gx * 0xC2B2AE35 ^ gz * 0x27D4EB2F;
+        h ^= h >>> 15;
+        h *= 0x2C1B3C6D;
+        h ^= h >>> 12;
+        return h;
+    }
+
+    /**
+     * The city's build level: the mean terrain height over the flat interior, sampled on a grid.
+     * Using the mean instead of the single centre point keeps cut-and-fill balanced, so a district
+     * on a slope is levelled gently rather than cut in half. Pure ({@code b.groundY} only, no rng),
+     * so it is identical for every generating chunk.
+     */
+    private static int meanLevel(StructureBuilder b, int cx, int cz, int radius) {
+        long sum = 0;
+        int n = 0;
+        int step = 16;
+        for (int dx = -radius; dx <= radius; dx += step) {
+            for (int dz = -radius; dz <= radius; dz += step) {
+                if (dx * dx + dz * dz > radius * radius) {
+                    continue;
+                }
+                int x = cx + dx;
+                int z = cz + dz;
+                if (b.isLand(x, z)) {
+                    sum += b.groundY(x, z);
+                    n++;
+                }
+            }
+        }
+        return n == 0 ? b.groundY(cx, cz) : (int) Math.round(sum / (double) n);
+    }
 
     /**
      * Paves the district on land only: a ground course on every land column within the district
@@ -187,22 +243,29 @@ public final class CityLocation implements Location {
                 if (!b.isLand(x, z)) {
                     continue;
                 }
-                // Outer fade ring: no big carve/fill here, so the rim reads as terrain
-                // swallowing the city rather than a circular wall. Lay a paving course only
-                // where the land already happens to sit at the city level, and never clear
-                // vegetation (that would leave scars in the wild). Inside the ring the old
-                // hard flatten still applies.
                 int surface = b.groundY(x, z);
-                if (dx * dx + dz * dz > (district - EDGE_RING) * (district - EDGE_RING)) {
-                    if (surface == ground) {
-                        // Plain ground course here: the fade reads as one clean surface, and no
-                        // texture hash is spent outside the built fabric.
-                        b.put(x, ground, z, p.ground());
+                int dist2 = dx * dx + dz * dz;
+                int flat2 = (district - EDGE_RING) * (district - EDGE_RING);
+                if (dist2 > flat2) {
+                    // Transition ring: blend from the flat city level to the natural terrain
+                    // instead of cutting a vertical wall. 0 at the flat edge, 1 at the rim.
+                    double t = Math.clamp(
+                            (Math.sqrt(dist2) - (district - EDGE_RING)) / (double) EDGE_RING, 0.0, 1.0);
+                    int target = (int) Math.round(ground * (1.0 - t) + surface * t);
+                    if (surface > target) {
+                        b.fill(x, target + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
+                    } else if (surface < target) {
+                        b.fill(x, surface + 1, z, x, target, z, p.foundation());
+                    }
+                    b.put(x, target, z, p.ground());
+                    int clearTop = Math.max(surface, target) + 4;
+                    for (int y = target + 1; y <= clearTop; y++) {
+                        b.put(x, y, z, Blocks.AIR.defaultBlockState());
                     }
                     continue;
                 }
-                // Flatten the whole interior to the single city-centre level: cut hills down,
-                // fill hollows up, then cap every column with one paving course.
+                // Flat interior: cut hills down, fill hollows up, then cap every column with one
+                // paving course.
                 if (surface > ground) {
                     b.fill(x, ground + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
                 } else if (surface < ground) {
@@ -210,8 +273,11 @@ public final class CityLocation implements Location {
                 }
                 b.put(x, ground, z, streetSurface(x, z, cx, cz, plaza, p));
                 // Clear the vanilla vegetation the biome decoration planted here (trees/leaves/
-                // grass) above the paving, so a jungle city is not swallowed by its own biome.
-                for (int y = ground + 1; y <= ground + 1 + CLEAR_ABOVE; y++) {
+                // grass). Clear all the way up to the ORIGINAL surface plus CLEAR_ABOVE, not a
+                // fixed cap: where a hill was cut down, its trees sat above the old surface, so a
+                // ground-relative cap left their trunks dangling in the air.
+                int clearTop = Math.max(surface, ground) + CLEAR_ABOVE;
+                for (int y = ground + 1; y <= clearTop; y++) {
                     b.put(x, y, z, Blocks.AIR.defaultBlockState());
                 }
             }
@@ -460,15 +526,17 @@ public final class CityLocation implements Location {
             }
         }
 
-        // Tall narrow windows, a row on each wall.
-        int wy = y0 + 2;
-        for (int wx = x + 2; wx <= x1 - 2; wx += 3) {
-            b.window(wx, wy, z, 3, 2, true);
-            b.window(wx, wy, z1, 3, 2, true);
-        }
-        for (int wz = z + 2; wz <= z1 - 2; wz += 3) {
-            b.window(x, wy, wz, 3, 1, true);
-            b.window(x1, wy, wz, 3, 1, true);
+        // Tall narrow windows, a row on every storey (not just the ground floor), so a tall facade
+        // is not a blank wall.
+        for (int wy = y0 + 2; wy <= y1 - 2; wy += 3) {
+            for (int wx = x + 2; wx <= x1 - 2; wx += 3) {
+                b.window(wx, wy, z, 3, 2, true);
+                b.window(wx, wy, z1, 3, 2, true);
+            }
+            for (int wz = z + 2; wz <= z1 - 2; wz += 3) {
+                b.window(x, wy, wz, 3, 1, true);
+                b.window(x1, wy, wz, 3, 1, true);
+            }
         }
 
         // Some buildings sprout a small spire or lean on a buttress.
