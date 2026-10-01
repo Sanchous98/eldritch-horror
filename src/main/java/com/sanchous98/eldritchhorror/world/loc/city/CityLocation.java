@@ -44,12 +44,10 @@ public final class CityLocation implements Location {
      * pass). Taller than the tallest tree we expect to remove; buildings are placed afterwards.
      */
     private static final int CLEAR_ABOVE = 40;
-    /**
-     * Width (blocks) of the outer fade ring. The district blends from the flat city level to the
-     * natural terrain across this ring (a graded slope), so the edge is never a vertical cliff;
-     * buildings stay inside the flat interior, {@code district - EDGE_RING}.
-     */
-    private static final int EDGE_RING = 28;
+    /** Minimum width (blocks) of the graded rim that blends the flat city into the wild terrain. */
+    private static final int EDGE_RING_MIN = 24;
+    /** Maximum rim width: on very steep sites the slope widens (flatter) but never eats the city. */
+    private static final int EDGE_RING_MAX = 64;
 
     private final City city;
 
@@ -98,16 +96,20 @@ public final class CityLocation implements Location {
         // flattening stays shallow wherever possible (e.g. Lima cuts 115 blocks at the centre
         // alone, but only a few with the mean). b.groundY is pure (no rng), so this stays
         // deterministic per column and the chunk-local loop below can reuse it.
-        int ground = meanLevel(b, cx, cz, district - EDGE_RING);
+        // The rim width adapts to how rugged the site is: a flat site needs only a short blend,
+        // while a steep one gets a wider, gentler slope so the flattening never reads as a cliff.
+        int interior = district - EDGE_RING_MIN;
+        int ground = meanLevel(b, cx, cz, interior);
+        int edgeRing = edgeRingWidth(b, cx, cz, interior, ground);
         Palette p = b.palette();
         RandomSource rng = b.rng();
         CityStyle style = CityStyles.forCity(this.city.name());
 
         int inner = INNER_CLEAR;
-        // The flat interior is EDGE_RING smaller than the district, and lots need another ~10 blocks
+        // The flat interior is edgeRing smaller than the district, and lots need another ~10 blocks
         // for their footprint/roof overhang, so buildings and street furniture stay fully on the
         // flat ground and off the graded transition ring.
-        int buildRadius = district - EDGE_RING - 10;
+        int buildRadius = district - edgeRing - 10;
 
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
@@ -115,7 +117,7 @@ public final class CityLocation implements Location {
 
         // 1b. Pave the whole district on land, so the city reads as urban fabric rather than
         // scattered buildings on wild terrain. Chunk-clipped: only this chunk's columns write.
-        paveDistrict(b, cx, cz, district, plaza, p, ground);
+        paveDistrict(b, cx, cz, district, plaza, p, ground, edgeRing);
 
         // 2. Landmark: the cultural skyline piece (cathedral / temple / mosque / pagoda …).
         style.landmark(b, rng, cx, cz, ground, p);
@@ -127,7 +129,7 @@ public final class CityLocation implements Location {
         // or two. Placed BEFORE buildings, so it can never punch through a wall, a door or a road;
         // every write is also gated on the cell being air/replaceable. Off the landmark plaza and
         // inside the paved fabric, deterministic like the rest.
-        streetDetails(b, rng, cx, cz, district, inner, ground, p);
+        streetDetails(b, rng, cx, cz, buildRadius, inner, ground, p);
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
         // Chunk-local and grid-canonical: each cell's jitter and vacancy come from a position hash
@@ -220,12 +222,37 @@ public final class CityLocation implements Location {
     }
 
     /**
+     * The rim width for this site: proportional to how far the terrain departs from the city level,
+     * so a steep site gets a wide gentle slope (about one block of drop per two blocks of run) and
+     * a flat site keeps a short blend. Clamped so it never consumes the whole district. Pure.
+     */
+    private static int edgeRingWidth(StructureBuilder b, int cx, int cz, int radius, int ground) {
+        int maxDeparture = 0;
+        int step = 16;
+        for (int dx = -radius; dx <= radius; dx += step) {
+            for (int dz = -radius; dz <= radius; dz += step) {
+                if (dx * dx + dz * dz > radius * radius) {
+                    continue;
+                }
+                int x = cx + dx;
+                int z = cz + dz;
+                if (!b.isLand(x, z)) {
+                    continue;
+                }
+                maxDeparture = Math.max(maxDeparture, Math.abs(b.groundY(x, z) - ground));
+            }
+        }
+        return Math.clamp(maxDeparture * 2, EDGE_RING_MIN, EDGE_RING_MAX);
+    }
+
+    /**
      * Paves the district on land only: a ground course on every land column within the district
      * radius. This gives the city a continuous urban surface (streets and courts) instead of
-     * buildings floating on untouched terrain. Deterministic and chunk-clipped.
+     * buildings floating on untouched terrain. The rim grades the height from the city level out to
+     * the natural terrain over {@code edgeRing} blocks. Deterministic and chunk-clipped.
      */
     private static void paveDistrict(StructureBuilder b, int cx, int cz,
-                                     int district, int plaza, Palette p, int ground) {
+                                     int district, int plaza, Palette p, int ground, int edgeRing) {
         // Only the columns of the chunk currently generating are visited (O(256) per chunk),
         // so paving costs the same regardless of district size.
         int x0 = b.chunkMinX();
@@ -245,12 +272,12 @@ public final class CityLocation implements Location {
                 }
                 int surface = b.groundY(x, z);
                 int dist2 = dx * dx + dz * dz;
-                int flat2 = (district - EDGE_RING) * (district - EDGE_RING);
+                int flat = district - edgeRing;
+                int flat2 = flat * flat;
                 if (dist2 > flat2) {
                     // Transition ring: blend from the flat city level to the natural terrain
                     // instead of cutting a vertical wall. 0 at the flat edge, 1 at the rim.
-                    double t = Math.clamp(
-                            (Math.sqrt(dist2) - (district - EDGE_RING)) / (double) EDGE_RING, 0.0, 1.0);
+                    double t = Math.clamp((Math.sqrt(dist2) - flat) / (double) edgeRing, 0.0, 1.0);
                     int target = (int) Math.round(ground * (1.0 - t) + surface * t);
                     if (surface > target) {
                         b.fill(x, target + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
@@ -320,9 +347,9 @@ public final class CityLocation implements Location {
      * landmark reads clean. A few dozen blocks at most, chunk-clipped like the rest.
      */
     private static void streetDetails(StructureBuilder b, RandomSource rng, int cx, int cz,
-                                      int district, int inner, int ground, Palette p) {
+                                      int buildRadius, int inner, int ground, Palette p) {
         int plaza = PLAZA;
-        int outer = district - EDGE_RING - 6; // keep the whole prop inside the paved fabric
+        int outer = buildRadius - 6; // keep the whole prop inside the flat built fabric
 
         // A few market stalls in the mid ring, clear of alleys and the plaza.
         for (int i = 0; i < 7; i++) {
