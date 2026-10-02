@@ -15,6 +15,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class Events {
 
     private static final List<EldritchEvent> EVENTS = new CopyOnWriteArrayList<>();
+    /** O(1) id index over {@link #EVENTS}, kept in sync by {@link #register}. */
+    private static final java.util.Map<String, EldritchEvent> BY_ID =
+            new java.util.concurrent.ConcurrentHashMap<>();
     private static volatile boolean initialised;
 
     private Events() {
@@ -23,6 +26,7 @@ public final class Events {
     /** Registers an event. Registration order is iteration order. */
     public static void register(EldritchEvent event) {
         EVENTS.add(event);
+        BY_ID.put(event.id(), event);
     }
 
     /** Snapshot of all registered events, in registration order. */
@@ -33,7 +37,8 @@ public final class Events {
 
     /** The event with {@code id}, or {@code null}. */
     public static EldritchEvent byId(String id) {
-        return all().stream().filter(event -> event.id().equals(id)).findFirst().orElse(null);
+        init();
+        return id == null ? null : BY_ID.get(id);
     }
 
     /** The per-event config toggle for {@code id}; unknown ids are disabled. */

@@ -19,6 +19,10 @@ public final class Rites {
 
     private static final CopyOnWriteArrayList<RiteDefinition> ALL = new CopyOnWriteArrayList<>();
 
+    /** O(1) id index over {@link #ALL}, kept in sync by {@link #register}. */
+    private static final java.util.Map<String, RiteDefinition> BY_ID =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     static {
         // Tier / outcomes are from design/08-rituals.md; the sanity/corruption fields are that
         // table's COST column (the price paid on success), not its Outcome column.
@@ -85,6 +89,7 @@ public final class Rites {
      * (keeping deterministic order); otherwise it is appended.
      */
     public static void register(RiteDefinition definition) {
+        BY_ID.put(definition.id(), definition);
         for (int i = 0; i < ALL.size(); i++) {
             if (ALL.get(i).id().equals(definition.id())) {
                 ALL.set(i, definition);
@@ -96,7 +101,7 @@ public final class Rites {
 
     /** @return the definition for {@code id}, or {@code null} if unknown. */
     public static RiteDefinition byId(String id) {
-        return ALL.stream().filter(definition -> definition.id().equals(id)).findFirst().orElse(null);
+        return id == null ? null : BY_ID.get(id);
     }
 
     /** @return all registered rites, in registration order. */
