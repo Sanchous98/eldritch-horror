@@ -77,6 +77,11 @@ integration build green.
   `docker compose run --rm dev bash -lc 'rm -rf /workspace/run/world'` and re-run.
 - One Gradle build at a time; they share `build/` and Windows locks files exclusively.
 - Verify with `./gradlew compileJava` (fast, warm cache) before claiming done.
+- **Run the static analyzer before claiming done:** `./gradlew pmdMain` (PMD 7, ruleset
+  `config/pmd/ruleset.xml`). It is not part of `build` and never fails the build; read
+  `build/reports/pmd/main.html`. Keep it at **0 violations** — it catches dead private members,
+  unused imports, always-true conditions, unnecessary returns/casts/parentheses and empty
+  statements. Mixins are excluded (their `eldritchhorror$…` methods are framework-invoked).
 - The first build decompiles Minecraft (~5 min, ~4 GB); later builds are quick.
 
 ## Where things live
