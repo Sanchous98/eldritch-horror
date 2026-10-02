@@ -55,7 +55,7 @@ public final class CairoStyle implements CityStyle {
         int height = 74;  // apex ~75 blocks above the plaza
         b.ground(cx - half, cz - half, cx + half, cz + half, ground, ground, p.foundation());
         for (int layer = 0; layer <= height; layer++) {
-            int h = half - (layer * half) / height;
+            int h = half - layer * half / height;
             if (h < 0) {
                 break;
             }
@@ -76,7 +76,7 @@ public final class CairoStyle implements CityStyle {
         int pz = b.rng().nextBoolean() ? cz - 36 : cz + 36;
         b.ground(px - chalf, pz - chalf, px + chalf, pz + chalf, ground, ground, p.foundation());
         for (int layer = 0; layer <= cheight; layer++) {
-            int h = chalf - (layer * chalf) / cheight;
+            int h = chalf - layer * chalf / cheight;
             if (h < 0) {
                 break;
             }

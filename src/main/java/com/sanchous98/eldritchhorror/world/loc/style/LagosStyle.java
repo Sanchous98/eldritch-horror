@@ -96,8 +96,8 @@ public final class LagosStyle implements CityStyle {
                 }
                 int x = cx - ax + ix;
                 int z = cz - az + iz;
-                boolean per = (ix == 0 || !in[ix - 1][iz]) || (ix == gw - 1 || !in[ix + 1][iz])
-                        || (iz == 0 || !in[ix][iz - 1]) || (iz == gd - 1 || !in[ix][iz + 1]);
+                boolean per = ix == 0 || !in[ix - 1][iz] || ix == gw - 1 || !in[ix + 1][iz]
+                        || iz == 0 || !in[ix][iz - 1] || iz == gd - 1 || !in[ix][iz + 1];
                 if (!per) {
                     continue;
                 }
@@ -150,8 +150,8 @@ public final class LagosStyle implements CityStyle {
                 if (!out[ix][iz]) {
                     continue;
                 }
-                boolean per = (ix == 0 || !out[ix - 1][iz]) || (ix == cw - 1 || !out[ix + 1][iz])
-                        || (iz == 0 || !out[ix][iz - 1]) || (iz == cd - 1 || !out[ix][iz + 1]);
+                boolean per = ix == 0 || !out[ix - 1][iz] || ix == cw - 1 || !out[ix + 1][iz]
+                        || iz == 0 || !out[ix][iz - 1] || iz == cd - 1 || !out[ix][iz + 1];
                 if (!per || Math.floorMod(ix + iz, 4) != 0) {
                     continue;
                 }
@@ -182,8 +182,8 @@ public final class LagosStyle implements CityStyle {
                     if (rx <= 0 || rz <= 0) {
                         inside = true;
                     } else {
-                        double e = ((double) (x - cx) * (x - cx)) / ((double) rx * rx)
-                                + ((double) (z - cz) * (z - cz)) / ((double) rz * rz);
+                        double e = (double) (x - cx) * (x - cx) / ((double) rx * rx)
+                                + (double) (z - cz) * (z - cz) / ((double) rz * rz);
                         inside = e <= 1.0001;
                     }
                     if (!inside) {

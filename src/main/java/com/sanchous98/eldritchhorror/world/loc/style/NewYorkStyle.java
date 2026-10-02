@@ -85,12 +85,12 @@ public final class NewYorkStyle implements CityStyle {
         int robeH = 34;
         for (int i = 0; i < robeH; i++) {
             int y = figY + i;
-            int r = 5 - (i * 3) / (robeH - 1);                 // 5 -> 2 half-width
+            int r = 5 - i * 3 / (robeH - 1);                 // 5 -> 2 half-width
             for (int dx = -r; dx <= r; dx++) {
                 int lim = r - Math.abs(dx);
                 for (int dz = -lim; dz <= lim; dz++) {
                     boolean edge = Math.abs(dx) + Math.abs(dz) == r;
-                    boolean fold = (((dx + dz) % 3) == 0);
+                    boolean fold = ((dx + dz) % 3) == 0;
                     b.put(cx + dx, y, cz + dz, edge && fold ? p.weathered() : p.wall());
                 }
             }

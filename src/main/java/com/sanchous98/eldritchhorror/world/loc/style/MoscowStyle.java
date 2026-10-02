@@ -82,7 +82,7 @@ public final class MoscowStyle implements CityStyle {
         int n = DOME_SHELLS.length;
         int ringR = 16;
         for (int k = 0; k < n; k++) {
-            double a = (Math.PI * 2 / n) * k + (rng.nextDouble() - 0.5) * 0.30;
+            double a = Math.PI * 2 / n * k + (rng.nextDouble() - 0.5) * 0.30;
             int tx = cx + (int) Math.round(Math.cos(a) * ringR);
             int tz = cz + (int) Math.round(Math.sin(a) * ringR);
 

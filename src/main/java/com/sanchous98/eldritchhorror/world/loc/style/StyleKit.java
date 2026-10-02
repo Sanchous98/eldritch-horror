@@ -164,7 +164,7 @@ public final class StyleKit {
     /** A hemispherical dome drawn as shrinking square rings, capped with a small finial. */
     public static void dome(StructureBuilder b, int cx, int cz, int baseY, int radius, Palette p) {
         for (int r = radius; r >= 0; r--) {
-            int y = baseY + (radius - r);
+            int y = baseY + radius - r;
             b.fill(cx - r, y, cz - r, cx + r, y, cz + r, p.roof());
             // Shell: only the perimeter is the wall colour, interior is filled with roof.
             for (int i = -r; i <= r; i++) {

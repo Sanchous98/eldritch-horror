@@ -88,7 +88,7 @@ public final class ParisStyle implements CityStyle {
             // The signature arch: the opening between piers shrinks on a quarter-circle.
             if (dy <= 15) {
                 int open = (int) Math.round(13.0 * Math.sqrt(Math.max(0.0,
-                        1.0 - (double) (dy * dy) / (15.0 * 15.0))));
+                        1.0 - dy * dy / (15.0 * 15.0))));
                 int edge = half + lr;
                 if (open < edge) {
                     b.fill(cx - edge, y, cz + half, cx - open, y, cz + half, p.accent());

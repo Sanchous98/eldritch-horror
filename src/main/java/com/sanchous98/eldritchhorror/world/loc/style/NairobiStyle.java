@@ -114,7 +114,7 @@ public final class NairobiStyle implements CityStyle {
         int crownH = 9;
         for (int dy = 0; dy <= crownH; dy++) {
             int y = crown0 + dy;
-            int r = 5 + (dy * 9) / crownH;
+            int r = 5 + dy * 9 / crownH;
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {
                     int d2 = dx * dx + dz * dz;

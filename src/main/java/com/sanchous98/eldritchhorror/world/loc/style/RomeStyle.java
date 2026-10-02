@@ -79,7 +79,7 @@ public final class RomeStyle implements CityStyle {
         int prevTop = ground;
         boolean prevRuin = false;
         for (int s = 0; s <= steps; s++) {
-            int deg = (s * 3) % 360;
+            int deg = s * 3 % 360;
             double t = Math.toRadians(deg);
             double ct = Math.cos(t);
             double st = Math.sin(t);
@@ -90,9 +90,9 @@ public final class RomeStyle implements CityStyle {
             boolean ruin = deg >= ruinsStart && deg < ruinsEnd;
             int top;
             if (ruin) {
-                top = ground + 8 + ((deg / 3) % 3);            // jagged broken top
+                top = ground + 8 + (deg / 3 % 3);            // jagged broken top
             } else {
-                top = wallTop - (((deg / 6) % 2) == 0 ? 0 : 1); // slight raggedness on the skyline
+                top = wallTop - ((deg / 6 % 2) == 0 ? 0 : 1); // slight raggedness on the skyline
             }
             if (s > 0) {
                 if (prevRuin || ruin) {
