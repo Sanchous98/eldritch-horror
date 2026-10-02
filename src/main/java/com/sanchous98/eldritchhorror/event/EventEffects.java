@@ -111,7 +111,7 @@ final class EventEffects {
         if (ctx.rifts().isEmpty()) {
             return; // the rift closed mid-event; the ticker ends this event on the same pass
         }
-        BlockPos rift = ctx.rifts().get(0);
+        BlockPos rift = ctx.rifts().getFirst();
         // Rate-only: raise the local taint field in the loaded 3x3 chunk patch around the tear.
         if (elapsed % 20 == 0) {
             ChunkPos centre = ChunkPos.containing(rift);

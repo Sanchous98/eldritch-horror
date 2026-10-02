@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
 public class EarthChunkGenerator extends ChunkGenerator {
     public static final MapCodec<EarthChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             EarthBiomeSource.CODEC.forGetter(g -> (EarthBiomeSource) g.getBiomeSource())
-    ).apply(i, (biomeSource) -> new EarthChunkGenerator(biomeSource)));
+    ).apply(i, EarthChunkGenerator::new));
 
     private final EarthBiomeSource biomeSource;
 

@@ -303,7 +303,7 @@ public final class BestiarySupport {
         if (auras.isEmpty()) {
             return;
         }
-        int max = Math.max(auras.get(0).auraMaxStack(), 0);
+        int max = Math.max(auras.getFirst().auraMaxStack(), 0);
         int count = Math.min(auras.size(), max);
         if (count <= 0) {
             return;
@@ -315,7 +315,7 @@ public final class BestiarySupport {
         if (total == 0.0) {
             return;
         }
-        switch (auras.get(0).auraAxis()) {
+        switch (auras.getFirst().auraAxis()) {
             case SANITY -> SanityAPI.add(player, total);
             case CORRUPTION -> CorruptionAPI.add(player, total);
         }

@@ -91,7 +91,7 @@ public final class ModAttachments {
                             .sync((holder, to) -> holder == to,
                                     ByteBufCodecs.collection(
                                             java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
-                                            .map(s -> Set.copyOf(s), s -> new java.util.HashSet<>(s)))
+                                            .map(java.util.Set::copyOf, java.util.HashSet::new))
                             .copyOnDeath()
                             .build());
 
@@ -120,7 +120,7 @@ public final class ModAttachments {
                             .sync((holder, to) -> holder == to,
                                     ByteBufCodecs.collection(
                                             java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
-                                            .map(s -> Set.copyOf(s), s -> new java.util.HashSet<>(s)))
+                                            .map(java.util.Set::copyOf, java.util.HashSet::new))
                             .copyOnDeath()
                             .build());
 

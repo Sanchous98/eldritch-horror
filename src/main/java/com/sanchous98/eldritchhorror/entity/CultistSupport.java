@@ -42,7 +42,7 @@ public final class CultistSupport {
     /** First registered cult id, used as the default when none has been assigned yet. */
     public static String defaultCult() {
         List<CultDefinition> all = Cults.all();
-        return all.isEmpty() ? "drowned_choir" : all.get(0).id();
+        return all.isEmpty() ? "drowned_choir" : all.getFirst().id();
     }
 
     /** A cult id drawn from the registry, so every NPC belongs to a real faction. */

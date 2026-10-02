@@ -114,7 +114,7 @@ public final class ModItems {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB =
             TABS.register("main", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.eldritch_horror"))
-                    .icon(() -> ALL.isEmpty() ? ItemStack.EMPTY : new ItemStack(ALL.get(0).get()))
+                    .icon(() -> ALL.isEmpty() ? ItemStack.EMPTY : new ItemStack(ALL.getFirst().get()))
                     .displayItems((params, output) -> {
                         for (DeferredItem<?> item : ALL) {
                             output.accept(item.get());
