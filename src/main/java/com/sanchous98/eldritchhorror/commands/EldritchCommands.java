@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.cult.CultDefinition;
@@ -15,11 +16,15 @@ import com.sanchous98.eldritchhorror.cult.CultService;
 import com.sanchous98.eldritchhorror.cult.CultServices;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
+import com.sanchous98.eldritchhorror.event.EldritchEvent;
+import com.sanchous98.eldritchhorror.event.EventTicker;
+import com.sanchous98.eldritchhorror.event.Events;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import com.sanchous98.eldritchhorror.rite.Rites;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
+import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -44,7 +49,7 @@ public final class EldritchCommands {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        dispatcher.register(
+        LiteralArgumentBuilder<CommandSourceStack> eh =
                 Commands.literal("eh")
                         .then(Commands.literal("sanity")
                                 .then(getNode("sanity", SanitySystem::get))
@@ -166,7 +171,50 @@ public final class EldritchCommands {
                         .then(Commands.literal("service")
                                 .then(Commands.argument("cult", StringArgumentType.word())
                                         .then(Commands.argument("service", StringArgumentType.word())
-                                                .executes(ctx -> performService(ctx))))));
+                                                .executes(ctx -> performService(ctx)))));
+        if (ModConfig.ENABLE_EVENT_COMMANDS.get()) {
+            eh.then(Commands.literal("event")
+                            .then(Commands.argument("id", StringArgumentType.word())
+                                    .executes(EldritchCommands::forceEvent)))
+                    .then(Commands.literal("events").executes(EldritchCommands::listEvents));
+        }
+        dispatcher.register(eh);
+    }
+
+    /**
+     * {@code /eh event <id>}: force-starts an event on the caller for testing, bypassing the master
+     * switch, the per-event toggle and cooldowns.
+     */
+    private static int forceEvent(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String id = StringArgumentType.getString(ctx, "id");
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        int tick = ctx.getSource().getServer().getTickCount();
+        EldritchEvent started = EventTicker.forceStart(player, id, tick);
+        if (started == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown event (or not in the overworld): " + id));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("[" + started.id() + "] started ("
+                + (started.duration() / 20) + "s, trigger " + started.trigger() + ")"), true);
+        return 1;
+    }
+
+    /** {@code /eh events}: lists what is active for the caller, then the known event ids. */
+    private static int listEvents(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        int tick = ctx.getSource().getServer().getTickCount();
+        List<String> active = EventTicker.activeFor(player, tick);
+        String activeLine = active.isEmpty() ? "none" : String.join(" ", active);
+        ctx.getSource().sendSuccess(() -> Component.literal("Active events: " + activeLine), false);
+        StringBuilder known = new StringBuilder();
+        for (EldritchEvent def : Events.all()) {
+            if (known.length() > 0) {
+                known.append(' ');
+            }
+            known.append(def.id());
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("Known events: " + known), false);
+        return 1;
     }
 
     /**

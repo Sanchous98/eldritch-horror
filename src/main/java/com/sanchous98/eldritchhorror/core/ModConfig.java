@@ -1985,6 +1985,155 @@ public final class ModConfig {
             BUILDER.comment("Ticks between the rift_scar's occasional star-spawn attempts (minimum 20).")
                     .defineInRange("siteStarSpawnIntervalTicks", 2400, 20, 72000);
 
+    // --- Events (design/19-events.md) -------------------------------------------------------
+    // Ambient/world events and the single shared EventTicker. Data-driven: each event carries a
+    // trigger, weight, duration and cooldown; the ticker applies global/per-player caps and
+    // cooldowns so events never stack into noise. Safe defaults: events are on, but every event
+    // is individually toggleable and can also be driven by hand with "/eh event <id>".
+
+    /** Master switch for the events framework. Off = no auto events and no effect ticking. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENTS =
+            BUILDER.comment("Enable the ambient/world events framework.")
+                    .define("enableEvents", true);
+
+    /** Whether the manual {@code /eh event} / {@code /eh events} test commands are registered. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_COMMANDS =
+            BUILDER.comment("Enable the manual /eh event and /eh events test commands.")
+                    .define("enableEventCommands", true);
+
+    /** Trigger evaluation cadence, in ticks (200 = every 10s). */
+    public static final ModConfigSpec.IntValue EVENT_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between event trigger evaluations (200 = 10s).")
+                    .defineInRange("eventIntervalTicks", 200, 20, 24000);
+
+    /** Global cap on events running at once across all players. */
+    public static final ModConfigSpec.IntValue EVENT_MAX_ACTIVE =
+            BUILDER.comment("Maximum events running at once across the server.")
+                    .defineInRange("eventMaxActive", 8, 1, 64);
+
+    /** Per-player cap on events running at once. */
+    public static final ModConfigSpec.IntValue EVENT_MAX_PER_PLAYER =
+            BUILDER.comment("Maximum events running at once for one player.")
+                    .defineInRange("eventMaxPerPlayer", 2, 1, 16);
+
+    /** Chunk radius of the bounded nearby-rift scan (only when a rift trigger is enabled). */
+    public static final ModConfigSpec.IntValue EVENT_RIFT_SCAN_CHUNK_RADIUS =
+            BUILDER.comment("Chunk radius searched for rift anchors during trigger evaluation.")
+                    .defineInRange("eventRiftScanChunkRadius", 2, 1, 6);
+
+    /** Cap on rift anchors collected per player per scan. */
+    public static final ModConfigSpec.IntValue EVENT_RIFT_SCAN_MAX =
+            BUILDER.comment("Maximum rift anchors collected per player during trigger evaluation.")
+                    .defineInRange("eventRiftScanMax", 8, 1, 64);
+
+    /** whisper: low sanity anywhere. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_WHISPER =
+            BUILDER.comment("Enable the 'whisper' event.")
+                    .define("enableEventWhisper", true);
+    public static final ModConfigSpec.DoubleValue EVENT_WHISPER_SANITY_THRESHOLD =
+            BUILDER.comment("whisper: sanity below which it may trigger.")
+                    .defineInRange("eventWhisperSanityThreshold", 40.0, 0.0, 100.0);
+    public static final ModConfigSpec.IntValue EVENT_WHISPER_DURATION =
+            BUILDER.comment("whisper: duration in ticks (400 = 20s).")
+                    .defineInRange("eventWhisperDuration", 400, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_WHISPER_COOLDOWN =
+            BUILDER.comment("whisper: cooldown in ticks after it ends (6000 = 5m).")
+                    .defineInRange("eventWhisperCooldown", 6000, 0, 240000);
+
+    /** darkness_pulse: night + a nearby open rift. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_DARKNESS_PULSE =
+            BUILDER.comment("Enable the 'darkness_pulse' event.")
+                    .define("enableEventDarknessPulse", true);
+    public static final ModConfigSpec.IntValue EVENT_DARKNESS_DURATION =
+            BUILDER.comment("darkness_pulse: duration in ticks (400 = 20s).")
+                    .defineInRange("eventDarknessDuration", 400, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_DARKNESS_COOLDOWN =
+            BUILDER.comment("darkness_pulse: cooldown in ticks after it ends (6000 = 5m).")
+                    .defineInRange("eventDarknessCooldown", 6000, 0, 240000);
+    public static final ModConfigSpec.DoubleValue EVENT_DARKNESS_SANITY_RATE =
+            BUILDER.comment("darkness_pulse: extra sanity per second for its duration (negative drains).")
+                    .defineInRange("eventDarknessSanityRate", -0.2, -10.0, 0.0);
+
+    /** rift_bloom: an open rift ages (high local taint). */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_RIFT_BLOOM =
+            BUILDER.comment("Enable the 'rift_bloom' event.")
+                    .define("enableEventRiftBloom", true);
+    public static final ModConfigSpec.IntValue EVENT_RIFT_BLOOM_DURATION =
+            BUILDER.comment("rift_bloom: duration in ticks while the rift stays open (2400 = 2m).")
+                    .defineInRange("eventRiftBloomDuration", 2400, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_RIFT_BLOOM_COOLDOWN =
+            BUILDER.comment("rift_bloom: cooldown in ticks after it ends.")
+                    .defineInRange("eventRiftBloomCooldown", 2400, 0, 240000);
+    public static final ModConfigSpec.DoubleValue EVENT_RIFT_BLOOM_TAINT_THRESHOLD =
+            BUILDER.comment("rift_bloom: local chunk taint at or above which the rift counts as aging.")
+                    .defineInRange("eventRiftBloomTaintThreshold", 0.5, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue EVENT_RIFT_BLOOM_TAINT_RATE =
+            BUILDER.comment("rift_bloom: extra taint per second added to the loaded patch around the rift.")
+                    .defineInRange("eventRiftBloomTaintRate", 0.01, 0.0, 1.0);
+
+    /** veil_thin: storm plus many rifts (or high local taint). */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_VEIL_THIN =
+            BUILDER.comment("Enable the 'veil_thin' event.")
+                    .define("enableEventVeilThin", true);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_DURATION =
+            BUILDER.comment("veil_thin: duration in ticks (2400 = 2m).")
+                    .defineInRange("eventVeilThinDuration", 2400, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_COOLDOWN =
+            BUILDER.comment("veil_thin: cooldown in ticks after it ends (6000 = 5m).")
+                    .defineInRange("eventVeilThinCooldown", 6000, 0, 240000);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_MIN_RIFTS =
+            BUILDER.comment("veil_thin: nearby rift anchors needed (with a storm) to trigger.")
+                    .defineInRange("eventVeilThinMinRifts", 2, 1, 16);
+    public static final ModConfigSpec.DoubleValue EVENT_VEIL_THIN_TAINT_THRESHOLD =
+            BUILDER.comment("veil_thin: local taint that substitutes for the rift count.")
+                    .defineInRange("eventVeilThinTaintThreshold", 0.6, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_SPAWN_RADIUS =
+            BUILDER.comment("veil_thin: radius (blocks) of the surge around a player.")
+                    .defineInRange("eventVeilThinSpawnRadius", 32, 8, 64);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_SURGE_CAP =
+            BUILDER.comment("veil_thin: cap of each surged hostile near one player.")
+                    .defineInRange("eventVeilThinSurgeCap", 8, 1, 32);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_SURGE_PER_PASS =
+            BUILDER.comment("veil_thin: hostiles of each type added per surge pass.")
+                    .defineInRange("eventVeilThinSurgePerPass", 2, 1, 8);
+    public static final ModConfigSpec.IntValue EVENT_VEIL_THIN_SPAWN_INTERVAL =
+            BUILDER.comment("veil_thin: ticks between surge passes (60 = 3s).")
+                    .defineInRange("eventVeilThinSpawnInterval", 60, 20, 600);
+
+    /** hallucination_wave: sanity below the threshold; fake cues only, no real mobs. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_HALLUCINATION_WAVE =
+            BUILDER.comment("Enable the 'hallucination_wave' event.")
+                    .define("enableEventHallucinationWave", true);
+    public static final ModConfigSpec.IntValue EVENT_HALLUCINATION_DURATION =
+            BUILDER.comment("hallucination_wave: duration in ticks (600 = 30s).")
+                    .defineInRange("eventHallucinationDuration", 600, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_HALLUCINATION_COOLDOWN =
+            BUILDER.comment("hallucination_wave: cooldown in ticks after it ends.")
+                    .defineInRange("eventHallucinationCooldown", 4800, 0, 240000);
+    public static final ModConfigSpec.DoubleValue EVENT_HALLUCINATION_SANITY_THRESHOLD =
+            BUILDER.comment("hallucination_wave: sanity below which it may trigger.")
+                    .defineInRange("eventHallucinationSanityThreshold", 20.0, 0.0, 100.0);
+
+    /** cleansing_dawn: after a close_rift; corruption recedes and sanity recovers. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_CLEANSING_DAWN =
+            BUILDER.comment("Enable the 'cleansing_dawn' event.")
+                    .define("enableEventCleansingDawn", true);
+    public static final ModConfigSpec.IntValue EVENT_CLEANSING_DAWN_DURATION =
+            BUILDER.comment("cleansing_dawn: duration in ticks (2400 = 2m).")
+                    .defineInRange("eventCleansingDawnDuration", 2400, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_CLEANSING_DAWN_COOLDOWN =
+            BUILDER.comment("cleansing_dawn: cooldown in ticks after it ends.")
+                    .defineInRange("eventCleansingDawnCooldown", 0, 0, 240000);
+    public static final ModConfigSpec.DoubleValue EVENT_CLEANSING_SANITY_RATE =
+            BUILDER.comment("cleansing_dawn: sanity per second recovered for its duration.")
+                    .defineInRange("eventCleansingSanityRate", 0.1, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue EVENT_CLEANSING_CORRUPTION_RATE =
+            BUILDER.comment("cleansing_dawn: player corruption per second removed (negative).")
+                    .defineInRange("eventCleansingCorruptionRate", -0.05, -10.0, 0.0);
+    public static final ModConfigSpec.DoubleValue EVENT_CLEANSING_TAINT_RATE =
+            BUILDER.comment("cleansing_dawn: taint per second removed from the loaded local patch (negative).")
+                    .defineInRange("eventCleansingTaintRate", -0.01, -1.0, 0.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

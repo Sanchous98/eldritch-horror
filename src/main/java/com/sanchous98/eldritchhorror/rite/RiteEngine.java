@@ -5,6 +5,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
+import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import net.minecraft.core.BlockPos;
@@ -397,6 +398,8 @@ public final class RiteEngine {
             taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
             // design/08: sealing grants sanity +10 as its OUTCOME (the corruption +5 is its cost).
             SanityAPI.add(player, 10);
+            // design/19: sealing a rift is the trigger for the cleansing dawn.
+            EventTicker.forceStart(player, "cleansing_dawn", level.getServer().getTickCount());
         }
         return new Result(true, Component.literal("The Way is sealed; " + removed
                 + " rift marker(s) removed and the Veil recedes."));
