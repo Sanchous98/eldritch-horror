@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "eldritch_horror:altar_core",
+    "eldritch_horror:bone_reagent",
+    "eldritch_horror:bone_reagent"
+  ],
+  "result": {
+    "id": "eldritch_horror:sacrificial_altar"
+  }
+}

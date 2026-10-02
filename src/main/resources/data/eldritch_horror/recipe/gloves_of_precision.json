@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:leather",
+    "minecraft:string",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "eldritch_horror:gloves_of_precision"
+  }
+}

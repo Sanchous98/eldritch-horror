@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "W": "minecraft:white_wool",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "WWW",
+    "SSS"
+  ],
+  "result": {
+    "id": "eldritch_horror:bedroll"
+  }
+}

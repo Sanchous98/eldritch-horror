@@ -19,6 +19,19 @@
           ]
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "condition": "minecraft:random_chance",
+        "chance": 0.5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:bone_reagent"
+        }
+      ]
     }
   ]
 }

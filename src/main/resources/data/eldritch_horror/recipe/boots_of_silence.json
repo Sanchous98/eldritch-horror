@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "minecraft:white_wool",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "W W",
+    "L L"
+  ],
+  "result": {
+    "id": "eldritch_horror:boots_of_silence"
+  }
+}

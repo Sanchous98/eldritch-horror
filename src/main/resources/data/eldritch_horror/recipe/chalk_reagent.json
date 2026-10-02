@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bone_meal",
+    "minecraft:clay_ball",
+    "minecraft:white_dye"
+  ],
+  "result": {
+    "id": "eldritch_horror:chalk_reagent",
+    "count": 2
+  }
+}

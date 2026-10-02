@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:flint",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "id": "eldritch_horror:tinderbox"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:stick",
+    "eldritch_horror:chalk_reagent",
+    "minecraft:gold_ingot"
+  ],
+  "result": {
+    "id": "eldritch_horror:occult_tool"
+  }
+}

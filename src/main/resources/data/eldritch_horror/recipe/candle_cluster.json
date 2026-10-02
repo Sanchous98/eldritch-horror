@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:candle",
+    "minecraft:candle",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "eldritch_horror:candle_cluster"
+  }
+}

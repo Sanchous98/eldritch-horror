@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:lantern",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "eldritch_horror:hand_lantern"
+  }
+}

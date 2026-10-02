@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:coal"
+  ],
+  "result": {
+    "id": "eldritch_horror:oil_flask"
+  }
+}

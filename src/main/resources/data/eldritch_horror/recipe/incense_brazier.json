@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cauldron",
+    "minecraft:torch",
+    "minecraft:charcoal"
+  ],
+  "result": {
+    "id": "eldritch_horror:incense_brazier"
+  }
+}

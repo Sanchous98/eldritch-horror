@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "eldritch_horror:rune_stone",
+    "S": "minecraft:stone",
+    "O": "eldritch_horror:offering_bowl"
+  },
+  "pattern": [
+    "RRR",
+    "SOS"
+  ],
+  "result": {
+    "id": "eldritch_horror:altar_core"
+  }
+}

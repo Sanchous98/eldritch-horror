@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:stone",
+    "eldritch_horror:chalk_reagent"
+  ],
+  "result": {
+    "id": "eldritch_horror:rune_stone"
+  }
+}

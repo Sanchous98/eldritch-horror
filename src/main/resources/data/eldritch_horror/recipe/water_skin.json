@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "eldritch_horror:water_skin"
+  }
+}
