@@ -646,5 +646,113 @@
         "type": "event"
       }
     ]
+  },
+  "entity.nyarlathotep.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.nyarlathotep.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.villager.ambient", "type": "event" }
+    ]
+  },
+  "entity.nyarlathotep.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.nyarlathotep.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.villager.hurt", "type": "event" }
+    ]
+  },
+  "entity.nyarlathotep.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.nyarlathotep.death",
+    "sounds": [
+      { "name": "minecraft:entity.villager.death", "type": "event" }
+    ]
+  },
+  "entity.cthugha.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.cthugha.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.blaze.burn", "type": "event" }
+    ]
+  },
+  "entity.cthugha.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.cthugha.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.blaze.hurt", "type": "event" }
+    ]
+  },
+  "entity.cthugha.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.cthugha.death",
+    "sounds": [
+      { "name": "minecraft:entity.blaze.death", "type": "event" }
+    ]
+  },
+  "entity.glaaki.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.glaaki.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.tadpole.flop", "type": "event" }
+    ]
+  },
+  "entity.glaaki.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.glaaki.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.squid.hurt", "type": "event" }
+    ]
+  },
+  "entity.glaaki.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.glaaki.death",
+    "sounds": [
+      { "name": "minecraft:entity.squid.death", "type": "event" }
+    ]
+  },
+  "entity.hydra.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.hydra.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.spider.ambient", "type": "event" }
+    ]
+  },
+  "entity.hydra.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.hydra.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.spider.hurt", "type": "event" }
+    ]
+  },
+  "entity.hydra.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.hydra.death",
+    "sounds": [
+      { "name": "minecraft:entity.spider.death", "type": "event" }
+    ]
+  },
+  "entity.nyogtha.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.nyogtha.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.silverfish.ambient", "type": "event" }
+    ]
+  },
+  "entity.nyogtha.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.nyogtha.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.silverfish.hurt", "type": "event" }
+    ]
+  },
+  "entity.nyogtha.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.nyogtha.death",
+    "sounds": [
+      { "name": "minecraft:entity.silverfish.death", "type": "event" }
+    ]
+  },
+  "entity.rhan_tegoth.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.rhan_tegoth.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.iron_golem.damage", "type": "event" }
+    ]
+  },
+  "entity.rhan_tegoth.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.rhan_tegoth.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.iron_golem.damage", "type": "event" }
+    ]
+  },
+  "entity.rhan_tegoth.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.rhan_tegoth.death",
+    "sounds": [
+      { "name": "minecraft:entity.iron_golem.death", "type": "event" }
+    ]
   }
 }

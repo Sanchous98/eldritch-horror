@@ -177,6 +177,8 @@ public final class RiteEngine {
             case "shub_niggurath" -> ModConfig.RITE_STILL_SHUB_NIGGURATH_TICKS.get();
             case "ithaqua" -> ModConfig.RITE_WARD_ITHAQUA_TICKS.get();
             case "atlach_nacha" -> ModConfig.RITE_BIND_ATLACH_NACHA_TICKS.get();
+            case "cthugha" -> ModConfig.RITE_QUENCH_CTHUGHA_TICKS.get();
+            case "hydra" -> ModConfig.RITE_SEVER_HYDRA_TICKS.get();
             default -> 0;
         };
     }
@@ -196,6 +198,12 @@ public final class RiteEngine {
             case "ithaqua" -> "mark_of_favour";
             case "yig" -> "black_obol";
             case "atlach_nacha" -> "relic_coin";
+            case "nyarlathotep" -> "cult_token";
+            case "cthugha" -> "relic_coin";
+            case "glaaki" -> "black_obol";
+            case "hydra" -> "barter_seal";
+            case "nyogtha" -> "order_scrip";
+            case "rhan_tegoth" -> "mark_of_favour";
             default -> "";
         };
         if (itemId.isEmpty()) {
@@ -223,6 +231,12 @@ public final class RiteEngine {
             case "ithaqua" -> ModConfig.ENABLE_RITE_WARD_ITHAQUA.get();
             case "yig" -> ModConfig.ENABLE_RITE_APPEASE_YIG.get();
             case "atlach_nacha" -> ModConfig.ENABLE_RITE_BIND_ATLACH_NACHA.get();
+            case "nyarlathotep" -> ModConfig.ENABLE_RITE_DENY_NYARLATHOTEP.get();
+            case "cthugha" -> ModConfig.ENABLE_RITE_QUENCH_CTHUGHA.get();
+            case "glaaki" -> ModConfig.ENABLE_RITE_STILL_GLAAKI.get();
+            case "hydra" -> ModConfig.ENABLE_RITE_SEVER_HYDRA.get();
+            case "nyogtha" -> ModConfig.ENABLE_RITE_BAR_NYOGTHA.get();
+            case "rhan_tegoth" -> ModConfig.ENABLE_RITE_TOPPLE_IDOL.get();
             default -> false;
         };
     }
@@ -238,6 +252,12 @@ public final class RiteEngine {
             case "ithaqua" -> AncientOne.Solve.STILLED;
             case "yig" -> AncientOne.Solve.SOOTHED;
             case "atlach_nacha" -> AncientOne.Solve.STILLED;
+            case "nyarlathotep" -> AncientOne.Solve.SOOTHED;
+            case "cthugha" -> AncientOne.Solve.STILLED;
+            case "glaaki" -> AncientOne.Solve.SOOTHED;
+            case "hydra" -> AncientOne.Solve.STILLED;
+            case "nyogtha" -> AncientOne.Solve.SOOTHED;
+            case "rhan_tegoth" -> AncientOne.Solve.SOOTHED;
             default -> AncientOne.Solve.NONE;
         };
     }
@@ -260,6 +280,18 @@ public final class RiteEngine {
                     "Yig is appeased; the deaths are no longer drunk, and nothing else is drawn.");
             case "atlach_nacha" -> Component.literal(
                     "The web is unbound; the scar begins to close again, for a time.");
+            case "nyarlathotep" -> Component.literal(
+                    "The trusted face is named and set aside; the betrayal cannot land, and nothing was killed.");
+            case "cthugha" -> Component.literal(
+                    "The watching flame is quenched; light is only light again, for a time.");
+            case "glaaki" -> Component.literal(
+                    "The same lake is stilled; the green servitors lose their pull, and nothing was killed.");
+            case "hydra" -> Component.literal(
+                    "The Hydra is severed; no head buds, for a time. The sword would only have grown it.");
+            case "nyogtha" -> Component.literal(
+                    "The way below is barred; the sound under the floor fades, and nothing was killed.");
+            case "rhan_tegoth" -> Component.literal(
+                    "The idol is toppled; the worship ends and the pull to kneel is broken.");
             default -> Component.literal("The presence is answered.");
         };
     }

@@ -25,6 +25,12 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  *       much longer interval (it is a place more than an event).</li>
  *   <li><b>Ithaqua</b> — the walking wind: cold, untainted loaded ground only, one per player.</li>
  *   <li><b>Yig</b> — the ashen-waste presence: tainted loaded terrain only, one per player.</li>
+ *   <li><b>Cthugha</b> — the watching flame of the same ashen waste: tainted loaded ground only.</li>
+ *   <li><b>Glaaki</b> and the <b>Hydra</b> — the drowned marsh: water within a few blocks of loaded
+ *       ground; both are one per player. The Hydra buds a head when struck (bounded escalation).</li>
+ *   <li><b>Nyogtha</b> — deep loaded cave floor (below {@code nyogthaSpawnMaxY}); it is heard, not
+ *       seen. Placed by {@link BestiarySupport#topUpUnderground}, never on the surface.</li>
+ *   <li><b>Rhan-Tegoth</b> — the cold, untainted loaded ground of the polar edge (as Ithaqua's).</li>
  * </ul>
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
@@ -49,7 +55,18 @@ public final class AncientOneSpawner {
                 && tick % ModConfig.ITHAQUA_SPAWN_INTERVAL_TICKS.get() == 0;
         boolean yigDue = ModConfig.ENABLE_YIG_SPAWNS.get()
                 && tick % ModConfig.YIG_SPAWN_INTERVAL_TICKS.get() == 0;
-        if (!dunwichDue && !shubDue && !ithaquaDue && !yigDue) {
+        boolean cthughaDue = ModConfig.ENABLE_CTHUGHA_SPAWNS.get()
+                && tick % ModConfig.CTHUGHA_SPAWN_INTERVAL_TICKS.get() == 0;
+        boolean glaakiDue = ModConfig.ENABLE_GLAAKI_SPAWNS.get()
+                && tick % ModConfig.GLAAKI_SPAWN_INTERVAL_TICKS.get() == 0;
+        boolean hydraDue = ModConfig.ENABLE_HYDRA_SPAWNS.get()
+                && tick % ModConfig.HYDRA_SPAWN_INTERVAL_TICKS.get() == 0;
+        boolean nyogthaDue = ModConfig.ENABLE_NYOGTHA_SPAWNS.get()
+                && tick % ModConfig.NYOGTHA_SPAWN_INTERVAL_TICKS.get() == 0;
+        boolean rhanDue = ModConfig.ENABLE_RHAN_TEGOTH_SPAWNS.get()
+                && tick % ModConfig.RHAN_TEGOTH_SPAWN_INTERVAL_TICKS.get() == 0;
+        if (!dunwichDue && !shubDue && !ithaquaDue && !yigDue && !cthughaDue && !glaakiDue
+                && !hydraDue && !nyogthaDue && !rhanDue) {
             return;
         }
         for (ServerPlayer player : level.players()) {
@@ -64,6 +81,21 @@ public final class AncientOneSpawner {
             }
             if (yigDue) {
                 spawnYig(level, cache, player, tick);
+            }
+            if (cthughaDue) {
+                spawnCthugha(level, cache, player, tick);
+            }
+            if (glaakiDue) {
+                spawnGlaaki(level, cache, player, tick);
+            }
+            if (hydraDue) {
+                spawnHydra(level, cache, player, tick);
+            }
+            if (nyogthaDue) {
+                spawnNyogtha(level, cache, player, tick);
+            }
+            if (rhanDue) {
+                spawnRhanTegoth(level, cache, player, tick);
             }
         }
     }
@@ -99,5 +131,46 @@ public final class AncientOneSpawner {
                 ModConfig.YIG_SPAWN_RADIUS.get(),
                 ModConfig.YIG_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> tainted);
+    }
+
+    /** Cthugha watches the ashen waste: tainted loaded ground only, like Yig's country. */
+    private static void spawnCthugha(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
+        BestiarySupport.topUp(level, cache, player, ModEntities.CTHUGHA.get(), Cthugha.class,
+                ModConfig.CTHUGHA_SPAWN_RADIUS.get(),
+                ModConfig.CTHUGHA_SPAWN_CAP.get(),
+                1, tick, (lvl, spot, dark, tainted) -> tainted);
+    }
+
+    /** Glaaki and the Hydra are the drowned_marsh: water within a few blocks of loaded ground. */
+    private static void spawnGlaaki(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
+        BestiarySupport.topUp(level, cache, player, ModEntities.GLAAKI.get(), Glaaki.class,
+                ModConfig.GLAAKI_SPAWN_RADIUS.get(),
+                ModConfig.GLAAKI_SPAWN_CAP.get(),
+                1, tick, (lvl, spot, dark, tainted) -> BestiarySupport.nearWater(lvl, spot));
+    }
+
+    private static void spawnHydra(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
+        BestiarySupport.topUp(level, cache, player, ModEntities.HYDRA.get(), Hydra.class,
+                ModConfig.HYDRA_SPAWN_RADIUS.get(),
+                ModConfig.HYDRA_SPAWN_CAP.get(),
+                1, tick, (lvl, spot, dark, tainted) -> BestiarySupport.nearWater(lvl, spot));
+    }
+
+    /** Nyogtha is heard under the floor: deep, loaded cave floor below the configured depth. */
+    private static void spawnNyogtha(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
+        int maxY = ModConfig.NYOGTHA_SPAWN_MAX_Y.get();
+        BestiarySupport.topUpUnderground(level, cache, player, ModEntities.NYOGTHA.get(), Nyogtha.class,
+                ModConfig.NYOGTHA_SPAWN_RADIUS.get(),
+                ModConfig.NYOGTHA_SPAWN_CAP.get(),
+                1, maxY, tick, (lvl, spot, dark, tainted) -> dark);
+    }
+
+    /** Rhan-Tegoth is the idol at the cold edge: cold, untainted loaded ground, like Ithaqua's. */
+    private static void spawnRhanTegoth(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
+        BestiarySupport.topUp(level, cache, player, ModEntities.RHAN_TEGOTH.get(), RhanTegoth.class,
+                ModConfig.RHAN_TEGOTH_SPAWN_RADIUS.get(),
+                ModConfig.RHAN_TEGOTH_SPAWN_CAP.get(),
+                1, tick, (lvl, spot, dark, tainted) ->
+                        !tainted && lvl.getBiome(spot).value().coldEnoughToSnow(spot, lvl.getSeaLevel()));
     }
 }

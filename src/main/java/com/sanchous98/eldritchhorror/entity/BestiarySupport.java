@@ -139,6 +139,81 @@ public final class BestiarySupport {
     }
 
     /**
+     * A valid standing spot at {@code (x,z)} in a loaded <b>cave</b>: like {@link #surfaceSpot} but
+     * it scans downward from {@code maxY} and only accepts a floor that does not see the sky. Used by
+     * the deep-cave presence (Nyogtha); loaded chunks only, never force-loads.
+     */
+    public static BlockPos undergroundSpot(ServerLevel level, int x, int z, int maxY) {
+        if (!level.hasChunkAt(x, z)) {
+            return null;
+        }
+        for (int cy = maxY; cy >= level.getMinY() + 1; cy--) {
+            BlockPos candidate = new BlockPos(x, cy, z);
+            if (!level.isLoaded(candidate)) {
+                break; // never read unloaded columns
+            }
+            BlockState below = level.getBlockState(candidate.below());
+            boolean ground = below.isSolidRender() || below.getBlock() instanceof PathBlock;
+            if (ground && below.getFluidState().isEmpty()
+                    && level.getBlockState(candidate).isAir()
+                    && level.getBlockState(candidate.above()).isAir()
+                    && !level.canSeeSky(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Tops {@code player} up towards {@code cap} with up to {@code perPass} <b>cave-floor</b> mobs of
+     * {@code type}, placing only at loaded underground spots at or below {@code maxY}. The third and
+     * last shared placement helper; same bounds as {@link #topUp} (server-authoritative, loaded
+     * chunks only, deterministic sampling, never force-loads).
+     */
+    public static <T extends Mob> void topUpUnderground(ServerLevel level, ServerChunkCache cache,
+                                                        ServerPlayer player, EntityType<T> type,
+                                                        Class<T> typeClass, int radius, int cap,
+                                                        int perPass, int maxY, int tick, SpawnGate gate) {
+        if (cap <= 0 || perPass <= 0) {
+            return;
+        }
+        BlockPos origin = player.blockPosition();
+        AABB box = player.getBoundingBox().inflate(radius);
+        int present = level.getEntitiesOfClass(typeClass, box, mob -> mob.isAlive()).size();
+        int budget = Math.min(perPass, cap - present);
+        if (budget <= 0) {
+            return;
+        }
+        RandomSource random = RandomSource.create(
+                player.getUUID().getMostSignificantBits() ^ tick * 0x9E3779B97F4A7C15L);
+        int spawned = 0;
+        int attempts = budget * PROBE_FACTOR;
+        for (int i = 0; i < attempts && spawned < budget; i++) {
+            int x = origin.getX() + random.nextInt(radius * 2 + 1) - radius;
+            int z = origin.getZ() + random.nextInt(radius * 2 + 1) - radius;
+            LevelChunk chunk = cache.getChunkNow(x >> 4, z >> 4);
+            if (chunk == null) {
+                continue; // never load/generate a chunk just to spawn
+            }
+            boolean tainted = CorruptionSystem.getTaint(chunk) >= ModConfig.TAINT_SPREAD_THRESHOLD.get();
+            BlockPos spot = undergroundSpot(level, x, z, maxY);
+            if (spot == null) {
+                continue;
+            }
+            boolean dark = Monster.isDarkEnoughToSpawn(level, spot, random);
+            if (!gate.allows(level, spot, dark, tainted)) {
+                continue;
+            }
+            T mob = type.spawn(level, spot, EntitySpawnReason.EVENT);
+            if (mob == null) {
+                continue;
+            }
+            mob.setPersistenceRequired();
+            spawned++;
+        }
+    }
+
+    /**
      * Tops {@code player} up towards {@code cap} with up to {@code perPass} <b>flying</b> mobs of
      * {@code type}, placed in air above the terrain. The shared loop cannot be reused directly
      * because it only places mobs on the ground, so this is the one extra shared placement helper

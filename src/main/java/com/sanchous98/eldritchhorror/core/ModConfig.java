@@ -735,6 +735,171 @@ public final class ModConfig {
             BUILDER.comment("Radius (blocks) of Atlach-Nacha's corruption aura.")
                     .defineInRange("corruptionAtlachNachaRadius", 28, 1, 96);
 
+    // --- Ancient Ones, batch 3 (design/28): Nyarlathotep / Cthugha / Glaaki / Hydra / Nyogtha /
+    // Rhan-Tegoth. Same shapes as batch 2; every one attaches to an existing site or biome.
+
+    /** Nyarlathotep: the trusted face at the cult_stronghold. */
+    public static final ModConfigSpec.BooleanValue NYARLATHOTEP_KILLABLE =
+            BUILDER.comment("Allow Nyarlathotep to be killed. False = permanently invulnerable.")
+                    .define("nyarlathotepKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_NYARLATHOTEP =
+            BUILDER.comment("Allow Nyarlathotep to wear a trusted face in the cult_stronghold (loaded-only).")
+                    .define("enableSiteNyarlathotep", true);
+    public static final ModConfigSpec.IntValue SITE_NYARLATHOTEP_COUNT =
+            BUILDER.comment("Max Nyarlathoteps spawned per cult_stronghold pass.")
+                    .defineInRange("siteNyarlathotepCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_NYARLATHOTEP_CAP =
+            BUILDER.comment("Max Nyarlathoteps near one player at a stronghold before pausing.")
+                    .defineInRange("siteNyarlathotepCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_NYARLATHOTEP =
+            BUILDER.comment("Enable the Nyarlathotep sanity source (the betrayal drains when you look away).")
+                    .define("enableSanityNyarlathotep", true);
+    public static final ModConfigSpec.DoubleValue SANITY_NYARLATHOTEP_RATE =
+            BUILDER.comment("Sanity change per second while near Nyarlathotep (negative drains).")
+                    .defineInRange("sanityNyarlathotepRate", -0.32, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_NYARLATHOTEP_RADIUS =
+            BUILDER.comment("Radius (blocks) of Nyarlathotep's sanity drain.")
+                    .defineInRange("sanityNyarlathotepRadius", 30, 1, 96);
+
+    /** Cthugha: the watching flame of the ashen_waste. */
+    public static final ModConfigSpec.BooleanValue CTHUGHA_KILLABLE =
+            BUILDER.comment("Allow Cthugha to be killed. False = permanently invulnerable.")
+                    .define("cthughaKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_CTHUGHA_SPAWNS =
+            BUILDER.comment("Allow Cthugha to appear on tainted loaded ground (the ashen waste).")
+                    .define("enableCthughaSpawns", true);
+    public static final ModConfigSpec.IntValue CTHUGHA_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Cthugha spawn passes (minimum 20).")
+                    .defineInRange("cthughaSpawnIntervalTicks", 2400, 20, 72000);
+    public static final ModConfigSpec.IntValue CTHUGHA_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Cthugha may appear.")
+                    .defineInRange("cthughaSpawnRadius", 48, 8, 128);
+    public static final ModConfigSpec.IntValue CTHUGHA_SPAWN_CAP =
+            BUILDER.comment("Max Cthughas allowed near one player before spawning pauses.")
+                    .defineInRange("cthughaSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_CTHUGHA =
+            BUILDER.comment("Enable the Cthugha corruption aura (the watching flame taints; worse in light).")
+                    .define("enableCorruptionCthugha", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_CTHUGHA_RATE =
+            BUILDER.comment("Corruption per second while near Cthugha (positive taints).")
+                    .defineInRange("corruptionCthughaRate", 0.14, 0.0, 10.0);
+    public static final ModConfigSpec.IntValue CORRUPTION_CTHUGHA_RADIUS =
+            BUILDER.comment("Radius (blocks) of Cthugha's corruption aura.")
+                    .defineInRange("corruptionCthughaRadius", 26, 1, 96);
+
+    /** Glaaki: the lake-dream of the drowned_marsh. */
+    public static final ModConfigSpec.BooleanValue GLAAKI_KILLABLE =
+            BUILDER.comment("Allow Glaaki to be killed. False = permanently invulnerable.")
+                    .define("glaakiKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_GLAAKI_SPAWNS =
+            BUILDER.comment("Allow Glaaki to appear on water-adjacent loaded ground (the drowned marsh).")
+                    .define("enableGlaakiSpawns", true);
+    public static final ModConfigSpec.IntValue GLAAKI_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Glaaki spawn passes (minimum 20).")
+                    .defineInRange("glaakiSpawnIntervalTicks", 2600, 20, 72000);
+    public static final ModConfigSpec.IntValue GLAAKI_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Glaaki may appear.")
+                    .defineInRange("glaakiSpawnRadius", 48, 8, 128);
+    public static final ModConfigSpec.IntValue GLAAKI_SPAWN_CAP =
+            BUILDER.comment("Max Glaakis allowed near one player before spawning pauses.")
+                    .defineInRange("glaakiSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_GLAAKI =
+            BUILDER.comment("Enable the Glaaki sanity source (the servitors' call).")
+                    .define("enableSanityGlaaki", true);
+    public static final ModConfigSpec.DoubleValue SANITY_GLAAKI_RATE =
+            BUILDER.comment("Sanity change per second while near Glaaki (negative drains).")
+                    .defineInRange("sanityGlaakiRate", -0.30, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_GLAAKI_RADIUS =
+            BUILDER.comment("Radius (blocks) of Glaaki's sanity drain.")
+                    .defineInRange("sanityGlaakiRadius", 28, 1, 96);
+
+    /** The Hydra: the head-budding presence of the drowned_marsh. */
+    public static final ModConfigSpec.BooleanValue HYDRA_KILLABLE =
+            BUILDER.comment("Allow the Hydra to be killed. False = permanently invulnerable.")
+                    .define("hydraKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_HYDRA_SPAWNS =
+            BUILDER.comment("Allow the Hydra to appear on water-adjacent loaded ground (the drowned marsh).")
+                    .define("enableHydraSpawns", true);
+    public static final ModConfigSpec.IntValue HYDRA_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Hydra spawn passes (minimum 20).")
+                    .defineInRange("hydraSpawnIntervalTicks", 2800, 20, 72000);
+    public static final ModConfigSpec.IntValue HYDRA_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which the Hydra may appear.")
+                    .defineInRange("hydraSpawnRadius", 48, 8, 128);
+    public static final ModConfigSpec.IntValue HYDRA_SPAWN_CAP =
+            BUILDER.comment("Max Hydras allowed near one player before spawning pauses.")
+                    .defineInRange("hydraSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_HYDRA_ESCALATION =
+            BUILDER.comment("Enable the Hydra's escalation: each hit may bud one more head.")
+                    .define("enableHydraEscalation", true);
+    public static final ModConfigSpec.IntValue HYDRA_ESCALATION_CAP =
+            BUILDER.comment("Max budded heads within 24 blocks of the Hydra before escalation pauses.")
+                    .defineInRange("hydraEscalationCap", 6, 0, 24);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_HYDRA =
+            BUILDER.comment("Enable the Hydra sanity source (the heads' gaze).")
+                    .define("enableSanityHydra", true);
+    public static final ModConfigSpec.DoubleValue SANITY_HYDRA_RATE =
+            BUILDER.comment("Sanity change per second while near the Hydra (negative drains).")
+                    .defineInRange("sanityHydraRate", -0.28, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_HYDRA_RADIUS =
+            BUILDER.comment("Radius (blocks) of the Hydra's sanity drain.")
+                    .defineInRange("sanityHydraRadius", 26, 1, 96);
+
+    /** Nyogtha: the thing under the floor in the deep caves. */
+    public static final ModConfigSpec.BooleanValue NYOGTHA_KILLABLE =
+            BUILDER.comment("Allow Nyogtha to be killed. False = permanently invulnerable.")
+                    .define("nyogthaKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_NYOGTHA_SPAWNS =
+            BUILDER.comment("Allow Nyogtha to be heard in deep loaded caves.")
+                    .define("enableNyogthaSpawns", true);
+    public static final ModConfigSpec.IntValue NYOGTHA_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Nyogtha spawn passes (minimum 20).")
+                    .defineInRange("nyogthaSpawnIntervalTicks", 3000, 20, 72000);
+    public static final ModConfigSpec.IntValue NYOGTHA_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Nyogtha may appear.")
+                    .defineInRange("nyogthaSpawnRadius", 40, 8, 128);
+    public static final ModConfigSpec.IntValue NYOGTHA_SPAWN_CAP =
+            BUILDER.comment("Max Nyogthas allowed near one player before spawning pauses.")
+                    .defineInRange("nyogthaSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.IntValue NYOGTHA_SPAWN_MAX_Y =
+            BUILDER.comment("Highest Y at which Nyogtha may appear (deep caves; it is under the floor).")
+                    .defineInRange("nyogthaSpawnMaxY", 0, -64, 64);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_NYOGTHA =
+            BUILDER.comment("Enable the Nyogtha sanity source (a sound heard through the stone).")
+                    .define("enableSanityNyogtha", true);
+    public static final ModConfigSpec.DoubleValue SANITY_NYOGTHA_RATE =
+            BUILDER.comment("Sanity change per second while near Nyogtha (negative drains).")
+                    .defineInRange("sanityNyogthaRate", -0.30, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_NYOGTHA_RADIUS =
+            BUILDER.comment("Radius (blocks) of Nyogtha's sanity drain.")
+                    .defineInRange("sanityNyogthaRadius", 24, 1, 96);
+
+    /** Rhan-Tegoth: the idol at the polar/cold edge. */
+    public static final ModConfigSpec.BooleanValue RHAN_TEGOTH_KILLABLE =
+            BUILDER.comment("Allow Rhan-Tegoth to be killed. False = permanently invulnerable.")
+                    .define("rhanTegothKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RHAN_TEGOTH_SPAWNS =
+            BUILDER.comment("Allow Rhan-Tegoth to stand on cold, loaded ground (the polar edge).")
+                    .define("enableRhanTegothSpawns", true);
+    public static final ModConfigSpec.IntValue RHAN_TEGOTH_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Rhan-Tegoth spawn passes (minimum 20).")
+                    .defineInRange("rhanTegothSpawnIntervalTicks", 3200, 20, 72000);
+    public static final ModConfigSpec.IntValue RHAN_TEGOTH_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Rhan-Tegoth may appear.")
+                    .defineInRange("rhanTegothSpawnRadius", 48, 8, 128);
+    public static final ModConfigSpec.IntValue RHAN_TEGOTH_SPAWN_CAP =
+            BUILDER.comment("Max Rhan-Tegoths allowed near one player before spawning pauses.")
+                    .defineInRange("rhanTegothSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_RHAN_TEGOTH =
+            BUILDER.comment("Enable the Rhan-Tegoth sanity source (the pull to worship).")
+                    .define("enableSanityRhanTegoth", true);
+    public static final ModConfigSpec.DoubleValue SANITY_RHAN_TEGOTH_RATE =
+            BUILDER.comment("Sanity change per second while near Rhan-Tegoth (negative drains).")
+                    .defineInRange("sanityRhanTegothRate", -0.25, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_RHAN_TEGOTH_RADIUS =
+            BUILDER.comment("Radius (blocks) of Rhan-Tegoth's sanity drain.")
+                    .defineInRange("sanityRhanTegothRadius", 32, 1, 96);
+
     // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
     // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,
     // which finds the nearest compatible AncientOne within riteSolveRadius and asks it to solve.
@@ -793,6 +958,37 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue RITE_BIND_ATLACH_NACHA_TICKS =
             BUILDER.comment("Ticks Atlach-Nacha stays bound after bind_atlach_nacha.")
                     .defineInRange("riteBindAtlachNachaTicks", 6000, 200, 72000);
+
+    // Ancient One non-combat solves, batch 3 (design/28): Nyarlathotep / Cthugha / Glaaki / Hydra /
+    // Nyogtha / Rhan-Tegoth. Same shared SOOTHE outcome; each toggle gates one target.
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_DENY_NYARLATHOTEP =
+            BUILDER.comment("Allow deny_nyarlathotep to name and set aside the trusted face.")
+                    .define("enableRiteDenyNyarlathotep", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_QUENCH_CTHUGHA =
+            BUILDER.comment("Allow quench_cthugha to dim the watching flame for a time.")
+                    .define("enableRiteQuenchCthugha", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_STILL_GLAAKI =
+            BUILDER.comment("Allow still_glaaki to still the same lake and free the servitors.")
+                    .define("enableRiteStillGlaaki", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_SEVER_HYDRA =
+            BUILDER.comment("Allow sever_hydra to stop the heads budding for a time.")
+                    .define("enableRiteSeverHydra", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_BAR_NYOGTHA =
+            BUILDER.comment("Allow bar_nyogtha to shut the way below and stop the hearing.")
+                    .define("enableRiteBarNyogtha", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_TOPPLE_IDOL =
+            BUILDER.comment("Allow topple_idol to topple Rhan-Tegoth and end the worship.")
+                    .define("enableRiteToppleIdol", true);
+
+    /** How long {@code quench_cthugha} dims the watching flame (ticks). */
+    public static final ModConfigSpec.IntValue RITE_QUENCH_CTHUGHA_TICKS =
+            BUILDER.comment("Ticks Cthugha's aura stays quenched after quench_cthugha.")
+                    .defineInRange("riteQuenchCthughaTicks", 6000, 200, 72000);
+
+    /** How long {@code sever_hydra} stops the heads budding (ticks). */
+    public static final ModConfigSpec.IntValue RITE_SEVER_HYDRA_TICKS =
+            BUILDER.comment("Ticks the Hydra stays severed after sever_hydra.")
+                    .defineInRange("riteSeverHydraTicks", 6000, 200, 72000);
 
     /** How far (blocks) {@code draw_away_dunwich} draws the Horror from the settlement. */
     public static final ModConfigSpec.IntValue DUNWICH_RETREAT_DISTANCE =

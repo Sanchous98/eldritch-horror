@@ -11,6 +11,7 @@ import com.sanchous98.eldritchhorror.entity.Burrowling;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.CaveDrifter;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
+import com.sanchous98.eldritchhorror.entity.Cthugha;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
 import com.sanchous98.eldritchhorror.entity.CultRaider;
 import com.sanchous98.eldritchhorror.entity.CultZealot;
@@ -19,18 +20,23 @@ import com.sanchous98.eldritchhorror.entity.DrownedMinnow;
 import com.sanchous98.eldritchhorror.entity.DrownedThrall;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.FrostWisp;
+import com.sanchous98.eldritchhorror.entity.Glaaki;
 import com.sanchous98.eldritchhorror.entity.GreyFox;
 import com.sanchous98.eldritchhorror.entity.HearthCat;
 import com.sanchous98.eldritchhorror.entity.HillHound;
+import com.sanchous98.eldritchhorror.entity.Hydra;
 import com.sanchous98.eldritchhorror.entity.Ithaqua;
 import com.sanchous98.eldritchhorror.entity.LanternJelly;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.MarshMote;
 import com.sanchous98.eldritchhorror.entity.MireSow;
 import com.sanchous98.eldritchhorror.entity.NightHag;
+import com.sanchous98.eldritchhorror.entity.Nyarlathotep;
+import com.sanchous98.eldritchhorror.entity.Nyogtha;
 import com.sanchous98.eldritchhorror.entity.PackBeast;
 import com.sanchous98.eldritchhorror.entity.PaleDrifter;
 import com.sanchous98.eldritchhorror.entity.PlagueCrone;
+import com.sanchous98.eldritchhorror.entity.RhanTegoth;
 import com.sanchous98.eldritchhorror.entity.RiftMite;
 import com.sanchous98.eldritchhorror.entity.RisenHusk;
 import com.sanchous98.eldritchhorror.entity.RiteBinder;
@@ -588,6 +594,84 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("atlach_nacha_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ATLACH_NACHA.get())));
 
+    /** Nyarlathotep: 0.6 x 1.95, the trusted face at the cult_stronghold (a humanoid silhouette). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Nyarlathotep>> NYARLATHOTEP =
+            ENTITY_TYPES.register("nyarlathotep", () ->
+                    EntityType.Builder.<Nyarlathotep>of(Nyarlathotep::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("nyarlathotep"))));
+
+    public static final DeferredItem<SpawnEggItem> NYARLATHOTEP_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("nyarlathotep_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(NYARLATHOTEP.get())));
+
+    /** Cthugha: 1.0 x 1.8, the watching flame of the ashen_waste. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Cthugha>> CTHUGHA =
+            ENTITY_TYPES.register("cthugha", () ->
+                    EntityType.Builder.<Cthugha>of(Cthugha::new, MobCategory.MONSTER)
+                            .sized(1.0F, 1.8F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("cthugha"))));
+
+    public static final DeferredItem<SpawnEggItem> CTHUGHA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("cthugha_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CTHUGHA.get())));
+
+    /** Glaaki: 1.6 x 1.6, the lake-dream of the drowned_marsh (a large drowned mass). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Glaaki>> GLAAKI =
+            ENTITY_TYPES.register("glaaki", () ->
+                    EntityType.Builder.<Glaaki>of(Glaaki::new, MobCategory.MONSTER)
+                            .sized(1.6F, 1.6F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("glaaki"))));
+
+    public static final DeferredItem<SpawnEggItem> GLAAKI_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("glaaki_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(GLAAKI.get())));
+
+    /** Hydra: 1.4 x 1.6, the head-budding presence of the drowned_marsh. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Hydra>> HYDRA =
+            ENTITY_TYPES.register("hydra", () ->
+                    EntityType.Builder.<Hydra>of(Hydra::new, MobCategory.MONSTER)
+                            .sized(1.4F, 1.6F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("hydra"))));
+
+    public static final DeferredItem<SpawnEggItem> HYDRA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("hydra_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(HYDRA.get())));
+
+    /** Nyogtha: 1.2 x 1.0, the thing under the floor in the deep caves. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Nyogtha>> NYOGTHA =
+            ENTITY_TYPES.register("nyogtha", () ->
+                    EntityType.Builder.<Nyogtha>of(Nyogtha::new, MobCategory.MONSTER)
+                            .sized(1.2F, 1.0F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("nyogtha"))));
+
+    public static final DeferredItem<SpawnEggItem> NYOGTHA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("nyogtha_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(NYOGTHA.get())));
+
+    /** Rhan-Tegoth: 1.4 x 2.2, the idol at the polar/cold edge. */
+    public static final DeferredHolder<EntityType<?>, EntityType<RhanTegoth>> RHAN_TEGOTH =
+            ENTITY_TYPES.register("rhan_tegoth", () ->
+                    EntityType.Builder.<RhanTegoth>of(RhanTegoth::new, MobCategory.MONSTER)
+                            .sized(1.4F, 2.2F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("rhan_tegoth"))));
+
+    public static final DeferredItem<SpawnEggItem> RHAN_TEGOTH_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("rhan_tegoth_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(RHAN_TEGOTH.get())));
+
     /**
      * Adds the spawn egg to the mod's creative tab. The tab is built once at registration from
      * {@code ModItems.ALL}, before items exist, so this event (fired while the tab populates) is the
@@ -646,6 +730,12 @@ public final class ModEntities {
             event.accept(ITHAQUA_SPAWN_EGG.get());
             event.accept(YIG_SPAWN_EGG.get());
             event.accept(ATLACH_NACHA_SPAWN_EGG.get());
+            event.accept(NYARLATHOTEP_SPAWN_EGG.get());
+            event.accept(CTHUGHA_SPAWN_EGG.get());
+            event.accept(GLAAKI_SPAWN_EGG.get());
+            event.accept(HYDRA_SPAWN_EGG.get());
+            event.accept(NYOGTHA_SPAWN_EGG.get());
+            event.accept(RHAN_TEGOTH_SPAWN_EGG.get());
         }
     }
 
@@ -704,6 +794,12 @@ public final class ModEntities {
         event.put(ITHAQUA.get(), Ithaqua.createAttributes().build());
         event.put(YIG.get(), Yig.createAttributes().build());
         event.put(ATLACH_NACHA.get(), AtlachNacha.createAttributes().build());
+        event.put(NYARLATHOTEP.get(), Nyarlathotep.createAttributes().build());
+        event.put(CTHUGHA.get(), Cthugha.createAttributes().build());
+        event.put(GLAAKI.get(), Glaaki.createAttributes().build());
+        event.put(HYDRA.get(), Hydra.createAttributes().build());
+        event.put(NYOGTHA.get(), Nyogtha.createAttributes().build());
+        event.put(RHAN_TEGOTH.get(), RhanTegoth.createAttributes().build());
     }
 
     private ModEntities() {

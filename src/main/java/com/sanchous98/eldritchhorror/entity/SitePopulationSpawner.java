@@ -119,6 +119,12 @@ public final class SitePopulationSpawner {
                 topUp(level, cache, player, ModEntities.WORSHIPPER.get(), Worshipper.class, radius,
                         ModConfig.SITE_WORSHIPPER_CAP.get(), ModConfig.SITE_WORSHIPPER_COUNT.get(),
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
+                // Nyarlathotep wears a face you trust inside the stronghold (design/28): one
+                // loaded-only presence, capped, zeroed when its toggle is off.
+                topUp(level, cache, player, ModEntities.NYARLATHOTEP.get(), Nyarlathotep.class, radius,
+                        ModConfig.SITE_NYARLATHOTEP_CAP.get(),
+                        ModConfig.ENABLE_SITE_NYARLATHOTEP.get() ? ModConfig.SITE_NYARLATHOTEP_COUNT.get() : 0,
+                        tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
             }
             case "eldritch_horror:site/drowned_temple" -> {
                 // The temple deck stands above the waterline, so a "water within 3 blocks" probe

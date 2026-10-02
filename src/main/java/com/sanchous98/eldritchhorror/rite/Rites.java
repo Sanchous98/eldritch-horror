@@ -61,6 +61,20 @@ public final class Rites {
                 2, -10, 0, RiteDefinition.Outcome.SOOTHE, "yig"));
         register(new RiteDefinition("bind_atlach_nacha", RiteDefinition.nameOf("bind_atlach_nacha"),
                 3, -15, -8, RiteDefinition.Outcome.SOOTHE, "atlach_nacha"));
+
+        // Ancient One solves, batch 3 (design/28). Same SOOTHE outcome, one per new presence.
+        register(new RiteDefinition("deny_nyarlathotep", RiteDefinition.nameOf("deny_nyarlathotep"),
+                2, -12, 0, RiteDefinition.Outcome.SOOTHE, "nyarlathotep"));
+        register(new RiteDefinition("quench_cthugha", RiteDefinition.nameOf("quench_cthugha"),
+                2, -10, -5, RiteDefinition.Outcome.SOOTHE, "cthugha"));
+        register(new RiteDefinition("still_glaaki", RiteDefinition.nameOf("still_glaaki"),
+                2, -12, 0, RiteDefinition.Outcome.SOOTHE, "glaaki"));
+        register(new RiteDefinition("sever_hydra", RiteDefinition.nameOf("sever_hydra"),
+                3, -15, -6, RiteDefinition.Outcome.SOOTHE, "hydra"));
+        register(new RiteDefinition("bar_nyogtha", RiteDefinition.nameOf("bar_nyogtha"),
+                3, -15, 0, RiteDefinition.Outcome.SOOTHE, "nyogtha"));
+        register(new RiteDefinition("topple_idol", RiteDefinition.nameOf("topple_idol"),
+                2, -12, 0, RiteDefinition.Outcome.SOOTHE, "rhan_tegoth"));
     }
 
     private Rites() {

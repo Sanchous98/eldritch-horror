@@ -31,13 +31,15 @@ public final class TomeRiteKnowledge {
     private static final Map<String, List<String>> GRANTS = Map.ofEntries(
             Map.entry("tome_of_the_eye", List.of("ward_of_the_eye")),
             // Also teaches the Leviathan/Cthulhu sooth: the drowned-temple presence is answered, not fought.
-            Map.entry("tome_of_tides", List.of("drowned_blessing", "soothe_cthulhu", "still_azathoth")),
-            // Also teaches appease_yig: the ashen-waste presence is answered by ritual, not by killing.
-            Map.entry("hollow_text", List.of("call_the_lesser", "appease_yig")),
-            // Also teaches the Shub-Niggurath stilling and the sealing of Yog-Sothoth's gate.
-            Map.entry("star_codex", List.of("summon_star_spawn", "still_shub_niggurath", "seal_the_gate")),
-            // Also teaches the binding of Atlach-Nacha: the rift weaver is unbound, not killed.
-            Map.entry("codex_of_wards", List.of("close_rift", "bind_atlach_nacha")),
+            Map.entry("tome_of_tides", List.of("drowned_blessing", "soothe_cthulhu", "still_azathoth",
+                    "still_glaaki", "sever_hydra")),
+            // Also teaches appease_yig and quench_cthugha: the ashen presences are answered by ritual.
+            Map.entry("hollow_text", List.of("call_the_lesser", "appease_yig", "quench_cthugha")),
+            // Also teaches the Shub-Niggurath stilling, the gate, and the toppling/barring rites.
+            Map.entry("star_codex", List.of("summon_star_spawn", "still_shub_niggurath", "seal_the_gate",
+                    "topple_idol", "bar_nyogtha")),
+            // Also teaches the binding of Atlach-Nacha and the denial of the trusted face.
+            Map.entry("codex_of_wards", List.of("close_rift", "bind_atlach_nacha", "deny_nyarlathotep")),
             // Also teaches the Dunwich Horror's drawing-away; a cleansing text answers both blights.
             Map.entry("bone_ledger", List.of("rite_of_cleansing", "draw_away_dunwich")),
             Map.entry("atlas_of_the_veil", List.of("open_rift")),

@@ -205,6 +205,66 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ATLACH_NACHA_DEATH =
             register("entity.atlach_nacha.death");
 
+    /** Nyarlathotep: a pleasant voice you cannot place (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> NYARLATHOTEP_AMBIENT =
+            register("entity.nyarlathotep.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> NYARLATHOTEP_HURT =
+            register("entity.nyarlathotep.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> NYARLATHOTEP_DEATH =
+            register("entity.nyarlathotep.death");
+
+    /** Cthugha: the watching flame's roar (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CTHUGHA_AMBIENT =
+            register("entity.cthugha.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CTHUGHA_HURT =
+            register("entity.cthugha.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> CTHUGHA_DEATH =
+            register("entity.cthugha.death");
+
+    /** Glaaki: the same lake lapping (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> GLAAKI_AMBIENT =
+            register("entity.glaaki.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> GLAAKI_HURT =
+            register("entity.glaaki.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> GLAAKI_DEATH =
+            register("entity.glaaki.death");
+
+    /** Hydra: a many-throated hiss (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> HYDRA_AMBIENT =
+            register("entity.hydra.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> HYDRA_HURT =
+            register("entity.hydra.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> HYDRA_DEATH =
+            register("entity.hydra.death");
+
+    /** Nyogtha: a low sound heard through the floor (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> NYOGTHA_AMBIENT =
+            register("entity.nyogtha.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> NYOGTHA_HURT =
+            register("entity.nyogtha.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> NYOGTHA_DEATH =
+            register("entity.nyogtha.death");
+
+    /** Rhan-Tegoth: a stone hum, as of something listening (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RHAN_TEGOTH_AMBIENT =
+            register("entity.rhan_tegoth.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> RHAN_TEGOTH_HURT =
+            register("entity.rhan_tegoth.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> RHAN_TEGOTH_DEATH =
+            register("entity.rhan_tegoth.death");
+
     // --- Passive (mundane) fauna (design/25 passive role table) --------------------------------
 
     public static final DeferredHolder<SoundEvent, SoundEvent> DEER_AMBIENT = register("entity.deer.ambient");
