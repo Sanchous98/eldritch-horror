@@ -154,8 +154,7 @@ public final class RiteEngine {
         if (nearest == null) {
             return new Result(false, Component.literal("No presence answers within " + radius + " blocks."));
         }
-        int ticks = "shub_niggurath".equals(target)
-                ? ModConfig.RITE_STILL_SHUB_NIGGURATH_TICKS.get() : 0;
+        int ticks = solveTicks(target);
         if (!nearest.solve(solveFor(target), ticks)) {
             return new Result(false, Component.literal("That presence is already answered."));
         }
@@ -164,8 +163,22 @@ public final class RiteEngine {
             taintPatch(level, nearest.blockPosition(), CLEANSE_TAINT, true);
             SanityAPI.add(player, 5);
         }
+        // Binding the weaver also lets the scar recede (bounded patch around the site).
+        if ("atlach_nacha".equals(target)) {
+            taintPatch(level, nearest.blockPosition(), CLEANSE_TAINT, true);
+        }
         Component reward = giveSolveReward(player, target);
         return new Result(true, solveMessage(target).copy().append(reward));
+    }
+
+    /** Per-target still/bind duration; only the {@link AncientOne.Solve#STILLED} solves use it. */
+    private static int solveTicks(String target) {
+        return switch (target) {
+            case "shub_niggurath" -> ModConfig.RITE_STILL_SHUB_NIGGURATH_TICKS.get();
+            case "ithaqua" -> ModConfig.RITE_WARD_ITHAQUA_TICKS.get();
+            case "atlach_nacha" -> ModConfig.RITE_BIND_ATLACH_NACHA_TICKS.get();
+            default -> 0;
+        };
     }
 
     /**
@@ -178,6 +191,11 @@ public final class RiteEngine {
             case "cthulhu" -> "mark_of_favour";
             case "dunwich_horror" -> "relic_coin";
             case "shub_niggurath" -> "black_obol";
+            case "azathoth" -> "void_reagent";
+            case "yog_sothoth" -> "relic_coin";
+            case "ithaqua" -> "mark_of_favour";
+            case "yig" -> "black_obol";
+            case "atlach_nacha" -> "relic_coin";
             default -> "";
         };
         if (itemId.isEmpty()) {
@@ -200,6 +218,11 @@ public final class RiteEngine {
             case "cthulhu" -> ModConfig.ENABLE_RITE_SOOTHE_CTHULHU.get();
             case "dunwich_horror" -> ModConfig.ENABLE_RITE_CLEANSE_DUNWICH.get();
             case "shub_niggurath" -> ModConfig.ENABLE_RITE_STILL_SHUB_NIGGURATH.get();
+            case "azathoth" -> ModConfig.ENABLE_RITE_STILL_AZATHOTH.get();
+            case "yog_sothoth" -> ModConfig.ENABLE_RITE_SEAL_YOG_SOTHOTH.get();
+            case "ithaqua" -> ModConfig.ENABLE_RITE_WARD_ITHAQUA.get();
+            case "yig" -> ModConfig.ENABLE_RITE_APPEASE_YIG.get();
+            case "atlach_nacha" -> ModConfig.ENABLE_RITE_BIND_ATLACH_NACHA.get();
             default -> false;
         };
     }
@@ -210,6 +233,11 @@ public final class RiteEngine {
             case "cthulhu" -> AncientOne.Solve.SOOTHED;
             case "dunwich_horror" -> AncientOne.Solve.BANISHED;
             case "shub_niggurath" -> AncientOne.Solve.STILLED;
+            case "azathoth" -> AncientOne.Solve.SOOTHED;
+            case "yog_sothoth" -> AncientOne.Solve.SOOTHED;
+            case "ithaqua" -> AncientOne.Solve.STILLED;
+            case "yig" -> AncientOne.Solve.SOOTHED;
+            case "atlach_nacha" -> AncientOne.Solve.STILLED;
             default -> AncientOne.Solve.NONE;
         };
     }
@@ -222,6 +250,16 @@ public final class RiteEngine {
                     "The horror is drawn off downhill, away from the settlement; the ground remembers less.");
             case "shub_niggurath" -> Component.literal(
                     "The woods hold their breath; the presence is stilled for a time.");
+            case "azathoth" -> Component.literal(
+                    "The music at the centre stills; the will to act returns, and nothing was killed.");
+            case "yog_sothoth" -> Component.literal(
+                    "The gate closes; the plateau is only a plateau again.");
+            case "ithaqua" -> Component.literal(
+                    "A ward turns the walking wind aside; it cannot find the seam for a while.");
+            case "yig" -> Component.literal(
+                    "Yig is appeased; the deaths are no longer drunk, and nothing else is drawn.");
+            case "atlach_nacha" -> Component.literal(
+                    "The web is unbound; the scar begins to close again, for a time.");
             default -> Component.literal("The presence is answered.");
         };
     }

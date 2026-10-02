@@ -49,6 +49,18 @@ public final class Rites {
                 2, -10, -5, RiteDefinition.Outcome.SOOTHE, "dunwich_horror"));
         register(new RiteDefinition("still_shub_niggurath", RiteDefinition.nameOf("still_shub_niggurath"),
                 3, -15, -8, RiteDefinition.Outcome.SOOTHE, "shub_niggurath"));
+
+        // Ancient One solves, batch 2 (design/28). Same SOOTHE outcome, one per new presence.
+        register(new RiteDefinition("still_azathoth", RiteDefinition.nameOf("still_azathoth"),
+                2, -12, 0, RiteDefinition.Outcome.SOOTHE, "azathoth"));
+        register(new RiteDefinition("seal_the_gate", RiteDefinition.nameOf("seal_the_gate"),
+                3, -15, 0, RiteDefinition.Outcome.SOOTHE, "yog_sothoth"));
+        register(new RiteDefinition("ward_ithaqua", RiteDefinition.nameOf("ward_ithaqua"),
+                2, -10, -5, RiteDefinition.Outcome.SOOTHE, "ithaqua"));
+        register(new RiteDefinition("appease_yig", RiteDefinition.nameOf("appease_yig"),
+                2, -10, 0, RiteDefinition.Outcome.SOOTHE, "yig"));
+        register(new RiteDefinition("bind_atlach_nacha", RiteDefinition.nameOf("bind_atlach_nacha"),
+                3, -15, -8, RiteDefinition.Outcome.SOOTHE, "atlach_nacha"));
     }
 
     private Rites() {

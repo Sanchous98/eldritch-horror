@@ -161,6 +161,141 @@
       }
     ]
   },
+  "entity.azathoth.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.azathoth.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.heartbeat",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.azathoth.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.azathoth.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.azathoth.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.azathoth.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.yog_sothoth.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.yog_sothoth.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.stare",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.yog_sothoth.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.yog_sothoth.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.yog_sothoth.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.yog_sothoth.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.ithaqua.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.ithaqua.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.roar",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.ithaqua.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.ithaqua.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.ithaqua.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.ithaqua.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.yig.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.yig.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.yig.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.yig.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.yig.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.yig.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.silverfish.death",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.atlach_nacha.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.atlach_nacha.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.spider.ambient",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.atlach_nacha.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.atlach_nacha.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.spider.hurt",
+        "type": "event"
+      }
+    ]
+  },
+  "entity.atlach_nacha.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.atlach_nacha.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.spider.death",
+        "type": "event"
+      }
+    ]
+  },
   "entity.blight_pod.ambient": {
     "subtitle": "subtitles.entity.eldritch_horror.blight_pod.ambient",
     "sounds": [

@@ -60,6 +60,11 @@ public final class DreadAuraTicker {
             // it runs its own two-axis pulse (corruption by motion, sanity at rest) in its own tick.
             BestiarySupport.tickAura(player, Cthulhu.class, ModConfig.SANITY_CTHULHU_RADIUS.get());
             BestiarySupport.tickAura(player, DunwichHorror.class, ModConfig.CORRUPTION_DUNWICH_HORROR_RADIUS.get());
+            BestiarySupport.tickAura(player, Azathoth.class, ModConfig.SANITY_AZATHOTH_RADIUS.get());
+            BestiarySupport.tickAura(player, YogSothoth.class, ModConfig.SANITY_YOG_SOTHOTH_RADIUS.get());
+            BestiarySupport.tickAura(player, Ithaqua.class, ModConfig.SANITY_ITHAQUA_RADIUS.get());
+            BestiarySupport.tickAura(player, Yig.class, ModConfig.CORRUPTION_YIG_RADIUS.get());
+            BestiarySupport.tickAura(player, AtlachNacha.class, ModConfig.CORRUPTION_ATLACH_NACHA_RADIUS.get());
         }
     }
 }

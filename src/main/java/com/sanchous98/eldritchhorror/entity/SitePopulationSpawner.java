@@ -136,6 +136,13 @@ public final class SitePopulationSpawner {
                         radius, ModConfig.SITE_STONE_SENTINEL_CAP.get(),
                         ModConfig.SITE_STONE_SENTINEL_COUNT.get(), tick,
                         siteGate(cx, cz, reach, (lvl, spot, dark, tainted) -> !tainted));
+                // The gate on the observatory plateau (design/28): the order_vault is the existing
+                // site that stands on that plateau, so Yog-Sothoth attaches to it. It is
+                // stationary-ish by attributes, one loaded-only presence inside the footprint.
+                topUp(level, cache, player, ModEntities.YOG_SOTHOTH.get(), YogSothoth.class, radius,
+                        ModConfig.SITE_YOG_SOTHOTH_CAP.get(),
+                        ModConfig.ENABLE_SITE_YOG_SOTHOTH.get() ? ModConfig.SITE_YOG_SOTHOTH_COUNT.get() : 0,
+                        tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
             }
             case "eldritch_horror:site/rift_scar" -> {
                 // The scar is a place of tears: swarm and vermin, and rarely a star-spawn.
@@ -144,6 +151,17 @@ public final class SitePopulationSpawner {
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
                 topUp(level, cache, player, ModEntities.RIFT_MITE.get(), RiftMite.class, radius,
                         ModConfig.SITE_RIFT_MITE_CAP.get(), ModConfig.SITE_RIFT_MITE_COUNT.get(),
+                        tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
+                // The scar's two Ancient Ones (design/28): Azathoth at the centre (no melee) and
+                // Atlach-Nacha weaving the tear wider. Both are one loaded-only presence per player;
+                // each keeps its own count config but zeroes its budget when the toggle is off.
+                topUp(level, cache, player, ModEntities.AZATHOTH.get(), Azathoth.class, radius,
+                        ModConfig.SITE_AZATHOTH_CAP.get(),
+                        ModConfig.ENABLE_SITE_AZATHOTH.get() ? ModConfig.SITE_AZATHOTH_COUNT.get() : 0,
+                        tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
+                topUp(level, cache, player, ModEntities.ATLACH_NACHA.get(), AtlachNacha.class, radius,
+                        ModConfig.SITE_ATLACH_NACHA_CAP.get(),
+                        ModConfig.ENABLE_SITE_ATLACH_NACHA.get() ? ModConfig.SITE_ATLACH_NACHA_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
                 // The pass only samples multiples of the site interval, so express the star cadence
                 // in whole passes: every round(starInterval / interval) passes, at least one.

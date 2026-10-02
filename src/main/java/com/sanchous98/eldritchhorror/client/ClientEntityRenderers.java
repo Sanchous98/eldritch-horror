@@ -67,5 +67,10 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.CTHULHU.get(), CthulhuRenderer::new);
         event.registerEntityRenderer(ModEntities.DUNWICH_HORROR.get(), DunwichHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.SHUB_NIGGURATH.get(), ShubNiggurathRenderer::new);
+        event.registerEntityRenderer(ModEntities.AZATHOTH.get(), AzathothRenderer::new);
+        event.registerEntityRenderer(ModEntities.YOG_SOTHOTH.get(), YogSothothRenderer::new);
+        event.registerEntityRenderer(ModEntities.ITHAQUA.get(), IthaquaRenderer::new);
+        event.registerEntityRenderer(ModEntities.YIG.get(), YigRenderer::new);
+        event.registerEntityRenderer(ModEntities.ATLACH_NACHA.get(), AtlachNachaRenderer::new);
     }
 }

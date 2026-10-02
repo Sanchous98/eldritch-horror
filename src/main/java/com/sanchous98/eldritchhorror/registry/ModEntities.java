@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.entity.AshFowl;
+import com.sanchous98.eldritchhorror.entity.AtlachNacha;
+import com.sanchous98.eldritchhorror.entity.Azathoth;
 import com.sanchous98.eldritchhorror.entity.BlightPod;
 import com.sanchous98.eldritchhorror.entity.BogBear;
 import com.sanchous98.eldritchhorror.entity.BoneChoir;
@@ -20,6 +22,7 @@ import com.sanchous98.eldritchhorror.entity.FrostWisp;
 import com.sanchous98.eldritchhorror.entity.GreyFox;
 import com.sanchous98.eldritchhorror.entity.HearthCat;
 import com.sanchous98.eldritchhorror.entity.HillHound;
+import com.sanchous98.eldritchhorror.entity.Ithaqua;
 import com.sanchous98.eldritchhorror.entity.LanternJelly;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.MarshMote;
@@ -45,6 +48,8 @@ import com.sanchous98.eldritchhorror.entity.WeaverSpawn;
 import com.sanchous98.eldritchhorror.entity.WoolBeast;
 import com.sanchous98.eldritchhorror.entity.WoolHare;
 import com.sanchous98.eldritchhorror.entity.Worshipper;
+import com.sanchous98.eldritchhorror.entity.Yig;
+import com.sanchous98.eldritchhorror.entity.YogSothoth;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -518,6 +523,71 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("shub_niggurath_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(SHUB_NIGGURATH.get())));
 
+    /** Azathoth: 3.5 x 3.5, the rift_scar presence that has no melee (replaces the Wither). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Azathoth>> AZATHOTH =
+            ENTITY_TYPES.register("azathoth", () ->
+                    EntityType.Builder.<Azathoth>of(Azathoth::new, MobCategory.MONSTER)
+                            .sized(3.5F, 3.5F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("azathoth"))));
+
+    public static final DeferredItem<SpawnEggItem> AZATHOTH_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("azathoth_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(AZATHOTH.get())));
+
+    /** Yog-Sothoth: 4.0 x 6.0, the gate on the observatory plateau (replaces the Ender Dragon). */
+    public static final DeferredHolder<EntityType<?>, EntityType<YogSothoth>> YOG_SOTHOTH =
+            ENTITY_TYPES.register("yog_sothoth", () ->
+                    EntityType.Builder.<YogSothoth>of(YogSothoth::new, MobCategory.MONSTER)
+                            .sized(4.0F, 6.0F)
+                            .clientTrackingRange(14)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("yog_sothoth"))));
+
+    public static final DeferredItem<SpawnEggItem> YOG_SOTHOTH_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("yog_sothoth_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(YOG_SOTHOTH.get())));
+
+    /** Ithaqua: 0.9 x 2.9, the walking wind of the cold edge (replaces the Warden). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Ithaqua>> ITHAQUA =
+            ENTITY_TYPES.register("ithaqua", () ->
+                    EntityType.Builder.<Ithaqua>of(Ithaqua::new, MobCategory.MONSTER)
+                            .sized(0.9F, 2.9F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("ithaqua"))));
+
+    public static final DeferredItem<SpawnEggItem> ITHAQUA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("ithaqua_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ITHAQUA.get())));
+
+    /** Yig: 1.4 x 1.4, the ashen_waste presence that escalates when struck. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Yig>> YIG =
+            ENTITY_TYPES.register("yig", () ->
+                    EntityType.Builder.<Yig>of(Yig::new, MobCategory.MONSTER)
+                            .sized(1.4F, 1.4F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("yig"))));
+
+    public static final DeferredItem<SpawnEggItem> YIG_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("yig_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(YIG.get())));
+
+    /** Atlach-Nacha: 2.0 x 1.2, the rift_scar weaver (a large spider). */
+    public static final DeferredHolder<EntityType<?>, EntityType<AtlachNacha>> ATLACH_NACHA =
+            ENTITY_TYPES.register("atlach_nacha", () ->
+                    EntityType.Builder.<AtlachNacha>of(AtlachNacha::new, MobCategory.MONSTER)
+                            .sized(2.0F, 1.2F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("atlach_nacha"))));
+
+    public static final DeferredItem<SpawnEggItem> ATLACH_NACHA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("atlach_nacha_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ATLACH_NACHA.get())));
+
     /**
      * Adds the spawn egg to the mod's creative tab. The tab is built once at registration from
      * {@code ModItems.ALL}, before items exist, so this event (fired while the tab populates) is the
@@ -571,6 +641,11 @@ public final class ModEntities {
             event.accept(CTHULHU_SPAWN_EGG.get());
             event.accept(DUNWICH_HORROR_SPAWN_EGG.get());
             event.accept(SHUB_NIGGURATH_SPAWN_EGG.get());
+            event.accept(AZATHOTH_SPAWN_EGG.get());
+            event.accept(YOG_SOTHOTH_SPAWN_EGG.get());
+            event.accept(ITHAQUA_SPAWN_EGG.get());
+            event.accept(YIG_SPAWN_EGG.get());
+            event.accept(ATLACH_NACHA_SPAWN_EGG.get());
         }
     }
 
@@ -624,6 +699,11 @@ public final class ModEntities {
         event.put(CTHULHU.get(), Cthulhu.createAttributes().build());
         event.put(DUNWICH_HORROR.get(), DunwichHorror.createAttributes().build());
         event.put(SHUB_NIGGURATH.get(), ShubNiggurath.createAttributes().build());
+        event.put(AZATHOTH.get(), Azathoth.createAttributes().build());
+        event.put(YOG_SOTHOTH.get(), YogSothoth.createAttributes().build());
+        event.put(ITHAQUA.get(), Ithaqua.createAttributes().build());
+        event.put(YIG.get(), Yig.createAttributes().build());
+        event.put(ATLACH_NACHA.get(), AtlachNacha.createAttributes().build());
     }
 
     private ModEntities() {

@@ -155,6 +155,56 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SHUB_NIGGURATH_DEATH =
             register("entity.shub_niggurath.death");
 
+    /** Azathoth's vast drone (ambient); the music at the centre of the scar. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> AZATHOTH_AMBIENT =
+            register("entity.azathoth.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> AZATHOTH_HURT =
+            register("entity.azathoth.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> AZATHOTH_DEATH =
+            register("entity.azathoth.death");
+
+    /** Yog-Sothoth: the gate's patient hum (ambient) and the sound of it sealing. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> YOG_SOTHOTH_AMBIENT =
+            register("entity.yog_sothoth.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> YOG_SOTHOTH_HURT =
+            register("entity.yog_sothoth.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> YOG_SOTHOTH_DEATH =
+            register("entity.yog_sothoth.death");
+
+    /** Ithaqua: the howl carried on the walking wind (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ITHAQUA_AMBIENT =
+            register("entity.ithaqua.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> ITHAQUA_HURT =
+            register("entity.ithaqua.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> ITHAQUA_DEATH =
+            register("entity.ithaqua.death");
+
+    /** Yig: the rustle of drawn things (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> YIG_AMBIENT =
+            register("entity.yig.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> YIG_HURT =
+            register("entity.yig.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> YIG_DEATH =
+            register("entity.yig.death");
+
+    /** Atlach-Nacha: the skitter of the weaving (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ATLACH_NACHA_AMBIENT =
+            register("entity.atlach_nacha.ambient");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> ATLACH_NACHA_HURT =
+            register("entity.atlach_nacha.hurt");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> ATLACH_NACHA_DEATH =
+            register("entity.atlach_nacha.death");
+
     // --- Passive (mundane) fauna (design/25 passive role table) --------------------------------
 
     public static final DeferredHolder<SoundEvent, SoundEvent> DEER_AMBIENT = register("entity.deer.ambient");

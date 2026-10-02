@@ -606,6 +606,135 @@ public final class ModConfig {
             BUILDER.comment("Sanity change per second while standing still near Shub-Niggurath.")
                     .defineInRange("sanityShubNiggurathStillRate", -0.12, -10.0, 0.0);
 
+    // --- Ancient Ones, batch 2 (design/28): Azathoth / Yog-Sothoth / Ithaqua / Yig / Atlach-Nacha --
+
+    /** Azathoth: the rift_scar presence that replaces the Wither and has no melee. */
+    public static final ModConfigSpec.BooleanValue AZATHOTH_KILLABLE =
+            BUILDER.comment("Allow Azathoth to be killed. False = permanently invulnerable (it is no fight).")
+                    .define("azathothKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_AZATHOTH =
+            BUILDER.comment("Enable the Azathoth sanity source (the music unmakes the will to act).")
+                    .define("enableSanityAzathoth", true);
+    public static final ModConfigSpec.DoubleValue SANITY_AZATHOTH_RATE =
+            BUILDER.comment("Sanity change per second while near Azathoth (negative drains).")
+                    .defineInRange("sanityAzathothRate", -0.55, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_AZATHOTH_RADIUS =
+            BUILDER.comment("Radius (blocks) of Azathoth's hard sanity drain.")
+                    .defineInRange("sanityAzathothRadius", 40, 1, 128);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_AZATHOTH =
+            BUILDER.comment("Allow Azathoth to hold the rift_scar (one loaded-only presence per player).")
+                    .define("enableSiteAzathoth", true);
+    public static final ModConfigSpec.IntValue SITE_AZATHOTH_COUNT =
+            BUILDER.comment("Max Azathoths spawned per rift_scar pass.")
+                    .defineInRange("siteAzathothCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_AZATHOTH_CAP =
+            BUILDER.comment("Max Azathoths near one player at a rift_scar before pausing.")
+                    .defineInRange("siteAzathothCap", 1, 1, 4);
+
+    /** Yog-Sothoth: the gate on the observatory plateau, bound to the existing order_vault site. */
+    public static final ModConfigSpec.BooleanValue YOG_SOTHOTH_KILLABLE =
+            BUILDER.comment("Allow Yog-Sothoth to be killed. False = permanently invulnerable.")
+                    .define("yogSothothKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_YOG_SOTHOTH =
+            BUILDER.comment("Enable the Yog-Sothoth sanity source (the gate draws the eye).")
+                    .define("enableSanityYogSothoth", true);
+    public static final ModConfigSpec.DoubleValue SANITY_YOG_SOTHOTH_RATE =
+            BUILDER.comment("Sanity change per second while near Yog-Sothoth (negative drains).")
+                    .defineInRange("sanityYogSothothRate", -0.30, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_YOG_SOTHOTH_RADIUS =
+            BUILDER.comment("Radius (blocks) of Yog-Sothoth's large, patient sanity drain.")
+                    .defineInRange("sanityYogSothothRadius", 48, 1, 160);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_YOG_SOTHOTH =
+            BUILDER.comment("Allow Yog-Sothoth to stand at the order_vault (observatory plateau), loaded-only.")
+                    .define("enableSiteYogSothoth", true);
+    public static final ModConfigSpec.IntValue SITE_YOG_SOTHOTH_COUNT =
+            BUILDER.comment("Max Yog-Sothoths spawned per order_vault pass.")
+                    .defineInRange("siteYogSothothCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_YOG_SOTHOTH_CAP =
+            BUILDER.comment("Max Yog-Sothoths near one player at the vault before pausing.")
+                    .defineInRange("siteYogSothothCap", 1, 1, 4);
+
+    /** Ithaqua: the walking wind of the cold edge, replacing the Warden. */
+    public static final ModConfigSpec.BooleanValue ITHAQUA_KILLABLE =
+            BUILDER.comment("Allow Ithaqua to be killed. False = permanently invulnerable.")
+                    .define("ithaquaKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_ITHAQUA_SPAWNS =
+            BUILDER.comment("Allow Ithaqua to stalk players on cold, loaded ground (the polar edge).")
+                    .define("enableIthaquaSpawns", true);
+    public static final ModConfigSpec.IntValue ITHAQUA_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Ithaqua spawn passes (minimum 20).")
+                    .defineInRange("ithaquaSpawnIntervalTicks", 2400, 20, 72000);
+    public static final ModConfigSpec.IntValue ITHAQUA_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Ithaqua may appear.")
+                    .defineInRange("ithaquaSpawnRadius", 48, 8, 128);
+    public static final ModConfigSpec.IntValue ITHAQUA_SPAWN_CAP =
+            BUILDER.comment("Max Ithaquas allowed near one player before spawning pauses.")
+                    .defineInRange("ithaquaSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_ITHAQUA =
+            BUILDER.comment("Enable the Ithaqua sanity source (the wind drags the will away).")
+                    .define("enableSanityIthaqua", true);
+    public static final ModConfigSpec.DoubleValue SANITY_ITHAQUA_RATE =
+            BUILDER.comment("Sanity change per second while near Ithaqua (negative drains).")
+                    .defineInRange("sanityIthaquaRate", -0.30, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_ITHAQUA_RADIUS =
+            BUILDER.comment("Radius (blocks) of Ithaqua's sanity drain.")
+                    .defineInRange("sanityIthaquaRadius", 28, 1, 96);
+
+    /** Yig: the ashen_waste presence that escalates when struck. */
+    public static final ModConfigSpec.BooleanValue YIG_KILLABLE =
+            BUILDER.comment("Allow Yig to be killed. False = permanently invulnerable.")
+                    .define("yigKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_YIG_SPAWNS =
+            BUILDER.comment("Allow Yig to appear in tainted loaded terrain (the ashen waste).")
+                    .define("enableYigSpawns", true);
+    public static final ModConfigSpec.IntValue YIG_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Yig spawn passes (minimum 20).")
+                    .defineInRange("yigSpawnIntervalTicks", 2400, 20, 72000);
+    public static final ModConfigSpec.IntValue YIG_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which Yig may appear.")
+                    .defineInRange("yigSpawnRadius", 48, 8, 128);
+    public static final ModConfigSpec.IntValue YIG_SPAWN_CAP =
+            BUILDER.comment("Max Yigs allowed near one player before spawning pauses.")
+                    .defineInRange("yigSpawnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_YIG_ESCALATION =
+            BUILDER.comment("Enable Yig's escalation: each hit may draw one more of the dead to it.")
+                    .define("enableYigEscalation", true);
+    public static final ModConfigSpec.IntValue YIG_ESCALATION_CAP =
+            BUILDER.comment("Max drawn dead within 24 blocks of Yig before the escalation pauses.")
+                    .defineInRange("yigEscalationCap", 6, 0, 24);
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_YIG =
+            BUILDER.comment("Enable the Yig corruption aura (the deaths taint the ground).")
+                    .define("enableCorruptionYig", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_YIG_RATE =
+            BUILDER.comment("Corruption per second while near Yig (positive taints).")
+                    .defineInRange("corruptionYigRate", 0.10, 0.0, 10.0);
+    public static final ModConfigSpec.IntValue CORRUPTION_YIG_RADIUS =
+            BUILDER.comment("Radius (blocks) of Yig's corruption aura.")
+                    .defineInRange("corruptionYigRadius", 24, 1, 96);
+
+    /** Atlach-Nacha: the rift_scar weaver. */
+    public static final ModConfigSpec.BooleanValue ATLACH_NACHA_KILLABLE =
+            BUILDER.comment("Allow Atlach-Nacha to be killed. False = permanently invulnerable.")
+                    .define("atlachNachaKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_ATLACH_NACHA =
+            BUILDER.comment("Allow Atlach-Nacha to weave at the rift_scar (loaded-only).")
+                    .define("enableSiteAtlachNacha", true);
+    public static final ModConfigSpec.IntValue SITE_ATLACH_NACHA_COUNT =
+            BUILDER.comment("Max Atlach-Nachas spawned per rift_scar pass.")
+                    .defineInRange("siteAtlachNachaCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_ATLACH_NACHA_CAP =
+            BUILDER.comment("Max Atlach-Nachas near one player at a rift_scar before pausing.")
+                    .defineInRange("siteAtlachNachaCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_ATLACH_NACHA =
+            BUILDER.comment("Enable the Atlach-Nacha corruption aura (the web widens the tear).")
+                    .define("enableCorruptionAtlachNacha", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_ATLACH_NACHA_RATE =
+            BUILDER.comment("Corruption per second while near Atlach-Nacha (positive taints).")
+                    .defineInRange("corruptionAtlachNachaRate", 0.18, 0.0, 10.0);
+    public static final ModConfigSpec.IntValue CORRUPTION_ATLACH_NACHA_RADIUS =
+            BUILDER.comment("Radius (blocks) of Atlach-Nacha's corruption aura.")
+                    .defineInRange("corruptionAtlachNachaRadius", 28, 1, 96);
+
     // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
     // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,
     // which finds the nearest compatible AncientOne within riteSolveRadius and asks it to solve.
@@ -636,6 +765,34 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue RITE_STILL_SHUB_NIGGURATH_TICKS =
             BUILDER.comment("Ticks Shub-Niggurath's aura stays stilled after still_shub_niggurath.")
                     .defineInRange("riteStillShubNiggurathTicks", 6000, 200, 72000);
+
+    // Ancient One non-combat solves, batch 2 (design/28). Same shared SOOTHE outcome; each toggle
+    // gates one target. A disabled solve makes its rite refuse (cost still paid).
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_STILL_AZATHOTH =
+            BUILDER.comment("Allow still_azathoth to still the music at the centre of the rift_scar.")
+                    .define("enableRiteStillAzathoth", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_SEAL_YOG_SOTHOTH =
+            BUILDER.comment("Allow seal_the_gate to close Yog-Sothoth's gate on the plateau.")
+                    .define("enableRiteSealYogSothoth", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_WARD_ITHAQUA =
+            BUILDER.comment("Allow ward_ithaqua to turn the walking wind aside for a time.")
+                    .define("enableRiteWardIthaqua", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_APPEASE_YIG =
+            BUILDER.comment("Allow appease_yig to stop Yig drinking the deaths.")
+                    .define("enableRiteAppeaseYig", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_BIND_ATLACH_NACHA =
+            BUILDER.comment("Allow bind_atlach_nacha to undo the web and let the scar close.")
+                    .define("enableRiteBindAtlachNacha", true);
+
+    /** How long {@code ward_ithaqua} stills the wind (ticks). */
+    public static final ModConfigSpec.IntValue RITE_WARD_ITHAQUA_TICKS =
+            BUILDER.comment("Ticks Ithaqua's aura stays stilled after ward_ithaqua.")
+                    .defineInRange("riteWardIthaquaTicks", 6000, 200, 72000);
+
+    /** How long {@code bind_atlach_nacha} binds the weaver (ticks). */
+    public static final ModConfigSpec.IntValue RITE_BIND_ATLACH_NACHA_TICKS =
+            BUILDER.comment("Ticks Atlach-Nacha stays bound after bind_atlach_nacha.")
+                    .defineInRange("riteBindAtlachNachaTicks", 6000, 200, 72000);
 
     /** How far (blocks) {@code draw_away_dunwich} draws the Horror from the settlement. */
     public static final ModConfigSpec.IntValue DUNWICH_RETREAT_DISTANCE =
