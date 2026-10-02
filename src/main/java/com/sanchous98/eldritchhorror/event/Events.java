@@ -33,12 +33,7 @@ public final class Events {
 
     /** The event with {@code id}, or {@code null}. */
     public static EldritchEvent byId(String id) {
-        for (EldritchEvent event : all()) {
-            if (event.id().equals(id)) {
-                return event;
-            }
-        }
-        return null;
+        return all().stream().filter(event -> event.id().equals(id)).findFirst().orElse(null);
     }
 
     /** The per-event config toggle for {@code id}; unknown ids are disabled. */

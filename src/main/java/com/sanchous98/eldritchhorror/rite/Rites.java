@@ -96,12 +96,7 @@ public final class Rites {
 
     /** @return the definition for {@code id}, or {@code null} if unknown. */
     public static RiteDefinition byId(String id) {
-        for (RiteDefinition definition : ALL) {
-            if (definition.id().equals(id)) {
-                return definition;
-            }
-        }
-        return null;
+        return ALL.stream().filter(definition -> definition.id().equals(id)).findFirst().orElse(null);
     }
 
     /** @return all registered rites, in registration order. */

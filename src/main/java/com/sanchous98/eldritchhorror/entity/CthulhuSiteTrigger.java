@@ -91,12 +91,8 @@ public final class CthulhuSiteTrigger {
 
     /** The registered site by id, or {@code null} if the registry has not been populated yet. */
     private static Location site() {
-        for (Location candidate : Locations.all()) {
-            if (candidate.id().equals(SITE_ID)) {
-                return candidate;
-            }
-        }
-        return null;
+        return Locations.all().stream().filter(candidate -> candidate.id().equals(SITE_ID))
+                .findFirst().orElse(null);
     }
 
     /**
