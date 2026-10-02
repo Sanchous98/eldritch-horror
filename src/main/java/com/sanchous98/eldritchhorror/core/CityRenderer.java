@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.Location;
+import net.minecraft.util.Mth;
 import com.sanchous98.eldritchhorror.world.loc.Locations;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import java.awt.image.BufferedImage;
@@ -630,7 +631,7 @@ public final class CityRenderer {
      * smaller site is simply rendered as a 220-radius area.
      */
     private static int populationForRadius(int radius) {
-        int r = Math.max(220, Math.min(400, radius));
+        int r = Mth.clamp(radius, 220, 400);
         double sqrtPop = (r - 220) * 40.0;
         double pop = sqrtPop * sqrtPop;
         if (pop >= Integer.MAX_VALUE) {

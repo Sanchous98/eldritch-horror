@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -120,6 +121,6 @@ public final class ClientHud {
     }
 
     private static double clamp01(double v) {
-        return v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v);
+        return Mth.clamp(v, 0.0, 1.0);
     }
 }

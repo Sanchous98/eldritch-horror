@@ -151,8 +151,9 @@ public final class SurfaceDecorator {
             // margin — not the larger cull radius. This keeps greenery out from under the
             // buildings while leaving a thin natural rim that softens the district edge.
             // clamp(radius, 220, DISTRICT_CAP), exactly as CityLocation computes its district.
-            int district = Math.max(220, Math.min(CITY_DISTRICT_CAP,
-                    (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0)));
+            int district = Mth.clamp(
+                    (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0),
+                    220, CITY_DISTRICT_CAP);
             int r = district + CITY_MARGIN;
             long dx = (long) x - c.x();
             long dz = (long) z - c.z();

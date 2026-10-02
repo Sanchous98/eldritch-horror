@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.city;
 
+import net.minecraft.util.Mth;
+
 /**
  * A curated city: real name, world coordinates and real population (from
  * {@code assets/eldritch_horror/map/settlements.json}, baked by {@code tools/bake_earth.py}).
@@ -13,6 +15,6 @@ public record City(String id, String name, int x, int z, int population) {
     /** Footprint radius in blocks, from real population (Tokyo ~40, Nairobi ~12). */
     public int radius() {
         int r = (int) Math.round(Math.sqrt(Math.max(population, 1)) / 150.0);
-        return Math.max(10, Math.min(44, r));
+        return Mth.clamp(r, 10, 44);
     }
 }

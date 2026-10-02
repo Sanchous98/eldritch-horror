@@ -35,6 +35,7 @@ public final class ElevationCurve {
         return (int) clamp(Math.round(y), MIN_Y, MAX_Y);
     }
 
+    /** Pure (no Minecraft types) so it stays unit-testable. */
     private static double clamp(double v, double lo, double hi) {
         return v < lo ? lo : (v > hi ? hi : v);
     }

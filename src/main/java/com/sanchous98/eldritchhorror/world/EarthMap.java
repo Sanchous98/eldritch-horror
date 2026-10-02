@@ -155,7 +155,7 @@ public final class EarthMap {
 
     private double at(BufferedImage img, int px, int py) {
         int x = wrapX(px);
-        int y = Math.max(0, Math.min(height - 1, py));
+        int y = clamp(py, height - 1);
         return img.getRaster().getSample(x, y, 0);
     }
 
@@ -167,6 +167,7 @@ public final class EarthMap {
         return px < 0 ? 0 : Math.min(px, width - 1);
     }
 
+    /** Pure (no Minecraft types): {@code EarthMap} is loaded by {@code EarthMapCylinderTest} without Minecraft. */
     private static int clamp(int v, int max) {
         return v < 0 ? 0 : (v > max ? max : v);
     }
