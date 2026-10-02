@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.147'
     id 'idea'
+    id 'pmd'
 }
 
 version = mod_version
@@ -122,6 +123,25 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+// Static analysis (PMD 7): catches the dead/redundant code an IDE flags — unused private
+// members, always-true/false conditions, useless parentheses/returns, unused imports. It runs
+// as its own task (`./gradlew pmdMain`), never as part of `build`, and does not fail the build:
+// read the report at build/reports/pmd/main.html and act on it deliberately.
+pmd {
+    toolVersion = '7.28.0'
+    ruleSets = [] // no default rulesets; use only the explicit ruleset below
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+tasks.named('pmdMain') {
+    // Our own sources only; the Minecraft/NeoForge jars are not analysed. Mixins are excluded:
+    // their `eldritchhorror$…` methods are invoked by the mixin framework, not from Java, so PMD
+    // reports them as unused (a false positive).
+    source = fileTree('src/main/java') { exclude '**/mixin/**' }
+    ignoreFailures = true
+    consoleOutput = true
 }
 
 idea {
