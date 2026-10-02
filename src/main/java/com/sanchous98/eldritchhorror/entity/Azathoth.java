@@ -75,7 +75,7 @@ public final class Azathoth extends AncientOne {
     @Override
     public boolean isAuraActive() {
         // Soothed: the music stills; the presence remains but no longer drains.
-        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_AZATHOTH.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_SANITY_AZATHOTH.get();
     }
 
     @Override

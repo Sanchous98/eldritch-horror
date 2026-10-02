@@ -121,7 +121,7 @@ public final class PlagueCrone extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_PLAGUE_CRONE.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_PLAGUE_CRONE.get();
     }
 
     @Override

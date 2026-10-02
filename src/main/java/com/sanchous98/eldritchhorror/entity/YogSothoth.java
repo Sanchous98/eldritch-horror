@@ -59,7 +59,7 @@ public final class YogSothoth extends AncientOne {
     @Override
     public boolean isAuraActive() {
         // Sealed: the gate is shut and no longer draws the eye.
-        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_YOG_SOTHOTH.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_SANITY_YOG_SOTHOTH.get();
     }
 
     @Override

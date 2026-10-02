@@ -94,7 +94,7 @@ public final class CultRaider extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_CULT_RAIDER.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_SANITY_CULT_RAIDER.get();
     }
 
     @Override

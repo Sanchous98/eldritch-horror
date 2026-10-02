@@ -55,7 +55,7 @@ public final class AtlachNacha extends AncientOne {
     @Override
     public boolean isAuraActive() {
         // Bound: the web is unwoven and the scar stops widening.
-        return !isSolved() && ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_ATLACH_NACHA.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_ATLACH_NACHA.get();
     }
 
     @Override

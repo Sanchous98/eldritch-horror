@@ -85,7 +85,7 @@ public final class TaintedFauna extends Animal implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_TAINTED_FAUNA.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_TAINTED_FAUNA.get();
     }
 
     @Override

@@ -4,9 +4,8 @@ import java.util.List;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * Mod configuration. Common config is registered in {@code EldritchHorror}; split into
- * {@code STARTUP}/{@code SERVER} (or add a client config on the client-only side) as the
- * systems below come online.
+ * Mod configuration. Registered as a single {@code SERVER} config in {@code EldritchHorror}
+ * (one {@link ModConfigSpec.Builder}); a client config can be split out later if needed.
  */
 public final class ModConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
@@ -153,10 +152,6 @@ public final class ModConfig {
     public static final ModConfigSpec.DoubleValue CORRUPTION_CLAIMED =
             BUILDER.comment("Corruption fraction at or above which the state becomes Claimed.")
                     .defineInRange("corruptionClaimed", 0.85, 0.0, 1.0);
-
-    public static final ModConfigSpec.IntValue RITUAL_COOLDOWN_TICKS =
-            BUILDER.comment("Minimum ticks between ritual attempts at the same altar.")
-                    .defineInRange("ritualCooldownTicks", 40, 0, 72000);
 
     // --- Mob suppression --------------------------------------------------------------------
 
@@ -900,6 +895,16 @@ public final class ModConfig {
             BUILDER.comment("Radius (blocks) of Rhan-Tegoth's sanity drain.")
                     .defineInRange("sanityRhanTegothRadius", 32, 1, 96);
 
+    // --- Rite framework ---------------------------------------------------------------------
+
+    /**
+     * Minimum ticks between one player's rite performances. Prevents rite spam (design/05-rituals).
+     * Applies per player; a rejected attempt still pays no cost and changes nothing.
+     */
+    public static final ModConfigSpec.IntValue RITUAL_COOLDOWN_TICKS =
+            BUILDER.comment("Minimum ticks between a player's rite performances (0 disables).")
+                    .defineInRange("ritualCooldownTicks", 40, 0, 72000);
+
     // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
     // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,
     // which finds the nearest compatible AncientOne within riteSolveRadius and asks it to solve.
@@ -1497,70 +1502,6 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue SANITY_CULT_RAIDER_MAX =
             BUILDER.comment("Maximum cult raiders counted toward the sanity drain at once.")
                     .defineInRange("sanityCultRaiderMax", 3, 1, 32);
-
-    /** Ambient raider war-bands near cult_stronghold sites (dark/tainted ground). On by default. */
-    public static final ModConfigSpec.BooleanValue ENABLE_CULT_RAIDER_SPAWNS =
-            BUILDER.comment("Allow cult raiders to spawn in dark/tainted terrain near a cult_stronghold.")
-                    .define("enableCultRaiderSpawns", true);
-
-    public static final ModConfigSpec.IntValue CULT_RAIDER_SPAWN_RADIUS =
-            BUILDER.comment("Radius (blocks) around each player in which cult raiders may spawn.")
-                    .defineInRange("cultRaiderSpawnRadius", 32, 8, 96);
-
-    public static final ModConfigSpec.IntValue CULT_RAIDER_SPAWN_COUNT =
-            BUILDER.comment("Max cult raiders spawned per player per pass.")
-                    .defineInRange("cultRaiderSpawnCount", 2, 0, 16);
-
-    public static final ModConfigSpec.IntValue CULT_RAIDER_SPAWN_CAP =
-            BUILDER.comment("Max cult raiders allowed near one player before spawning pauses.")
-                    .defineInRange("cultRaiderSpawnCap", 4, 1, 64);
-
-    /** Ambient zealot guards near cult_stronghold sites. Off by default (rare site elite). */
-    public static final ModConfigSpec.BooleanValue ENABLE_CULT_ZEALOT_SPAWNS =
-            BUILDER.comment("Allow cult zealots to spawn near a cult_stronghold (default OFF; eggs still work).")
-                    .define("enableCultZealotSpawns", false);
-
-    public static final ModConfigSpec.IntValue CULT_ZEALOT_SPAWN_RADIUS =
-            BUILDER.comment("Radius (blocks) around each player in which cult zealots may spawn.")
-                    .defineInRange("cultZealotSpawnRadius", 24, 8, 96);
-
-    public static final ModConfigSpec.IntValue CULT_ZEALOT_SPAWN_COUNT =
-            BUILDER.comment("Max cult zealots spawned per player per pass.")
-                    .defineInRange("cultZealotSpawnCount", 1, 0, 8);
-
-    public static final ModConfigSpec.IntValue CULT_ZEALOT_SPAWN_CAP =
-            BUILDER.comment("Max cult zealots allowed near one player before spawning pauses.")
-                    .defineInRange("cultZealotSpawnCap", 2, 1, 32);
-
-    /** Shared interval for the cult war-band spawn pass. */
-    public static final ModConfigSpec.IntValue CULT_SPAWN_INTERVAL_TICKS =
-            BUILDER.comment("Ticks between cult war-band spawn passes (minimum 20).")
-                    .defineInRange("cultSpawnIntervalTicks", 300, 20, 24000);
-
-    /** How near a cult_stronghold site a cult ambient spawn must be (blocks). */
-    public static final ModConfigSpec.IntValue CULT_SPAWN_SITE_RADIUS =
-            BUILDER.comment("Radius (blocks) around a cult_stronghold within which the war-band may spawn.")
-                    .defineInRange("cultSpawnSiteRadius", 64, 8, 160);
-
-    /**
-     * Ambient worshipper spawns. Off by default: per {@code design/25}, the NPC worshipper is a
-     * <b>site population</b> (a later batch); the spawn egg and commands are available now.
-     */
-    public static final ModConfigSpec.BooleanValue ENABLE_WORSHIPPER_SPAWNS =
-            BUILDER.comment("Allow ambient worshipper spawns (default OFF; site populations and eggs work).")
-                    .define("enableWorshipperSpawns", false);
-
-    public static final ModConfigSpec.IntValue WORSHIPPER_SPAWN_RADIUS =
-            BUILDER.comment("Radius (blocks) around each player in which a worshipper may spawn.")
-                    .defineInRange("worshipperSpawnRadius", 24, 8, 96);
-
-    public static final ModConfigSpec.IntValue WORSHIPPER_SPAWN_COUNT =
-            BUILDER.comment("Max worshippers spawned per player per pass.")
-                    .defineInRange("worshipperSpawnCount", 1, 0, 8);
-
-    public static final ModConfigSpec.IntValue WORSHIPPER_SPAWN_CAP =
-            BUILDER.comment("Max worshippers allowed near one player before spawning pauses.")
-                    .defineInRange("worshipperSpawnCap", 2, 1, 16);
 
     // --- Bestiary: rite_binder (raises the dead) ---------------------------------------------
 

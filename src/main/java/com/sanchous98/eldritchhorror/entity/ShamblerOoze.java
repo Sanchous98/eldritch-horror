@@ -187,7 +187,7 @@ public final class ShamblerOoze extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_SHAMBLER_OOZE.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_SHAMBLER_OOZE.get();
     }
 
     @Override

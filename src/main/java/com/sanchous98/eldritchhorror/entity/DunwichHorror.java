@@ -82,7 +82,7 @@ public final class DunwichHorror extends AncientOne {
     @Override
     public boolean isAuraActive() {
         // A banished Horror has been drawn off the settlement: it no longer taints there.
-        return !isSolved() && ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_DUNWICH_HORROR.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_DUNWICH_HORROR.get();
     }
 
     @Override

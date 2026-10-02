@@ -1,4 +1,26 @@
 {
   "type": "minecraft:entity",
-  "pools": []
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "condition": "minecraft:random_chance",
+        "chance": 0.5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:void_reagent",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 0,
+              "max": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

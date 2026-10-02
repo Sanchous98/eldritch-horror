@@ -2,9 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
-import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;

@@ -160,7 +160,7 @@ public final class BlightPod extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_BLIGHT_POD.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_BLIGHT_POD.get();
     }
 
     @Override

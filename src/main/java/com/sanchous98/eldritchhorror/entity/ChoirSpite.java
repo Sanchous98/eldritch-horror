@@ -119,7 +119,7 @@ public final class ChoirSpite extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_CHOIR_SPITE.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_SANITY_CHOIR_SPITE.get();
     }
 
     @Override

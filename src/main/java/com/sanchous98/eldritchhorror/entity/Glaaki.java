@@ -53,7 +53,7 @@ public final class Glaaki extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_GLAAKI.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_SANITY_GLAAKI.get();
     }
 
     @Override

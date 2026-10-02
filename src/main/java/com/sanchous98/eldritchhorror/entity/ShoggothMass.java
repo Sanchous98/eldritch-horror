@@ -83,7 +83,7 @@ public final class ShoggothMass extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_SHOGGOTH.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_SHOGGOTH.get();
     }
 
     @Override

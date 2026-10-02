@@ -75,6 +75,10 @@ public final class RiteEngine {
 
     /** Ward buff duration per rite tier (ticks). */
     private static final int WARD_TICKS_PER_TIER = 400;
+
+    /** Per-player tick at which the next rite is allowed; in-memory (resets on restart). */
+    private static final java.util.Map<java.util.UUID, Long> RITE_READY =
+            new java.util.concurrent.ConcurrentHashMap<>();
     /** Drowned Blessing buff duration (ticks). */
     private static final int BLESSING_TICKS = 1200;
 
@@ -95,6 +99,18 @@ public final class RiteEngine {
     public static Result perform(ServerPlayer player, RiteDefinition rite) {
         if (!RiteKnowledge.knows(player, rite.id())) {
             return new Result(false, Component.literal("You do not know the rite: " + rite.id()));
+        }
+        // Per-player cooldown (design/05): a rejected attempt changes nothing and pays no cost.
+        int cooldown = ModConfig.RITUAL_COOLDOWN_TICKS.get();
+        if (cooldown > 0) {
+            long now = player.level().getGameTime();
+            long ready = RITE_READY.getOrDefault(player.getUUID(), 0L);
+            if (now < ready) {
+                long left = (ready - now + 19L) / 20L;
+                return new Result(false, Component.literal(
+                        "The ritual must settle: " + left + "s before the next rite."));
+            }
+            RITE_READY.put(player.getUUID(), now + cooldown);
         }
         ServerLevel level = player.level();
 

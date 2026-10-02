@@ -54,7 +54,7 @@ public final class RhanTegoth extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_RHAN_TEGOTH.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_SANITY_RHAN_TEGOTH.get();
     }
 
     @Override

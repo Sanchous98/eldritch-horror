@@ -60,7 +60,7 @@ public final class HearthCat extends MundaneAnimal implements DreadAura {
     @Override
     public boolean isAuraActive() {
         // Only unsettled while a wrong thing is actually near; the dark alone does not move it.
-        return this.alarmed && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_HEARTH_CAT.get();
+        return this.alarmed && masterAuraEnabled() && ModConfig.ENABLE_SANITY_HEARTH_CAT.get();
     }
 
     @Override

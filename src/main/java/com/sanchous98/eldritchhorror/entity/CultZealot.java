@@ -101,7 +101,7 @@ public final class CultZealot extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_CULT_ZEALOT.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_SANITY_CULT_ZEALOT.get();
     }
 
     @Override

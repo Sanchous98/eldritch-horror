@@ -115,11 +115,6 @@ public final class RisenHuskSpawner {
     }
 
     /**
-     * A valid standing spot at {@code (x,z)}: ground below, two air blocks of body space, and open
-     * sky at the surface. Same conservative gate as {@code CityPopulation.surfaceSpot} — no water,
-     * no enclosed interiors — so husks land on open terrain rather than roofs or caves for now.
-     */
-    /**
      * A valid standing spot at {@code (x,z)}: ground below, two air blocks of body space. On open
      * surface it must see the sky; if {@code allowUnderground} (a tainted chunk) it may also be a
      * cave/indoor floor, so a tainted area genuinely spawns husks in the dark.

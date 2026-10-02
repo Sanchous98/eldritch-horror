@@ -110,7 +110,7 @@ public final class Yig extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return !isSolved() && ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_YIG.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_YIG.get();
     }
 
     @Override

@@ -102,7 +102,7 @@ public final class NightHag extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_NIGHT_HAG.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_SANITY_NIGHT_HAG.get();
     }
 
     @Override

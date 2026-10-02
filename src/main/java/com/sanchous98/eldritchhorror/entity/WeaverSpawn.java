@@ -200,7 +200,7 @@ public final class WeaverSpawn extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_WEAVER_SPAWN.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_SANITY_WEAVER_SPAWN.get();
     }
 
     @Override

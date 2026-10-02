@@ -74,7 +74,7 @@ public final class AshFowl extends MundaneAnimal implements DreadAura {
     @Override
     public boolean isAuraActive() {
         // The bird only unsettles while it is actually hushing before a presence.
-        return this.alarmed && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_ASH_FOWL.get();
+        return this.alarmed && masterAuraEnabled() && ModConfig.ENABLE_SANITY_ASH_FOWL.get();
     }
 
     @Override

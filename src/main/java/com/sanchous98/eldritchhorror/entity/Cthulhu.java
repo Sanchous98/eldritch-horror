@@ -92,7 +92,7 @@ public final class Cthulhu extends AncientOne {
     @Override
     public boolean isAuraActive() {
         // A soothed presence sleeps: awake, but no longer draining (design/28 non-combat solve).
-        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_CTHULHU.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_SANITY_CTHULHU.get();
     }
 
     @Override

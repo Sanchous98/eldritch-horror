@@ -62,7 +62,7 @@ public final class ShubNiggurath extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return !isSolved() && ModConfig.ENABLE_CORRUPTION.get()
+        return !isSolved() && masterAuraEnabled()
                 && ModConfig.ENABLE_CORRUPTION_SHUB_NIGGURATH.get();
     }
 

@@ -40,7 +40,7 @@ public final class LanternJelly extends WaterAmbientDrifter implements DreadAura
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_LANTERN_JELLY.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_SANITY_LANTERN_JELLY.get();
     }
 
     @Override

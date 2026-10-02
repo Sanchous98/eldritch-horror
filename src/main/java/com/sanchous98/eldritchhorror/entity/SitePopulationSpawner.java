@@ -11,8 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -33,7 +31,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * clipped to the site's built footprint ({@link Location#renderRadius}) by the gate, so the
  * population cannot leak across the countryside.
  *
- * <p>This replaces the ad-hoc {@link CultistSpawner} (folded away: it duplicated the
+ * <p>This replaces the former ad-hoc cult spawner (folded away: it duplicated the
  * {@code cult_stronghold} population here) and is where {@code order_vault}'s {@code stone_sentinel}
  * guards come from (their ambient pass stays off). The {@code drowned_temple} boss trigger
  * ({@link CthulhuSiteTrigger}) and the coastal/global tide spawns are separate and untouched.
@@ -109,19 +107,19 @@ public final class SitePopulationSpawner {
                 // Cult war-band on dark/tainted ground; the mobs' own target selector gates on
                 // reputation (CultRaider/CultZealot only aggro below the cult threshold), so this
                 // does not bypass the existing cult standing logic.
-                topUp(level, cache, player, ModEntities.CULT_ZEALOT.get(), CultZealot.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.CULT_ZEALOT.get(), CultZealot.class, radius,
                         ModConfig.SITE_CULT_ZEALOT_CAP.get(), ModConfig.SITE_CULT_ZEALOT_COUNT.get(),
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
-                topUp(level, cache, player, ModEntities.CULT_RAIDER.get(), CultRaider.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.CULT_RAIDER.get(), CultRaider.class, radius,
                         ModConfig.SITE_CULT_RAIDER_CAP.get(), ModConfig.SITE_CULT_RAIDER_COUNT.get(),
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
                 // Worshippers are passive altar guards: any valid spot inside the stronghold.
-                topUp(level, cache, player, ModEntities.WORSHIPPER.get(), Worshipper.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.WORSHIPPER.get(), Worshipper.class, radius,
                         ModConfig.SITE_WORSHIPPER_CAP.get(), ModConfig.SITE_WORSHIPPER_COUNT.get(),
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
                 // Nyarlathotep wears a face you trust inside the stronghold (design/28): one
                 // loaded-only presence, capped, zeroed when its toggle is off.
-                topUp(level, cache, player, ModEntities.NYARLATHOTEP.get(), Nyarlathotep.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.NYARLATHOTEP.get(), Nyarlathotep.class, radius,
                         ModConfig.SITE_NYARLATHOTEP_CAP.get(),
                         ModConfig.ENABLE_SITE_NYARLATHOTEP.get() ? ModConfig.SITE_NYARLATHOTEP_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
@@ -131,41 +129,41 @@ public final class SitePopulationSpawner {
                 // would never see it; the site itself is the drowned context. Any valid dry spot
                 // (the platform interior, open to the sky) inside the footprint is enough. The
                 // Cthulhu boss has its own once-only trigger and is not duplicated here.
-                topUp(level, cache, player, ModEntities.DROWNED_THRALL.get(), DrownedThrall.class,
+                BestiarySupport.topUp(level, cache, player, ModEntities.DROWNED_THRALL.get(), DrownedThrall.class,
                         radius, ModConfig.SITE_DROWNED_THRALL_CAP.get(),
                         ModConfig.SITE_DROWNED_THRALL_COUNT.get(), tick,
                         siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
             }
             case "eldritch_horror:site/order_vault" -> {
                 // Order-built guards hold the vault; their ambient pass stays off.
-                topUp(level, cache, player, ModEntities.STONE_SENTINEL.get(), StoneSentinel.class,
+                BestiarySupport.topUp(level, cache, player, ModEntities.STONE_SENTINEL.get(), StoneSentinel.class,
                         radius, ModConfig.SITE_STONE_SENTINEL_CAP.get(),
                         ModConfig.SITE_STONE_SENTINEL_COUNT.get(), tick,
                         siteGate(cx, cz, reach, (lvl, spot, dark, tainted) -> !tainted));
                 // The gate on the observatory plateau (design/28): the order_vault is the existing
                 // site that stands on that plateau, so Yog-Sothoth attaches to it. It is
                 // stationary-ish by attributes, one loaded-only presence inside the footprint.
-                topUp(level, cache, player, ModEntities.YOG_SOTHOTH.get(), YogSothoth.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.YOG_SOTHOTH.get(), YogSothoth.class, radius,
                         ModConfig.SITE_YOG_SOTHOTH_CAP.get(),
                         ModConfig.ENABLE_SITE_YOG_SOTHOTH.get() ? ModConfig.SITE_YOG_SOTHOTH_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
             }
             case "eldritch_horror:site/rift_scar" -> {
                 // The scar is a place of tears: swarm and vermin, and rarely a star-spawn.
-                topUp(level, cache, player, ModEntities.LESSER_SWARM.get(), LesserSwarm.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.LESSER_SWARM.get(), LesserSwarm.class, radius,
                         ModConfig.SITE_LESSER_SWARM_CAP.get(), ModConfig.SITE_LESSER_SWARM_COUNT.get(),
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
-                topUp(level, cache, player, ModEntities.RIFT_MITE.get(), RiftMite.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.RIFT_MITE.get(), RiftMite.class, radius,
                         ModConfig.SITE_RIFT_MITE_CAP.get(), ModConfig.SITE_RIFT_MITE_COUNT.get(),
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
                 // The scar's two Ancient Ones (design/28): Azathoth at the centre (no melee) and
                 // Atlach-Nacha weaving the tear wider. Both are one loaded-only presence per player;
                 // each keeps its own count config but zeroes its budget when the toggle is off.
-                topUp(level, cache, player, ModEntities.AZATHOTH.get(), Azathoth.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.AZATHOTH.get(), Azathoth.class, radius,
                         ModConfig.SITE_AZATHOTH_CAP.get(),
                         ModConfig.ENABLE_SITE_AZATHOTH.get() ? ModConfig.SITE_AZATHOTH_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
-                topUp(level, cache, player, ModEntities.ATLACH_NACHA.get(), AtlachNacha.class, radius,
+                BestiarySupport.topUp(level, cache, player, ModEntities.ATLACH_NACHA.get(), AtlachNacha.class, radius,
                         ModConfig.SITE_ATLACH_NACHA_CAP.get(),
                         ModConfig.ENABLE_SITE_ATLACH_NACHA.get() ? ModConfig.SITE_ATLACH_NACHA_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
@@ -176,7 +174,7 @@ public final class SitePopulationSpawner {
                 int starPasses = starInterval <= 0 || interval <= 0
                         ? 0 : Math.max(1, Math.round((float) starInterval / interval));
                 if (starPasses > 0 && (tick / interval) % starPasses == 0) {
-                    topUp(level, cache, player, ModEntities.STAR_SPAWN.get(), StarSpawn.class, radius,
+                    BestiarySupport.topUp(level, cache, player, ModEntities.STAR_SPAWN.get(), StarSpawn.class, radius,
                             ModConfig.SITE_STAR_SPAWN_CAP.get(), ModConfig.SITE_STAR_SPAWN_COUNT.get(),
                             tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
                 }
@@ -208,12 +206,5 @@ public final class SitePopulationSpawner {
 
     private static boolean anywhere(ServerLevel level, BlockPos spot, boolean dark, boolean tainted) {
         return true;
-    }
-
-    private static <T extends Mob> void topUp(ServerLevel level, ServerChunkCache cache,
-                                              ServerPlayer player, EntityType<T> type,
-                                              Class<T> typeClass, int radius, int cap, int perPass,
-                                              int tick, BestiarySupport.SpawnGate gate) {
-        BestiarySupport.topUp(level, cache, player, type, typeClass, radius, cap, perPass, tick, gate);
     }
 }

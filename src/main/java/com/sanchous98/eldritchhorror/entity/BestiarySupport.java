@@ -31,8 +31,9 @@ import net.minecraft.world.phys.AABB;
  * id and server tick (never {@code Math.random}), and only ever touching already-loaded chunks
  * ({@code getChunkNow} / {@code getEntitiesOfClass}, which never force-load or generate).
  *
- * <p>Generalises {@link RisenHuskSpawner} so each new mob supplies only its gate, caps and config;
- * no duplicated scan loop.
+ * <p>The shared placement pass is the same bounded shape the risen husk uses (its own local
+ * {@code surfaceSpot} remains the single-column variant); each mob supplies only its gate, caps and
+ * config, so no second scan loop is added.
  */
 public final class BestiarySupport {
 

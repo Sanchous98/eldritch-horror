@@ -54,7 +54,7 @@ public final class Ithaqua extends AncientOne {
     @Override
     public boolean isAuraActive() {
         // Warded: the wind cannot find the seam to blow through.
-        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_ITHAQUA.get();
+        return !isSolved() && masterAuraEnabled() && ModConfig.ENABLE_SANITY_ITHAQUA.get();
     }
 
     @Override

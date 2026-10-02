@@ -86,7 +86,7 @@ public final class RiftMite extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_RIFT_MITE.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_RIFT_MITE.get();
     }
 
     @Override

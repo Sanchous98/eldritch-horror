@@ -96,7 +96,7 @@ public final class DrownedThrall extends Monster implements DreadAura {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_DROWNED_THRALL.get();
+        return masterAuraEnabled() && ModConfig.ENABLE_CORRUPTION_DROWNED_THRALL.get();
     }
 
     @Override

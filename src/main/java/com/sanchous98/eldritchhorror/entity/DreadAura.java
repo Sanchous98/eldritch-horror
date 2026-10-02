@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.entity;
 
+import com.sanchous98.eldritchhorror.core.ModConfig;
+
 /**
  * Shared trait for bestiary entities that are a <b>presence</b> rather than a fight: standing near
  * one slowly moves a meter. The risen husk's sanity drain established the pattern per-mob; this is
@@ -24,8 +26,23 @@ public interface DreadAura {
     /** The meter this aura writes through {@code SanityAPI}/{@code CorruptionAPI}. */
     Axis auraAxis();
 
+    /**
+     * Whether the master switch for this aura's axis is on. The shared form of the check every
+     * implementor used to repeat; callers combine it with their own per-mob config toggle.
+     */
+    default boolean masterAuraEnabled() {
+        return master(auraAxis());
+    }
+
+    /** The master switch for an axis: sanity or corruption. */
+    static boolean master(Axis axis) {
+        return axis == Axis.SANITY ? ModConfig.ENABLE_SANITY.get() : ModConfig.ENABLE_CORRUPTION.get();
+    }
+
     /** Whether the aura applies at all this tick (the per-mob config enable plus master switch). */
-    boolean isAuraActive();
+    default boolean isAuraActive() {
+        return masterAuraEnabled();
+    }
 
     /** Meter change per second contributed per counted aura (negative drains sanity). */
     double auraRate();

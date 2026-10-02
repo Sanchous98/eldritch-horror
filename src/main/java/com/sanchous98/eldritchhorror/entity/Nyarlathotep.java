@@ -56,7 +56,7 @@ public final class Nyarlathotep extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return !isSolved() && ModConfig.ENABLE_SANITY.get()
+        return !isSolved() && masterAuraEnabled()
                 && ModConfig.ENABLE_SANITY_NYARLATHOTEP.get();
     }
 
