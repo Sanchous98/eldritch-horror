@@ -99,7 +99,7 @@ public final class CodexRegistry {
                 continue;
             }
             String path = key.getPath();
-            boolean boss = ModEntities.ANCIENT_ONES.contains(type);
+            boolean boss = ModEntities.ancientOnes().contains(type);
             CodexCategory category = boss ? CodexCategory.BOSS : CodexCategory.BESTIARY;
             out.put(path, new CodexEntry(path, category, entityName(path)));
         }

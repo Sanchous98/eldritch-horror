@@ -23,7 +23,7 @@
     {
       "rolls": 1,
       "condition": {
-        "condition": "minecraft:random_chance",
+        "type": "minecraft:random_chance",
         "chance": 0.5
       },
       "entries": [

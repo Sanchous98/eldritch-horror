@@ -676,11 +676,16 @@ public final class ModEntities {
      * The 14 Ancient One entity types, for classification where the class hierarchy is not usable
      * ({@code EntityType.getBaseClass()} is fixed to {@link net.minecraft.world.entity.Entity} in
      * 26.3, so a boss cannot be told from a monster by reflection).
+     *
+     * <p>Resolved lazily: calling {@link DeferredHolder#get()} in a static initialiser runs before
+     * the registry is bound and throws "Trying to access unbound value".
      */
-    public static final java.util.Set<EntityType<?>> ANCIENT_ONES = java.util.Set.of(
-            CTHULHU.get(), DUNWICH_HORROR.get(), SHUB_NIGGURATH.get(), AZATHOTH.get(),
-            YOG_SOTHOTH.get(), ITHAQUA.get(), YIG.get(), ATLACH_NACHA.get(), NYARLATHOTEP.get(),
-            CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get());
+    public static java.util.Set<EntityType<?>> ancientOnes() {
+        return java.util.Set.of(
+                CTHULHU.get(), DUNWICH_HORROR.get(), SHUB_NIGGURATH.get(), AZATHOTH.get(),
+                YOG_SOTHOTH.get(), ITHAQUA.get(), YIG.get(), ATLACH_NACHA.get(), NYARLATHOTEP.get(),
+                CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get());
+    }
 
     /**
      * Adds the spawn egg to the mod's creative tab. The tab is built once at registration from

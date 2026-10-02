@@ -176,21 +176,30 @@ public final class EldritchCommands {
                                 .then(Commands.argument("cult", StringArgumentType.word())
                                         .then(Commands.argument("service", StringArgumentType.word())
                                                 .executes(EldritchCommands::performService))));
-        if (ModConfig.ENABLE_CODEX_COMMANDS.get()) {
-            eh.then(Commands.literal("codex")
-                            .executes(EldritchCommands::listCodex)
-                            .then(Commands.literal("learn")
-                                    .then(Commands.argument("id", StringArgumentType.greedyString())
-                                            .executes(EldritchCommands::learnCodex))))
-                    .then(Commands.literal("codexentries").executes(EldritchCommands::listCodexEntries));
-        }
-        if (ModConfig.ENABLE_EVENT_COMMANDS.get()) {
-            eh.then(Commands.literal("event")
-                            .then(Commands.argument("id", StringArgumentType.word())
-                                    .executes(EldritchCommands::forceEvent)))
-                    .then(Commands.literal("events").executes(EldritchCommands::listEvents));
-        }
+        // Commands are registered unconditionally: the config is not loaded yet when the command
+        // tree is built (it is built while datapacks load), so reading ModConfig here would throw
+        // "Cannot get config value before config is loaded". The per-feature toggle is checked in
+        // the handler instead.
+        eh.then(Commands.literal("codex")
+                        .executes(EldritchCommands::listCodex)
+                        .then(Commands.literal("learn")
+                                .then(Commands.argument("id", StringArgumentType.greedyString())
+                                        .executes(EldritchCommands::learnCodex))))
+                .then(Commands.literal("codexentries").executes(EldritchCommands::listCodexEntries));
+        eh.then(Commands.literal("event")
+                        .then(Commands.argument("id", StringArgumentType.word())
+                                .executes(EldritchCommands::forceEvent)))
+                .then(Commands.literal("events").executes(EldritchCommands::listEvents));
         dispatcher.register(eh);
+    }
+
+    /** {@code /eh ...}: refuses when the feature's command toggle is off (config read at runtime). */
+    private static boolean commandsDisabled(CommandContext<CommandSourceStack> ctx, boolean enabled) {
+        if (!enabled) {
+            ctx.getSource().sendFailure(Component.literal("That command is disabled in the config."));
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -198,6 +207,9 @@ public final class EldritchCommands {
      * switch, the per-event toggle and cooldowns.
      */
     private static int forceEvent(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_EVENT_COMMANDS.get())) {
+            return 0;
+        }
         String id = StringArgumentType.getString(ctx, "id");
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         int tick = ctx.getSource().getServer().getTickCount();
@@ -213,6 +225,9 @@ public final class EldritchCommands {
 
     /** {@code /eh events}: lists what is active for the caller, then the known event ids. */
     private static int listEvents(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_EVENT_COMMANDS.get())) {
+            return 0;
+        }
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         int tick = ctx.getSource().getServer().getTickCount();
         List<String> active = EventTicker.activeFor(player, tick);
@@ -334,6 +349,9 @@ public final class EldritchCommands {
      * entry's display name; ids are shown too so the debug {@code learn} command has a target.
      */
     private static int listCodex(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_CODEX_COMMANDS.get())) {
+            return 0;
+        }
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         var known = CodexAPI.all(p);
         if (known.isEmpty()) {
@@ -370,6 +388,9 @@ public final class EldritchCommands {
      * permissions, like the other operator mutation tools.
      */
     private static int learnCodex(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_CODEX_COMMANDS.get())) {
+            return 0;
+        }
         String id = StringArgumentType.getString(ctx, "id");
         if (!ctx.getSource().permissions().hasPermission(
                 net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
@@ -391,6 +412,9 @@ public final class EldritchCommands {
 
     /** {@code /eh codexentries}: lists every known entry id by category (debug/authoring aid). */
     private static int listCodexEntries(CommandContext<CommandSourceStack> ctx) {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_CODEX_COMMANDS.get())) {
+            return 0;
+        }
         if (!ctx.getSource().permissions().hasPermission(
                 net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
             ctx.getSource().sendFailure(Component.literal("gamemaster permission required"));
