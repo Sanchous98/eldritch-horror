@@ -2,8 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -246,82 +244,9 @@ public final class LagosStyle implements CityStyle {
         }
     }
 
-    /**
-     * A walled palace compound: a paved court ringed by painted piers, a long pillared hall under
-     * a pitched metal roof, and an ornate bright gate on the southern approach.
-     */
-    private static void palace(StructureBuilder b, RandomSource rng, int cx, int cz, int ground, Palette p) {
-        int w = 15;
-        int d = 11;
-        int h = 7;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - d / 2;
-        int z1 = z0 + d - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
 
-        // Paved courtyard, then the compound wall out to its edge.
-        b.ground(cx - 13, cz - 12, cx + 13, cz + 16, ground, ground, p.ground());
-        courtyard(b, cx, cz, 13, 12, ground, p);
 
-        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, w / 2));
 
-        // Painted pillars down both long flanks — the bright daub of a Lagos compound.
-        for (int x = x0 + 1; x <= x1 - 1; x += 2) {
-            BlockState trim = paint(x);
-            b.fill(x, y0, z0, x, y1, z0, trim);
-            b.fill(x, y0, z1, x, y1, z1, trim);
-        }
-        // Tall windows between the pillars.
-        for (int x = x0 + 3; x <= x1 - 3; x += 3) {
-            b.window(x, y0 + 3, z0, 3, 1, true);
-            b.window(x, y0 + 3, z1, 3, 1, true);
-        }
-
-        b.pitchedRoof(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1, 4, 1);
-        ornateGate(b, cx, z1 + 2, ground, p);
-    }
-
-    /** Painted piers spaced around a compound rectangle, with an opening on the south flank. */
-    private static void courtyard(StructureBuilder b, int cx, int cz, int hx, int hz, int ground, Palette p) {
-        int y = ground + 1;
-        for (int x = cx - hx; x <= cx + hx; x += 3) {
-            pier(b, x, cz - hz, y, p);
-            if (Math.abs(x - cx) > 3) {
-                pier(b, x, cz + hz, y, p); // leave the gateway clear
-            }
-        }
-        for (int z = cz - hz; z <= cz + hz; z += 3) {
-            pier(b, cx - hx, z, y, p);
-            pier(b, cx + hx, z, y, p);
-        }
-    }
-
-    /** A short painted compound pier with a slab cap. */
-    private static void pier(StructureBuilder b, int x, int z, int y, Palette p) {
-        for (int i = 0; i < 3; i++) {
-            b.put(x, y + i, z, paint(x + z + i));
-        }
-        b.put(x, y + 3, z, p.roofSlab());
-    }
-
-    /** An ornate gate: two tall painted piers carrying a glazed crest, with bright gate leaves. */
-    private static void ornateGate(StructureBuilder b, int cx, int z, int ground, Palette p) {
-        int y = ground + 1;
-        int top = y + 4;
-        b.fill(cx - 3, y, z, cx - 3, top, z, p.wall());
-        b.fill(cx + 3, y, z, cx + 3, top, z, p.wall());
-        b.fill(cx - 3, y, z, cx - 3, y + 1, z, paint(1));
-        b.fill(cx + 3, y, z, cx + 3, y + 1, z, paint(4));
-        // Painted lintel and a glazed crest over the opening.
-        b.fill(cx - 3, top + 1, z, cx + 3, top + 1, z, Materials.glazed(DyeColor.YELLOW));
-        b.fill(cx - 1, top + 2, z, cx + 1, top + 2, z, p.roof());
-        b.put(cx, top + 3, z, p.light());
-        // Bright timber gate leaves.
-        b.fill(cx - 2, y, z, cx - 1, y + 2, z, paint(0));
-        b.fill(cx + 1, y, z, cx + 2, y + 2, z, paint(2));
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

@@ -94,9 +94,6 @@ public final class Worshipper extends PathfinderMob {
         return data;
     }
 
-    public CultIdentity identity() {
-        return this.identity;
-    }
 
     /**
      * The explicit service hook: the services this cult offers to the interacting player, with the

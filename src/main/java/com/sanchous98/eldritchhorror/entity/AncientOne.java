@@ -74,7 +74,7 @@ public abstract class AncientOne extends Monster implements DreadAura {
         SOOTHED,
         /** {@code draw_away_dunwich}: drawn off and retreating from the settlement. */
         BANISHED,
-        /** {@code still_shub_niggurath}: aura suppressed until {@link #solveUntil()}. */
+        /** {@code still_shub_niggurath}: aura suppressed until the solve window lapses. */
         STILLED
     }
 
@@ -207,16 +207,6 @@ public abstract class AncientOne extends Monster implements DreadAura {
         this.solveUntil = 0L;
         this.onSolved(kind);
         return true;
-    }
-
-    /** Current solve state. */
-    public final Solve solve() {
-        return this.solve;
-    }
-
-    /** Tick at which {@link Solve#STILLED} lapses ({@code 0} otherwise). */
-    public final long solveUntil() {
-        return this.solveUntil;
     }
 
     /** Whether the presence is currently quieted by a solve (and {@code STILLED} has not lapsed). */

@@ -4,10 +4,7 @@ import com.sanchous98.eldritchhorror.cult.CultDefinition;
 import com.sanchous98.eldritchhorror.cult.CultRank;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
-import com.sanchous98.eldritchhorror.world.loc.Location;
-import com.sanchous98.eldritchhorror.world.loc.Locations;
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -104,25 +101,5 @@ public final class CultistSupport {
         if (instance != null) {
             instance.setBaseValue(instance.getBaseValue() * multiplier);
         }
-    }
-
-    /**
-     * Whether {@code spot} is within {@code radius} of a registered {@code cult_stronghold} site —
-     * the "cult agents appear around cult sites" attachment ({@code design/25}: site-based spawns).
-     * Loaded-chunk agnostic (a plain distance check on the fixed registry) and never scans the world.
-     */
-    public static boolean nearStronghold(BlockPos spot, int radius) {
-        if (radius <= 0) {
-            return false;
-        }
-        int radiusSqr = radius * radius;
-        for (Location site : Locations.byId("cult_stronghold")) {
-            int dx = spot.getX() - Locations.xOf(site);
-            int dz = spot.getZ() - Locations.zOf(site);
-            if (dx * dx + dz * dz <= radiusSqr) {
-                return true;
-            }
-        }
-        return false;
     }
 }

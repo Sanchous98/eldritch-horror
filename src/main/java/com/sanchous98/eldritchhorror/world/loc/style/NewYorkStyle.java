@@ -2,8 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -163,33 +161,6 @@ public final class NewYorkStyle implements CityStyle {
         b.fill(tabX - 2, torsoY + 10, cz - 1, tabX, torsoY + 10, cz + 1, p.roof());
     }
 
-    /** A stepped Deco tower: widening base, three setback tiers, a crenellated crown and a spire. */
-    private static void skyscraper(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int y0 = ground + 1;
-        // tier: {halfWidth, height}
-        int[][] tiers = {{8, 14}, {6, 10}, {4, 9}, {2, 8}};
-        int y = y0;
-        for (int tier = 0; tier < tiers.length; tier++) {
-            int[] t = tiers[tier];
-            int r = t[0];
-            int top = y + t[1] - 1;
-            // The base tier is a street lobby: give it a south entrance. Setback floors stay closed.
-            if (tier == 0) {
-                b.room(cx - r, y, cz - r, cx + r, top, cz + r, new Doorway(Side.S, r));
-            } else {
-                b.room(cx - r, y, cz - r, cx + r, top, cz + r);
-            }
-            cornerPilasters(b, cx, cz, r, y, top, p);
-            windowBands(b, cx, cz, r, y, top, p);
-            // Cornice / setback ledge in the limestone crown colour.
-            b.fill(cx - r, top, cz - r, cx + r, top, cz + r, p.roofSlab());
-            y = top + 1;
-        }
-        int crown = y;
-        b.crenellations(cx - 2, cz - 2, cx + 2, cz + 2, crown);
-        b.spire(cx, cz, crown + 2, 12);
-        b.fill(cx - 2, crown - 1, cz - 2, cx + 2, crown - 1, cz + 2, p.roof());
-    }
 
     /** Dark-iron vertical piers at the four corners of a tier. */
     private static void cornerPilasters(StructureBuilder b, int cx, int cz, int r, int y0, int y1,

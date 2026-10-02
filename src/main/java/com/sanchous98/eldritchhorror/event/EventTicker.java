@@ -231,7 +231,7 @@ public final class EventTicker {
                 continue;
             }
             int pick = RandomSource.create(player.getUUID().getMostSignificantBits()
-                    ^ (long) tick * 0x9E3779B97F4A7C15L).nextInt(totalWeight);
+                    ^ tick * 0x9E3779B97F4A7C15L).nextInt(totalWeight);
             EldritchEvent chosen = candidates.getLast();
             for (EldritchEvent candidate : candidates) {
                 pick -= Math.max(1, candidate.weight());

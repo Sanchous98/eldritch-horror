@@ -14,7 +14,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Blocks;
@@ -41,11 +40,8 @@ public class EarthChunkGenerator extends ChunkGenerator {
             EarthBiomeSource.CODEC.forGetter(g -> (EarthBiomeSource) g.getBiomeSource())
     ).apply(i, EarthChunkGenerator::new));
 
-    private final EarthBiomeSource biomeSource;
-
     public EarthChunkGenerator(EarthBiomeSource biomeSource) {
         super(biomeSource);
-        this.biomeSource = biomeSource;
     }
 
     @Override

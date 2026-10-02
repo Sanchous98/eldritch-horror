@@ -258,7 +258,7 @@ public final class Builder implements StructureBuilder {
         int half = 2;
         for (int i = 0; i < height; i++) {
             int y = baseY + i;
-            int r = Math.max(0, half - (i * (half + 1)) / height);
+            int r = Math.max(0, half - i * (half + 1) / height);
             if (r == 0) {
                 put(cx, y, cz, p.accent());
                 continue;
@@ -306,7 +306,7 @@ public final class Builder implements StructureBuilder {
         for (int i = 0; i < height; i++) {
             int px = x + dir.getStepX() * i;
             int pz = z + dir.getStepZ() * i;
-            int top = baseY + (height - 1 - i); // tall at the wall, tapering to the base outward
+            int top = baseY + height - 1 - i; // tall at the wall, tapering to the base outward
             for (int y = baseY; y <= top; y++) {
                 put(px, y, pz, y == baseY ? p.foundation() : p.wall());
             }

@@ -1,7 +1,6 @@
 package com.sanchous98.eldritchhorror.world.loc.style;
 
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,10 +15,6 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class Materials {
 
     private Materials() {
-    }
-
-    private static BlockState s(Block b) {
-        return b.defaultBlockState();
     }
 
     /** Dyed concrete, e.g. {@code concrete(DyeColor.WHITE)} (shikkui plaster). */

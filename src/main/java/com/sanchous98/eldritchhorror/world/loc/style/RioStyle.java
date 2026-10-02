@@ -136,36 +136,7 @@ public final class RioStyle implements CityStyle {
 
     // ------------------------------------------------------------------ local helpers
 
-    /** Art-deco Cristo Redentor: a stepped pedestal carrying an outstretched figure. */
-    private static void cristo(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int y = ground + 1;
-        // Stepped plinth.
-        b.fill(cx - 4, y, cz - 4, cx + 4, y + 1, cz + 4, p.foundation());
-        b.fill(cx - 3, y + 2, cz - 3, cx + 3, y + 3, cz + 3, p.wall());
-        // Tall shaft with an accented corner.
-        b.fill(cx - 2, y + 4, cz - 2, cx + 2, y + 15, cz + 2, p.wall());
-        for (int yy = y + 4; yy <= y + 15; yy++) {
-            b.put(cx - 2, yy, cz - 2, p.accent());
-            b.put(cx + 2, yy, cz + 2, p.accent());
-        }
-        // Cornice cap, then the figure.
-        b.fill(cx - 3, y + 16, cz - 3, cx + 3, y + 16, cz + 3, p.accent());
-        figure(b, cx, cz, y + 17, p);
-    }
 
-    /** The outstretched figure: a robed body, wide arms and a head in the accent stone. */
-    private static void figure(StructureBuilder b, int cx, int cz, int base, Palette p) {
-        // Robe flaring at the feet.
-        b.fill(cx - 1, base, cz, cx + 1, base + 1, cz, p.accent());
-        b.fill(cx, base + 2, cz, cx, base + 4, cz, p.accent());
-        // Shoulders and outstretched arms, drooping at the wrists.
-        b.fill(cx - 1, base + 4, cz, cx + 1, base + 4, cz, p.accent());
-        b.fill(cx - 4, base + 4, cz, cx + 4, base + 4, cz, p.accent());
-        b.put(cx - 4, base + 3, cz, p.accent());
-        b.put(cx + 4, base + 3, cz, p.accent());
-        // Head.
-        b.put(cx, base + 5, cz, p.accent());
-    }
 
     /** A Copacabana-style wave mosaic on the plaza: pale stone with running dark tiles. */
     private static void mosaicPlaza(StructureBuilder b, int cx, int cz, int ground, Palette p) {

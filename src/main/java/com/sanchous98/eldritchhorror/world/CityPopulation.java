@@ -147,7 +147,7 @@ public final class CityPopulation {
         }
 
         // Deterministic per city and pass; no Math.random.
-        long key = ((long) city.x() * 0x9E3779B97F4A7C15L) ^ ((long) city.z() * 0xC2B2AE3D27D4EB4FL);
+        long key = (city.x() * 0x9E3779B97F4A7C15L) ^ (city.z() * 0xC2B2AE3D27D4EB4FL);
         RandomSource random = RandomSource.create(key ^ tick);
         // Sample across the whole district (its chunks span district/16 each way).
         int chunkReach = Math.max(1, district >> 4);

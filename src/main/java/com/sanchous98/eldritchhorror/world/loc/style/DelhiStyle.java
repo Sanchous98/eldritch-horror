@@ -195,56 +195,6 @@ public final class DelhiStyle implements CityStyle {
         b.put(cx, ground + 2, cz, p.light());
     }
 
-    /**
-     * A domed mausoleum: a square sandstone hall on a marble plinth, a bulbous dome on a
-     * cylindrical drum, four corner minarets and four chhatri pavilions.
-     */
-    private static void mausoleum(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int w = 17;
-        int h = 11;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - w / 2;
-        int z1 = z0 + w - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
-
-        b.ground(x0 - 3, z0 - 3, x1 + 3, z1 + 3, ground, ground, p.foundation());
-        b.room(x0, y0, z0, x1, y1, z1, new StructureBuilder.Doorway(Side.S, 8));
-        // Marble plinth band and a cornice of marble.
-        b.walls(x0, y0, z0, x1, y0 + 1, z1, p.accent());
-        b.crenellations(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1 + 1);
-
-        // Pointed-arch iwan recesses on each face (marble frames).
-        iwan(b, cx, z0, y0, p, true);
-        iwan(b, cx, z1, y0, p, true);
-        iwan(b, x0, cz, y0, p, false);
-        iwan(b, x1, cz, y0, p, false);
-
-        // Cylindrical drum, then a bulbous dome.
-        int drumY = y1 + 2;
-        b.fill(cx - 3, y1 + 1, cz - 3, cx + 3, y1 + 1, cz + 3, p.foundation());
-        b.fill(cx - 3, drumY, cz - 3, cx + 3, drumY + 2, cz + 3, p.wall());
-        for (int i = -3; i <= 3; i++) {
-            b.put(cx + i, drumY + 1, cz - 3, p.accent());
-            b.put(cx + i, drumY + 1, cz + 3, p.accent());
-            b.put(cx - 3, drumY + 1, cz + i, p.accent());
-            b.put(cx + 3, drumY + 1, cz + i, p.accent());
-        }
-        bulbousDome(b, cx, cz, drumY + 3, 4, p);
-
-        // Four corner minarets, standing proud of the plinth.
-        StyleKit.minaret(b, x0 - 2, z0 - 2, ground, 24, p);
-        StyleKit.minaret(b, x1 + 2, z0 - 2, ground, 24, p);
-        StyleKit.minaret(b, x0 - 2, z1 + 2, ground, 24, p);
-        StyleKit.minaret(b, x1 + 2, z1 + 2, ground, 24, p);
-
-        // Four chhatri pavilions on the roof corners.
-        chhatri(b, x0 + 1, z0 + 1, y1, p);
-        chhatri(b, x1 - 1, z0 + 1, y1, p);
-        chhatri(b, x0 + 1, z1 - 1, y1, p);
-        chhatri(b, x1 - 1, z1 - 1, y1, p);
-    }
 
     /** A shallow iwan: a marble-framed arched recess centred on one hall face. */
     private static void iwan(StructureBuilder b, int fx, int fz, int y0, Palette p, boolean xFace) {

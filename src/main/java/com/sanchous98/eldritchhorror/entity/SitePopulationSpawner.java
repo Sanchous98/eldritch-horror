@@ -173,7 +173,8 @@ public final class SitePopulationSpawner {
                 int starInterval = ModConfig.SITE_STAR_SPAWN_INTERVAL_TICKS.get();
                 int starPasses = starInterval <= 0 || interval <= 0
                         ? 0 : Math.max(1, Math.round((float) starInterval / interval));
-                if (starPasses > 0 && (tick / interval) % starPasses == 0) {
+                int pass = tick / interval;
+                if (starPasses > 0 && pass % starPasses == 0) {
                     BestiarySupport.topUp(level, cache, player, ModEntities.STAR_SPAWN.get(), StarSpawn.class, radius,
                             ModConfig.SITE_STAR_SPAWN_CAP.get(), ModConfig.SITE_STAR_SPAWN_COUNT.get(),
                             tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));

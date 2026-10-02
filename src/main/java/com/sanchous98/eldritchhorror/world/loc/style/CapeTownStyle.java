@@ -20,8 +20,6 @@ import net.minecraft.world.level.block.Blocks;
  */
 public final class CapeTownStyle implements CityStyle {
 
-    /** Cape Dutch gable half-widths, base to apex — the stepped/curved silhouette. */
-    private static final int[] GABLE_HALF = {4, 4, 3, 2, 1, 0};
 
     @Override
     public String id() {
@@ -179,55 +177,7 @@ public final class CapeTownStyle implements CityStyle {
 
     // ------------------------------------------------------------------ local helpers
 
-    /** A long whitewashed manor with a thatch roof, front stoep and an ornate stepped gable. */
-    private static void capeDutchManor(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int halfW = 6;
-        int halfD = 7;
-        int wallH = 6;
-        int x0 = cx - halfW;
-        int x1 = cx + halfW;
-        int z0 = cz - halfD;
-        int z1 = cz + halfD;
-        int y0 = ground + 1;
-        int y1 = y0 + wallH;
 
-        // Paved werf and the manor shell, entered at the south end.
-        b.ground(x0 - 2, z0 - 2, x1 + 2, z1 + 2, ground, ground, p.foundation());
-        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, halfW));
-        b.pitchedRoof(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1, 6, 1);
-
-        // Tall windows along the long east/west faces.
-        for (int z = z0 + 3; z <= z1 - 3; z += 3) {
-            b.window(x0, y0 + 2, z, 2, 2, true);
-            b.window(x1, y0 + 2, z, 2, 2, true);
-        }
-
-        // Stoep steps up to the entrance, then the ornamental gable over it.
-        b.fill(cx - 1, ground, z1 + 1, cx + 1, ground, z1 + 2, p.foundation());
-        StyleKit.twoHighDoor(b, p, cx, z1, y0 + 1, Direction.SOUTH);
-        capeDutchGable(b, cx, z1, y1, p);
-    }
-
-    /** A stepped/curved Cape Dutch gable of whitewash, green pilasters, slab scrolls and a spire. */
-    private static void capeDutchGable(StructureBuilder b, int cx, int z, int baseY, Palette p) {
-        for (int dy = 0; dy < GABLE_HALF.length; dy++) {
-            int y = baseY + dy;
-            int h = GABLE_HALF[dy];
-            b.fill(cx - h, y, z, cx + h, y, z, p.wall());
-            // Green pilaster trim stepping inward at both gable edges.
-            b.put(cx - h, y, z, p.accent());
-            b.put(cx + h, y, z, p.accent());
-            // Slab scrolls capping each shoulder of the step.
-            if (h > 0) {
-                b.put(cx - h, y + 1, z, p.roofSlab());
-                b.put(cx + h, y + 1, z, p.roofSlab());
-            }
-        }
-        // Central green motif and glazed vent, then a small finial spire.
-        b.put(cx, baseY + 1, z, p.accent());
-        b.put(cx, baseY + 3, z, p.window());
-        b.spire(cx, z, baseY + GABLE_HALF.length, 3);
-    }
 
     /** A harbour crane: a timber mast, an out-reaching jib beam, and a hanging hoist. */
     private static void harbourCrane(StructureBuilder b, int x, int z, int ground, Palette p) {

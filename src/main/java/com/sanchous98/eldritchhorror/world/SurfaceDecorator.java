@@ -39,7 +39,7 @@ public final class SurfaceDecorator {
         int x0 = chunk.getPos().getMinBlockX();
         int z0 = chunk.getPos().getMinBlockZ();
         // Seeded by chunk so the pattern is stable and independent of neighbours.
-        RandomSource rng = RandomSource.create(((long) x0 * 341873128712L) ^ ((long) z0 * 132897987541L));
+        RandomSource rng = RandomSource.create((x0 * 341873128712L) ^ (z0 * 132897987541L));
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         int minY = level.getMinY();
         int maxY = level.getMaxY();

@@ -4,7 +4,6 @@ import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
-import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -134,82 +133,8 @@ public final class LondonStyle implements CityStyle {
         b.spire((vx0 + vx1) / 2, cz, vy1 + 3, 18);
     }
 
-    /** A long buttressed nave crowned by a great dome (St Paul's silhouette). */
-    private static void domedCathedral(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int w = 17;
-        int d = 13;
-        int h = 11;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - d / 2;
-        int z1 = z0 + d - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
 
-        b.ground(x0 - 2, z0 - 2, x1 + 2, z1 + 2, ground, ground, p.foundation());
-        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, 8));
-        b.crenellations(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1 + 1);
 
-        // Buttresses and tall narrow windows down both flanks.
-        for (int z = z0 + 2; z <= z1 - 2; z += 4) {
-            b.buttress(x0, z, y0, 5, Side.W);
-            b.buttress(x1, z, y0, 5, Side.E);
-        }
-        for (int z = z0 + 3; z <= z1 - 3; z += 3) {
-            b.window(x0, y0 + 3, z, 5, 1, true);
-            b.window(x1, y0 + 3, z, 5, 1, true);
-        }
-        for (int x = x0 + 4; x <= x1 - 4; x += 4) {
-            b.window(x, y0 + 3, z0, 5, 1, true);
-        }
-        // Dark stone string-course banding.
-        b.fill(x0 - 1, y0 + 8, z0 - 1, x1 + 1, y0 + 8, z1 + 1, p.accent());
-
-        StyleKit.dome(b, cx, cz, y1 + 2, 7, p);
-        StyleKit.twoHighDoor(b, p, cx, z1, y0 + 1, Direction.SOUTH);
-    }
-
-    /** A square clock tower (Big Ben): quoined shaft, narrow slits, a lit clock dial and a spire. */
-    private static void clockTower(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int r = 3;
-        int top = ground + 24;
-        b.ground(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, ground, ground, p.foundation());
-        b.room(cx - r, ground + 1, cz - r, cx + r, top, cz + r, new Doorway(Side.S, r));
-
-        for (int y = ground + 1; y <= top; y++) {
-            b.put(cx - r, y, cz - r, p.accent());
-            b.put(cx + r, y, cz - r, p.accent());
-            b.put(cx - r, y, cz + r, p.accent());
-            b.put(cx + r, y, cz + r, p.accent());
-            if (y % 4 == 0) {                       // banded string courses up the shaft
-                b.fill(cx - r, y, cz - r, cx + r, y, cz + r, p.accent());
-            }
-        }
-        for (int y = ground + 7; y <= top - 5; y += 5) {
-            b.window(cx, y, cz - r, 3, 1, true);
-            b.window(cx, y, cz + r, 3, 1, true);
-            b.window(cx - r, y, cz, 3, 1, true);
-            b.window(cx + r, y, cz, 3, 1, true);
-        }
-
-        int dialY = top - 3;
-        clockDial(b, cx, dialY, cz - r, p);
-        clockDial(b, cx, dialY, cz + r, p);
-        clockDial(b, cx - r, dialY, cz, p);
-        clockDial(b, cx + r, dialY, cz, p);
-
-        b.crenellations(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, top + 1);
-        b.spire(cx, cz, top + 2, 14);
-    }
-
-    /** A square clock face: lit centre with a dark stone rim. */
-    private static void clockDial(StructureBuilder b, int x, int y, int z, Palette p) {
-        b.put(x, y, z, p.light());
-        b.put(x + 1, y, z, p.accent());
-        b.put(x - 1, y, z, p.accent());
-        b.put(x, y + 1, z, p.accent());
-        b.put(x, y - 1, z, p.accent());
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

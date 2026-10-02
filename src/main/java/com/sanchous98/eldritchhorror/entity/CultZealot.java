@@ -88,9 +88,6 @@ public final class CultZealot extends Monster implements DreadAura {
         return data;
     }
 
-    public CultIdentity identity() {
-        return this.identity;
-    }
 
     // --- Low presence sanity drain (DreadAura) --------------------------------------------------
 

@@ -370,7 +370,7 @@ public final class CityLocation implements Location {
                     // Transition ring: blend from the terrace level at the interior boundary
                     // (terraceAt continued, so it matches the interior exactly) out to the
                     // natural terrain instead of cutting a vertical wall. 0 at flat, 1 at the rim.
-                    double t = Math.clamp((Math.sqrt(dist2) - flat) / (double) edgeRing, 0.0, 1.0);
+                    double t = Math.clamp((Math.sqrt(dist2) - flat) / edgeRing, 0.0, 1.0);
                     int inner = terraceAt(tiles, tbx, tbz, cx, cz, ground, x, z);
                     target = (int) Math.round(inner * (1.0 - t) + surface * t);
                     if (surface > target) {
@@ -392,7 +392,7 @@ public final class CityLocation implements Location {
                 } else if (dist2 <= ramp2) {
                     // Ramp the heart into the terrace field: continuous at both ends, so the
                     // plaza edge just meets the first terrace with no floating lip.
-                    double t = Math.clamp((Math.sqrt(dist2) - flatHeart) / (double) HEART_RAMP, 0.0, 1.0);
+                    double t = Math.clamp((Math.sqrt(dist2) - flatHeart) / HEART_RAMP, 0.0, 1.0);
                     target = (int) Math.round(ground * (1.0 - t) + target * t);
                 }
                 // Cut hills down / fill hollows up, then cap every column with one paving course.

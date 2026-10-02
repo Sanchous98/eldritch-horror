@@ -2,7 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -181,82 +180,8 @@ public final class LosAngelesStyle implements CityStyle {
 
     // ------------------------------------------------------------------ local helpers
 
-    /**
-     * The mission landmark: a stucco nave under a terracotta pitched roof, an arched arcade
-     * colonnade along the south front, and a red-tile bell tower at the north-west corner.
-     * Small and cheap — safe to call per chunk.
-     */
-    private static void mission(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int w = 11;
-        int l = 19;
-        int h = 8;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - l / 2;
-        int z1 = z0 + l - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
 
-        b.ground(x0 - 2, z0 - 2, x1 + 2, z1 + 2, ground, ground, p.foundation());
-        b.room(x0, y0, z0, x1, y1, z1, new StructureBuilder.Doorway(Side.N, 5));
-        b.pitchedRoof(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1, 5, 1);
-        for (int z = z0 + 3; z <= z1 - 3; z += 4) {
-            b.window(x0, y0 + 3, z, 3, 1, true);
-            b.window(x1, y0 + 3, z, 3, 1, true);
-        }
-        arcade(b, x0, x1, z1 + 3, ground, p);
-        bellTower(b, x0 - 3, z0 + 3, ground, p);
-    }
 
-    /**
-     * An arched arcade colonnade along X at fixed Z: terracotta piers two apart under a tile
-     * lintel, capped with stair heads suggesting round mission arches.
-     */
-    private static void arcade(StructureBuilder b, int x0, int x1, int z, int ground, Palette p) {
-        int y = ground + 1;
-        int top = y + 3;
-        for (int x = x0; x <= x1; x += 2) {
-            b.fill(x, y, z, x, top, z, p.accent());
-        }
-        b.fill(x0 - 1, top + 1, z, x1 + 1, top + 1, z, p.roof());
-        for (int x = x0 + 1; x <= x1 - 1; x += 2) {
-            b.put(x, top, z, p.roofStairs());
-        }
-    }
-
-    /**
-     * A Mission bell tower: a slender stucco shaft with a red-tile cap and a tile bell canopy
-     * carried on four corner posts, finished with a light.
-     */
-    private static void bellTower(StructureBuilder b, int x, int z, int ground, Palette p) {
-        int y0 = ground + 1;
-        int y1 = y0 + 18;
-        b.room(x - 1, y0, z - 1, x + 1, y1, z + 1);
-        // White revival stucco shaft (contrasts with the tan nave).
-        b.walls(x - 1, y0, z - 1, x + 1, y1, z + 1, Materials.terracotta(DyeColor.WHITE));
-        for (int y = y0; y <= y1; y++) {
-            b.put(x - 1, y, z - 1, p.accent());
-            b.put(x + 1, y, z - 1, p.accent());
-            b.put(x - 1, y, z + 1, p.accent());
-            b.put(x + 1, y, z + 1, p.accent());
-        }
-        for (int y = y0 + 4; y <= y1 - 3; y += 4) {
-            b.window(x, y, z - 1, 2, 1, true);
-            b.window(x, y, z + 1, 2, 1, true);
-        }
-        // Tile cap.
-        b.pitchedRoof(x - 2, z - 2, x + 2, z + 2, y1, 3, 0);
-        // Bell canopy: four posts, a lintel and a small tile roof, lit from within.
-        int by = y1 + 4;
-        for (int y = y1 + 1; y <= by; y++) {
-            b.put(x - 1, y, z - 1, p.accent());
-            b.put(x + 1, y, z - 1, p.accent());
-            b.put(x - 1, y, z + 1, p.accent());
-            b.put(x + 1, y, z + 1, p.accent());
-        }
-        b.put(x, by, z, p.light());
-        b.pitchedRoof(x - 2, z - 2, x + 2, z + 2, by + 1, 3, 0);
-    }
 
     /** A palm: a slim timber trunk with a mop of leaves. */
     private static void palm(StructureBuilder b, int x, int z, int ground, Palette p) {

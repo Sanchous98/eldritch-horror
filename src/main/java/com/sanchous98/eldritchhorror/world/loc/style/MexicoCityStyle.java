@@ -2,8 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -94,24 +92,6 @@ public final class MexicoCityStyle implements CityStyle {
         StyleKit.steppedTemple(b, cx - 24, cz + 22, ground, 4, p);
     }
 
-    /** A low square bell tower: plastered shaft, a high dark bell opening, a tiled pyramid cap. */
-    private static void bellTower(StructureBuilder b, int x, int z, int ground, Palette p) {
-        int y0 = ground + 1;
-        int top = y0 + 16;
-        // Bell towers are walk-in: a south doorway at ground level.
-        b.room(x - 2, y0, z - 2, x + 2, top, z + 2, new Doorway(Side.S, 2));
-        for (int y = y0; y <= top; y++) {
-            b.put(x - 2, y, z - 2, p.accent());
-            b.put(x + 2, y, z - 2, p.accent());
-            b.put(x - 2, y, z + 2, p.accent());
-            b.put(x + 2, y, z + 2, p.accent());
-        }
-        // Bell opening (a dark arch) high up, on two faces.
-        b.window(x, top - 5, z - 2, 4, 1, true);
-        b.window(x, top - 5, z + 2, 4, 1, true);
-        // Tiled pyramidal cap.
-        b.pitchedRoof(x - 2, z - 2, x + 2, z + 2, top, 3, 0);
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

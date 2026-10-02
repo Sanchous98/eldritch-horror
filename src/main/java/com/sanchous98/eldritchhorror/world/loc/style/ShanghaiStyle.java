@@ -113,17 +113,6 @@ public final class ShanghaiStyle implements CityStyle {
         b.spire(cx, cz, columnTop + 1, 18);
     }
 
-    /** Corner and mid-wall stone piers of the arcade, in the accent colour. */
-    private static void colonnade(StructureBuilder b, int cx, int cz, int y0, Palette p) {
-        int top = y0 + 9;
-        for (int x = cx - 7; x <= cx + 7; x += 7) {
-            for (int z = cz - 7; z <= cz + 7; z += 7) {
-                for (int y = y0; y <= top; y++) {
-                    b.put(x, y, z, p.accent());
-                }
-            }
-        }
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

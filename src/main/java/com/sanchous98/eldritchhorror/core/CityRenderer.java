@@ -129,10 +129,6 @@ public final class CityRenderer {
             this.argb = new int[this.diameter * this.diameter];
         }
 
-        int chunkCount() {
-            return (this.cMaxX - this.cMinX + 1) * (this.cMaxZ - this.cMinZ + 1);
-        }
-
         /** Packs the chunk runs (with the sampling step) that {@link #generateSlice} will load. */
         void planChunks() {
             long total = (long) (this.cMaxX - this.cMinX + 1) * (this.cMaxZ - this.cMinZ + 1);
@@ -148,15 +144,9 @@ public final class CityRenderer {
     private static final class Session {
         final List<CityTask> tasks = new ArrayList<>();
         final List<String> rendered = new ArrayList<>();
-        final List<String> failed = new ArrayList<>();
-        final int total;
         boolean exitWhenDone;
         int savedPauseSeconds = -1;
         int index;
-
-        Session(int total) {
-            this.total = total;
-        }
     }
 
     private static volatile Session active;
@@ -261,7 +251,7 @@ public final class CityRenderer {
             }
         }
 
-        Session session = new Session(selected.size());
+        Session session = new Session();
         session.exitWhenDone = exitWhenDone;
         // Sites are wrapped as synthetic Cities for the shared pipeline, but their built footprint
         // is small and would clamp to the 220-block city floor. Remember each site's render radius
@@ -421,8 +411,8 @@ public final class CityRenderer {
             dedicated.setPauseWhenEmptySeconds(session.savedPauseSeconds);
         }
         active = null;
-        EldritchHorror.LOGGER.info("CityRenderer: session done ({} rendered, {} failed) into run/render",
-                session.rendered.size(), session.failed.size());
+        EldritchHorror.LOGGER.info("CityRenderer: session done ({} rendered) into run/render",
+                session.rendered.size());
         if (session.exitWhenDone) {
             try {
                 server.halt(false);
@@ -551,7 +541,7 @@ public final class CityRenderer {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         int span = t.diameter;
         int processed = 0;
-        while (t.row <= (span - 1) + (span - 1) && processed < ISO_COLUMNS_PER_TICK) {
+        while (t.row <= span - 1 + span - 1 && processed < ISO_COLUMNS_PER_TICK) {
             if (t.wallIdx >= 0) {
                 processed += flushWall(t, pos);
                 continue;
@@ -572,7 +562,7 @@ public final class CityRenderer {
             t.wallY = t.topY[idx];
             processed += flushWall(t, pos);
         }
-        if (t.row > (span - 1) + (span - 1)) {
+        if (t.row > span - 1 + span - 1) {
             write(t.iso, t.dir, t.city.id() + "_iso.png");
             t.phase = Phase.DONE;
         }
@@ -589,7 +579,7 @@ public final class CityRenderer {
         int x = t.minX + ix;
         int z = t.minZ + iz;
         int span = t.diameter;
-        int sx = ix - iz + (span - 1);
+        int sx = ix - iz + span - 1;
         int processed = 0;
         for (int y = t.wallY; y >= t.wallBottom; y--) {
             pos.set(x, y, z);
@@ -642,9 +632,10 @@ public final class CityRenderer {
 
     /** How far to render around a city: the built district, not the (larger) cull radius. */
     private static int renderRadius(City city) {
-        int cityRadius = new CityLocation(city).radius();
-        int district = Math.min(cityRadius, 380);
-        return Math.min(district, MAX_RENDER_RADIUS) + 20;
+        // The built district half-extent (the city's own radius is already clamped to <=400, and a
+        // 380 district cap sits below MAX_RENDER_RADIUS), plus a small margin for the rim.
+        int district = Math.min(new CityLocation(city).radius(), 380);
+        return district + 20;
     }
 
     /**
@@ -671,7 +662,7 @@ public final class CityRenderer {
     private static int colourOf(BlockState state, ServerLevel level, int x, int y, int z) {
         try {
             MapColor mapColor = state.getMapColor(level, new BlockPos(x, y, z));
-            if (mapColor != null && mapColor != MapColor.NONE && mapColor.col != 0) {
+            if (mapColor != MapColor.NONE && mapColor.col != 0) {
                 return mapColor.calculateARGBColor(MapColor.Brightness.HIGH);
             }
         } catch (Exception ignored) {

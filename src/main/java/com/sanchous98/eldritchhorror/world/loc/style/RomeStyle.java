@@ -2,8 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -53,13 +51,6 @@ public final class RomeStyle implements CityStyle {
                 Blocks.GRAVEL.defaultBlockState());                 // rubble
     }
 
-    /** The palette with a pale stone dome — the cupola of the basilica is masonry, not tile. */
-    private static Palette stoneDomed(Palette p) {
-        return new Palette(p.ground(), p.foundation(), p.wall(), p.weathered(),
-                p.accent(), Blocks.CALCITE.defaultBlockState(), Blocks.CALCITE.defaultBlockState(),
-                Blocks.CALCITE.defaultBlockState(), p.window(), p.frame(), p.door(), p.rail(),
-                p.light(), p.overgrowth(), p.rubble());
-    }
 
     // ------------------------------------------------------------------ landmark
 
@@ -152,85 +143,11 @@ public final class RomeStyle implements CityStyle {
         b.fill(x0, top, z0, x1, top, z1, p.roofSlab());
     }
 
-    /** A domed basilica: a tiled nave, a columned portico and a piazza colonnade around it. */
-    private static void basilica(StructureBuilder b, RandomSource rng, int cx, int cz,
-                                 int ground, Palette p) {
-        int w = 11;
-        int l = 15;
-        int h = 9;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - l / 2;
-        int z1 = z0 + l - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
 
-        // Paved apron, then the nave and its terracotta pantile roof.
-        b.ground(x0 - 2, z0 - 2, x1 + 2, z1 + 4, ground, ground, p.ground());
-        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, w / 2));
-        b.pitchedRoof(x0 - 1, z0 - 1, x1 + 1, z1 + 1, y1, 6, 1);
 
-        // A row of tall arched windows down each flank.
-        for (int z = z0 + 3; z <= z1 - 3; z += 3) {
-            b.window(x0, y0 + 3, z, 4, 1, true);
-            b.window(x1, y0 + 3, z, 4, 1, true);
-        }
-
-        // The great dome over the crossing, on a low drum.
-        int drum = y1;
-        b.crenellations(x0, z0 + 4, x1, z0 + 6, drum + 1);
-        StyleKit.dome(b, cx, cz, drum, 6, stoneDomed(p));
-
-        int py = y0 + h - 1;               // entablature height of the portico
-        portico(b, cx, z1 + 2, w, py, ground, p);
-        piazzaColonnade(b, cx, cz, ground, p);
-    }
-
-    /** A classical portico: a columned front row carrying an architrave, with steps below. */
-    private static void portico(StructureBuilder b, int cx, int z, int w, int topY,
-                                int ground, Palette p) {
-        int half = w / 2;
-        for (int x = cx - half; x <= cx + half; x += 2) {
-            column(b, x, z, ground, p);
-        }
-        b.fill(cx - half, topY, z, cx + half, topY, z, p.foundation());          // architrave
-        b.fill(cx - half, topY + 1, z, cx + half, topY + 1, z, p.roofSlab());    // cornice
-        for (int s = 0; s < 2; s++) {                                            // front steps
-            b.fill(cx - half, ground, z + 2 + s, cx + half, ground, z + 2 + s, p.foundation());
-        }
-    }
-
-    /** A U-shaped colonnade enclosing the piazza in front of the basilica, under a cornice. */
-    private static void piazzaColonnade(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int arm = 16;
-        int back = cz + 20;
-        int topY = ground + 7;
-        for (int z = cz + 7; z <= back; z += 2) {
-            column(b, cx - arm, z, ground, p);
-            column(b, cx + arm, z, ground, p);
-        }
-        for (int x = cx - arm; x <= cx + arm; x += 2) {
-            column(b, x, back, ground, p);
-        }
-        // Continuous entablature and a balustrade silhouette over the whole sweep.
-        b.fill(cx - arm, topY, cz + 7, cx - arm, topY, back, p.foundation());
-        b.fill(cx + arm, topY, cz + 7, cx + arm, topY, back, p.foundation());
-        b.fill(cx - arm, topY, back, cx + arm, topY, back, p.foundation());
-        b.crenellations(cx - arm, cz + 7, cx - arm, back, topY + 1);
-        b.crenellations(cx + arm, cz + 7, cx + arm, back, topY + 1);
-        b.crenellations(cx - arm, back, cx + arm, back, topY + 1);
-    }
 
     // ------------------------------------------------------------------ props
 
-    /** A squat travertine column: base, fluted shaft in accent, carved capital. */
-    private static void column(StructureBuilder b, int x, int z, int ground, Palette p) {
-        b.put(x, ground + 1, z, p.foundation());
-        for (int y = ground + 2; y <= ground + 5; y++) {
-            b.put(x, y, z, p.accent());
-        }
-        b.put(x, ground + 6, z, p.frame());
-    }
 
     /** An umbrella pine: a bare pale trunk under a broad flat crown of needles (palette leaves). */
     private static void umbrellaPine(StructureBuilder b, int x, int z, int ground, Palette p) {

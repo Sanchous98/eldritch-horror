@@ -2,8 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -146,42 +144,6 @@ public final class BangkokStyle implements CityStyle {
         }
     }
 
-    /**
-     * A Thai temple: a 17x11 hall raised on a three-step tiered base, with a vermilion colonnade,
-     * mosaic window bands and a steep two-tier golden roof capped by a tall chofah spire.
-     */
-    private static void temple(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int w = 17;
-        int d = 11;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - d / 2;
-        int z1 = z0 + d - 1;
-        int y0 = ground + 3;   // the hall sits on top of the tiers
-        int h = 7;
-
-        // Tiered base: three shrinking slabs of pale stone.
-        b.ground(x0 - 3, z0 - 3, x1 + 3, z1 + 3, ground, ground + 2, p.foundation());
-        b.ground(x0 - 1, z0 - 1, x1 + 1, z1 + 1, ground, ground + 2, p.wall());
-
-        b.room(x0, y0, z0, x1, y0 + h, z1, new Doorway(Side.S, w / 2), new Doorway(Side.N, w / 2));
-
-        // Vermilion columns down both long sides, carried one course past the eave.
-        for (int x = x0 + 1; x <= x1 - 1; x += 3) {
-            b.fill(x, y0, z0, x, y0 + h + 1, z0, p.accent());
-            b.fill(x, y0, z1, x, y0 + h + 1, z1, p.accent());
-        }
-        // Mosaic window bands on the flanks.
-        for (int x = x0 + 2; x <= x1 - 2; x += 3) {
-            b.window(x, y0 + 3, z0, 3, 1, true);
-            b.window(x, y0 + 3, z1, 3, 1, true);
-        }
-
-        // Steep stacked roof: a broad lower shell, a narrower upper shell, then the golden spire.
-        b.pitchedRoof(x0 - 2, z0 - 2, x1 + 2, z1 + 2, y0 + h, 5, 0);
-        b.pitchedRoof(x0 + 3, z0 + 1, x1 - 3, z1 - 1, y0 + h + 5, 4, 0);
-        b.spire(cx, cz, y0 + h + 9, 16);
-    }
 
     /**
      * A spirit house: a tiny gilded shrine raised on a post so the household spirit sits above the

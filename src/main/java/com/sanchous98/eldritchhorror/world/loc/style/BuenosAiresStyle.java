@@ -2,9 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
-import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -73,58 +70,7 @@ public final class BuenosAiresStyle implements CityStyle {
         b.put(cx, shaftTop + 3, cz, p.accent());
     }
 
-    /**
-     * A beaux-arts congress palace: a long balustraded block with a projecting colonnaded portico
-     * on the north front and a high slate dome over the crossing.
-     */
-    private static void palace(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int w = 19;
-        int d = 13;
-        int h = 12;
-        int x0 = cx - w / 2;
-        int x1 = x0 + w - 1;
-        int z0 = cz - d / 2;
-        int z1 = z0 + d - 1;
-        int y0 = ground + 1;
-        int y1 = y0 + h;
 
-        b.ground(x0 - 3, z0 - 3, x1 + 3, z1 + 2, ground, ground, p.foundation());
-        b.room(x0, y0, z0, x1, y1, z1, new Doorway(Side.S, 9));
-
-        // String course and crowning cornice in pale stone.
-        b.fill(x0 - 1, y0 + 6, z0 - 1, x1 + 1, y0 + 6, z1 + 1, p.accent());
-        b.fill(x0 - 1, y1, z0 - 1, x1 + 1, y1, z1 + 1, p.accent());
-
-        // Tall windows in two tiers down both flanks; a wide row across the south front.
-        for (int z = z0 + 3; z <= z1 - 3; z += 3) {
-            b.window(x0, y0 + 2, z, 3, 1, true);
-            b.window(x1, y0 + 2, z, 3, 1, true);
-            b.window(x0, y0 + 8, z, 2, 1, true);
-            b.window(x1, y0 + 8, z, 2, 1, true);
-        }
-        for (int x = x0 + 4; x <= x1 - 4; x += 4) {
-            b.window(x, y0 + 2, z1, 3, 1, true);
-        }
-
-        // Projecting portico: a free-standing colonnade across the north front.
-        colonnade(b, x0 + 3, x1 - 3, z0 - 2, ground, p, 5);
-
-        // High dome on a lit drum, capped with a spire (the Congress lantern).
-        StyleKit.dome(b, cx, cz, y1 + 2, 6, p);
-        b.spire(cx, cz, y1 + 9, 8);
-
-        StyleKit.twoHighDoor(b, p, cx, z1, y0 + 1, Direction.SOUTH);
-    }
-
-    /** A run of paired columns and an entablature along X at fixed Z. Small and cheap. */
-    private static void colonnade(StructureBuilder b, int x0, int x1, int z, int ground, Palette p, int h) {
-        int y = ground + 1;
-        for (int x = x0; x <= x1; x += 3) {
-            b.fill(x, y, z, x, y + h, z, p.accent());
-            b.put(x, y + h + 1, z, p.accent()); // capital
-        }
-        b.fill(x0 - 1, y + h + 2, z, x1 + 1, y + h + 2, z, p.accent()); // entablature
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

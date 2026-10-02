@@ -61,9 +61,8 @@ public final class CorruptionSources {
 
         @Override
         public double deltaPerSecond(ServerPlayer player, CorruptionContext ctx) {
-            if (ctx.chunkTaint() <= 0.0) {
-                return 0.0;
-            }
+            // Chunk taint is documented 0..1 (CorruptionSystem clamps it) and the rate is >= 0, so
+            // the product is already non-negative: no floor/guard is needed for a clean chunk.
             return ctx.chunkTaint() * ModConfig.CORRUPTION_TAINT_RATE.get();
         }
     }

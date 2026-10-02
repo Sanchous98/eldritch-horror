@@ -154,49 +154,6 @@ public final class LimaStyle implements CityStyle {
         }
     }
 
-    /** A colonial bell tower: ochre plaster shaft, dark quoins, open belfry arches and a tiled cap. */
-    private static void tower(StructureBuilder b, int cx, int cz, int ground, Palette p) {
-        int r = 3;
-        int y0 = ground + 1;
-        int top = ground + 36;
-        b.ground(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, ground, ground, p.foundation());
-        b.room(cx - r, y0, cz - r, cx + r, top, cz + r);
-        for (int y = y0; y <= top; y++) {
-            b.put(cx - r, y, cz - r, p.accent());
-            b.put(cx + r, y, cz - r, p.accent());
-            b.put(cx - r, y, cz + r, p.accent());
-            b.put(cx + r, y, cz + r, p.accent());
-        }
-        // Cream string-courses break the tall shaft into storeys.
-        for (int y = y0 + 9; y <= top - 4; y += 9) {
-            b.fill(cx - r, y, cz - r, cx + r, y, cz + r, p.weathered());
-        }
-        // Tall paired openings on each face.
-        for (int y = y0 + 5; y <= top - 14; y += 9) {
-            b.window(cx, y, cz - r, 4, 2, true);
-            b.window(cx, y, cz + r, 4, 2, true);
-            b.window(cx - r, y, cz, 4, 2, true);
-            b.window(cx + r, y, cz, 4, 2, true);
-        }
-        // Open belfry arches under the cap.
-        b.window(cx, top - 8, cz - r, 6, 2, true);
-        b.window(cx, top - 8, cz + r, 6, 2, true);
-        b.window(cx - r, top - 8, cz, 6, 2, true);
-        b.window(cx + r, top - 8, cz, 6, 2, true);
-        for (int y = top - 6; y <= top; y++) {
-            b.put(cx - 1, y, cz - r, p.frame());
-            b.put(cx + 1, y, cz - r, p.frame());
-            b.put(cx - 1, y, cz + r, p.frame());
-            b.put(cx + 1, y, cz + r, p.frame());
-            b.put(cx - r, y, cz - 1, p.frame());
-            b.put(cx - r, y, cz + 1, p.frame());
-            b.put(cx + r, y, cz - 1, p.frame());
-            b.put(cx + r, y, cz + 1, p.frame());
-        }
-        // Pointed tiled cap; the finial light sits on the roof apex.
-        b.pitchedRoof(cx - r - 1, cz - r - 1, cx + r + 1, cz + r + 1, top, 7, 0);
-        b.put(cx, top + 5, cz, p.light());
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

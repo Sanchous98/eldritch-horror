@@ -89,9 +89,6 @@ public final class RiteBinder extends Monster implements DreadAura {
         return data;
     }
 
-    public CultIdentity identity() {
-        return this.identity;
-    }
 
     @Override
     public void aiStep() {

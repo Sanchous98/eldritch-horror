@@ -81,9 +81,6 @@ public final class CultRaider extends Monster implements DreadAura {
         return data;
     }
 
-    public CultIdentity identity() {
-        return this.identity;
-    }
 
     // --- Faction presence sanity drain (DreadAura) ---------------------------------------------
 

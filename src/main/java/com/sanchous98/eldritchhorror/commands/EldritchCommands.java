@@ -167,15 +167,15 @@ public final class EldritchCommands {
                                 })))
                         .then(Commands.literal("rite")
                                 .then(Commands.argument("id", StringArgumentType.word())
-                                        .executes(ctx -> performRite(ctx))))
-                        .then(Commands.literal("rites").executes(ctx -> listRites(ctx)))
+                                        .executes(EldritchCommands::performRite)))
+                        .then(Commands.literal("rites").executes(EldritchCommands::listRites))
                         .then(Commands.literal("cult")
                                 .then(Commands.argument("id", StringArgumentType.word())
-                                        .executes(ctx -> cultInfo(ctx))))
+                                        .executes(EldritchCommands::cultInfo)))
                         .then(Commands.literal("service")
                                 .then(Commands.argument("cult", StringArgumentType.word())
                                         .then(Commands.argument("service", StringArgumentType.word())
-                                                .executes(ctx -> performService(ctx)))));
+                                                .executes(EldritchCommands::performService))));
         if (ModConfig.ENABLE_CODEX_COMMANDS.get()) {
             eh.then(Commands.literal("codex")
                             .executes(EldritchCommands::listCodex)
@@ -261,12 +261,10 @@ public final class EldritchCommands {
     private static int listRites(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         var known = RiteKnowledge.known(p);
-        if (known.isEmpty()) {
-            ctx.getSource().sendSuccess(() -> Component.literal("You know no rites."), false);
-            return 1;
-        }
-        String line = String.join(" ", new java.util.TreeSet<>(known));
-        ctx.getSource().sendSuccess(() -> Component.literal("Known rites: " + line), false);
+        String message = known.isEmpty()
+                ? "You know no rites."
+                : "Known rites: " + String.join(" ", new java.util.TreeSet<>(known));
+        ctx.getSource().sendSuccess(() -> Component.literal(message), false);
         return 1;
     }
 

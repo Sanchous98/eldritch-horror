@@ -103,21 +103,6 @@ public final class SydneyStyle implements CityStyle {
         }
     }
 
-    /** One curved shell: horizontal rows of tapering width, leaning as they rise. */
-    private static void sail(StructureBuilder b, int cx, int cz, int baseY, int r, int h, Palette p) {
-        BlockState shell = Materials.whiteConcrete();
-        for (int i = 0; i < h; i++) {
-            int xr = r - (i * r) / h;            // the arc: widest at the base
-            int z = cz + (i * r) / (h + 3);      // the lean, back from the concourse
-            b.fill(cx - xr, baseY + i, z, cx + xr, baseY + i, z, shell);
-            b.put(cx - xr, baseY + i, z + 1, p.roofSlab());   // dark tile lip
-            b.put(cx + xr, baseY + i, z + 1, p.roofSlab());
-        }
-        for (int k = 0; k < 3; k++) {            // mast
-            b.put(cx, baseY + h + k, cz + r / 2, p.accent());
-        }
-        b.put(cx, baseY + h + 3, cz + r / 2, p.light());
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,

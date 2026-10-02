@@ -79,7 +79,7 @@ public class EarthBiomeSource extends BiomeSource {
         boolean land = earth.isLand(worldX, worldZ);
         int koppen = earth.koppenClass(worldX, worldZ);
         int depth = land ? 0
-                : (int) Math.max(0, ElevationCurve.SEA_LEVEL
+                : Math.max(0, ElevationCurve.SEA_LEVEL
                         - ElevationCurve.toY(earth.elevationMetres(worldX, worldZ)));
         return lookup.getOrThrow(key(BiomeTable.forColumn(koppen, land, depth)));
     }

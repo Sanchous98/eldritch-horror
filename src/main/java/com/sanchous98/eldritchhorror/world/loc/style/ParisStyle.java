@@ -2,8 +2,6 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Doorway;
-import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -147,41 +145,7 @@ public final class ParisStyle implements CityStyle {
         b.spire(cx, cz, y3 + 3, 11);
     }
 
-    /** A flat-topped, crenellated belfry tower — the mirrored partner of the cathedral's tower. */
-    private static void twinTower(StructureBuilder b, int cx, int zA, int zB, int ground, Palette p) {
-        int tx0 = cx - 4;
-        int tx1 = cx + 4;
-        int z0 = Math.min(zA, zB);
-        int z1 = Math.max(zA, zB);
-        int y0 = ground + 1;
-        int top = y0 + 26;
-        b.room(tx0, y0, z0, tx1, top, z1, new Doorway(Side.N, 4));
-        for (int y = y0; y <= top; y++) {
-            b.put(tx0, y, z0, p.accent());
-            b.put(tx1, y, z0, p.accent());
-            b.put(tx0, y, z1, p.accent());
-            b.put(tx1, y, z1, p.accent());
-        }
-        for (int y = y0 + 5; y <= top - 4; y += 5) {
-            b.window(tx0, y, (z0 + z1) / 2, 3, 1, true);
-            b.window(tx1, y, (z0 + z1) / 2, 3, 1, true);
-            b.window((tx0 + tx1) / 2, y, z0, 3, 1, true);
-        }
-        b.crenellations(tx0 - 1, z0 - 1, tx1 + 1, z1 + 1, top + 1);
-    }
 
-    /** A stepped flyer arching from the clerestory out to a free-standing pier, both flanks. */
-    private static void flyingButtresses(StructureBuilder b, int x0, int x1, int z0, int z1,
-                                         int y0, Palette p) {
-        for (int z = z0 + 2; z <= z1 - 2; z += 4) {
-            for (int i = 0; i <= 3; i++) {
-                b.put(x0 - i, y0 + 9 - i, z, p.accent());
-                b.put(x1 + i, y0 + 9 - i, z, p.accent());
-            }
-            b.fill(x0 - 3, y0, z, x0 - 3, y0 + 6, z, p.foundation());
-            b.fill(x1 + 3, y0, z, x1 + 3, y0 + 6, z, p.foundation());
-        }
-    }
 
     @Override
     public void flourish(StructureBuilder b, RandomSource rng, int x, int y0, int z,
