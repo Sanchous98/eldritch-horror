@@ -16,7 +16,7 @@ public record SanityContext(ServerLevel level, long gameTime, boolean night, boo
 
     /** Snapshot the context for one player. Cheap: one brightness/clock read, no chunk access. */
     public static SanityContext of(ServerPlayer player) {
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         return new SanityContext(
                 level,
                 level.getGameTime(),

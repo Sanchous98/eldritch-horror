@@ -18,7 +18,7 @@ public record CorruptionContext(ServerLevel level, long gameTime, double chunkTa
      * loading beyond it) via {@link CorruptionSystem#getTaintAt(ServerPlayer)}.
      */
     public static CorruptionContext of(ServerPlayer player) {
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         return new CorruptionContext(level, level.getGameTime(),
                 CorruptionSystem.getTaintAt(player));
     }

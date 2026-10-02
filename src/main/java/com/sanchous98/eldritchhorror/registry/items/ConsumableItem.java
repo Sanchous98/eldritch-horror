@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.function.Consumer;
 
@@ -31,6 +32,7 @@ import java.util.function.Consumer;
  * has infinite materials). When {@code false} (tomes are knowledge, not consumables) the stack is
  * left intact and only the cost is paid.
  */
+@NullMarked
 public class ConsumableItem extends Item {
     private final double sanity;
     private final double corruption;

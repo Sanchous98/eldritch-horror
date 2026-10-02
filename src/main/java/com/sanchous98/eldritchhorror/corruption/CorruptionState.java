@@ -22,8 +22,7 @@ public enum CorruptionState {
 
     /** Band of {@code corruption}, using the configured cut-offs. */
     public static CorruptionState of(double corruption) {
-        double max = CorruptionSystem.DEFAULT_MAX;
-        double f = max <= 0.0 ? 0.0 : Math.clamp(corruption / max, 0.0, 1.0);
+        double f = Math.clamp(corruption / CorruptionSystem.DEFAULT_MAX, 0.0, 1.0);
         if (f >= ModConfig.CORRUPTION_CLAIMED.get()) {
             return CLAIMED;
         }

@@ -69,7 +69,7 @@ public final class CorruptionSystem {
      * not loaded yet.
      */
     public static double getTaintAt(ServerPlayer player) {
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         LevelChunk chunk = level.getChunkSource().getChunkNow(
                 player.chunkPosition().x(), player.chunkPosition().z());
         return chunk == null ? 0.0 : getTaint(chunk);

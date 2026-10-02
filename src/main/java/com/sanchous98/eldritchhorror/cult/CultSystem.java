@@ -19,9 +19,6 @@ public final class CultSystem {
     public static final int MIN = -100;
     public static final int MAX = 100;
 
-    /** Generic rank thresholds (value ≥ threshold ⇒ that band); see design/03c-reputation.md. */
-    private static final int[] BANDS = {20, 40, 60, 80};
-
     /** Fraction of a gain that is subtracted from an opposed cult. */
     private static final double OPPOSED_FACTOR = 0.5;
 
@@ -80,22 +77,19 @@ public final class CultSystem {
      * cult ⇒ the neutral component.
      */
     public static Component rank(ServerPlayer player, String cultId) {
-        int v = get(player, cultId);
-        if (v < 0) {
+        CultRank rank = CultRank.of(get(player, cultId));
+        if (rank == CultRank.OUTSIDER) {
             return Component.translatable("rank.eldritch_horror.outsider");
         }
-        int band = 0;
-        while (band < BANDS.length && v >= BANDS[band]) {
-            band++;
-        }
-        if (band == 0) {
+        if (rank == CultRank.NEUTRAL) {
             return Component.translatable("rank.eldritch_horror.neutral");
         }
         CultDefinition def = Cults.byId(cultId);
         if (def == null || def.ranks().isEmpty()) {
             return Component.translatable("rank.eldritch_horror.neutral");
         }
-        int idx = Math.min(band - 1, def.ranks().size() - 1);
+        int band = rank.ordinal() - CultRank.NEUTRAL.ordinal() - 1;
+        int idx = Math.min(band, def.ranks().size() - 1);
         return def.ranks().get(idx);
     }
 }
