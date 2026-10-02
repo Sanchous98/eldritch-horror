@@ -81,9 +81,18 @@ public final class Cthulhu extends AncientOne {
         return Axis.SANITY;
     }
 
+    /** Soothed: the dream stills and the presence settles into sleep, not death. */
+    @Override
+    protected void onSolved(Solve kind) {
+        if (kind == Solve.SOOTHED) {
+            this.playSound(SoundEvents.ELDER_GUARDIAN_DEATH, 1.0F, 0.4F);
+        }
+    }
+
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_CTHULHU.get();
+        // A soothed presence sleeps: awake, but no longer draining (design/28 non-combat solve).
+        return !isSolved() && ModConfig.ENABLE_SANITY.get() && ModConfig.ENABLE_SANITY_CTHULHU.get();
     }
 
     @Override

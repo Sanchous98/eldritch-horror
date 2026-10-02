@@ -62,7 +62,8 @@ public final class ShubNiggurath extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_SHUB_NIGGURATH.get();
+        return !isSolved() && ModConfig.ENABLE_CORRUPTION.get()
+                && ModConfig.ENABLE_CORRUPTION_SHUB_NIGGURATH.get();
     }
 
     @Override
@@ -81,9 +82,21 @@ public final class ShubNiggurath extends AncientOne {
         pulseAura(level);
     }
 
+    /** Stilled: the woods' breathing fades for a time. */
+    @Override
+    protected void onSolved(Solve kind) {
+        if (kind == Solve.STILLED) {
+            this.playSound(SoundEvents.RAVAGER_ROAR, 1.0F, 0.3F);
+        }
+    }
+
     /** Once per second: the wide corruption aura (sprint-aware) plus the standing-still sanity drain. */
     private void pulseAura(ServerLevel level) {
         if (!this.isAlive() || level.getGameTime() % 20L != 0L) {
+            return;
+        }
+        // A stilled presence holds its breath for a while (design/28 non-combat solve).
+        if (isSolved()) {
             return;
         }
         double radiusSqr = this.auraRadius() * this.auraRadius();

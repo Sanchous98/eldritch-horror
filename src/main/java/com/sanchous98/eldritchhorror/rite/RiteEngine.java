@@ -1,23 +1,30 @@
 package com.sanchous98.eldritchhorror.rite;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
+import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -39,7 +46,8 @@ import java.util.List;
  *
  * <p>Outcomes with no seeded content (reputation / transform / curse / sanity) return a
  * {@code ok=false} result explaining that they are not implemented for this rite — never a silent
- * no-op.
+ * no-op. {@link RiteDefinition.Outcome#SOOTHE} is the shared Ancient One non-combat solve
+ * ({@code design/28}).
  */
 public final class RiteEngine {
 
@@ -104,9 +112,117 @@ public final class RiteEngine {
             case OPEN_RIFT -> openRift(level, player);
             case CLOSE_RIFT -> closeRift(level, player);
             case CORRUPTION -> cleanse(level, player, rite);
+            case SOOTHE -> soothe(level, player, rite);
             case REPUTATION, TRANSFORM, CURSE, SANITY ->
                     new Result(false, Component.literal("The rite's outcome " + rite.outcome()
                             + " is not implemented for " + rite.id() + "."));
+        };
+    }
+
+    /**
+     * The shared Ancient One non-combat solve ({@link RiteDefinition.Outcome#SOOTHE}). Finds the
+     * nearest compatible {@link AncientOne} within {@link com.sanchous98.eldritchhorror.core.ModConfig#RITE_SOLVE_RADIUS}
+     * (the {@code grant} field names the entity path, e.g. {@code cthulhu}) and asks it to solve.
+     * Bounded: a single, already-loaded entity query; no world scan, no chunk generation, no random.
+     * A disabled solve or an absent/already-answered presence fails with an explicit message.
+     */
+    private static Result soothe(ServerLevel level, ServerPlayer player, RiteDefinition rite) {
+        String target = rite.grant();
+        if (target.isEmpty()) {
+            return new Result(false, Component.literal("The rite names no presence to solve."));
+        }
+        if (!solveEnabled(target)) {
+            return new Result(false, Component.literal("That solve is disabled: " + target + "."));
+        }
+        int radius = ModConfig.RITE_SOLVE_RADIUS.get();
+        double radiusSqr = (double) radius * radius;
+        List<AncientOne> candidates = level.getEntitiesOfClass(AncientOne.class,
+                player.getBoundingBox().inflate(radius),
+                a -> {
+                    Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(a.getType());
+                    return a.isAlive() && key != null && target.equals(key.getPath());
+                });
+        AncientOne nearest = null;
+        double best = Double.MAX_VALUE;
+        for (AncientOne candidate : candidates) {
+            double distance = candidate.distanceToSqr(player);
+            if (distance <= radiusSqr && distance < best) {
+                best = distance;
+                nearest = candidate;
+            }
+        }
+        if (nearest == null) {
+            return new Result(false, Component.literal("No presence answers within " + radius + " blocks."));
+        }
+        int ticks = "shub_niggurath".equals(target)
+                ? ModConfig.RITE_STILL_SHUB_NIGGURATH_TICKS.get() : 0;
+        if (!nearest.solve(solveFor(target), ticks)) {
+            return new Result(false, Component.literal("That presence is already answered."));
+        }
+        // Drawing the Horror off a settlement also cleanses the ground it was eating (bounded patch).
+        if ("dunwich_horror".equals(target)) {
+            taintPatch(level, nearest.blockPosition(), CLEANSE_TAINT, true);
+            SanityAPI.add(player, 5);
+        }
+        Component reward = giveSolveReward(player, target);
+        return new Result(true, solveMessage(target).copy().append(reward));
+    }
+
+    /**
+     * The solve's <b>different reward path</b> (design/18: soothing gives a different reward than the
+     * kill). Reuses existing currency items from {@code registry/items/Currency.java}; no new item is
+     * invented. Returns a short suffix describing what was received, or empty if nothing was due.
+     */
+    private static Component giveSolveReward(ServerPlayer player, String target) {
+        String itemId = switch (target) {
+            case "cthulhu" -> "mark_of_favour";
+            case "dunwich_horror" -> "relic_coin";
+            case "shub_niggurath" -> "black_obol";
+            default -> "";
+        };
+        if (itemId.isEmpty()) {
+            return Component.empty();
+        }
+        Item item = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(itemId));
+        if (item == null || item == Items.AIR) {
+            return Component.empty();
+        }
+        ItemStack reward = new ItemStack(item, 1);
+        if (!player.getInventory().add(reward)) {
+            player.drop(reward, false, Prediction.SERVER_ONLY);
+        }
+        return Component.literal(" The presence yields " + itemId.replace('_', ' ') + ".");
+    }
+
+    /** Whether the solve for {@code target} is enabled; an unknown name is never enabled. */
+    private static boolean solveEnabled(String target) {
+        return switch (target) {
+            case "cthulhu" -> ModConfig.ENABLE_RITE_SOOTHE_CTHULHU.get();
+            case "dunwich_horror" -> ModConfig.ENABLE_RITE_CLEANSE_DUNWICH.get();
+            case "shub_niggurath" -> ModConfig.ENABLE_RITE_STILL_SHUB_NIGGURATH.get();
+            default -> false;
+        };
+    }
+
+    /** Maps a solve target name to its {@link AncientOne.Solve} state. */
+    private static AncientOne.Solve solveFor(String target) {
+        return switch (target) {
+            case "cthulhu" -> AncientOne.Solve.SOOTHED;
+            case "dunwich_horror" -> AncientOne.Solve.BANISHED;
+            case "shub_niggurath" -> AncientOne.Solve.STILLED;
+            default -> AncientOne.Solve.NONE;
+        };
+    }
+
+    /** Per-target success text. */
+    private static Component solveMessage(String target) {
+        return switch (target) {
+            case "cthulhu" -> Component.literal("The dream stills: the presence sleeps, and is not killed.");
+            case "dunwich_horror" -> Component.literal(
+                    "The horror is drawn off downhill, away from the settlement; the ground remembers less.");
+            case "shub_niggurath" -> Component.literal(
+                    "The woods hold their breath; the presence is stilled for a time.");
+            default -> Component.literal("The presence is answered.");
         };
     }
 

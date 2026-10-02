@@ -30,11 +30,14 @@ public final class TomeRiteKnowledge {
     /** Tome item path → the rite ids it grants. A tome may grant two (e.g. {@code cult_litanies}). */
     private static final Map<String, List<String>> GRANTS = Map.ofEntries(
             Map.entry("tome_of_the_eye", List.of("ward_of_the_eye")),
-            Map.entry("tome_of_tides", List.of("drowned_blessing")),
+            // Also teaches the Leviathan/Cthulhu sooth: the drowned-temple presence is answered, not fought.
+            Map.entry("tome_of_tides", List.of("drowned_blessing", "soothe_cthulhu")),
             Map.entry("hollow_text", List.of("call_the_lesser")),
-            Map.entry("star_codex", List.of("summon_star_spawn")),
+            // Also teaches the Shub-Niggurath stilling: the biome presence is quieted, not killed.
+            Map.entry("star_codex", List.of("summon_star_spawn", "still_shub_niggurath")),
             Map.entry("codex_of_wards", List.of("close_rift")),
-            Map.entry("bone_ledger", List.of("rite_of_cleansing")),
+            // Also teaches the Dunwich Horror's drawing-away; a cleansing text answers both blights.
+            Map.entry("bone_ledger", List.of("rite_of_cleansing", "draw_away_dunwich")),
             Map.entry("atlas_of_the_veil", List.of("open_rift")),
             Map.entry("watchers_diary", List.of("respec")),
             Map.entry("cult_litanies", List.of("call_the_lesser", "open_rift")),

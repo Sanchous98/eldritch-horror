@@ -606,6 +606,42 @@ public final class ModConfig {
             BUILDER.comment("Sanity change per second while standing still near Shub-Niggurath.")
                     .defineInRange("sanityShubNiggurathStillRate", -0.12, -10.0, 0.0);
 
+    // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
+    // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,
+    // which finds the nearest compatible AncientOne within riteSolveRadius and asks it to solve.
+    // Each solve has its own availability toggle; disabling one makes its rite refuse, never
+    // silently no-op (the rite's cost is still paid, per design/08).
+
+    /** Cthulhu: {@code soothe_cthulhu} puts the drowned-temple presence to sleep instead of killing it. */
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_SOOTHE_CTHULHU =
+            BUILDER.comment("Allow soothe_cthulhu to put Cthulhu to sleep (a non-combat solve).")
+                    .define("enableRiteSootheCthulhu", true);
+
+    /** Dunwich Horror: {@code draw_away_dunwich} lures it off the settlement and clears local taint. */
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_CLEANSE_DUNWICH =
+            BUILDER.comment("Allow draw_away_dunwich to banish the Dunwich Horror and cleanse local taint.")
+                    .define("enableRiteCleanseDunwich", true);
+
+    /** Shub-Niggurath: {@code still_shub_niggurath} stills the woods' aura for a bounded duration. */
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_STILL_SHUB_NIGGURATH =
+            BUILDER.comment("Allow still_shub_niggurath to suppress Shub-Niggurath's aura for a while.")
+                    .define("enableRiteStillShubNiggurath", true);
+
+    /** Radius (blocks) within which a solve rite may find its Ancient One; loaded chunks only. */
+    public static final ModConfigSpec.IntValue RITE_SOLVE_RADIUS =
+            BUILDER.comment("Radius (blocks) a solve rite searches for its Ancient One.")
+                    .defineInRange("riteSolveRadius", 8, 2, 32);
+
+    /** How long {@code still_shub_niggurath} stills the biome presence (ticks). */
+    public static final ModConfigSpec.IntValue RITE_STILL_SHUB_NIGGURATH_TICKS =
+            BUILDER.comment("Ticks Shub-Niggurath's aura stays stilled after still_shub_niggurath.")
+                    .defineInRange("riteStillShubNiggurathTicks", 6000, 200, 72000);
+
+    /** How far (blocks) {@code draw_away_dunwich} draws the Horror from the settlement. */
+    public static final ModConfigSpec.IntValue DUNWICH_RETREAT_DISTANCE =
+            BUILDER.comment("Distance (blocks) draw_away_dunwich draws the Dunwich Horror away.")
+                    .defineInRange("dunwichRetreatDistance", 64, 8, 192);
+
     // --- Bestiary: blight_pod (creeper-role corruption vector) --------------------------------
 
     /** The blight pod's spore aura: standing near one taints you slowly. */

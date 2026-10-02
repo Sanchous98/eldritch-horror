@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * The rite registry: the eight seed rites from {@code design/08-rituals.md}, seeded in table order.
+ * The rite registry: the eight seed rites from {@code design/08-rituals.md}, seeded in table order,
+ * plus the three Ancient One non-combat solve rites from {@code design/28-ancient-ones.md}.
  *
  * <p>A Java registry for now; a datapack loader can populate {@link #register} later without
  * changing callers (mirrors {@code cult/Cults.java}). Definitions are immutable data and this class
@@ -37,6 +38,17 @@ public final class Rites {
                 3, -15, 5, RiteDefinition.Outcome.CORRUPTION, ""));
         register(new RiteDefinition("respec", RiteDefinition.nameOf("respec"),
                 3, -20, 0, RiteDefinition.Outcome.GRANT_SKILL, "respec"));
+
+        // Ancient One non-combat solves (design/28-ancient-ones.md). One shared SOOTHE outcome,
+        // parameterised by the entity to find in the `grant` field (mirroring how grant/grantSkill
+        // already carry their own key). Reagent/gate: the same rite-knowledge gate used by every
+        // rite (a tome), so no new currency is invented.
+        register(new RiteDefinition("soothe_cthulhu", RiteDefinition.nameOf("soothe_cthulhu"),
+                2, -10, 0, RiteDefinition.Outcome.SOOTHE, "cthulhu"));
+        register(new RiteDefinition("draw_away_dunwich", RiteDefinition.nameOf("draw_away_dunwich"),
+                2, -10, -5, RiteDefinition.Outcome.SOOTHE, "dunwich_horror"));
+        register(new RiteDefinition("still_shub_niggurath", RiteDefinition.nameOf("still_shub_niggurath"),
+                3, -15, -8, RiteDefinition.Outcome.SOOTHE, "shub_niggurath"));
     }
 
     private Rites() {

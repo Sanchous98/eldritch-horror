@@ -64,6 +64,14 @@ public final class DunwichHorror extends AncientOne {
         }
     }
 
+    /** Drawn away: the roar recedes downhill instead of on top of the settlement. */
+    @Override
+    protected void onSolved(Solve kind) {
+        if (kind == Solve.BANISHED) {
+            this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 0.4F);
+        }
+    }
+
     // --- Corruption vector + presence -----------------------------------------------------------
 
     @Override
@@ -73,7 +81,8 @@ public final class DunwichHorror extends AncientOne {
 
     @Override
     public boolean isAuraActive() {
-        return ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_DUNWICH_HORROR.get();
+        // A banished Horror has been drawn off the settlement: it no longer taints there.
+        return !isSolved() && ModConfig.ENABLE_CORRUPTION.get() && ModConfig.ENABLE_CORRUPTION_DUNWICH_HORROR.get();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -61,10 +62,32 @@ public abstract class AncientOne extends Monster implements DreadAura {
         ENRAGED
     }
 
+    /**
+     * The non-combat solve state (design/28): a presence can be answered without a kill. This is
+     * deliberately small and server-authoritative; the solve rites in {@code rite/RiteEngine} set it
+     * through {@link #solve}.
+     */
+    public enum Solve {
+        /** No solve applied. */
+        NONE,
+        /** {@code soothe_cthulhu}: asleep — awake but no longer hunting or draining. */
+        SOOTHED,
+        /** {@code draw_away_dunwich}: drawn off and retreating from the settlement. */
+        BANISHED,
+        /** {@code still_shub_niggurath}: aura suppressed until {@link #solveUntil()}. */
+        STILLED
+    }
+
     private static final String TAG_PHASE = "AncientOnePhase";
+    private static final String TAG_SOLVE = "AncientOneSolve";
+    private static final String TAG_SOLVE_UNTIL = "AncientOneSolveUntil";
 
     private final ServerBossEvent bossEvent;
     private Phase phase = Phase.DORMANT;
+    /** How this presence has been solved without a kill; see {@link #solve}. */
+    private Solve solve = Solve.NONE;
+    /** Game tick at which {@link Solve#STILLED} lapses; {@code 0} for the other solves. */
+    private long solveUntil;
 
     protected AncientOne(EntityType<? extends AncientOne> type, Level level,
                          BossEvent.BossBarColor color, Component title) {
@@ -109,6 +132,16 @@ public abstract class AncientOne extends Monster implements DreadAura {
         super.customServerAiStep(level);
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+        // Solve maintenance must run even while NoAI is set (which skips customServerAiStep), so it
+        // lives here, server-side. A solved presence keeps its state until it lapses or is reloaded.
+        if (!this.level().isClientSide()) {
+            this.tickSolve((ServerLevel) this.level());
+        }
+    }
+
     /**
      * Phase for the current health fraction. Subclasses override to read the world (sanity, taint)
      * or to collapse to fewer bands. Default is the shared two-threshold ladder.
@@ -139,6 +172,113 @@ public abstract class AncientOne extends Monster implements DreadAura {
     /** Current band. */
     public final Phase phase() {
         return this.phase;
+    }
+
+    // --- Non-combat solve (design/28: "always a non-combat solve") ------------------------------
+
+    /**
+     * Solves this presence without a kill. Called by {@code rite/RiteEngine} on the nearest
+     * compatible Ancient One within the rite's small radius (loaded-only). Idempotent per kind:
+     * the terminal solves ({@code SOOTHED}/{@code BANISHED}) reject an already-solved presence, and
+     * {@link Solve#STILLED} may be refreshed but only reports a <b>new</b> solve (so a rite cannot
+     * be farmed for its reward while the quiet holds).
+     *
+     * @param kind   the solve to apply
+     * @param ticks  duration for {@link Solve#STILLED} (ignored by the others)
+     * @return whether a <b>new</b> solve was applied
+     */
+    public final boolean solve(Solve kind, int ticks) {
+        if (!this.isAlive() || kind == Solve.NONE) {
+            return false;
+        }
+        if (kind == Solve.STILLED) {
+            // Refresh allowed: standing the woods down again simply extends the quiet. The reward
+            // path only fires for a NEW stilling, so the rite cannot be farmed while it holds.
+            boolean fresh = !this.isSolved();
+            this.solve = Solve.STILLED;
+            this.solveUntil = this.level().getGameTime() + ticks;
+            this.onSolved(kind);
+            return fresh;
+        }
+        if (this.solve != Solve.NONE) {
+            return false;
+        }
+        this.solve = kind;
+        this.solveUntil = 0L;
+        this.onSolved(kind);
+        return true;
+    }
+
+    /** Current solve state. */
+    public final Solve solve() {
+        return this.solve;
+    }
+
+    /** Tick at which {@link Solve#STILLED} lapses ({@code 0} otherwise). */
+    public final long solveUntil() {
+        return this.solveUntil;
+    }
+
+    /** Whether the presence is currently quieted by a solve (and {@code STILLED} has not lapsed). */
+    public final boolean isSolved() {
+        if (this.solve == Solve.STILLED) {
+            return this.level().getGameTime() < this.solveUntil;
+        }
+        return this.solve != Solve.NONE;
+    }
+
+    /** The one place a subclass adds solve-specific world work; default is inert. */
+    protected void onSolved(Solve kind) {
+    }
+
+    /**
+     * Applies the solve each server tick: a solved presence drops its target, never acquires a new
+     * one, and does not move under its own AI. A {@link Solve#BANISHED} presence is additionally
+     * drawn a short, bounded step away from the performer's settlement each second (the "draw it
+     * away" fantasy) until it is far enough, then left be. Everything here is server-side.
+     */
+    private void tickSolve(ServerLevel level) {
+        if (this.solve == Solve.STILLED && level.getGameTime() >= this.solveUntil) {
+            this.solve = Solve.NONE;
+            this.setNoAi(false); // the woods breathe again
+        }
+        if (this.solve == Solve.NONE) {
+            return;
+        }
+        if (this.getTarget() != null) {
+            this.setTarget(null);
+        }
+        this.setNoAi(true);
+        if (this.solve == Solve.BANISHED && level.getGameTime() % 20L == 0L) {
+            this.retreat(level);
+        }
+    }
+
+    /**
+     * One deterministic, bounded retreat step for a banished presence: horizontal-only, away from
+     * the nearest player (the settlement being eaten), and it stops once no player is within twice
+     * the configured draw distance (it has been drawn off) or the next step would leave a loaded
+     * chunk. Chunks are never force-loaded.
+     */
+    private void retreat(ServerLevel level) {
+        double draw = ModConfig.DUNWICH_RETREAT_DISTANCE.get();
+        Player nearest = level.getNearestPlayer(this, draw * 2.0);
+        if (nearest == null) {
+            return; // already drawn far enough; leave it be
+        }
+        double dx = this.getX() - nearest.getX();
+        double dz = this.getZ() - nearest.getZ();
+        Direction away = Math.abs(dx) >= Math.abs(dz)
+                ? (dx >= 0 ? Direction.EAST : Direction.WEST)
+                : (dz >= 0 ? Direction.SOUTH : Direction.NORTH);
+        double step = draw / 16.0;
+        double nx = this.getX() + away.getStepX() * step;
+        double nz = this.getZ() + away.getStepZ() * step;
+        if (!level.hasChunkAt(Mth.floor(nx), Mth.floor(nz))) {
+            return; // never load/generate a chunk just to retreat
+        }
+        this.getNavigation().stop();
+        this.teleportTo(nx, this.getY(), nz);
     }
 
     // --- Presence / persistence -----------------------------------------------------------------
@@ -179,6 +319,8 @@ public abstract class AncientOne extends Monster implements DreadAura {
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putString(TAG_PHASE, this.phase.name());
+        output.putString(TAG_SOLVE, this.solve.name());
+        output.putLong(TAG_SOLVE_UNTIL, this.solveUntil);
     }
 
     @Override
@@ -186,6 +328,8 @@ public abstract class AncientOne extends Monster implements DreadAura {
         super.readAdditionalSaveData(input);
         String stored = input.getStringOr(TAG_PHASE, Phase.DORMANT.name());
         this.phase = parsePhase(stored);
+        this.solve = parseSolve(input.getStringOr(TAG_SOLVE, Solve.NONE.name()));
+        this.solveUntil = input.getLongOr(TAG_SOLVE_UNTIL, 0L);
     }
 
     private static Phase parsePhase(String name) {
@@ -195,6 +339,15 @@ public abstract class AncientOne extends Monster implements DreadAura {
             }
         }
         return Phase.DORMANT;
+    }
+
+    private static Solve parseSolve(String name) {
+        for (Solve value : Solve.values()) {
+            if (value.name().equals(name)) {
+                return value;
+            }
+        }
+        return Solve.NONE;
     }
 
     // --- Shared melee goals ---------------------------------------------------------------------

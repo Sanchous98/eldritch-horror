@@ -56,7 +56,14 @@ public record RiteDefinition(
         /** {@code sanity} — a sanity-only resolution. */
         SANITY,
         /** {@code corruption} — a corruption-only resolution (e.g. cleansing). */
-        CORRUPTION
+        CORRUPTION,
+        /**
+         * A non-combat solve of an Ancient One present in the world (design/28: "always a non-combat
+         * solve"). The rite's {@code grant} names the entity family to find (e.g. {@code cthulhu});
+         * {@link RiteEngine} resolves the nearest one within {@code riteSolveRadius} and asks it to
+         * solve. Added additively — no existing outcome changes.
+         */
+        SOOTHE
     }
 
     /** Builds the translatable name for a rite id. */

@@ -99,10 +99,19 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   few natural surface blocks to `tainted_soil`/`corrupt_stone` (deterministic, open-sky only, never
   builds), with `/eh taint purify` as the debug stop.
 - **Bestiary** (`entity/`, `design/25`, `design/28`): vanilla bosses are replaced by **Ancient
-  Ones** (Cthulhu, the Dunwich Horror, Shub-Niggurath first) and every vanilla mob is replaced by a
-  monster — vanilla mobs are suppressed except villagers. Implemented: the framework + `risen_husk`,
-  `tainted_fauna`, `lesser_swarm`, `watcher`, sharing a dread-aura trait, a follow goal and a bounded
-  spawner. Cities are populated with crowds of villagers.
+  Ones** and every vanilla mob by one of ours — vanilla mobs are suppressed except villagers.
+  The **full `design/25` roster is implemented**: Ancient Ones (framework + `cthulhu`,
+  `dunwich_horror`, `shub_niggurath`), hostile lesser (`risen_husk`, `bone_choir`, `drowned_thrall`,
+  `veil_stalker`, `weaver_spawn`, `rift_mite`, `shambler_ooze`, `choir_spite`, `night_hag`,
+  `blight_pod`, `byakhee`), minions (`lesser_swarm`, `watcher`, `star_spawn`, `shoggoth_mass`),
+  cultists (`worshipper` + `cult_zealot`/`cult_raider`/`rite_binder`/`plague_crone`), mundane
+  (`deer`, `wool_hare`, `mire_sow`, `ash_fowl`, `burrowling`, `pack_beast`, `grey_fox`, `hill_hound`,
+  `hearth_cat`, `wool_beast`, `bog_bear`, `tide_grazer`, `spore_bee`, `stone_sentinel`) and ambient
+  (`cave_drifter`, `pale_drifter`, `lantern_jelly`, `marsh_mote`, `drowned_minnow`, `frost_wisp`).
+  Shared: a dread-aura trait + one ticker, one `topUp`/`topUpAir` spawner, a goals library
+  (stalk/pack-alert/retreat/ambush), a mundane taint-conversion helper, and a reusable
+  mundane-weapon ward (`EldritchWarded`). **Site populations** inhabit the 5 sites via one bounded
+  pass. Cities are populated with crowds of villagers.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
