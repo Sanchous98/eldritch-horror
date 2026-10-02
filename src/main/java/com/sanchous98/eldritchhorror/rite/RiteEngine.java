@@ -315,7 +315,7 @@ public final class RiteEngine {
 
     /** {@code ward_of_the_eye}: a tier-scaled resistance + regeneration ward. */
     private static Result grant(ServerPlayer player, RiteDefinition rite) {
-        int ticks = WARD_TICKS_PER_TIER * Mth.clamp(rite.tier(), 1, 3);
+        int ticks = WARD_TICKS_PER_TIER * Math.clamp(rite.tier(), 1, 3);
         player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, ticks, 0, true, false, false));
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, ticks, 0, true, false, false));
         return new Result(true, Component.literal("A ward settles over you ("
@@ -347,7 +347,7 @@ public final class RiteEngine {
         int cap = star ? STAR_CAP : LESSER_CAP;
 
         int existing = level.getEntitiesOfClass(Mob.class, capBox(player), mob -> mob.getType() == type).size();
-        int allowed = Mth.clamp(cap - existing, 0, requested);
+        int allowed = Math.clamp(cap - existing, 0, requested);
         if (allowed == 0) {
             return new Result(false, Component.literal("Too many summoned things already stir here."));
         }

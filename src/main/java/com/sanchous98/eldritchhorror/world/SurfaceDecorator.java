@@ -3,7 +3,6 @@ package com.sanchous98.eldritchhorror.world;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -51,7 +50,7 @@ public final class SurfaceDecorator {
                 if (inCity(map, x, z)) {
                     continue;
                 }
-                int surfaceY = Mth.clamp(ElevationCurve.toY(map.elevationMetres(x, z)), minY + 1, maxY - 1);
+                int surfaceY = Math.clamp(ElevationCurve.toY(map.elevationMetres(x, z)), minY + 1, maxY - 1);
                 if (surfaceY <= ElevationCurve.SEA_LEVEL) {
                     continue; // underwater / sea ice: leave it
                 }
@@ -151,7 +150,7 @@ public final class SurfaceDecorator {
             // margin — not the larger cull radius. This keeps greenery out from under the
             // buildings while leaving a thin natural rim that softens the district edge.
             // clamp(radius, 220, DISTRICT_CAP), exactly as CityLocation computes its district.
-            int district = Mth.clamp(
+            int district = Math.clamp(
                     (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0),
                     220, CITY_DISTRICT_CAP);
             int r = district + CITY_MARGIN;

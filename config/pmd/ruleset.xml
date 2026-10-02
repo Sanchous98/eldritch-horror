@@ -27,4 +27,12 @@
     <rule ref="category/java/codestyle.xml/ExtendsObject"/>
     <rule ref="category/java/errorprone.xml/UnconditionalIfStatement"/>
     <rule ref="category/java/errorprone.xml/EmptyCatchBlock"/>
+
+    <!-- Considered and rejected (kept out deliberately):
+         - CloseResource: flags ServerLevel / ServerChunkCache / MinecraftServer (they implement
+           AutoCloseable but are engine-owned and must NOT be closed) and even EarthMap.read,
+           whose InputStream is already closed by try-with-resources. 76 false positives.
+         - GuardLogStatement: fires on every parameterised '{}' log call (~15 sites), which is the
+           idiomatic, recommended form. Guarding info/warn adds noise, not safety.
+         Revisit only with a curated ignore-list / resource-type restriction. -->
 </ruleset>

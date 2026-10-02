@@ -5,7 +5,6 @@ import com.sanchous98.eldritchhorror.world.EarthMaps;
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
@@ -132,22 +131,22 @@ public final class Builder implements StructureBuilder {
             int y = ay + 1;
             switch (d.side()) {
                 case N -> { // wall at z = az
-                    int x = ax + Mth.clamp(d.offset(), 1, Math.max(1, bx - ax - 1));
+                    int x = ax + Math.clamp(d.offset(), 1, Math.max(1, bx - ax - 1));
                     put(x, y, az, air);
                     put(x, y + 1, az, air);
                 }
                 case S -> { // wall at z = bz
-                    int x = ax + Mth.clamp(d.offset(), 1, Math.max(1, bx - ax - 1));
+                    int x = ax + Math.clamp(d.offset(), 1, Math.max(1, bx - ax - 1));
                     put(x, y, bz, air);
                     put(x, y + 1, bz, air);
                 }
                 case W -> { // wall at x = ax
-                    int z = az + Mth.clamp(d.offset(), 1, Math.max(1, bz - az - 1));
+                    int z = az + Math.clamp(d.offset(), 1, Math.max(1, bz - az - 1));
                     put(ax, y, z, air);
                     put(ax, y + 1, z, air);
                 }
                 case E -> { // wall at x = bx
-                    int z = az + Mth.clamp(d.offset(), 1, Math.max(1, bz - az - 1));
+                    int z = az + Math.clamp(d.offset(), 1, Math.max(1, bz - az - 1));
                     put(bx, y, z, air);
                     put(bx, y + 1, z, air);
                 }
@@ -460,7 +459,7 @@ public final class Builder implements StructureBuilder {
     @Override
     public int groundY(int x, int z) {
         EarthMap map = EarthMaps.get();
-        return Mth.clamp(ElevationCurve.toY(map.elevationMetres(x, z)), this.minY + 1, this.maxY - 1);
+        return Math.clamp(ElevationCurve.toY(map.elevationMetres(x, z)), this.minY + 1, this.maxY - 1);
     }
 
     @Override

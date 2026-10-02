@@ -1,6 +1,5 @@
 package com.sanchous98.eldritchhorror.world.city;
 
-import net.minecraft.util.Mth;
 
 /**
  * A curated city: real name, world coordinates and real population (from
@@ -15,6 +14,6 @@ public record City(String id, String name, int x, int z, int population) {
     /** Footprint radius in blocks, from real population (Tokyo ~40, Nairobi ~12). */
     public int radius() {
         int r = (int) Math.round(Math.sqrt(Math.max(population, 1)) / 150.0);
-        return Mth.clamp(r, 10, 44);
+        return Math.clamp(r, 10, 44);
     }
 }

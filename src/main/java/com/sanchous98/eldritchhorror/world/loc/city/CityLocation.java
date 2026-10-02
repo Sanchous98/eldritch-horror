@@ -4,7 +4,6 @@ import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
-import net.minecraft.util.Mth;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import com.sanchous98.eldritchhorror.world.loc.Tier;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
@@ -87,7 +86,7 @@ public final class CityLocation implements Location {
     public int radius() {
         double r = 220.0 + Math.sqrt(Math.max(this.city.population(), 1)) / 40.0;
         int rounded = (int) Math.round(r);
-        return Mth.clamp(rounded, 220, 400);
+        return Math.clamp(rounded, 220, 400);
     }
 
     /** The built district half-extent (blocks), not the larger cull radius. */
@@ -136,9 +135,9 @@ public final class CityLocation implements Location {
         // terrace field, so the plaza edge meets the first terrace without a floating lip. Shared
         // by paveDistrict and the building gate below so the two always agree.
         int flat = district - edgeRing;
-        int flatHeart = Math.min(FLAT_HEART, Mth.clamp(flat - HEART_RAMP - TILE, 0, Integer.MAX_VALUE));
+        int flatHeart = Math.min(FLAT_HEART, Math.clamp(flat - HEART_RAMP - TILE, 0, Integer.MAX_VALUE));
         // Street furniture is kept on the flat heart, so no prop can hover on a terrace step.
-        int propRadius = Mth.clamp(flatHeart - 6, 0, buildRadius);
+        int propRadius = Math.clamp(flatHeart - 6, 0, buildRadius);
 
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
@@ -335,7 +334,7 @@ public final class CityLocation implements Location {
         int flat2 = flat * flat;
         // The intentional flat heart (plaza + landmark) plus a ramp of HEART_RAMP blocks that
         // steps the heart down/up into the terrace field, so the plaza never ends in a lip.
-        int flatHeart = Math.min(FLAT_HEART, Mth.clamp(flat - HEART_RAMP - TILE, 0, Integer.MAX_VALUE));
+        int flatHeart = Math.min(FLAT_HEART, Math.clamp(flat - HEART_RAMP - TILE, 0, Integer.MAX_VALUE));
         int rampOuter = flatHeart + HEART_RAMP;
         int heart2 = flatHeart * flatHeart;
         int ramp2 = rampOuter * rampOuter;

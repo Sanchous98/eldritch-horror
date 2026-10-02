@@ -82,6 +82,19 @@ integration build green.
   `build/reports/pmd/main.html`. Keep it at **0 violations** — it catches dead private members,
   unused imports, always-true conditions, unnecessary returns/casts/parentheses and empty
   statements. Mixins are excluded (their `eldritchhorror$…` methods are framework-invoked).
+- **Smoke-test the server before claiming done.** `build` + PMD cannot see load-time failures:
+  they have twice passed green while the server refused to start (a `DeferredHolder.get()` in a
+  `static` initialiser → *unbound value*; a `ModConfig` read while the command tree was built →
+  *Cannot get config value before config is loaded*; a loot condition with the wrong inner key →
+  *No key type*). Run a short, bounded start and check for `Done (` (full startup) with no
+  `Failed to load datapacks` / `ExceptionInInitializer` / `Unbound value`:
+  ```
+  docker compose run --rm --no-deps dev bash -c \
+    'cd /workspace && timeout 200 ./gradlew runServer --no-daemon --console=plain'
+  ```
+  Rules of thumb this caught: never call `.get()` on a registry holder from a `static`
+  initialiser; never read SERVER `ModConfig` while building the command tree/registries (gate in
+  the handler instead); loot condition discriminators are `"type"`, not `"condition"`.
 - The first build decompiles Minecraft (~5 min, ~4 GB); later builds are quick.
 
 ## Where things live

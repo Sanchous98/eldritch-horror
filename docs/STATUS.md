@@ -100,8 +100,8 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   builds), with `/eh taint purify` as the debug stop.
 - **Bestiary** (`entity/`, `design/25`, `design/28`): vanilla bosses are replaced by **Ancient
   Ones** and every vanilla mob by one of ours — vanilla mobs are suppressed except villagers.
-  The **full `design/25` roster is implemented**: Ancient Ones (framework + `cthulhu`,
-  `dunwich_horror`, `shub_niggurath`), hostile lesser (`risen_husk`, `bone_choir`, `drowned_thrall`,
+  The **full `design/25` roster is implemented**: Ancient Ones (framework + 14 bosses, below),
+  hostile lesser (`risen_husk`, `bone_choir`, `drowned_thrall`,
   `veil_stalker`, `weaver_spawn`, `rift_mite`, `shambler_ooze`, `choir_spite`, `night_hag`,
   `blight_pod`, `byakhee`), minions (`lesser_swarm`, `watcher`, `star_spawn`, `shoggoth_mass`),
   cultists (`worshipper` + `cult_zealot`/`cult_raider`/`rite_binder`/`plague_crone`), mundane
@@ -154,14 +154,32 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 - Palette for a city's style was bypassed in `Locations.place` (grey cities) — fixed.
 - World border crashed startup (`ServerAboutToStart` → `ServerStarted`).
 - Renderer used the legacy city radius (captured only the centre) — fixed.
+- **Startup bugs found by a real server run** (invisible to `build`+PMD): `ModEntities` built
+  `ANCIENT_ONES` in a `static` initialiser via `DeferredHolder.get()` (unbound value) — now lazily
+  resolved; `EldritchCommands` read SERVER `ModConfig` while the command tree was built — commands
+  are registered unconditionally and the toggles are checked in the handlers; loot conditions used
+  the inner key `"condition"` instead of `"type"` — fixed.
+- **Clamp standardised on JDK `Math.clamp`** (Java 25 has every needed overload; int calls bind to
+  `(long,int,int)` and return `int`). All 20 `Mth.clamp` call sites swapped; unused `Mth` imports
+  dropped. `EarthMap`/`ElevationCurve` keep local `clamp` helpers (Minecraft-free, unit-tested).
+- **PMD ruleset: `CloseResource` + `GuardLogStatement` considered and rejected.** `CloseResource`
+  flags engine-owned `ServerLevel`/`ServerChunkCache`/`MinecraftServer` (must not be closed) and
+  closes already handled by try-with-resources → 76 false positives. `GuardLogStatement` fires on
+  every parameterised `{}` log call (~15). Both documented as deliberate exclusions in the ruleset;
+  still 0 violations.
 
 ## Known limitations / deferred
 
 - Cities have **no services/state** yet (deferred until those features exist).
-- **No combat, mobs, bosses or rituals yet — design only.** Sanity and corruption have real
-  tickers, states, effects, config and item interaction; cults are definitions + synced reputation
-  + ranks. Morok is implemented on both axes (mob effects + a sanity source). Items only yet act on
-  the meters; rites, spawning and block conversion are deferred.
+- **Implemented and playable:** bestiary (Ancient Ones + lesser/mundane/ambient), cults (definitions
+  + synced reputation + ranks), rites (`RiteEngine` resolves wards/summons/rifts/cleansing), taint
+  world-conversion, world events, codex and the recipe economy. Sanity and corruption have real
+  tickers, states, effects, config and item interaction. Morok is implemented on both axes (mob
+  effects + a sanity source).
+- **Still deferred:** 6 Ancient Ones (Hastur, Nephren-Ka, Abhoth, Chaugnar Faugn, Tulzscha,
+  Zstylzhemghi) need new minor sites; 4 bespoke events (`cult_procession`, `blood_moon_rite`,
+  `star_fall`, `hollow_call`); rite **reagent-cost consumption** (needs a change to the frozen
+  `RiteDefinition`); a client map/codex screen; city services.
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,

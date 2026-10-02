@@ -11,7 +11,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -122,7 +121,7 @@ public final class ShamblerOoze extends Monster implements DreadAura {
     }
 
     public void setOozeSize(int size) {
-        this.entityData.set(DATA_SIZE_ID, (byte) Mth.clamp(size, 0, 3));
+        this.entityData.set(DATA_SIZE_ID, (byte) Math.clamp(size, 0, 3));
     }
 
     @Override

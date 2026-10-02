@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
@@ -92,7 +91,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
                 int worldX = chunkPos.getMinBlockX() + lx;
                 int worldZ = chunkPos.getMinBlockZ() + lz;
                 EarthMap map = EarthMaps.get();
-                int surfaceY = Mth.clamp(ElevationCurve.toY(map.elevationMetres(worldX, worldZ)), minY + 1, maxY - 1);
+                int surfaceY = Math.clamp(ElevationCurve.toY(map.elevationMetres(worldX, worldZ)), minY + 1, maxY - 1);
                 boolean ocean = surfaceY < ElevationCurve.SEA_LEVEL;
 
                 for (int y = minY; y <= Math.max(surfaceY, ElevationCurve.SEA_LEVEL); y++) {
@@ -135,14 +134,14 @@ public class EarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor heightAccessor, RandomState randomState) {
-        return Mth.clamp(ElevationCurve.toY(EarthMaps.get().elevationMetres(x, z)),
+        return Math.clamp(ElevationCurve.toY(EarthMaps.get().elevationMetres(x, z)),
                 heightAccessor.getMinY(), heightAccessor.getMaxY());
     }
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor heightAccessor, RandomState randomState) {
         int minY = heightAccessor.getMinY();
-        int surfaceY = Mth.clamp(ElevationCurve.toY(EarthMaps.get().elevationMetres(x, z)), minY + 1, heightAccessor.getMaxY() - 1);
+        int surfaceY = Math.clamp(ElevationCurve.toY(EarthMaps.get().elevationMetres(x, z)), minY + 1, heightAccessor.getMaxY() - 1);
         BlockState[] states = new BlockState[heightAccessor.getHeight()];
         for (int i = 0; i < states.length; i++) {
             int y = minY + i;
