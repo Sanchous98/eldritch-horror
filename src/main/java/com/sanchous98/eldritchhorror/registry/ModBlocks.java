@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.blocks.CorruptedBlocks;
+import com.sanchous98.eldritchhorror.registry.blocks.PrologueBlocks;
 import com.sanchous98.eldritchhorror.registry.blocks.RitualBlocks;
 import com.sanchous98.eldritchhorror.registry.blocks.RiftBlocks;
 import net.minecraft.world.level.block.Block;
@@ -48,6 +49,7 @@ public final class ModBlocks {
         RitualBlocks.init();
         RiftBlocks.init();
         CorruptedBlocks.init();
+        PrologueBlocks.init();
     }
 
     private ModBlocks() {

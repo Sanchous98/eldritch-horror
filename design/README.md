@@ -47,6 +47,7 @@ is the complete specification.
 28. [28-ancient-ones.md](28-ancient-ones.md) — the Ancient One bosses that replace vanilla bosses.
 29. [26-rituals-and-occult.md](26-rituals-and-occult.md) — the occult systems (consolidates 05/08).
 30. [27-systems-framework.md](27-systems-framework.md) — the technical shape of sanity/corruption/cult.
+31. [29-prologue.md](29-prologue.md) — the one-time Threshold prologue (class choice + city gate).
 
 ## The one-paragraph summary
 

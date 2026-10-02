@@ -37,7 +37,9 @@ def ids_for(path):
 def registry():
     out = {}
     for fn in sorted(os.listdir(SRC)):
-        if fn.endswith(".java"):
+        # PrologueBlocks is bespoke: the city_gate has 24 city= property variants, which this
+        # single-variant generator cannot express. Its assets are hand-written; do not touch them.
+        if fn.endswith(".java") and fn != "PrologueBlocks.java":
             out[fn[:-5]] = ids_for(os.path.join(SRC, fn))
     return out
 

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.classes.Progression;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
 import java.util.Map;
@@ -78,6 +79,10 @@ public final class SanityTicker {
         double delta = 0.0;
         for (SanitySource source : SanitySources.all()) {
             delta += source.deltaPerSecond(player, ctx);
+        }
+        // Class archetype scales drain only: recovery is never penalised.
+        if (delta < 0.0) {
+            delta *= Progression.sanityDrainMultiplier(player);
         }
         SanitySystem.add(player, delta * ModConfig.SANITY_DRAIN_MULTIPLIER.get());
 

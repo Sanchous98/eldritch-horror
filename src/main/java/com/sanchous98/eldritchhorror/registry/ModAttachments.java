@@ -124,6 +124,32 @@ public final class ModAttachments {
                             .copyOnDeath()
                             .build());
 
+    /**
+     * Per-player chosen class id ({@code ""} = none chosen), synced to the owner and copied on
+     * death so the prologue choice survives a respawn. Written only through
+     * {@link com.sanchous98.eldritchhorror.classes.ClassAPI}. See {@code design/29-prologue.md}.
+     */
+    public static final Supplier<AttachmentType<String>> PLAYER_CLASS =
+            ATTACHMENT_TYPES.register("player_class",
+                    () -> AttachmentType.<String>builder(() -> "")
+                            .serialize(com.mojang.serialization.Codec.STRING.fieldOf("id"))
+                            .sync((holder, to) -> holder == to, ByteBufCodecs.STRING_UTF8)
+                            .copyOnDeath()
+                            .build());
+
+    /**
+     * Whether the one-time Threshold prologue has been completed, synced to the owner and copied on
+     * death. Set only by {@link com.sanchous98.eldritchhorror.classes.Prologue#complete}. See
+     * {@code design/29-prologue.md}.
+     */
+    public static final Supplier<AttachmentType<Boolean>> PROLOGUE_DONE =
+            ATTACHMENT_TYPES.register("prologue_done",
+                    () -> AttachmentType.<Boolean>builder(() -> false)
+                            .serialize(com.mojang.serialization.Codec.BOOL.fieldOf("done"))
+                            .sync((holder, to) -> holder == to, ByteBufCodecs.BOOL)
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }

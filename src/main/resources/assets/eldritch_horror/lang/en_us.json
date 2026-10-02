@@ -536,5 +536,19 @@
   "subtitles.entity.eldritch_horror.drowned_minnow.ambient": "The last small life in dead water",
   "entity.eldritch_horror.frost_wisp": "Frost Wisp",
   "item.eldritch_horror.frost_wisp_spawn_egg": "Frost Wisp Spawn Egg",
-  "subtitles.entity.eldritch_horror.frost_wisp.ambient": "Cold motes whisper at the world's edge"
+  "subtitles.entity.eldritch_horror.frost_wisp.ambient": "Cold motes whisper at the world's edge",
+
+  "block.eldritch_horror.investigator_pedestal": "Pedestal of the Investigator",
+  "block.eldritch_horror.occultist_pedestal": "Pedestal of the Occultist",
+  "block.eldritch_horror.cultist_pedestal": "Pedestal of the Cultist",
+  "block.eldritch_horror.city_gate": "Waystation Gate",
+
+  "class.eldritch_horror.investigator": "Investigator",
+  "class.eldritch_horror.occultist": "Occultist",
+  "class.eldritch_horror.cultist": "Cultist",
+  "class.eldritch_horror.chosen": "You are now an %s.",
+  "class.eldritch_horror.locked": "Your path is already chosen: %s. Ask an operator to reset it.",
+  "prologue.eldritch_horror.choose_class": "Choose who you are before you choose where you begin.",
+  "prologue.eldritch_horror.gate": "The way to %s opens.",
+  "prologue.eldritch_horror.no_city": "That gate leads nowhere yet."
 }

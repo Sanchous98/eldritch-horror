@@ -7,6 +7,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.sanchous98.eldritchhorror.classes.ClassAPI;
+import com.sanchous98.eldritchhorror.classes.ClassId;
 import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import com.sanchous98.eldritchhorror.codex.CodexCategory;
 import com.sanchous98.eldritchhorror.codex.CodexEntry;
@@ -169,6 +171,11 @@ public final class EldritchCommands {
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(EldritchCommands::performRite)))
                         .then(Commands.literal("rites").executes(EldritchCommands::listRites))
+                        .then(Commands.literal("class")
+                                .then(Commands.literal("get").executes(EldritchCommands::getClass))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("id", StringArgumentType.word())
+                                                .executes(EldritchCommands::setClass))))
                         .then(Commands.literal("cult")
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(EldritchCommands::cultInfo)))
@@ -280,6 +287,49 @@ public final class EldritchCommands {
                 ? "You know no rites."
                 : "Known rites: " + String.join(" ", new java.util.TreeSet<>(known));
         ctx.getSource().sendSuccess(() -> Component.literal(message), false);
+        return 1;
+    }
+
+    /** {@code /eh class get}: prints the caller's chosen class, or "none". */
+    private static int getClass(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_CLASS_COMMANDS.get())) {
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        ClassId id = ClassAPI.get(p);
+        if (id == null) {
+            ctx.getSource().sendSuccess(() -> Component.literal("none"), false);
+        } else {
+            ctx.getSource().sendSuccess(() -> Component.literal(id.id() + " (").append(id.displayName())
+                    .append(Component.literal(")")), false);
+        }
+        return 1;
+    }
+
+    /**
+     * {@code /eh class set <id>}: gamemaster debug reset that switches the caller to {@code id} and
+     * re-grants that archetype's kit and rites, even if a different class was already chosen (the
+     * only way to change a class).
+     */
+    private static int setClass(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_CLASS_COMMANDS.get())) {
+            return 0;
+        }
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("Requires gamemaster permissions."));
+            return 0;
+        }
+        String id = StringArgumentType.getString(ctx, "id");
+        ClassId target = ClassId.byId(id);
+        if (target == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown class: " + id
+                    + " (expected investigator, occultist or cultist)"));
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        ClassAPI.forceSet(p, target);
+        ctx.getSource().sendSuccess(() -> Component.literal("class set to " + target.id()), true);
         return 1;
     }
 

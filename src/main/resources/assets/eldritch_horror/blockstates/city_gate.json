@@ -1,0 +1,76 @@
+{
+  "variants": {
+    "city=0": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=1": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=2": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=3": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=4": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=5": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=6": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=7": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=8": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=9": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=10": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=11": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=12": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=13": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=14": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=15": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=16": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=17": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=18": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=19": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=20": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=21": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=22": {
+      "model": "eldritch_horror:block/city_gate"
+    },
+    "city=23": {
+      "model": "eldritch_horror:block/city_gate"
+    }
+  }
+}

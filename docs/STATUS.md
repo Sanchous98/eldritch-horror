@@ -122,6 +122,15 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   `/eh codex`. **Recipes/economy** (design/16): 25 crafting/smelting recipes make the reagents,
   ritual blocks, tools, gear and utility items obtainable; every reagent has an in-game source.
   Remaining roster: 6 Ancient Ones needing new minor sites; 4 bespoke world events.
+- **Prologue — the Threshold** (`classes/`, `world/threshold/`, design/29): a one-time onboarding.
+  A new player is teleported to the `eldritch_horror:threshold` dimension (flat, dark, no
+  sanity/corruption/event tickers — they gate on `minecraft:overworld`), stamped deterministically
+  at `ServerStarted` (idempotent, forceload -> place -> release). Three class pedestals grant a
+  permanent archetype (`investigator`/`occultist`/`cultist`) with a starter kit, a tier-1 rite and
+  a `max_sanity` modifier; 24 waystation gates (blockstate `city=0..23`) teleport to the chosen
+  curated city's safe surface and end the prologue (one-way, no return). Class scales drain/gain
+  via `Progression` in the sanity/corruption tickers. `/eh class get|set` + `ENABLE_PROLOGUE`.
+  Contract: `docs/PROLOGUE-CONTRACT.md`.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
@@ -184,7 +193,8 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,
   so it is judged in-game rather than on the map PNGs.
-- Spawn is vanilla-chosen; a pinned coastal spawn is a tracked task.
+- Spawn is decided by the prologue (the Threshold city gate), not vanilla; a player who skips the
+  prologue falls back to the vanilla spawn search.
 - **No third-party builds are imported.** Landmarks/cities are generated procedurally from our
   own code. Community schematics (e.g. Planet Minecraft) were considered and rejected: most are
   All-Rights-Reserved (we publish to a public repo), and raw `.schematic/.litematic` do not drop
