@@ -2134,6 +2134,36 @@ public final class ModConfig {
             BUILDER.comment("cleansing_dawn: taint per second removed from the loaded local patch (negative).")
                     .defineInRange("eventCleansingTaintRate", -0.01, -1.0, 0.0);
 
+    // --- Codex / world knowledge (design/22-map-and-knowledge.md) ---------------------------
+    // The server-authoritative discovery layer. Knowledge is the progression: proximity reveals
+    // sites/cities, seeing or killing a mob reveals its bestiary entry, seeing an Ancient One
+    // reveals its boss entry, and a world event starting nearby reveals it.
+
+    /** Master switch for the codex discovery ticker and the kill hook. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CODEX =
+            BUILDER.comment("Enable server-authoritative codex discovery.")
+                    .define("enableCodex", true);
+
+    /** Whether the manual {@code /eh codex} / {@code /eh codex learn} commands are registered. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CODEX_COMMANDS =
+            BUILDER.comment("Enable the /eh codex and /eh codex learn test commands.")
+                    .define("enableCodexCommands", true);
+
+    /** Discovery cadence, in ticks (20 = once a second), matching the sanity ticker. */
+    public static final ModConfigSpec.IntValue CODEX_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between codex proximity discovery passes (20 = 1s).")
+                    .defineInRange("codexIntervalTicks", 20, 5, 1200);
+
+    /** Radius (blocks) at which a fixed site/city is discovered. */
+    public static final ModConfigSpec.IntValue CODEX_SITE_RADIUS =
+            BUILDER.comment("Blocks from a fixed site/city centre at which it is discovered.")
+                    .defineInRange("codexSiteRadius", 96, 8, 512);
+
+    /** Radius (blocks) at which an Ancient One is discovered. */
+    public static final ModConfigSpec.IntValue CODEX_BOSS_RADIUS =
+            BUILDER.comment("Blocks from an Ancient One at which its boss entry is discovered.")
+                    .defineInRange("codexBossRadius", 48, 8, 256);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

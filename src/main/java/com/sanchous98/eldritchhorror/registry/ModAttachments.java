@@ -95,6 +95,35 @@ public final class ModAttachments {
                             .copyOnDeath()
                             .build());
 
+    /**
+     * Per-player set of discovered codex entry ids, persisted, copied on death, and synced to the
+     * owner so a future codex screen can read it. Mirrors {@link #RITE_KNOWLEDGE} exactly: the value
+     * is an immutable {@link Set#copyOf} snapshot, so content adds through
+     * {@link com.sanchous98.eldritchhorror.codex.CodexAPI} (read-modify-write). Rite entries are
+     * <b>derived</b> from {@code RITE_KNOWLEDGE} rather than stored here, so learning a rite is not
+     * duplicated. See {@code design/22-map-and-knowledge.md}.
+     */
+    public static final Supplier<AttachmentType<Set<String>>> LORE =
+            ATTACHMENT_TYPES.register("lore",
+                    () -> AttachmentType.<Set<String>>builder(() -> Set.of())
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.BOOL)
+                                    .xmap(set -> Set.copyOf(set.keySet()), key -> {
+                                        java.util.Map<String, Boolean> map = new java.util.HashMap<>();
+                                        for (String k : key) {
+                                            map.put(k, Boolean.TRUE);
+                                        }
+                                        return map;
+                                    })
+                                    .fieldOf("known"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.collection(
+                                            java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
+                                            .map(s -> Set.copyOf(s), s -> new java.util.HashSet<>(s)))
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }

@@ -490,7 +490,7 @@ public final class ModEntities {
 
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
-    /** Cthulhu: 3.0 x 4.0, the drowned-temple site boss. */
+    /** The drowned-temple site boss. */
     public static final DeferredHolder<EntityType<?>, EntityType<Cthulhu>> CTHULHU =
             ENTITY_TYPES.register("cthulhu", () ->
                     EntityType.Builder.<Cthulhu>of(Cthulhu::new, MobCategory.MONSTER)
@@ -671,6 +671,16 @@ public final class ModEntities {
     public static final DeferredItem<SpawnEggItem> RHAN_TEGOTH_SPAWN_EGG =
             ModItems.ITEMS.registerItem("rhan_tegoth_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(RHAN_TEGOTH.get())));
+
+    /**
+     * The 14 Ancient One entity types, for classification where the class hierarchy is not usable
+     * ({@code EntityType.getBaseClass()} is fixed to {@link net.minecraft.world.entity.Entity} in
+     * 26.3, so a boss cannot be told from a monster by reflection).
+     */
+    public static final java.util.Set<EntityType<?>> ANCIENT_ONES = java.util.Set.of(
+            CTHULHU.get(), DUNWICH_HORROR.get(), SHUB_NIGGURATH.get(), AZATHOTH.get(),
+            YOG_SOTHOTH.get(), ITHAQUA.get(), YIG.get(), ATLACH_NACHA.get(), NYARLATHOTEP.get(),
+            CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get());
 
     /**
      * Adds the spawn egg to the mod's creative tab. The tab is built once at registration from

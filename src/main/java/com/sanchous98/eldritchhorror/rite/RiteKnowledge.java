@@ -15,6 +15,9 @@ import java.util.Set;
  * read-modify-write: copy, add, store. Content never touches the attachment directly; it calls
  * this facade. Per {@code design/26-rituals-and-occult.md}, a rite must be <b>learned</b> (tome or
  * cult) before it can be performed.
+ *
+ * <p>Rite knowledge is also the codex's {@code rite} section: the {@link com.sanchous98.eldritchhorror.codex.CodexAPI}
+ * derives rite entries from this store on read, so learning a rite needs no second write here.
  */
 public final class RiteKnowledge {
     private RiteKnowledge() {

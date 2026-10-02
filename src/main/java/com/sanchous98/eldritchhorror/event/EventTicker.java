@@ -130,6 +130,18 @@ public final class EventTicker {
         return n;
     }
 
+    /**
+     * The ids of the events active for {@code player} right now. Used by the codex discovery pass
+     * so an event starting near a player is learned without coupling the ticker to the codex.
+     */
+    public static List<String> activeIds(ServerPlayer player) {
+        Map<String, Active> map = ACTIVE.get(player.getUUID());
+        if (map == null || map.isEmpty()) {
+            return List.of();
+        }
+        return List.copyOf(map.keySet());
+    }
+
     /** Advances every running effect, ending any whose window closed or whose rift vanished. */
     private static void advance(MinecraftServer server, int tick) {
         if (ACTIVE.isEmpty()) {

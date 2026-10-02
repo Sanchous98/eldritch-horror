@@ -7,6 +7,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.sanchous98.eldritchhorror.codex.CodexAPI;
+import com.sanchous98.eldritchhorror.codex.CodexCategory;
+import com.sanchous98.eldritchhorror.codex.CodexEntry;
+import com.sanchous98.eldritchhorror.codex.CodexRegistry;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
@@ -172,6 +176,14 @@ public final class EldritchCommands {
                                 .then(Commands.argument("cult", StringArgumentType.word())
                                         .then(Commands.argument("service", StringArgumentType.word())
                                                 .executes(ctx -> performService(ctx)))));
+        if (ModConfig.ENABLE_CODEX_COMMANDS.get()) {
+            eh.then(Commands.literal("codex")
+                            .executes(EldritchCommands::listCodex)
+                            .then(Commands.literal("learn")
+                                    .then(Commands.argument("id", StringArgumentType.greedyString())
+                                            .executes(EldritchCommands::learnCodex))))
+                    .then(Commands.literal("codexentries").executes(EldritchCommands::listCodexEntries));
+        }
         if (ModConfig.ENABLE_EVENT_COMMANDS.get()) {
             eh.then(Commands.literal("event")
                             .then(Commands.argument("id", StringArgumentType.word())
@@ -317,6 +329,81 @@ public final class EldritchCommands {
         }
         ctx.getSource().sendFailure(outcome.message());
         return 0;
+    }
+
+    /**
+     * {@code /eh codex}: lists the caller's discovered entries, grouped by category. Names are the
+     * entry's display name; ids are shown too so the debug {@code learn} command has a target.
+     */
+    private static int listCodex(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        var known = CodexAPI.all(p);
+        if (known.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("Your codex is empty."), false);
+            return 1;
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("Codex - " + known.size() + " entries"), false);
+        for (CodexCategory category : CodexCategory.ordered()) {
+            List<Component> names = new java.util.ArrayList<>();
+            for (CodexEntry entry : CodexRegistry.all().values()) {
+                if (entry.category() == category && known.contains(entry.id())) {
+                    names.add(entry.name());
+                }
+            }
+            if (names.isEmpty()) {
+                continue;
+            }
+            ctx.getSource().sendSuccess(() -> {
+                Component line = Component.literal("  " + category.id() + " (" + names.size() + "): ");
+                for (int i = 0; i < names.size(); i++) {
+                    if (i > 0) {
+                        line = line.copy().append(Component.literal(", "));
+                    }
+                    line = line.copy().append(names.get(i));
+                }
+                return line;
+            }, false);
+        }
+        return 1;
+    }
+
+    /**
+     * {@code /eh codex learn <id>}: debug discovery of one entry. Gated behind gamemaster
+     * permissions, like the other operator mutation tools.
+     */
+    private static int learnCodex(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String id = StringArgumentType.getString(ctx, "id");
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("Requires gamemaster permissions."));
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        CodexEntry entry = CodexRegistry.byId(id);
+        if (entry == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown codex entry: " + id));
+            return 0;
+        }
+        boolean learned = CodexAPI.learn(p, id);
+        ctx.getSource().sendSuccess(() -> Component.literal(learned
+                ? "[" + entry.category().id() + "] learned " + id
+                : "Already known: " + id), true);
+        return 1;
+    }
+
+    /** {@code /eh codexentries}: lists every known entry id by category (debug/authoring aid). */
+    private static int listCodexEntries(CommandContext<CommandSourceStack> ctx) {
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("gamemaster permission required"));
+            return 0;
+        }
+        for (CodexCategory category : CodexCategory.ordered()) {
+            List<String> ids = CodexRegistry.idsIn(category);
+            ctx.getSource().sendSuccess(() -> Component.literal(category.id() + " (" + ids.size()
+                    + "): " + String.join(", ", ids)), false);
+        }
+        return 1;
     }
 
     /**
