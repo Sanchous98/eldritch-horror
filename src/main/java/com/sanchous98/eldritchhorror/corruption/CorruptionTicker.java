@@ -104,13 +104,14 @@ public final class CorruptionTicker {
         switch (state) {
             case DORMANT, TOUCHED -> {
             }
-            case MARKED -> effect(player, ModEffects.CORRUPTED, 0);
-            case CLAIMED -> effect(player, ModEffects.CORRUPTED, 1);
+            case MARKED -> effect(player, 0);
+            case CLAIMED -> effect(player, 1);
         }
     }
 
-    private static void effect(ServerPlayer player, Holder<MobEffect> effect, int amplifier) {
-        player.addEffect(new MobEffectInstance(effect, MobEffectInstance.INFINITE_DURATION,
+    /** Apply the single corruption-band effect (always {@link ModEffects#CORRUPTED}). */
+    private static void effect(ServerPlayer player, int amplifier) {
+        player.addEffect(new MobEffectInstance(ModEffects.CORRUPTED, MobEffectInstance.INFINITE_DURATION,
                 amplifier, true, false, false));
     }
 
