@@ -71,6 +71,13 @@ public final class DreadAuraTicker {
             BestiarySupport.tickAura(player, Hydra.class, ModConfig.SANITY_HYDRA_RADIUS.get());
             BestiarySupport.tickAura(player, Nyogtha.class, ModConfig.SANITY_NYOGTHA_RADIUS.get());
             BestiarySupport.tickAura(player, RhanTegoth.class, ModConfig.SANITY_RHAN_TEGOTH_RADIUS.get());
+            // Batch 4.
+            BestiarySupport.tickAura(player, Hastur.class, ModConfig.SANITY_HASTUR_RADIUS.get());
+            BestiarySupport.tickAura(player, NephrenKa.class, ModConfig.CORRUPTION_NEPHREN_KA_RADIUS.get());
+            BestiarySupport.tickAura(player, Abhoth.class, ModConfig.CORRUPTION_ABHOTH_RADIUS.get());
+            BestiarySupport.tickAura(player, ChaugnarFaugn.class, ModConfig.SANITY_CHAUGNAR_FAUGN_RADIUS.get());
+            BestiarySupport.tickAura(player, Tulzscha.class, ModConfig.SANITY_TULZSCHA_RADIUS.get());
+            BestiarySupport.tickAura(player, Zstylzhemghi.class, ModConfig.CORRUPTION_ZSTYLZHEMGHI_RADIUS.get());
         }
     }
 }

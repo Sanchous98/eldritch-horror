@@ -296,6 +296,10 @@ public final class BestiarySupport {
         if (queryRadius <= 0.0) {
             return;
         }
+        // Creative/spectator players are not a gameplay subject: the world must not perturb them.
+        if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
         AABB box = player.getBoundingBox().inflate(queryRadius);
         List<T> auras = player.level().getEntitiesOfClass(type, box,
                 aura -> aura.isAlive() && aura.isAuraActive()

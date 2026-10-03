@@ -31,17 +31,23 @@ public final class TomeRiteKnowledge {
     private static final Map<String, List<String>> GRANTS = Map.ofEntries(
             Map.entry("tome_of_the_eye", List.of("ward_of_the_eye")),
             // Also teaches the Leviathan/Cthulhu sooth: the drowned-temple presence is answered, not fought.
+            // Also the sealed pool (seal_abhoth) and the quenched green flame (quench_tulzscha).
             Map.entry("tome_of_tides", List.of("drowned_blessing", "soothe_cthulhu", "still_azathoth",
-                    "still_glaaki", "sever_hydra")),
+                    "still_glaaki", "sever_hydra", "seal_abhoth", "quench_tulzscha")),
             // Also teaches appease_yig and quench_cthugha: the ashen presences are answered by ritual.
-            Map.entry("hollow_text", List.of("call_the_lesser", "appease_yig", "quench_cthugha")),
+            // Also the feaster (starve_chaugnar_faugn): the hunger is answered by feeding it nothing.
+            Map.entry("hollow_text", List.of("call_the_lesser", "appease_yig", "quench_cthugha",
+                    "starve_chaugnar_faugn")),
             // Also teaches the Shub-Niggurath stilling, the gate, and the toppling/barring rites.
             Map.entry("star_codex", List.of("summon_star_spawn", "still_shub_niggurath", "seal_the_gate",
                     "topple_idol", "bar_nyogtha")),
             // Also teaches the binding of Atlach-Nacha and the denial of the trusted face.
-            Map.entry("codex_of_wards", List.of("close_rift", "bind_atlach_nacha", "deny_nyarlathotep")),
+            // Also the unspoken name (silence_hastur) and the forgotten name (erase_zstylzhemghi).
+            Map.entry("codex_of_wards", List.of("close_rift", "bind_atlach_nacha", "deny_nyarlathotep",
+                    "silence_hastur", "erase_zstylzhemghi")),
             // Also teaches the Dunwich Horror's drawing-away; a cleansing text answers both blights.
-            Map.entry("bone_ledger", List.of("rite_of_cleansing", "draw_away_dunwich")),
+            // Also the remembering king (unmake_nephren_ka): a ledger of names unmakes one.
+            Map.entry("bone_ledger", List.of("rite_of_cleansing", "draw_away_dunwich", "unmake_nephren_ka")),
             Map.entry("atlas_of_the_veil", List.of("open_rift")),
             // Also teaches ward_ithaqua: the walking wind is turned aside, not fought.
             Map.entry("watchers_diary", List.of("respec", "ward_ithaqua")),

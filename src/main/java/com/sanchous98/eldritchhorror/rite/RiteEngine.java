@@ -64,11 +64,9 @@ public final class RiteEngine {
     private static final int RIFT_REMOVE_RADIUS = 8;
 
     /** Lesser summon: 3 lesser swarm, refused past {@value #LESSER_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
-    private static final EntityType<?> LESSER_TYPE = ModEntities.LESSER_SWARM.get();
     private static final int LESSER_COUNT = 3;
     private static final int LESSER_CAP = 8;
     /** Star-spawn summon: 1 star-spawn, refused past {@value #STAR_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
-    private static final EntityType<?> STAR_TYPE = ModEntities.STAR_SPAWN.get();
     private static final int STAR_COUNT = 1;
     private static final int STAR_CAP = 4;
     private static final int SPAWN_RADIUS = 6;
@@ -375,7 +373,9 @@ public final class RiteEngine {
     /** {@code call_the_lesser} / {@code summon_star_spawn}: a small, capped hostile summon. */
     private static Result spawn(ServerLevel level, ServerPlayer player, RiteDefinition rite) {
         boolean star = rite.id().contains("star");
-        EntityType<?> type = star ? STAR_TYPE : LESSER_TYPE;
+        // Resolve lazily: a static DeferredHolder.get() would run before the registry is bound and
+        // throw "Trying to access unbound value" (the historical startup crash).
+        EntityType<?> type = star ? ModEntities.STAR_SPAWN.get() : ModEntities.LESSER_SWARM.get();
         int requested = star ? STAR_COUNT : LESSER_COUNT;
         int cap = star ? STAR_CAP : LESSER_CAP;
 

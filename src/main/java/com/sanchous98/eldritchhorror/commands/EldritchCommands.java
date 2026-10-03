@@ -519,7 +519,7 @@ public final class EldritchCommands {
      * The player's own chunk without ever loading/generating one. It is always loaded (the player
      * stands in it), but {@code getChunkNow} is nullable, so callers get {@code null} rather than an NPE.
      */
-    private static net.minecraft.world.level.chunk.LevelChunk ownChunk(ServerPlayer p) {
+    private static net.minecraft.world.level.chunk.@org.jspecify.annotations.Nullable LevelChunk ownChunk(ServerPlayer p) {
         var cp = p.chunkPosition();
         return p.level().getChunkSource().getChunkNow(cp.x(), cp.z());
     }

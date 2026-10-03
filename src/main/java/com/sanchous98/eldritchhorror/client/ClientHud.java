@@ -56,7 +56,7 @@ public final class ClientHud {
             return;
         }
         double sanity = player.getData(ModAttachments.SANITY.get());
-        double frac = clamp01(sanity / SanitySystem.DEFAULT_MAX);
+        double frac = clamp01(sanity / SanitySystem.max(player));
         int pips = (int) Math.ceil(frac * 10.0);
 
         int right = g.guiWidth() / 2 + 91;

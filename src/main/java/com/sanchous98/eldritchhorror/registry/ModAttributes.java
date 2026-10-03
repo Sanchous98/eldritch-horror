@@ -30,12 +30,13 @@ public final class ModAttributes {
 
     /**
      * The sanity meter ceiling. Default {@code 100.0} (matching
-     * {@code SanitySystem.DEFAULT_MAX}), bounds {@code 0.0..100.0} (the design's 0–100 range),
-     * synced so the HUD sees it.
+     * {@code SanitySystem.DEFAULT_MAX}); the bound allows class bonuses to exceed the base (the
+     * Investigator's {@code +20%} needs headroom, and {@code RangedAttribute} sanitises anything
+     * above its max back down). Synced so the HUD sees it.
      */
     public static final DeferredHolder<Attribute, Attribute> MAX_SANITY =
             ATTRIBUTES.register("max_sanity",
-                    () -> new RangedAttribute("attribute.name.eldritch_horror.max_sanity", 100.0, 0.0, 100.0)
+                    () -> new RangedAttribute("attribute.name.eldritch_horror.max_sanity", 100.0, 0.0, 1000.0)
                             .setSyncable(true));
 
     private ModAttributes() {

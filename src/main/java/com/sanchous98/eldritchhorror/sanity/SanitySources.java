@@ -57,10 +57,36 @@ public final class SanitySources {
     }
 
     /**
-     * Cheap squared-distance test against the curated city footprints: no chunk lookup, no
-     * allocation. Uses each city's <b>generated</b> footprint ({@link CityLocation#radius()},
-     * ~220–400 blocks), not the legacy population-derived {@link City#radius()} (10–44), so the
-     * recovery zone matches the district that actually renders. Overworld only.
+     * Curated city footprints, cached once: {@code {x, z, radius²}}. Built lazily from
+     * {@link Cities#all()} using each city's <b>generated</b> footprint
+     * ({@link CityLocation#radius()}, ~220–400 blocks) rather than the legacy population-derived
+     * {@link City#radius()} (10–44), so the recovery zone matches the district that actually
+     * renders. Cached so the once-a-second per-player check allocates nothing.
+     */
+    private static volatile long[][] cityFootprints;
+
+    private static long[][] cityFootprints() {
+        long[][] cached = cityFootprints;
+        if (cached != null) {
+            return cached;
+        }
+        synchronized (SanitySources.class) {
+            if (cityFootprints == null) {
+                List<City> cities = Cities.all();
+                long[][] out = new long[cities.size()][];
+                for (int i = 0; i < cities.size(); i++) {
+                    City city = cities.get(i);
+                    long r = new CityLocation(city).radius();
+                    out[i] = new long[] { city.x(), city.z(), r * r };
+                }
+                cityFootprints = out;
+            }
+            return cityFootprints;
+        }
+    }
+
+    /**
+     * Cheap squared-distance test against the cached curated city footprints. Overworld only.
      */
     static boolean nearCity(ServerPlayer player) {
         if (!player.level().dimension().equals(Level.OVERWORLD)) {
@@ -68,11 +94,10 @@ public final class SanitySources {
         }
         double x = player.getX();
         double z = player.getZ();
-        for (City city : Cities.all()) {
-            double r = new CityLocation(city).radius();
-            double dx = x - city.x();
-            double dz = z - city.z();
-            if (dx * dx + dz * dz <= r * r) {
+        for (long[] city : cityFootprints()) {
+            double dx = x - city[0];
+            double dz = z - city[1];
+            if (dx * dx + dz * dz <= city[2]) {
                 return true;
             }
         }

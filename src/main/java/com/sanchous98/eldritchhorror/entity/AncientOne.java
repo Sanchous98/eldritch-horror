@@ -192,6 +192,9 @@ public abstract class AncientOne extends Monster implements DreadAura {
             return false;
         }
         if (kind == Solve.STILLED) {
+            if (this.solve == Solve.SOOTHED || this.solve == Solve.BANISHED) {
+                return false; // never downgrade a terminal solve back to a temporary one
+            }
             // Refresh allowed: standing the woods down again simply extends the quiet. The reward
             // path only fires for a NEW stilling, so the rite cannot be farmed while it holds.
             boolean fresh = !this.isSolved();

@@ -59,6 +59,6 @@ public final class Classes {
 
     private static ItemStack stack(String path, int count) {
         Item item = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(path));
-        return item == null ? ItemStack.EMPTY : new ItemStack(item, count);
+        return item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item, count);
     }
 }
