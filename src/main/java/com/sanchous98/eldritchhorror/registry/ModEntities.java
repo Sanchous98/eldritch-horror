@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.Abhoth;
 import com.sanchous98.eldritchhorror.entity.AshFowl;
 import com.sanchous98.eldritchhorror.entity.AtlachNacha;
 import com.sanchous98.eldritchhorror.entity.Azathoth;
@@ -10,6 +11,7 @@ import com.sanchous98.eldritchhorror.entity.BoneChoir;
 import com.sanchous98.eldritchhorror.entity.Burrowling;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.CaveDrifter;
+import com.sanchous98.eldritchhorror.entity.ChaugnarFaugn;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
 import com.sanchous98.eldritchhorror.entity.Cthugha;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
@@ -22,6 +24,7 @@ import com.sanchous98.eldritchhorror.entity.DunwichHorror;
 import com.sanchous98.eldritchhorror.entity.FrostWisp;
 import com.sanchous98.eldritchhorror.entity.Glaaki;
 import com.sanchous98.eldritchhorror.entity.GreyFox;
+import com.sanchous98.eldritchhorror.entity.Hastur;
 import com.sanchous98.eldritchhorror.entity.HearthCat;
 import com.sanchous98.eldritchhorror.entity.HillHound;
 import com.sanchous98.eldritchhorror.entity.Hydra;
@@ -30,6 +33,7 @@ import com.sanchous98.eldritchhorror.entity.LanternJelly;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.MarshMote;
 import com.sanchous98.eldritchhorror.entity.MireSow;
+import com.sanchous98.eldritchhorror.entity.NephrenKa;
 import com.sanchous98.eldritchhorror.entity.NightHag;
 import com.sanchous98.eldritchhorror.entity.Nyarlathotep;
 import com.sanchous98.eldritchhorror.entity.Nyogtha;
@@ -48,6 +52,7 @@ import com.sanchous98.eldritchhorror.entity.StarSpawn;
 import com.sanchous98.eldritchhorror.entity.StoneSentinel;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.TideGrazer;
+import com.sanchous98.eldritchhorror.entity.Tulzscha;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
 import com.sanchous98.eldritchhorror.entity.Watcher;
 import com.sanchous98.eldritchhorror.entity.WeaverSpawn;
@@ -56,6 +61,7 @@ import com.sanchous98.eldritchhorror.entity.WoolHare;
 import com.sanchous98.eldritchhorror.entity.Worshipper;
 import com.sanchous98.eldritchhorror.entity.Yig;
 import com.sanchous98.eldritchhorror.entity.YogSothoth;
+import com.sanchous98.eldritchhorror.entity.Zstylzhemghi;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -672,8 +678,86 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("rhan_tegoth_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(RHAN_TEGOTH.get())));
 
+    /** Hastur: 1.6 x 2.6, the unspoken name of the yellow_court. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Hastur>> HASTUR =
+            ENTITY_TYPES.register("hastur", () ->
+                    EntityType.Builder.<Hastur>of(Hastur::new, MobCategory.MONSTER)
+                            .sized(1.6F, 2.6F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("hastur"))));
+
+    public static final DeferredItem<SpawnEggItem> HASTUR_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("hastur_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(HASTUR.get())));
+
+    /** Nephren-Ka: 0.9 x 2.4, the remembering king of the black_pyramid. */
+    public static final DeferredHolder<EntityType<?>, EntityType<NephrenKa>> NEPHREN_KA =
+            ENTITY_TYPES.register("nephren_ka", () ->
+                    EntityType.Builder.<NephrenKa>of(NephrenKa::new, MobCategory.MONSTER)
+                            .sized(0.9F, 2.4F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("nephren_ka"))));
+
+    public static final DeferredItem<SpawnEggItem> NEPHREN_KA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("nephren_ka_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(NEPHREN_KA.get())));
+
+    /** Abhoth: 3.0 x 2.2, the spawning filth-pool of the spawning_pool. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Abhoth>> ABHOTH =
+            ENTITY_TYPES.register("abhoth", () ->
+                    EntityType.Builder.<Abhoth>of(Abhoth::new, MobCategory.MONSTER)
+                            .sized(3.0F, 2.2F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("abhoth"))));
+
+    public static final DeferredItem<SpawnEggItem> ABHOTH_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("abhoth_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ABHOTH.get())));
+
+    /** Chaugnar Faugn: 2.2 x 2.8, the audible hunger of the temple_of_the_feaster. */
+    public static final DeferredHolder<EntityType<?>, EntityType<ChaugnarFaugn>> CHAUGNAR_FAUGN =
+            ENTITY_TYPES.register("chaugnar_faugn", () ->
+                    EntityType.Builder.<ChaugnarFaugn>of(ChaugnarFaugn::new, MobCategory.MONSTER)
+                            .sized(2.2F, 2.8F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("chaugnar_faugn"))));
+
+    public static final DeferredItem<SpawnEggItem> CHAUGNAR_FAUGN_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("chaugnar_faugn_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CHAUGNAR_FAUGN.get())));
+
+    /** Tulzscha: 1.4 x 2.4, the green flame at the rift_scar (Veil-centre proxy). */
+    public static final DeferredHolder<EntityType<?>, EntityType<Tulzscha>> TULZSCHA =
+            ENTITY_TYPES.register("tulzscha", () ->
+                    EntityType.Builder.<Tulzscha>of(Tulzscha::new, MobCategory.MONSTER)
+                            .sized(1.4F, 2.4F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("tulzscha"))));
+
+    public static final DeferredItem<SpawnEggItem> TULZSCHA_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("tulzscha_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(TULZSCHA.get())));
+
+    /** Zstylzhemghi: 2.4 x 3.0, the forgotten name eroding the rift_scar court. */
+    public static final DeferredHolder<EntityType<?>, EntityType<Zstylzhemghi>> ZSTYLZHEMGHI =
+            ENTITY_TYPES.register("zstylzhemghi", () ->
+                    EntityType.Builder.<Zstylzhemghi>of(Zstylzhemghi::new, MobCategory.MONSTER)
+                            .sized(2.4F, 3.0F)
+                            .clientTrackingRange(12)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("zstylzhemghi"))));
+
+    public static final DeferredItem<SpawnEggItem> ZSTYLZHEMGHI_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("zstylzhemghi_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ZSTYLZHEMGHI.get())));
+
     /**
-     * The 14 Ancient One entity types, for classification where the class hierarchy is not usable
+     * The 20 Ancient One entity types, for classification where the class hierarchy is not usable
      * ({@code EntityType.getBaseClass()} is fixed to {@link net.minecraft.world.entity.Entity} in
      * 26.3, so a boss cannot be told from a monster by reflection).
      *
@@ -684,7 +768,9 @@ public final class ModEntities {
         return java.util.Set.of(
                 CTHULHU.get(), DUNWICH_HORROR.get(), SHUB_NIGGURATH.get(), AZATHOTH.get(),
                 YOG_SOTHOTH.get(), ITHAQUA.get(), YIG.get(), ATLACH_NACHA.get(), NYARLATHOTEP.get(),
-                CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get());
+                CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get(),
+                HASTUR.get(), NEPHREN_KA.get(), ABHOTH.get(), CHAUGNAR_FAUGN.get(), TULZSCHA.get(),
+                ZSTYLZHEMGHI.get());
     }
 
     /**
@@ -751,6 +837,12 @@ public final class ModEntities {
             event.accept(HYDRA_SPAWN_EGG.get());
             event.accept(NYOGTHA_SPAWN_EGG.get());
             event.accept(RHAN_TEGOTH_SPAWN_EGG.get());
+            event.accept(HASTUR_SPAWN_EGG.get());
+            event.accept(NEPHREN_KA_SPAWN_EGG.get());
+            event.accept(ABHOTH_SPAWN_EGG.get());
+            event.accept(CHAUGNAR_FAUGN_SPAWN_EGG.get());
+            event.accept(TULZSCHA_SPAWN_EGG.get());
+            event.accept(ZSTYLZHEMGHI_SPAWN_EGG.get());
         }
     }
 
@@ -815,6 +907,12 @@ public final class ModEntities {
         event.put(HYDRA.get(), Hydra.createAttributes().build());
         event.put(NYOGTHA.get(), Nyogtha.createAttributes().build());
         event.put(RHAN_TEGOTH.get(), RhanTegoth.createAttributes().build());
+        event.put(HASTUR.get(), Hastur.createAttributes().build());
+        event.put(NEPHREN_KA.get(), NephrenKa.createAttributes().build());
+        event.put(ABHOTH.get(), Abhoth.createAttributes().build());
+        event.put(CHAUGNAR_FAUGN.get(), ChaugnarFaugn.createAttributes().build());
+        event.put(TULZSCHA.get(), Tulzscha.createAttributes().build());
+        event.put(ZSTYLZHEMGHI.get(), Zstylzhemghi.createAttributes().build());
     }
 
     private ModEntities() {

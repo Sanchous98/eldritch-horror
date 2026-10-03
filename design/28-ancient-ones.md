@@ -1,6 +1,7 @@
 # 28 — Ancient Ones
 
-Status: **decided (design)**; implementation deferred. This is the **boss layer** of the
+Status: **implemented (20/20)** — the boss layer of the bestiary is in code (see
+`docs/ANCIENT-ONES-BATCH4-CONTRACT.md` for the last six). This is the **boss layer** of the
 bestiary: the named presences that replace the removed vanilla bosses (see the *Replacement
 contract* in `25-bestiary-and-entities.md`). It is a spirit-analogue of the board game
 Eldritch Horror, **not a port** — the names are public-domain literary names, the mechanics,

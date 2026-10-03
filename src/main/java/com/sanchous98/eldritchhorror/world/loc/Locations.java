@@ -97,6 +97,13 @@ public final class Locations {
             // lowland so they are not swallowed by relief — chosen from the baked elevation map.
             register(new com.sanchous98.eldritchhorror.world.loc.site.RitualAltarSite(-46944, -24736), -46944, -24736);
             register(new com.sanchous98.eldritchhorror.world.loc.site.RiftScar(-53344, -24224), -53344, -24224);
+            // Ancient Ones batch 4 sites (design/28): each a home for one new boss, on flat land
+            // far from every city and site. Fixed coordinates so the codex and spawner can find
+            // them. See docs/ANCIENT-ONES-BATCH4-CONTRACT.md.
+            register(new com.sanchous98.eldritchhorror.world.loc.site.YellowCourt(28000, -20000), 28000, -20000);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.BlackPyramid(-2000, -10000), -2000, -10000);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.SpawningPool(-36000, -24000), -36000, -24000);
+            register(new com.sanchous98.eldritchhorror.world.loc.site.TempleOfTheFeaster(46000, 8000), 46000, 8000);
             initialised = true;
             EldritchHorror.LOGGER.info("registered {} fixed locations", ENTRIES.size());
         }

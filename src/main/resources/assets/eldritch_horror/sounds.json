@@ -754,5 +754,77 @@
     "sounds": [
       { "name": "minecraft:entity.iron_golem.death", "type": "event" }
     ]
+  },
+  "entity.hastur.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.hastur.ambient",
+    "sounds": [ { "name": "minecraft:entity.evoker.ambient", "type": "event" } ]
+  },
+  "entity.hastur.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.hastur.hurt",
+    "sounds": [ { "name": "minecraft:entity.evoker.hurt", "type": "event" } ]
+  },
+  "entity.hastur.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.hastur.death",
+    "sounds": [ { "name": "minecraft:entity.evoker.death", "type": "event" } ]
+  },
+  "entity.nephren_ka.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.nephren_ka.ambient",
+    "sounds": [ { "name": "minecraft:entity.husk.ambient", "type": "event" } ]
+  },
+  "entity.nephren_ka.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.nephren_ka.hurt",
+    "sounds": [ { "name": "minecraft:entity.husk.hurt", "type": "event" } ]
+  },
+  "entity.nephren_ka.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.nephren_ka.death",
+    "sounds": [ { "name": "minecraft:entity.husk.death", "type": "event" } ]
+  },
+  "entity.abhoth.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.abhoth.ambient",
+    "sounds": [ { "name": "minecraft:entity.slime.squish", "type": "event" } ]
+  },
+  "entity.abhoth.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.abhoth.hurt",
+    "sounds": [ { "name": "minecraft:entity.slime.hurt", "type": "event" } ]
+  },
+  "entity.abhoth.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.abhoth.death",
+    "sounds": [ { "name": "minecraft:entity.slime.death", "type": "event" } ]
+  },
+  "entity.chaugnar_faugn.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.chaugnar_faugn.ambient",
+    "sounds": [ { "name": "minecraft:entity.ravager.roar", "type": "event" } ]
+  },
+  "entity.chaugnar_faugn.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.chaugnar_faugn.hurt",
+    "sounds": [ { "name": "minecraft:entity.ravager.hurt", "type": "event" } ]
+  },
+  "entity.chaugnar_faugn.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.chaugnar_faugn.death",
+    "sounds": [ { "name": "minecraft:entity.ravager.death", "type": "event" } ]
+  },
+  "entity.tulzscha.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.tulzscha.ambient",
+    "sounds": [ { "name": "minecraft:entity.blaze.ambient", "type": "event" } ]
+  },
+  "entity.tulzscha.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.tulzscha.hurt",
+    "sounds": [ { "name": "minecraft:entity.blaze.hurt", "type": "event" } ]
+  },
+  "entity.tulzscha.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.tulzscha.death",
+    "sounds": [ { "name": "minecraft:entity.blaze.death", "type": "event" } ]
+  },
+  "entity.zstylzhemghi.ambient": {
+    "subtitle": "subtitles.entity.eldritch_horror.zstylzhemghi.ambient",
+    "sounds": [ { "name": "minecraft:entity.enderman.ambient", "type": "event" } ]
+  },
+  "entity.zstylzhemghi.hurt": {
+    "subtitle": "subtitles.entity.eldritch_horror.zstylzhemghi.hurt",
+    "sounds": [ { "name": "minecraft:entity.enderman.hurt", "type": "event" } ]
+  },
+  "entity.zstylzhemghi.death": {
+    "subtitle": "subtitles.entity.eldritch_horror.zstylzhemghi.death",
+    "sounds": [ { "name": "minecraft:entity.enderman.death", "type": "event" } ]
   }
 }

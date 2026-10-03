@@ -112,16 +112,20 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   (stalk/pack-alert/retreat/ambush), a mundane taint-conversion helper, and a reusable
   mundane-weapon ward (`EldritchWarded`). **Site populations** inhabit the 5 sites via one bounded
   pass. Cities are populated with crowds of villagers.
-  **Ancient Ones** (14/20): Cthulhu, Dunwich Horror, Shub-Niggurath, Azathoth, Yog-Sothoth, Ithaqua,
-  Yig, Atlach-Nacha, Nyarlathotep, Cthugha, Glaaki, Hydra, Nyogtha, Rhan-Tegoth — each with a
-  sanity/corruption aura and a **non-combat solve** (`Outcome.SOOTHE`, taught from a tome). The
-  last six need new minor sites and are deferred. **World events** (`event/`, design/19): a bounded
+  **Ancient Ones** (20/20): Cthulhu, Dunwich Horror, Shub-Niggurath, Azathoth, Yog-Sothoth, Ithaqua,
+  Yig, Atlach-Nacha, Nyarlathotep, Cthugha, Glaaki, Hydra, Nyogtha, Rhan-Tegoth, Hastur,
+  Nephren-Ka, Abhoth, Chaugnar Faugn, Tulzscha, Zstylzhemghi — each with a sanity/corruption aura
+  and a **non-combat solve** (`Outcome.SOOTHE`, taught from a tome). The last six ship with four
+  new minor sites (`yellow_court`, `black_pyramid`, `spawning_pool`, `temple_of_the_feaster`);
+  Tulzscha and Zstylzhemghi share `rift_scar` as the Veil-centre proxy (a real `the_veil`
+  dimension is deferred). **World events** (`event/`, design/19): a bounded
   data-driven framework + whisper, darkness_pulse, rift_bloom, veil_thin, hallucination_wave,
   cleansing_dawn (`/eh event`, `/eh events`). **Codex** (`codex/`, design/22): a per-player LORE
-  attachment + discovery of 112 entries (sites, cities, bosses, bestiary, rites, events);
+  attachment + discovery of every site, city, boss, bestiary mob, rite and event (the entry set is
+  generated from the registries, so it grows with content);
   `/eh codex`. **Recipes/economy** (design/16): 25 crafting/smelting recipes make the reagents,
   ritual blocks, tools, gear and utility items obtainable; every reagent has an in-game source.
-  Remaining roster: 6 Ancient Ones needing new minor sites; 4 bespoke world events.
+  Remaining roster: 4 bespoke world events.
 - **Prologue — the Threshold** (`classes/`, `world/threshold/`, design/29): a one-time onboarding.
   A new player is teleported to the `eldritch_horror:threshold` dimension (flat, dark, no
   sanity/corruption/event tickers — they gate on `minecraft:overworld`), stamped deterministically

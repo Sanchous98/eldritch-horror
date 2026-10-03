@@ -167,6 +167,16 @@ public final class SitePopulationSpawner {
                         ModConfig.SITE_ATLACH_NACHA_CAP.get(),
                         ModConfig.ENABLE_SITE_ATLACH_NACHA.get() ? ModConfig.SITE_ATLACH_NACHA_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
+                // Two more Ancient Ones attach to the same tear (design/28): Tulzscha, the green
+                // flame at the centre, and Zstylzhemghi, whose forgotten name erodes the court.
+                BestiarySupport.topUp(level, cache, player, ModEntities.TULZSCHA.get(), Tulzscha.class, radius,
+                        ModConfig.SITE_TULZSCHA_CAP.get(),
+                        ModConfig.ENABLE_SITE_TULZSCHA.get() ? ModConfig.SITE_TULZSCHA_COUNT.get() : 0,
+                        tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
+                BestiarySupport.topUp(level, cache, player, ModEntities.ZSTYLZHEMGHI.get(), Zstylzhemghi.class,
+                        radius, ModConfig.SITE_ZSTYLZHEMGHI_CAP.get(),
+                        ModConfig.ENABLE_SITE_ZSTYLZHEMGHI.get() ? ModConfig.SITE_ZSTYLZHEMGHI_COUNT.get() : 0,
+                        tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
                 // The pass only samples multiples of the site interval, so express the star cadence
                 // in whole passes: every round(starInterval / interval) passes, at least one.
                 int interval = ModConfig.SITE_POPULATION_INTERVAL_TICKS.get();
@@ -182,6 +192,31 @@ public final class SitePopulationSpawner {
             }
             // ritual_altar_site intentionally has no ambient population: the rite engine owns what
             // appears there (design/25: "what the rite calls").
+
+            // The four batch-4 Ancient Ones each keep their own site (design/28). Like
+            // Nyarlathotep, each is a single loaded-only presence held by its site; every count
+            // config is zeroed when its toggle is off.
+            case "eldritch_horror:site/yellow_court" -> BestiarySupport.topUp(level, cache, player,
+                    ModEntities.HASTUR.get(), Hastur.class, radius,
+                    ModConfig.SITE_HASTUR_CAP.get(),
+                    ModConfig.ENABLE_SITE_HASTUR.get() ? ModConfig.SITE_HASTUR_COUNT.get() : 0,
+                    tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
+            case "eldritch_horror:site/black_pyramid" -> BestiarySupport.topUp(level, cache, player,
+                    ModEntities.NEPHREN_KA.get(), NephrenKa.class, radius,
+                    ModConfig.SITE_NEPHREN_KA_CAP.get(),
+                    ModConfig.ENABLE_SITE_NEPHREN_KA.get() ? ModConfig.SITE_NEPHREN_KA_COUNT.get() : 0,
+                    tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
+            case "eldritch_horror:site/spawning_pool" -> BestiarySupport.topUp(level, cache, player,
+                    ModEntities.ABHOTH.get(), Abhoth.class, radius,
+                    ModConfig.SITE_ABHOTH_CAP.get(),
+                    ModConfig.ENABLE_SITE_ABHOTH.get() ? ModConfig.SITE_ABHOTH_COUNT.get() : 0,
+                    tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
+            case "eldritch_horror:site/temple_of_the_feaster" -> BestiarySupport.topUp(level, cache, player,
+                    ModEntities.CHAUGNAR_FAUGN.get(), ChaugnarFaugn.class, radius,
+                    ModConfig.SITE_CHAUGNAR_FAUGN_CAP.get(),
+                    ModConfig.ENABLE_SITE_CHAUGNAR_FAUGN.get()
+                            ? ModConfig.SITE_CHAUGNAR_FAUGN_COUNT.get() : 0,
+                    tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
             default -> {
             }
         }

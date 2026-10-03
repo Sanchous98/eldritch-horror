@@ -80,6 +80,22 @@ public final class Rites {
                 3, -15, 0, RiteDefinition.Outcome.SOOTHE, "nyogtha"));
         register(new RiteDefinition("topple_idol", RiteDefinition.nameOf("topple_idol"),
                 2, -12, 0, RiteDefinition.Outcome.SOOTHE, "rhan_tegoth"));
+
+        // Ancient One solves, batch 4 (design/28). Same SOOTHE outcome, one per new presence.
+        register(new RiteDefinition("silence_hastur", RiteDefinition.nameOf("silence_hastur"),
+                3, -15, 0, RiteDefinition.Outcome.SOOTHE, "hastur"));
+        register(new RiteDefinition("unmake_nephren_ka", RiteDefinition.nameOf("unmake_nephren_ka"),
+                2, -12, -8, RiteDefinition.Outcome.SOOTHE, "nephren_ka"));
+        register(new RiteDefinition("seal_abhoth", RiteDefinition.nameOf("seal_abhoth"),
+                3, -15, -10, RiteDefinition.Outcome.SOOTHE, "abhoth"));
+        register(new RiteDefinition("starve_chaugnar_faugn",
+                RiteDefinition.nameOf("starve_chaugnar_faugn"),
+                2, -12, 0, RiteDefinition.Outcome.SOOTHE, "chaugnar_faugn"));
+        register(new RiteDefinition("quench_tulzscha", RiteDefinition.nameOf("quench_tulzscha"),
+                3, -18, 0, RiteDefinition.Outcome.SOOTHE, "tulzscha"));
+        register(new RiteDefinition("erase_zstylzhemghi",
+                RiteDefinition.nameOf("erase_zstylzhemghi"),
+                3, -20, -12, RiteDefinition.Outcome.SOOTHE, "zstylzhemghi"));
     }
 
     private Rites() {

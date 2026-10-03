@@ -265,6 +265,38 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> RHAN_TEGOTH_DEATH =
             register("entity.rhan_tegoth.death");
 
+    // Ancient Ones batch 4 (design/28): the last six presences.
+
+    /** Hastur: the unspoken name, an air-pressure hum (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> HASTUR_AMBIENT = register("entity.hastur.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HASTUR_HURT = register("entity.hastur.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HASTUR_DEATH = register("entity.hastur.death");
+
+    /** Nephren-Ka: a dry, remembered voice (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEPHREN_KA_AMBIENT = register("entity.nephren_ka.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEPHREN_KA_HURT = register("entity.nephren_ka.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEPHREN_KA_DEATH = register("entity.nephren_ka.death");
+
+    /** Abhoth: the wet churn of the spawning pool (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ABHOTH_AMBIENT = register("entity.abhoth.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ABHOTH_HURT = register("entity.abhoth.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ABHOTH_DEATH = register("entity.abhoth.death");
+
+    /** Chaugnar Faugn: the hunger you can hear (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHAUGNAR_FAUGN_AMBIENT = register("entity.chaugnar_faugn.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHAUGNAR_FAUGN_HURT = register("entity.chaugnar_faugn.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHAUGNAR_FAUGN_DEATH = register("entity.chaugnar_faugn.death");
+
+    /** Tulzscha: a green flame that cracks and spits (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> TULZSCHA_AMBIENT = register("entity.tulzscha.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TULZSCHA_HURT = register("entity.tulzscha.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TULZSCHA_DEATH = register("entity.tulzscha.death");
+
+    /** Zstylzhemghi: a name that will not stay heard (ambient/hurt/death). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ZSTYLZHEMGHI_AMBIENT = register("entity.zstylzhemghi.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ZSTYLZHEMGHI_HURT = register("entity.zstylzhemghi.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ZSTYLZHEMGHI_DEATH = register("entity.zstylzhemghi.death");
+
     // --- Passive (mundane) fauna (design/25 passive role table) --------------------------------
 
     public static final DeferredHolder<SoundEvent, SoundEvent> DEER_AMBIENT = register("entity.deer.ambient");

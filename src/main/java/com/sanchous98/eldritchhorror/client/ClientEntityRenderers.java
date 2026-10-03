@@ -78,5 +78,11 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.HYDRA.get(), HydraRenderer::new);
         event.registerEntityRenderer(ModEntities.NYOGTHA.get(), NyogthaRenderer::new);
         event.registerEntityRenderer(ModEntities.RHAN_TEGOTH.get(), RhanTegothRenderer::new);
+        event.registerEntityRenderer(ModEntities.HASTUR.get(), HasturRenderer::new);
+        event.registerEntityRenderer(ModEntities.NEPHREN_KA.get(), NephrenKaRenderer::new);
+        event.registerEntityRenderer(ModEntities.ABHOTH.get(), AbhothRenderer::new);
+        event.registerEntityRenderer(ModEntities.CHAUGNAR_FAUGN.get(), ChaugnarFaugnRenderer::new);
+        event.registerEntityRenderer(ModEntities.TULZSCHA.get(), TulzschaRenderer::new);
+        event.registerEntityRenderer(ModEntities.ZSTYLZHEMGHI.get(), ZstylzhemghiRenderer::new);
     }
 }

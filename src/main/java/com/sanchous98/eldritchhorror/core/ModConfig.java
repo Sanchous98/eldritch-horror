@@ -1010,6 +1010,180 @@ public final class ModConfig {
             BUILDER.comment("Distance (blocks) draw_away_dunwich draws the Dunwich Horror away.")
                     .defineInRange("dunwichRetreatDistance", 64, 8, 192);
 
+    // --- Ancient Ones, batch 4 (design/28): the last six presences ----------------------------
+    // Four new minor sites own one each (yellow_court / black_pyramid / spawning_pool /
+    // temple_of_the_feaster); Tulzscha and Zstylzhemghi share the existing rift_scar as the
+    // Veil-centre proxy (a real the_veil dimension is deferred). Same site-bound spawn shape and
+    // same shared SOOTHE solve outcome as the earlier batches.
+
+    /** Hastur: the unspoken name in the yellow_court. */
+    public static final ModConfigSpec.BooleanValue HASTUR_KILLABLE =
+            BUILDER.comment("Allow Hastur to be killed. False = permanently invulnerable.")
+                    .define("hasturKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_HASTUR =
+            BUILDER.comment("Allow Hastur to hold the yellow_court (loaded-only).")
+                    .define("enableSiteHastur", true);
+    public static final ModConfigSpec.IntValue SITE_HASTUR_COUNT =
+            BUILDER.comment("Max Hasturs spawned per yellow_court pass.")
+                    .defineInRange("siteHasturCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_HASTUR_CAP =
+            BUILDER.comment("Max Hasturs near one player at the court before pausing.")
+                    .defineInRange("siteHasturCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_HASTUR =
+            BUILDER.comment("Enable the Hastur sanity source (hearing the name makes you want to say it).")
+                    .define("enableSanityHastur", true);
+    public static final ModConfigSpec.DoubleValue SANITY_HASTUR_RATE =
+            BUILDER.comment("Sanity change per second while near Hastur (negative drains).")
+                    .defineInRange("sanityHasturRate", -0.42, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_HASTUR_RADIUS =
+            BUILDER.comment("Radius (blocks) of Hastur's sanity drain.")
+                    .defineInRange("sanityHasturRadius", 34, 1, 96);
+
+    /** Nephren-Ka: the king who remembers you, in the black_pyramid. */
+    public static final ModConfigSpec.BooleanValue NEPHREN_KA_KILLABLE =
+            BUILDER.comment("Allow Nephren-Ka to be killed. False = permanently invulnerable.")
+                    .define("nephrenKaKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_NEPHREN_KA =
+            BUILDER.comment("Allow Nephren-Ka to hold the black_pyramid (loaded-only).")
+                    .define("enableSiteNephrenKa", true);
+    public static final ModConfigSpec.IntValue SITE_NEPHREN_KA_COUNT =
+            BUILDER.comment("Max Nephren-Kas spawned per black_pyramid pass.")
+                    .defineInRange("siteNephrenKaCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_NEPHREN_KA_CAP =
+            BUILDER.comment("Max Nephren-Kas near one player at the pyramid before pausing.")
+                    .defineInRange("siteNephrenKaCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_NEPHREN_KA =
+            BUILDER.comment("Enable the Nephren-Ka corruption aura (his gaze turns your cult against you).")
+                    .define("enableCorruptionNephrenKa", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_NEPHREN_KA_RATE =
+            BUILDER.comment("Corruption per second while near Nephren-Ka (positive taints).")
+                    .defineInRange("corruptionNephrenKaRate", 0.16, 0.0, 10.0);
+    public static final ModConfigSpec.IntValue CORRUPTION_NEPHREN_KA_RADIUS =
+            BUILDER.comment("Radius (blocks) of Nephren-Ka's corruption aura.")
+                    .defineInRange("corruptionNephrenKaRadius", 30, 1, 96);
+
+    /** Abhoth: the spawning pool — killing is the trap. */
+    public static final ModConfigSpec.BooleanValue ABHOTH_KILLABLE =
+            BUILDER.comment("Allow Abhoth to be killed. False = permanently invulnerable.")
+                    .define("abhothKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_ABHOTH =
+            BUILDER.comment("Allow Abhoth to fill the spawning_pool (loaded-only).")
+                    .define("enableSiteAbhoth", true);
+    public static final ModConfigSpec.IntValue SITE_ABHOTH_COUNT =
+            BUILDER.comment("Max Abhoths spawned per spawning_pool pass.")
+                    .defineInRange("siteAbhothCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_ABHOTH_CAP =
+            BUILDER.comment("Max Abhoths near one player at the pool before pausing.")
+                    .defineInRange("siteAbhothCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_ABHOTH =
+            BUILDER.comment("Enable the Abhoth corruption aura (the filth it spawns taints the ground).")
+                    .define("enableCorruptionAbhoth", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_ABHOTH_RATE =
+            BUILDER.comment("Corruption per second while near Abhoth (positive taints).")
+                    .defineInRange("corruptionAbhothRate", 0.18, 0.0, 10.0);
+    public static final ModConfigSpec.IntValue CORRUPTION_ABHOTH_RADIUS =
+            BUILDER.comment("Radius (blocks) of Abhoth's corruption aura.")
+                    .defineInRange("corruptionAbhothRadius", 28, 1, 96);
+
+    /** Chaugnar Faugn: the hunger you can hear, in the temple_of_the_feaster. */
+    public static final ModConfigSpec.BooleanValue CHAUGNAR_FAUGN_KILLABLE =
+            BUILDER.comment("Allow Chaugnar Faugn to be killed. False = permanently invulnerable.")
+                    .define("chaugnarFaugnKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_CHAUGNAR_FAUGN =
+            BUILDER.comment("Allow Chaugnar Faugn to hold the temple_of_the_feaster (loaded-only).")
+                    .define("enableSiteChaugnarFaugn", true);
+    public static final ModConfigSpec.IntValue SITE_CHAUGNAR_FAUGN_COUNT =
+            BUILDER.comment("Max Chaugnar Faugns spawned per temple pass.")
+                    .defineInRange("siteChaugnarFaugnCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_CHAUGNAR_FAUGN_CAP =
+            BUILDER.comment("Max Chaugnar Faugns near one player at the temple before pausing.")
+                    .defineInRange("siteChaugnarFaugnCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_CHAUGNAR_FAUGN =
+            BUILDER.comment("Enable the Chaugnar Faugn sanity source (it feeds on your courage).")
+                    .define("enableSanityChaugnarFaugn", true);
+    public static final ModConfigSpec.DoubleValue SANITY_CHAUGNAR_FAUGN_RATE =
+            BUILDER.comment("Sanity change per second while near Chaugnar Faugn (negative drains).")
+                    .defineInRange("sanityChaugnarFaugnRate", -0.38, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_CHAUGNAR_FAUGN_RADIUS =
+            BUILDER.comment("Radius (blocks) of Chaugnar Faugn's sanity drain.")
+                    .defineInRange("sanityChaugnarFaugnRadius", 32, 1, 96);
+
+    /** Tulzscha: the green flame at the Veil-centre (attached to the rift_scar for now). */
+    public static final ModConfigSpec.BooleanValue TULZSCHA_KILLABLE =
+            BUILDER.comment("Allow Tulzscha to be killed. False = permanently invulnerable.")
+                    .define("tulzschaKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_TULZSCHA =
+            BUILDER.comment("Allow Tulzscha to burn at the rift_scar centre (loaded-only).")
+                    .define("enableSiteTulzscha", true);
+    public static final ModConfigSpec.IntValue SITE_TULZSCHA_COUNT =
+            BUILDER.comment("Max Tulzschas spawned per rift_scar pass.")
+                    .defineInRange("siteTulzschaCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_TULZSCHA_CAP =
+            BUILDER.comment("Max Tulzschas near one player at the scar before pausing.")
+                    .defineInRange("siteTulzschaCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_TULZSCHA =
+            BUILDER.comment("Enable the Tulzscha sanity source (looking into the flame costs memory).")
+                    .define("enableSanityTulzscha", true);
+    public static final ModConfigSpec.DoubleValue SANITY_TULZSCHA_RATE =
+            BUILDER.comment("Sanity change per second while near Tulzscha (negative drains).")
+                    .defineInRange("sanityTulzschaRate", -0.50, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue SANITY_TULZSCHA_RADIUS =
+            BUILDER.comment("Radius (blocks) of Tulzscha's sanity drain.")
+                    .defineInRange("sanityTulzschaRadius", 36, 1, 96);
+
+    /** Zstylzhemghi: the name forgotten on purpose, eroding the court at the scar. */
+    public static final ModConfigSpec.BooleanValue ZSTYLZHEMGHI_KILLABLE =
+            BUILDER.comment("Allow Zstylzhemghi to be killed. False = permanently invulnerable.")
+                    .define("zstylzhemghiKillable", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_SITE_ZSTYLZHEMGHI =
+            BUILDER.comment("Allow Zstylzhemghi to erode the rift_scar court (loaded-only).")
+                    .define("enableSiteZstylzhemghi", true);
+    public static final ModConfigSpec.IntValue SITE_ZSTYLZHEMGHI_COUNT =
+            BUILDER.comment("Max Zstylzhemghis spawned per rift_scar pass.")
+                    .defineInRange("siteZstylzhemghiCount", 1, 0, 2);
+    public static final ModConfigSpec.IntValue SITE_ZSTYLZHEMGHI_CAP =
+            BUILDER.comment("Max Zstylzhemghis near one player at the scar before pausing.")
+                    .defineInRange("siteZstylzhemghiCap", 1, 1, 4);
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_ZSTYLZHEMGHI =
+            BUILDER.comment("Enable the Zstylzhemghi corruption aura (the world erodes around the name).")
+                    .define("enableCorruptionZstylzhemghi", true);
+    public static final ModConfigSpec.DoubleValue CORRUPTION_ZSTYLZHEMGHI_RATE =
+            BUILDER.comment("Corruption per second while near Zstylzhemghi (positive taints).")
+                    .defineInRange("corruptionZstylzhemghiRate", 0.20, 0.0, 10.0);
+    public static final ModConfigSpec.IntValue CORRUPTION_ZSTYLZHEMGHI_RADIUS =
+            BUILDER.comment("Radius (blocks) of Zstylzhemghi's corruption aura.")
+                    .defineInRange("corruptionZstylzhemghiRadius", 34, 1, 96);
+
+    // Ancient One non-combat solves, batch 4 (design/28). Same shared SOOTHE outcome.
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_SILENCE_HASTUR =
+            BUILDER.comment("Allow silence_hastur to still the yellow court for a time.")
+                    .define("enableRiteSilenceHastur", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_UNMAKE_NEPHREN_KA =
+            BUILDER.comment("Allow unmake_nephren_ka to make the king forget you.")
+                    .define("enableRiteUnmakeNephrenKa", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_SEAL_ABHOTH =
+            BUILDER.comment("Allow seal_abhoth to seal the spawning pool without killing it.")
+                    .define("enableRiteSealAbhoth", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_STARVE_CHAUGNAR_FAUGN =
+            BUILDER.comment("Allow starve_chaugnar_faugn to feed the hunger nothing.")
+                    .define("enableRiteStarveChaugnarFaugn", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_QUENCH_TULZSCHA =
+            BUILDER.comment("Allow quench_tulzscha to close the green flame's eye.")
+                    .define("enableRiteQuenchTulzscha", true);
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_ERASE_ZSTYLZHEMGHI =
+            BUILDER.comment("Allow erase_zstylzhemghi to forget the forgotten name again.")
+                    .define("enableRiteEraseZstylzhemghi", true);
+
+    /** How long {@code silence_hastur} stills the court (ticks). */
+    public static final ModConfigSpec.IntValue RITE_SILENCE_HASTUR_TICKS =
+            BUILDER.comment("Ticks the yellow court stays stilled after silence_hastur.")
+                    .defineInRange("riteSilenceHasturTicks", 6000, 200, 72000);
+
+    /** How long {@code erase_zstylzhemghi} pauses the erosion (ticks). */
+    public static final ModConfigSpec.IntValue RITE_ERASE_ZSTYLZHEMGHI_TICKS =
+            BUILDER.comment("Ticks the erosion stays paused after erase_zstylzhemghi.")
+                    .defineInRange("riteEraseZstylzhemghiTicks", 6000, 200, 72000);
+
     // --- Bestiary: blight_pod (creeper-role corruption vector) --------------------------------
 
     /** The blight pod's spore aura: standing near one taints you slowly. */

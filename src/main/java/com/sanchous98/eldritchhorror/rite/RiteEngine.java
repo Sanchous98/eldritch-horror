@@ -197,6 +197,8 @@ public final class RiteEngine {
             case "atlach_nacha" -> ModConfig.RITE_BIND_ATLACH_NACHA_TICKS.get();
             case "cthugha" -> ModConfig.RITE_QUENCH_CTHUGHA_TICKS.get();
             case "hydra" -> ModConfig.RITE_SEVER_HYDRA_TICKS.get();
+            case "hastur" -> ModConfig.RITE_SILENCE_HASTUR_TICKS.get();
+            case "zstylzhemghi" -> ModConfig.RITE_ERASE_ZSTYLZHEMGHI_TICKS.get();
             default -> 0;
         };
     }
@@ -222,6 +224,12 @@ public final class RiteEngine {
             case "hydra" -> "barter_seal";
             case "nyogtha" -> "order_scrip";
             case "rhan_tegoth" -> "mark_of_favour";
+            case "hastur" -> "cult_token";
+            case "nephren_ka" -> "order_scrip";
+            case "abhoth" -> "black_obol";
+            case "chaugnar_faugn" -> "barter_seal";
+            case "tulzscha" -> "void_reagent";
+            case "zstylzhemghi" -> "relic_coin";
             default -> "";
         };
         if (itemId.isEmpty()) {
@@ -255,6 +263,12 @@ public final class RiteEngine {
             case "hydra" -> ModConfig.ENABLE_RITE_SEVER_HYDRA.get();
             case "nyogtha" -> ModConfig.ENABLE_RITE_BAR_NYOGTHA.get();
             case "rhan_tegoth" -> ModConfig.ENABLE_RITE_TOPPLE_IDOL.get();
+            case "hastur" -> ModConfig.ENABLE_RITE_SILENCE_HASTUR.get();
+            case "nephren_ka" -> ModConfig.ENABLE_RITE_UNMAKE_NEPHREN_KA.get();
+            case "abhoth" -> ModConfig.ENABLE_RITE_SEAL_ABHOTH.get();
+            case "chaugnar_faugn" -> ModConfig.ENABLE_RITE_STARVE_CHAUGNAR_FAUGN.get();
+            case "tulzscha" -> ModConfig.ENABLE_RITE_QUENCH_TULZSCHA.get();
+            case "zstylzhemghi" -> ModConfig.ENABLE_RITE_ERASE_ZSTYLZHEMGHI.get();
             default -> false;
         };
     }
@@ -276,6 +290,12 @@ public final class RiteEngine {
             case "hydra" -> AncientOne.Solve.STILLED;
             case "nyogtha" -> AncientOne.Solve.SOOTHED;
             case "rhan_tegoth" -> AncientOne.Solve.SOOTHED;
+            case "hastur" -> AncientOne.Solve.STILLED;
+            case "nephren_ka" -> AncientOne.Solve.SOOTHED;
+            case "abhoth" -> AncientOne.Solve.SOOTHED;
+            case "chaugnar_faugn" -> AncientOne.Solve.SOOTHED;
+            case "tulzscha" -> AncientOne.Solve.SOOTHED;
+            case "zstylzhemghi" -> AncientOne.Solve.STILLED;
             default -> AncientOne.Solve.NONE;
         };
     }
@@ -310,6 +330,18 @@ public final class RiteEngine {
                     "The way below is barred; the sound under the floor fades, and nothing was killed.");
             case "rhan_tegoth" -> Component.literal(
                     "The idol is toppled; the worship ends and the pull to kneel is broken.");
+            case "hastur" -> Component.literal(
+                    "The name goes unspoken; the yellow court stills for a time.");
+            case "nephren_ka" -> Component.literal(
+                    "The king forgets you; your own cult no longer doubts, and nothing was killed.");
+            case "abhoth" -> Component.literal(
+                    "The pool is sealed; killing was the trap, and sealing is not.");
+            case "chaugnar_faugn" -> Component.literal(
+                    "The hunger is fed nothing; it sleeps, and the temple is quiet.");
+            case "tulzscha" -> Component.literal(
+                    "The green flame closes its eye; what you remember returns, and nothing was killed.");
+            case "zstylzhemghi" -> Component.literal(
+                    "The forgotten name is forgotten again; the erosion pauses for a time.");
             default -> Component.literal("The presence is answered.");
         };
     }
