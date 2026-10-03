@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.event;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
+import com.sanchous98.eldritchhorror.corruption.CorruptionState;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import java.util.ArrayList;
@@ -16,7 +18,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.MoonPhase;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -46,6 +50,15 @@ import org.jspecify.annotations.Nullable;
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class EventTicker {
+
+    /**
+     * The fixed {@code cult_stronghold} centre, in world X/Z (the site has no meaningful Y on the
+     * surface). Hard-coded deliberately: the event hot path must not touch the lazily-built
+     * {@code Locations} registry. The radius around it is config-driven
+     * ({@code eventCultSiteRadius}).
+     */
+    private static final int CULT_SITE_X = -29127;
+    private static final int CULT_SITE_Z = -13835;
 
     private EventTicker() {
     }
@@ -105,6 +118,9 @@ public final class EventTicker {
         if (def == null || !player.level().dimension().equals(Level.OVERWORLD)) {
             return null;
         }
+        // start(player, def, tick) begins the window at the current tick; the ticker advances after
+        // evaluate, so the next tick runs the effect with elapsed==1 — the same elapsed a naturally
+        // started event sees on its first effect tick.
         start(player, def, tick);
         return def;
     }
@@ -261,8 +277,17 @@ public final class EventTicker {
         List<BlockPos> rifts = anyRiftTrigger
                 ? Rifts.near(level, player.blockPosition(), riftChunkRadius, maxRifts)
                 : List.of();
+        MoonPhase moon = level.environmentAttributes().getValue(
+                EnvironmentAttributes.MOON_PHASE, player.position(), null);
+        CorruptionState corruption = CorruptionState.of(CorruptionAPI.get(player));
+        BlockPos pos = player.blockPosition();
+        double dx = pos.getX() - CULT_SITE_X;
+        double dz = pos.getZ() - CULT_SITE_Z;
+        double cultRadius = ModConfig.EVENT_CULT_SITE_RADIUS.get();
+        boolean nearCultSite = dx * dx + dz * dz <= cultRadius * cultRadius;
         return new EventContext(level, level.getGameTime(), tick, level.isDarkOutside(),
-                level.isThundering(), SanityAPI.get(player), CorruptionSystem.getTaintAt(player), rifts);
+                level.isThundering(), SanityAPI.get(player), CorruptionSystem.getTaintAt(player), rifts,
+                moon == MoonPhase.FULL_MOON, corruption, nearCultSite);
     }
 
     /** Starts {@code def} for {@code player} and logs it. */

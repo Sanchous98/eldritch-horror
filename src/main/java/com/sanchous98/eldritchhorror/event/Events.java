@@ -51,13 +51,17 @@ public final class Events {
             case "veil_thin" -> ModConfig.ENABLE_EVENT_VEIL_THIN.get();
             case "hallucination_wave" -> ModConfig.ENABLE_EVENT_HALLUCINATION_WAVE.get();
             case "cleansing_dawn" -> ModConfig.ENABLE_EVENT_CLEANSING_DAWN.get();
+            case "cult_procession" -> ModConfig.ENABLE_EVENT_CULT_PROCESSION.get();
+            case "blood_moon_rite" -> ModConfig.ENABLE_EVENT_BLOOD_MOON_RITE.get();
+            case "star_fall" -> ModConfig.ENABLE_EVENT_STAR_FALL.get();
+            case "hollow_call" -> ModConfig.ENABLE_EVENT_HOLLOW_CALL.get();
             default -> false;
         };
     }
 
     /**
-     * Registers the first-wave definitions (idempotent). Called from {@link EventTicker} so the
-     * registry is complete as soon as the first event tick runs.
+     * Registers the event definitions (idempotent). Called from {@link EventTicker} so the registry
+     * is complete as soon as the first event tick runs.
      */
     static void init() {
         if (initialised) {
@@ -73,6 +77,10 @@ public final class Events {
             register(EventEffects.veilThin());
             register(EventEffects.hallucinationWave());
             register(EventEffects.cleansingDawn());
+            register(EventEffects.cultProcession());
+            register(EventEffects.bloodMoonRite());
+            register(EventEffects.starFall());
+            register(EventEffects.hollowCall());
             initialised = true;
         }
     }

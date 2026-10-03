@@ -120,12 +120,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   Tulzscha and Zstylzhemghi share `rift_scar` as the Veil-centre proxy (a real `the_veil`
   dimension is deferred). **World events** (`event/`, design/19): a bounded
   data-driven framework + whisper, darkness_pulse, rift_bloom, veil_thin, hallucination_wave,
-  cleansing_dawn (`/eh event`, `/eh events`). **Codex** (`codex/`, design/22): a per-player LORE
+  cleansing_dawn, cult_procession, blood_moon_rite, star_fall, hollow_call (`/eh event`, `/eh events`). **Codex** (`codex/`, design/22): a per-player LORE
   attachment + discovery of every site, city, boss, bestiary mob, rite and event (the entry set is
   generated from the registries, so it grows with content);
   `/eh codex`. **Recipes/economy** (design/16): 25 crafting/smelting recipes make the reagents,
   ritual blocks, tools, gear and utility items obtainable; every reagent has an in-game source.
-  Remaining roster: 4 bespoke world events.
 - **Prologue — the Threshold** (`classes/`, `world/threshold/`, design/29): a one-time onboarding.
   A new player is teleported to the `eldritch_horror:threshold` dimension (flat, dark, no
   sanity/corruption/event tickers — they gate on `minecraft:overworld`), stamped deterministically

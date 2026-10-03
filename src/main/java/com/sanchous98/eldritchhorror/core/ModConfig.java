@@ -2259,6 +2259,115 @@ public final class ModConfig {
             BUILDER.comment("cleansing_dawn: taint per second removed from the loaded local patch (negative).")
                     .defineInRange("eventCleansingTaintRate", -0.01, -1.0, 0.0);
 
+    // --- World events, batch 2 (design/19): the four remaining bespoke events ------------------
+    // cult_procession / blood_moon_rite / star_fall / hollow_call.
+
+    /** Radius (blocks) around the fixed cult_stronghold that counts as "at the cult site". */
+    public static final ModConfigSpec.IntValue EVENT_CULT_SITE_RADIUS =
+            BUILDER.comment("Radius (blocks) around the cult_stronghold centre for site events.")
+                    .defineInRange("eventCultSiteRadius", 160, 16, 512);
+
+    /** cult_procession: a scheduled march and chant at the cult stronghold. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_CULT_PROCESSION =
+            BUILDER.comment("Enable the 'cult_procession' event.")
+                    .define("enableEventCultProcession", true);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_DURATION =
+            BUILDER.comment("cult_procession: duration in ticks (default one in-game day).")
+                    .defineInRange("eventCultProcessionDuration", 24000, 200, 72000);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_COOLDOWN =
+            BUILDER.comment("cult_procession: cooldown in ticks after it ends.")
+                    .defineInRange("eventCultProcessionCooldown", 24000, 0, 240000);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_SPAWN_INTERVAL =
+            BUILDER.comment("cult_procession: ticks between procession top-up passes.")
+                    .defineInRange("eventCultProcessionSpawnInterval", 200, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_SPAWN_RADIUS =
+            BUILDER.comment("cult_procession: radius (blocks) in which the procession may gather.")
+                    .defineInRange("eventCultProcessionSpawnRadius", 48, 8, 160);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_SPAWN_CAP =
+            BUILDER.comment("cult_procession: max zealots present near one player.")
+                    .defineInRange("eventCultProcessionSpawnCap", 3, 1, 16);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_WORSHIPPER_CAP =
+            BUILDER.comment("cult_procession: max worshippers present near one player.")
+                    .defineInRange("eventCultProcessionWorshipperCap", 4, 1, 16);
+    public static final ModConfigSpec.DoubleValue EVENT_CULT_PROCESSION_SANITY_RATE =
+            BUILDER.comment("cult_procession: sanity per second drained by the chant (negative).")
+                    .defineInRange("eventCultProcessionSanityRate", -0.05, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue EVENT_CULT_PROCESSION_REP =
+            BUILDER.comment("cult_procession: hollow_choir reputation granted at the event's start.")
+                    .defineInRange("eventCultProcessionRep", 3, 0, 50);
+
+    /** blood_moon_rite: a full-moon rite at high corruption; rifts may open. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_BLOOD_MOON_RITE =
+            BUILDER.comment("Enable the 'blood_moon_rite' event.")
+                    .define("enableEventBloodMoonRite", true);
+    public static final ModConfigSpec.IntValue EVENT_BLOOD_MOON_DURATION =
+            BUILDER.comment("blood_moon_rite: duration in ticks (one night).")
+                    .defineInRange("eventBloodMoonDuration", 12000, 200, 72000);
+    public static final ModConfigSpec.IntValue EVENT_BLOOD_MOON_COOLDOWN =
+            BUILDER.comment("blood_moon_rite: cooldown in ticks after it ends.")
+                    .defineInRange("eventBloodMoonCooldown", 24000, 0, 240000);
+    public static final ModConfigSpec.DoubleValue EVENT_BLOOD_MOON_TAINT_RATE =
+            BUILDER.comment("blood_moon_rite: taint added per pass to the loaded local patch.")
+                    .defineInRange("eventBloodMoonTaintRate", 0.02, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue EVENT_BLOOD_MOON_SPAWN_INTERVAL =
+            BUILDER.comment("blood_moon_rite: ticks between cult top-up passes.")
+                    .defineInRange("eventBloodMoonSpawnInterval", 300, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_BLOOD_MOON_CULT_CAP =
+            BUILDER.comment("blood_moon_rite: max zealots present near one player.")
+                    .defineInRange("eventBloodMoonCultCap", 3, 1, 16);
+    public static final ModConfigSpec.IntValue EVENT_BLOOD_MOON_HAG_CAP =
+            BUILDER.comment("blood_moon_rite: max night hags present near one player.")
+                    .defineInRange("eventBloodMoonHagCap", 2, 1, 16);
+    public static final ModConfigSpec.DoubleValue EVENT_BLOOD_MOON_SANITY_RATE =
+            BUILDER.comment("blood_moon_rite: sanity per second drained (negative).")
+                    .defineInRange("eventBloodMoonSanityRate", -0.08, -10.0, 0.0);
+
+    /** star_fall: a meteorite of star_reagent; the only event that edits blocks (a bounded crater). */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_STAR_FALL =
+            BUILDER.comment("Enable the 'star_fall' event.")
+                    .define("enableEventStarFall", true);
+    public static final ModConfigSpec.IntValue EVENT_STAR_FALL_DURATION =
+            BUILDER.comment("star_fall: duration in ticks (a brief after-shock).")
+                    .defineInRange("eventStarFallDuration", 120, 20, 2400);
+    public static final ModConfigSpec.IntValue EVENT_STAR_FALL_COOLDOWN =
+            BUILDER.comment("star_fall: cooldown in ticks after it ends.")
+                    .defineInRange("eventStarFallCooldown", 6000, 0, 240000);
+    public static final ModConfigSpec.IntValue EVENT_STAR_FALL_RADIUS =
+            BUILDER.comment("star_fall: radius (blocks) around the player searched for the impact site.")
+                    .defineInRange("eventStarFallRadius", 40, 8, 128);
+    public static final ModConfigSpec.IntValue EVENT_STAR_FALL_CRATER_RADIUS =
+            BUILDER.comment("star_fall: crater radius (blocks) of the impact.")
+                    .defineInRange("eventStarFallCraterRadius", 4, 1, 12);
+    public static final ModConfigSpec.IntValue EVENT_STAR_FALL_CRATER_BLOCKS =
+            BUILDER.comment("star_fall: hard cap on blocks changed by the crater.")
+                    .defineInRange("eventStarFallCraterBlocks", 96, 8, 512);
+    public static final ModConfigSpec.DoubleValue EVENT_STAR_FALL_SANITY_RATE =
+            BUILDER.comment("star_fall: sanity per second drained during the after-shock (negative).")
+                    .defineInRange("eventStarFallSanityRate", -0.15, -10.0, 0.0);
+
+    /** hollow_call: the Claimed-corruption "call"; a forced-night horror. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_HOLLOW_CALL =
+            BUILDER.comment("Enable the 'hollow_call' event.")
+                    .define("enableEventHollowCall", true);
+    public static final ModConfigSpec.IntValue EVENT_HOLLOW_CALL_DURATION =
+            BUILDER.comment("hollow_call: duration in ticks (one night).")
+                    .defineInRange("eventHollowCallDuration", 12000, 200, 72000);
+    public static final ModConfigSpec.IntValue EVENT_HOLLOW_CALL_COOLDOWN =
+            BUILDER.comment("hollow_call: cooldown in ticks after it ends.")
+                    .defineInRange("eventHollowCallCooldown", 36000, 0, 240000);
+    public static final ModConfigSpec.DoubleValue EVENT_HOLLOW_CALL_SANITY_RATE =
+            BUILDER.comment("hollow_call: sanity per second drained by the call (negative).")
+                    .defineInRange("eventHollowCallSanityRate", -0.20, -10.0, 0.0);
+    public static final ModConfigSpec.IntValue EVENT_HOLLOW_CALL_SPAWN_INTERVAL =
+            BUILDER.comment("hollow_call: ticks between spawn top-up passes.")
+                    .defineInRange("eventHollowCallSpawnInterval", 400, 20, 24000);
+    public static final ModConfigSpec.IntValue EVENT_HOLLOW_CALL_HAG_CAP =
+            BUILDER.comment("hollow_call: max night hags present near one player.")
+                    .defineInRange("eventHollowCallHagCap", 2, 1, 16);
+    public static final ModConfigSpec.IntValue EVENT_HOLLOW_CALL_SPITE_CAP =
+            BUILDER.comment("hollow_call: max choir spites present near one player.")
+                    .defineInRange("eventHollowCallSpiteCap", 3, 1, 16);
+
     // --- Codex / world knowledge (design/22-map-and-knowledge.md) ---------------------------
     // The server-authoritative discovery layer. Knowledge is the progression: proximity reveals
     // sites/cities, seeing or killing a mob reveals its bestiary entry, seeing an Ancient One
