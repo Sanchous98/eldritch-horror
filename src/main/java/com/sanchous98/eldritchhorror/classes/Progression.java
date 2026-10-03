@@ -1,7 +1,6 @@
 package com.sanchous98.eldritchhorror.classes;
 
 import net.minecraft.server.level.ServerPlayer;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -16,7 +15,6 @@ import org.jspecify.annotations.Nullable;
  * corruption fastest and drains sanity fastest. Per {@code design/29-prologue.md}, only the
  * currently-live bonuses are wired; the rest are recorded here for when their systems land.
  */
-@NullMarked
 public final class Progression {
 
     private Progression() {

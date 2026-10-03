@@ -65,6 +65,9 @@ public final class TomeRiteKnowledge {
             return;
         }
         Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (key == null) {
+            return;
+        }
         if (!EldritchHorror.MODID.equals(key.getNamespace())) {
             return;
         }

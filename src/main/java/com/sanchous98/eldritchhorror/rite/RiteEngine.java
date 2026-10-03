@@ -34,6 +34,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Server-authoritative resolution for a performed rite: applies the sanity/corruption cost, then
@@ -458,7 +459,7 @@ public final class RiteEngine {
     }
 
     /** A loaded, clear ground position within {@code radius} of the player, deterministic per {@code salt}. */
-    private static BlockPos surfaceSpot(ServerLevel level, ServerPlayer player, int radius, int salt) {
+    private static @Nullable BlockPos surfaceSpot(ServerLevel level, ServerPlayer player, int radius, int salt) {
         for (int attempt = 0; attempt < 8; attempt++) {
             int angle = (salt * 8 + attempt) * 45;
             int dx = Mth.floor(Mth.cos(angle * Mth.DEG_TO_RAD) * radius);

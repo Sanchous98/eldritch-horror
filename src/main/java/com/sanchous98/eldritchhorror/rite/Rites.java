@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.rite;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The rite registry: the eight seed rites from {@code design/08-rituals.md}, seeded in table order,
@@ -100,7 +101,7 @@ public final class Rites {
     }
 
     /** @return the definition for {@code id}, or {@code null} if unknown. */
-    public static RiteDefinition byId(String id) {
+    public static @Nullable RiteDefinition byId(@Nullable String id) {
         return id == null ? null : BY_ID.get(id);
     }
 

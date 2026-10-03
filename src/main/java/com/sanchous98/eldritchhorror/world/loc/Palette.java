@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.world.loc;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The frozen palette vocabulary: locations never hardcode blocks, they pick blocks from here.
@@ -25,7 +26,7 @@ public record Palette(
         BlockState door,         // door / gate
         BlockState rail,         // railing / fence
         BlockState light,        // lantern / candle / torch
-        BlockState overgrowth,   // vines / leaves / moss (nullable = none)
+        @Nullable BlockState overgrowth,   // vines / leaves / moss (nullable = none)
         BlockState rubble         // gravel / coarse dirt / debris
 ) {
 

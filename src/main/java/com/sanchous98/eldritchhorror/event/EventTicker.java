@@ -21,6 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The single server tick for the events framework (design/19-events.md). One shared ticker keeps
@@ -98,7 +99,7 @@ public final class EventTicker {
      * and cooldowns (the operator/debug escape hatch behind {@code /eh event}). Returns the started
      * event, or {@code null} if the id is unknown or the player is not in the overworld.
      */
-    public static EldritchEvent forceStart(ServerPlayer player, String id, int tick) {
+    public static @Nullable EldritchEvent forceStart(ServerPlayer player, String id, int tick) {
         Events.init();
         EldritchEvent def = Events.byId(id);
         if (def == null || !player.level().dimension().equals(Level.OVERWORLD)) {

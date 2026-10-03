@@ -18,6 +18,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The bounded, server-side codex discovery pass (design/22-map-and-knowledge.md): once a second it
@@ -118,7 +119,7 @@ public final class CodexDiscovery {
      * check goes through the registry, so a vanilla mob (no entry) is ignored and an Ancient One is
      * classified by the same path its type was registered under.
      */
-    private static String entityId(Entity entity) {
+    private static @Nullable String entityId(Entity entity) {
         Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         if (key == null) {
             return null;

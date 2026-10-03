@@ -15,6 +15,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Biome source for the Earth map: picks a vanilla biome from the baked Köppen layer, with an
@@ -31,7 +32,7 @@ public class EarthBiomeSource extends BiomeSource {
             Codec.STRING.listOf().fieldOf("biomes").forGetter(EarthBiomeSource::biomeIds)
     ).apply(i, EarthBiomeSource::new));
 
-    private static volatile HolderLookup<Biome> registry;
+    private static volatile @Nullable HolderLookup<Biome> registry;
 
     private final List<String> biomeIds;
 

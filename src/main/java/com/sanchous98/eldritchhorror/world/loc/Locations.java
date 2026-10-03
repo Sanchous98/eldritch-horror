@@ -15,6 +15,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Registry and dispatch for fixed-coordinate locations. See {@code docs/STRUCTURES-CONTRACT.md}.
@@ -143,7 +144,7 @@ public final class Locations {
     }
 
     /** The cultural style of a location, if it is a styled city; otherwise {@code null}. */
-    private static CityStyle styleOf(Location loc) {
+    private static @Nullable CityStyle styleOf(Location loc) {
         return loc instanceof CityLocation city ? CityStyles.forCity(city.city().name()) : null;
     }
 

@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The one-time Threshold prologue: on a player's first join they are carried to the authored
@@ -30,7 +30,6 @@ import org.jspecify.annotations.NullMarked;
  * resumes in the Threshold, never re-triggering the arrival. {@link #enabled} reads the SERVER
  * config at event time only.
  */
-@NullMarked
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class Prologue {
 
@@ -108,7 +107,7 @@ public final class Prologue {
         }
     }
 
-    private static ServerLevel threshold(ServerPlayer player) {
+    private static @Nullable ServerLevel threshold(ServerPlayer player) {
         MinecraftServer server = player.level().getServer();
         return server == null ? null : server.getLevel(Threshold.DIMENSION);
     }
@@ -119,7 +118,7 @@ public final class Prologue {
      * {@link BestiarySupport#surfaceSpot} returns {@code null} for unloaded chunks. Returns
      * {@code null} if no safe surface can be found.
      */
-    private static BlockPos citySpot(ServerLevel level, City city) {
+    private static @Nullable BlockPos citySpot(ServerLevel level, City city) {
         level.getChunk(city.x() >> 4, city.z() >> 4, ChunkStatus.FULL, true);
         BlockPos spot = BestiarySupport.surfaceSpot(level, city.x(), city.z(), false);
         if (spot != null) {

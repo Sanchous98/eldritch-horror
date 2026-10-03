@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
 public final class BlightPod extends Monster implements DreadAura {
 
     /** Resolved lazily from the registry; {@code Blocks.AIR} until the mod's block exists. */
-    private static Block taintedSoil;
+    private static @Nullable Block taintedSoil;
 
     public BlightPod(EntityType<? extends BlightPod> type, Level level) {
         super(type, level);

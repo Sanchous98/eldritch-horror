@@ -82,6 +82,12 @@ integration build green.
   `build/reports/pmd/main.html`. Keep it at **0 violations** — it catches dead private members,
   unused imports, always-true conditions, unnecessary returns/casts/parentheses and empty
   statements. Mixins are excluded (their `eldritchhorror$…` methods are framework-invoked).
+- **Nullness: every package is `@NullMarked`** via a `package-info.java` (org.jspecify). All
+  references in our source are non-null by default; annotate `@Nullable` on any method that can
+  legitimately return null (e.g. registry `getValue`, `server.getLevel`, `getChunkNow`,
+  `player.getAttribute`) and on any parameter/field that may hold null. Do not add a second
+  class-level `@NullMarked` — the package already provides it (mixin packages that must stay
+  unmarked are the only exception).
 - **Smoke-test the server before claiming done.** `build` + PMD cannot see load-time failures:
   they have twice passed green while the server refused to start (a `DeferredHolder.get()` in a
   `static` initialiser → *unbound value*; a `ModConfig` read while the command tree was built →

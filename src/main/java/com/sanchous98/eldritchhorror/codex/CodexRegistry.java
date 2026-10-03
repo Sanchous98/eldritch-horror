@@ -17,6 +17,7 @@ import java.util.Map;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The codex entry registry: id → {@link CodexEntry}, built once (lazily, then cached) from the
@@ -42,13 +43,13 @@ import net.minecraft.world.entity.EntityType;
  */
 public final class CodexRegistry {
 
-    private static volatile Map<String, CodexEntry> entries;
+    private static volatile @Nullable Map<String, CodexEntry> entries;
 
     private CodexRegistry() {
     }
 
     /** The entry for {@code id}, or {@code null} if unknown. */
-    public static CodexEntry byId(String id) {
+    public static @Nullable CodexEntry byId(String id) {
         return all().get(id);
     }
 

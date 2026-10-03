@@ -8,7 +8,6 @@ import java.util.function.UnaryOperator;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * The Threshold prologue's blocks: three class pedestals and the 24-variant city gate.
@@ -20,7 +19,6 @@ import org.jspecify.annotations.NullMarked;
  * calls, which forces that initialisation. Placeholder textures reference vanilla blocks until the
  * final art lands (see the asset JSONs).
  */
-@NullMarked
 public final class PrologueBlocks {
 
     private PrologueBlocks() {

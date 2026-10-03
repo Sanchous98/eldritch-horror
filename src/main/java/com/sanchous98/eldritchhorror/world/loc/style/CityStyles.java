@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.world.loc.style;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The single mapping from a curated city to its {@link CityStyle}. <b>Owned centrally — workers
@@ -54,7 +55,7 @@ public final class CityStyles {
     }
 
     /** The style for a curated city, or the fallback gothic style if none is defined. */
-    public static CityStyle forCity(String cityName) {
+    public static CityStyle forCity(@Nullable String cityName) {
         if (cityName == null) {
             return FALLBACK;
         }

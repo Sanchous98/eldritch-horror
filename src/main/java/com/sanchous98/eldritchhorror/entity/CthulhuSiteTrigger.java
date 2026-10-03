@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Bounded, deterministic, once-per-site trigger for {@link Cthulhu}. Server-authoritative and
@@ -90,7 +91,7 @@ public final class CthulhuSiteTrigger {
     }
 
     /** The registered site by id, or {@code null} if the registry has not been populated yet. */
-    private static Location site() {
+    private static @Nullable Location site() {
         return Locations.all().stream().filter(candidate -> candidate.id().equals(SITE_ID))
                 .findFirst().orElse(null);
     }

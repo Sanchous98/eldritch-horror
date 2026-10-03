@@ -15,7 +15,6 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * Stamps the authored Threshold hub once, when the server starts.
@@ -34,7 +33,6 @@ import org.jspecify.annotations.NullMarked;
  * chunks are generated (not left permanently loaded) and the island is written to disk. Placement
  * uses {@link Block#UPDATE_ALL} because the hub is small and settled before any player can arrive.
  */
-@NullMarked
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class ThresholdPlacement {
 

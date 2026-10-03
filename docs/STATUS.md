@@ -176,6 +176,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   closes already handled by try-with-resources → 76 false positives. `GuardLogStatement` fires on
   every parameterised `{}` log call (~15). Both documented as deliberate exclusions in the ruleset;
   still 0 violations.
+- **Deprecated `appendHoverText` removed.** Consumable tooltips now go through NeoForge's
+  `RegisterTooltipAppendersEvent` (mod bus) → one `TooltipAppenders` appender at
+  `TooltipLocation.POST_CUSTOM`, matching the old lines. No vanilla `@Deprecated` hook remains.
+- **Nullness: all 24 packages are `@NullMarked`** via `package-info.java`. Legal null returns are
+  annotated `@Nullable` (registry lookups, `server.getLevel`, `getChunkNow`, `getAttribute`); the
+  mixin package stays unmarked.
 
 ## Known limitations / deferred
 

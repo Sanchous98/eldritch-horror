@@ -1,7 +1,6 @@
 package com.sanchous98.eldritchhorror.classes;
 
 import net.minecraft.network.chat.Component;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -13,7 +12,6 @@ import org.jspecify.annotations.Nullable;
  * {@code ...eldritchhorror.class}: {@code class} is a Java reserved keyword and cannot be a package
  * segment. See the handoff note in {@code docs/PROLOGUE-CONTRACT.md}.
  */
-@NullMarked
 public enum ClassId {
     INVESTIGATOR("investigator"),
     OCCULTIST("occultist"),

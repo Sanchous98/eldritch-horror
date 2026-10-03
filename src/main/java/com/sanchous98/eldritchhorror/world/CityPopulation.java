@@ -27,6 +27,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Actively populates the curated city districts with villagers so their streets feel busy. These
@@ -186,7 +187,7 @@ public final class CityPopulation {
      * enclosed. Requires a hard ground block below, two air blocks at the spawn and open sky, so a
      * villager lands on the street rather than in water or inside a building's walled interior.
      */
-    private static BlockPos surfaceSpot(ServerLevel level, int x, int z) {
+    private static @Nullable BlockPos surfaceSpot(ServerLevel level, int x, int z) {
         if (!level.hasChunkAt(x, z)) {
             return null;
         }

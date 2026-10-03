@@ -21,6 +21,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The world-effect layer of the per-chunk {@link CorruptionSystem#getTaint taint field}: once a
@@ -54,8 +55,8 @@ public final class TaintWorld {
     private static final int PARTICLE_ONE_IN = 4;
 
     /** Resolved once from the registry; {@code null} until the mod's corrupted blocks exist. */
-    private static Block taintedSoil;
-    private static Block corruptStone;
+    private static @Nullable Block taintedSoil;
+    private static @Nullable Block corruptStone;
 
     private TaintWorld() {
     }
@@ -161,7 +162,7 @@ public final class TaintWorld {
      * {@code corrupt_stone}. Anything else (logs, leaves, ores, our blocks, builds) returns
      * {@code null} and is left alone.
      */
-    private static BlockState corruptFor(BlockState state) {
+    private static @Nullable BlockState corruptFor(BlockState state) {
         if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.COARSE_DIRT)
                 || state.is(Blocks.PODZOL) || state.is(Blocks.MYCELIUM) || state.is(Blocks.MOSS_BLOCK)
                 || state.is(Blocks.SAND) || state.is(Blocks.RED_SAND) || state.is(Blocks.GRAVEL)

@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.event;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Registry of {@link EldritchEvent}s, mirroring {@code SanitySources}/{@code Locations}: register
@@ -36,7 +37,7 @@ public final class Events {
     }
 
     /** The event with {@code id}, or {@code null}. */
-    public static EldritchEvent byId(String id) {
+    public static @Nullable EldritchEvent byId(@Nullable String id) {
         init();
         return id == null ? null : BY_ID.get(id);
     }

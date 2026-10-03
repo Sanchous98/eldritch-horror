@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Shared, bounded support for the bestiary: a deterministic per-player spawner and the
@@ -113,7 +114,7 @@ public final class BestiarySupport {
      * tainted chunk) it may also be a cave/indoor floor, so a tainted area genuinely spawns in the
      * dark. Same conservative gate as {@code CityPopulation.surfaceSpot}.
      */
-    public static BlockPos surfaceSpot(ServerLevel level, int x, int z, boolean allowUnderground) {
+    public static @Nullable BlockPos surfaceSpot(ServerLevel level, int x, int z, boolean allowUnderground) {
         if (!level.hasChunkAt(x, z)) {
             return null;
         }
@@ -144,7 +145,7 @@ public final class BestiarySupport {
      * it scans downward from {@code maxY} and only accepts a floor that does not see the sky. Used by
      * the deep-cave presence (Nyogtha); loaded chunks only, never force-loads.
      */
-    public static BlockPos undergroundSpot(ServerLevel level, int x, int z, int maxY) {
+    public static @Nullable BlockPos undergroundSpot(ServerLevel level, int x, int z, int maxY) {
         if (!level.hasChunkAt(x, z)) {
             return null;
         }

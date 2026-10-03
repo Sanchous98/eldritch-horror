@@ -11,6 +11,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Bounded, loaded-chunks-only lookup of open rift anchors (the {@code rift_anchor} block placed by
@@ -27,7 +28,7 @@ public final class Rifts {
     private static final String ANCHOR_ID = "rift_anchor";
 
     /** Cached resolved anchor block; {@link Blocks#AIR} means it is missing (treat as none). */
-    private static Block anchorBlock;
+    private static @Nullable Block anchorBlock;
 
     private Rifts() {
     }
@@ -61,7 +62,7 @@ public final class Rifts {
     }
 
     /** The anchor block, or {@code null} while it is missing (unresolved or {@link Blocks#AIR}). */
-    private static Block resolve() {
+    private static @Nullable Block resolve() {
         if (anchorBlock == null) {
             anchorBlock = BuiltInRegistries.BLOCK.getValue(EldritchHorror.id(ANCHOR_ID));
         }

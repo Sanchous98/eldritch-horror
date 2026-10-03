@@ -19,6 +19,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Bounded spawner for {@link RisenHusk}. Vanilla mobs are removed ({@code world/MobSuppressor}), and
@@ -119,7 +120,7 @@ public final class RisenHuskSpawner {
      * surface it must see the sky; if {@code allowUnderground} (a tainted chunk) it may also be a
      * cave/indoor floor, so a tainted area genuinely spawns husks in the dark.
      */
-    private static BlockPos surfaceSpot(ServerLevel level, int x, int z, boolean allowUnderground) {
+    private static @Nullable BlockPos surfaceSpot(ServerLevel level, int x, int z, boolean allowUnderground) {
         if (!level.hasChunkAt(x, z)) {
             return null;
         }

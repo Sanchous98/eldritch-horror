@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Server-authoritative access to a player's codex, layered over the synced
@@ -70,7 +71,7 @@ public final class CodexAPI {
     }
 
     /** @return the entry id for {@code id}, or {@code null} if the id is not a codex entry. */
-    public static CodexEntry entry(String id) {
+    public static @Nullable CodexEntry entry(String id) {
         return CodexRegistry.byId(id);
     }
 

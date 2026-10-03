@@ -10,7 +10,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * A starting-class pedestal in the Threshold. Right-click chooses the block's {@link ClassId} via
@@ -21,7 +20,6 @@ import org.jspecify.annotations.NullMarked;
  * <p>Server-authoritative: only the server touches the class state; the client path returns success
  * so the arm swings.
  */
-@NullMarked
 public class ClassPedestalBlock extends Block {
 
     private final ClassId classId;

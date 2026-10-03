@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * The authored {@code eldritch_horror:threshold} dimension and its fixed geometry. The dimension
@@ -16,7 +15,6 @@ import org.jspecify.annotations.NullMarked;
  * <p>All vertical constants are expressed against the dimension's {@code min_y} of {@code -64}: the
  * generator's top solid block sits at {@link #FLOOR_Y} and a player stands at {@link #SURFACE_Y}.
  */
-@NullMarked
 public final class Threshold {
 
     /** The dimension key, matching {@code data/eldritch_horror/dimension/threshold.json}. */

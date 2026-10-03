@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.world;
 
 import java.io.IOException;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Server-side access to the baked {@link EarthMap}. The layers are read once, lazily, from
@@ -13,13 +14,13 @@ public final class EarthMaps {
     /** Pixel width of the baked layers (8 blocks/pixel). Must match the baked assets. */
     public static final int PIXEL_WIDTH = 16384;
 
-    private static volatile EarthMap instance;
+    private static volatile @Nullable EarthMap instance;
 
     private EarthMaps() {
     }
 
     /** @return the loaded map, or {@code null} if the layers are missing (never throws). */
-    public static EarthMap getOrNull() {
+    public static @Nullable EarthMap getOrNull() {
         EarthMap local = instance;
         if (local == null) {
             synchronized (EarthMaps.class) {

@@ -11,7 +11,6 @@ import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -26,7 +25,6 @@ import org.jspecify.annotations.Nullable;
  * archetype's kit, starting rites and the {@code max_sanity} attribute bonus.
  * See {@code design/14-classes.md} and {@code design/29-prologue.md}.
  */
-@NullMarked
 public final class ClassAPI {
 
     /**

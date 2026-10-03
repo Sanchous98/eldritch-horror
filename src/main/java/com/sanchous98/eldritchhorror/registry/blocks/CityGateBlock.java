@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * One of the 24 destination gates in the Threshold. The {@link #CITY} property (0–23) indexes
@@ -26,7 +25,6 @@ import org.jspecify.annotations.NullMarked;
  * persists in the world save with no extra state. No property is user-settable beyond the 24
  * variants stamped by {@code world.threshold.ThresholdPlacement}.
  */
-@NullMarked
 public class CityGateBlock extends Block {
 
     /** The curated-city index, matching the order of {@link Cities#all()}. */

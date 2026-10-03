@@ -26,6 +26,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Dev-only, server-side top-down + isometric PNG renderer for the generated cities.
@@ -99,8 +100,8 @@ public final class CityRenderer {
         int isoH;
         int isoOffY;
         int isoDepth;
-        BufferedImage top;
-        BufferedImage iso;
+        @Nullable BufferedImage top;
+        @Nullable BufferedImage iso;
 
         CityTask(City city, ServerLevel level, File dir) {
             this(city, level, dir, -1);
@@ -148,7 +149,7 @@ public final class CityRenderer {
         int index;
     }
 
-    private static volatile Session active;
+    private static volatile @Nullable Session active;
 
     private CityRenderer() {
     }

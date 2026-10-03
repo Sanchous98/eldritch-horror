@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.cult;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A data-driven cult (faction): identity, domain, an ordered rank ladder, services, demands,
@@ -42,7 +43,7 @@ public record CultDefinition(
     }
 
     /** @return the service with {@code serviceId}, or {@code null} if this cult does not offer it. */
-    public CultService service(String serviceId) {
+    public @Nullable CultService service(String serviceId) {
         for (CultService service : services) {
             if (service.id().equals(serviceId)) {
                 return service;

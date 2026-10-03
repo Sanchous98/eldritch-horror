@@ -6,7 +6,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jspecify.annotations.NullMarked;
 
 /**
  * The one data table for class archetypes: {@link ClassId} → starting kit and starting rites, from
@@ -17,7 +16,6 @@ import org.jspecify.annotations.NullMarked;
  * {@code rite/RiteEngine} uses), because the item registry only exposes them as deferred holders
  * without per-item constants. This class is touched at gameplay time, never during registration.
  */
-@NullMarked
 public final class Classes {
 
     private Classes() {

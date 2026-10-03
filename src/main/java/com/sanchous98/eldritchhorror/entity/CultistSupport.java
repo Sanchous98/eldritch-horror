@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Small shared helper for the cult faction ({@code design/25-bestiary-and-entities.md},
@@ -75,7 +76,7 @@ public final class CultistSupport {
      * below {@code threshold} (the config's {@code cultHostileBelow}, default {@code 0} — i.e. below
      * the {@code OUTSIDER} band). Unknown cults are never hostile.
      */
-    public static boolean hostileTo(ServerPlayer player, String cultId, int threshold) {
+    public static boolean hostileTo(ServerPlayer player, @Nullable String cultId, int threshold) {
         return cultId != null && Cults.byId(cultId) != null
                 && CultSystem.get(player, cultId) < threshold;
     }

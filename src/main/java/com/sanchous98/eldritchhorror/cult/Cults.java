@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The cult registry: the three seed cults. A Java registry for now; a datapack loader can populate
@@ -75,7 +76,7 @@ public final class Cults {
     }
 
     /** @return the definition for {@code id}, or {@code null} if unknown. */
-    public static CultDefinition byId(String id) {
+    public static @Nullable CultDefinition byId(String id) {
         return BY_ID.get(id);
     }
 
