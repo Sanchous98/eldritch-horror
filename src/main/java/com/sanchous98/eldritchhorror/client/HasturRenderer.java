@@ -7,14 +7,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Hastur: the vanilla wither model (a many-part, floating silhouette) with
  * our own flat placeholder texture. Art is the user's job.
  */
-@OnlyIn(Dist.CLIENT)
 public final class HasturRenderer extends MobRenderer<Hastur, WitherRenderState, WitherBossModel> {
 
     private static final Identifier TEXTURE =

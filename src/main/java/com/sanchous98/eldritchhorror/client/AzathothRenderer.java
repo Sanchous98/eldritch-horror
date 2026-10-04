@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Azathoth: the vanilla wither model (a floating, many-part silhouette)
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code MobRenderer<Azathoth, WitherRenderState, WitherBossModel>}; only {@code createRenderState()}
  * and {@code getTextureLocation(state)} are abstract.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AzathothRenderer extends MobRenderer<Azathoth, WitherRenderState, WitherBossModel> {
 
     private static final Identifier TEXTURE =

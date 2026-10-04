@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Nyarlathotep: the vanilla villager model (the trusted face) with our own
@@ -18,7 +16,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code VillagerRenderState}, only {@code createRenderState()} and {@code getTextureLocation} to
  * implement.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NyarlathotepRenderer
         extends MobRenderer<Nyarlathotep, VillagerRenderState, VillagerModel> {
 

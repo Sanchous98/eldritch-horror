@@ -8,8 +8,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.IllagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderers for the two melee cult soldiers — {@link CultZealot} and {@link CultRaider}.
@@ -22,7 +20,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code HumanoidMobRenderer}); {@code IllagerRenderState} is a {@code LivingEntityRenderState}, and
  * {@code ModelLayers.PILLAGER} is the baked illager body layer.
  */
-@OnlyIn(Dist.CLIENT)
 public final class CultistRenderers {
 
     private CultistRenderers() {

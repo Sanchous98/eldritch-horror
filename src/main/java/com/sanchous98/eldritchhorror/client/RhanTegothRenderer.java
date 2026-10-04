@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.IronGolemRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Rhan-Tegoth: the vanilla iron golem model (a standing carved shape, which
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code IronGolemRenderState}, only {@code createRenderState()} and {@code getTextureLocation} to
  * implement.
  */
-@OnlyIn(Dist.CLIENT)
 public final class RhanTegothRenderer
         extends MobRenderer<RhanTegoth, IronGolemRenderState, IronGolemModel> {
 

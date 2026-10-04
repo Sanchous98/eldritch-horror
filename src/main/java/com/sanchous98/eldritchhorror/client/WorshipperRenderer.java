@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the worshipper: a {@link MobRenderer} over the vanilla villager model,
@@ -20,7 +18,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code VillagerRenderer} is an {@code AgeableMobRenderer}; we take the plain {@code MobRenderer}
  * shape and need only {@code createRenderState()} + {@code getTextureLocation(state)}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class WorshipperRenderer extends MobRenderer<Worshipper, VillagerRenderState, VillagerModel> {
 
     private static final Identifier TEXTURE =

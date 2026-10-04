@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.EndermanRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the star-spawn: the same verified enderman shape as
@@ -20,7 +18,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * EndermanRenderState> extends HumanoidModel<T>} and {@code HumanoidMobRenderer<T, S, M extends
  * HumanoidModel<S>>}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class StarSpawnRenderer
         extends HumanoidMobRenderer<StarSpawn, EndermanRenderState, EndermanModel<EndermanRenderState>> {
 

@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the weaver spawn: a {@link MobRenderer} over the vanilla spider model,
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * <p>26.3 verified: {@code SpiderModel extends EntityModel<LivingEntityRenderState>}; the
  * 180-degree flip is kept so it reads on wall and ceiling.
  */
-@OnlyIn(Dist.CLIENT)
 public final class WeaverSpawnRenderer
         extends MobRenderer<WeaverSpawn, LivingEntityRenderState, SpiderModel> {
 

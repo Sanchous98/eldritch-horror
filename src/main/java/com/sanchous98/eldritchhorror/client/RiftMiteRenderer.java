@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the rift mite: a {@link MobRenderer} over the vanilla endermite model,
@@ -21,7 +19,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * EndermiteModel>}; we mirror it with our own entity type and texture. The 180-degree flip is kept so
  * it skitters on walls/ceilings.
  */
-@OnlyIn(Dist.CLIENT)
 public final class RiftMiteRenderer
         extends MobRenderer<RiftMite, LivingEntityRenderState, EndermiteModel> {
 

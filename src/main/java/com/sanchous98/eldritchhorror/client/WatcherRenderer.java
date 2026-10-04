@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.EndermanRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the Watcher: a {@link HumanoidMobRenderer} over the vanilla enderman
@@ -21,7 +19,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code HumanoidMobRenderer<Watcher, EndermanRenderState, EndermanModel<EndermanRenderState>>} is
  * the correct shape. {@code EndermanRenderState} extends {@code HumanoidRenderState}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class WatcherRenderer
         extends HumanoidMobRenderer<Watcher, EndermanRenderState, EndermanModel<EndermanRenderState>> {
 

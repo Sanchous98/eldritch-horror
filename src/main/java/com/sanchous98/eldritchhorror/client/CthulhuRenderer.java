@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.RavagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Cthulhu: a {@link MobRenderer} over the vanilla ravager quadruped model,
@@ -21,7 +19,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * and {@code getTextureLocation(state)} are abstract. The ravager animation fields default to 0
  * here (no custom extract), which reads as a slow lumbering walk — acceptable for a placeholder.
  */
-@OnlyIn(Dist.CLIENT)
 public final class CthulhuRenderer extends MobRenderer<Cthulhu, RavagerRenderState, RavagerModel> {
 
     private static final Identifier TEXTURE =

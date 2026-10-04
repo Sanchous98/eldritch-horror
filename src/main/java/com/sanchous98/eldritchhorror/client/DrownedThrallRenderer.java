@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.ZombieRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the drowned thrall: a {@link HumanoidMobRenderer} over the vanilla zombie
@@ -17,7 +15,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * drowned model, whose swim pose reads the vanilla {@code Drowned} state we do not implement. Art
  * is the user's job.
  */
-@OnlyIn(Dist.CLIENT)
 public final class DrownedThrallRenderer
         extends HumanoidMobRenderer<DrownedThrall, ZombieRenderState, ZombieModel<ZombieRenderState>> {
 

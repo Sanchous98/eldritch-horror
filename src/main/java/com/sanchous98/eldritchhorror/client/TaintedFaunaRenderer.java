@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for tainted fauna: a {@link MobRenderer} over the vanilla cow quadruped
@@ -20,7 +18,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@link LivingEntityRenderState} is the matching render state; {@code MobRenderer} leaves only
  * {@code createRenderState()} and {@code getTextureLocation(state)} to implement.
  */
-@OnlyIn(Dist.CLIENT)
 public final class TaintedFaunaRenderer
         extends MobRenderer<TaintedFauna, LivingEntityRenderState, CowModel> {
 

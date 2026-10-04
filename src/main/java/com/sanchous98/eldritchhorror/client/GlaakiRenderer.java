@@ -8,8 +8,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.SlimeRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Glaaki: the vanilla slime model (a green half-drowned mass) with our own
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * fixed {@code SlimeRenderState.size} plus the {@link #scale} override draws a body matching the
  * 1.6-block hitbox without a custom layer.
  */
-@OnlyIn(Dist.CLIENT)
 public final class GlaakiRenderer extends MobRenderer<Glaaki, SlimeRenderState, SlimeModel> {
 
     private static final Identifier TEXTURE =

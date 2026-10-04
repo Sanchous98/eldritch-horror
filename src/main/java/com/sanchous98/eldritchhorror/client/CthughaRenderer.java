@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Cthugha: the vanilla blaze model (a hovering fire) with our own flat
@@ -18,7 +16,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code BlazeRenderer} is a {@code MobRenderer<Blaze, LivingEntityRenderState, BlazeModel>}; we take
  * the same shape and need only {@code createRenderState()} + {@code getTextureLocation(state)}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class CthughaRenderer
         extends MobRenderer<Cthugha, LivingEntityRenderState, BlazeModel> {
 

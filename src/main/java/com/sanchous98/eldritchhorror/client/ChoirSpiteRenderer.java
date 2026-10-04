@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.VexRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the choir spite: a {@link MobRenderer} over the vanilla vex model, with
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code VexRenderer} is {@code MobRenderer<Vex, VexRenderState, VexModel>}. The model uses the
  * translucent render type, so the placeholder texture must keep the wing area transparent.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ChoirSpiteRenderer extends MobRenderer<ChoirSpite, VexRenderState, VexModel> {
 
     private static final Identifier TEXTURE =

@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the veil stalker: a {@link MobRenderer} over the vanilla spider model,
@@ -20,7 +18,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@link LivingEntityRenderState} is the matching render state; vanilla {@code SpiderRenderer} is the
  * same shape. The {@code SpiderEyesLayer} is not added — we have no eye texture yet.
  */
-@OnlyIn(Dist.CLIENT)
 public final class VeilStalkerRenderer
         extends MobRenderer<VeilStalker, LivingEntityRenderState, SpiderModel> {
 

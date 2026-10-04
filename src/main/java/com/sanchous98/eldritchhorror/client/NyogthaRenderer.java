@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Nyogtha: the vanilla silverfish model (a segmented thing under the floor)
@@ -18,7 +16,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code SilverfishRenderer} is a {@code MobRenderer<Silverfish, LivingEntityRenderState,
  * SilverfishModel>} with a 180-degree flip (it walks on ceilings); we mirror both.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NyogthaRenderer
         extends MobRenderer<Nyogtha, LivingEntityRenderState, SilverfishModel> {
 

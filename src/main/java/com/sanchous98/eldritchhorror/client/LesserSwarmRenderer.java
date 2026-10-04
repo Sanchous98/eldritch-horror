@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the lesser swarm: a {@link MobRenderer} over the vanilla silverfish
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code MobRenderer<Silverfish, LivingEntityRenderState, SilverfishModel>}; we mirror it with our
  * own entity type and texture. The 180-degree flip is kept so it skitters on walls/ceilings.
  */
-@OnlyIn(Dist.CLIENT)
 public final class LesserSwarmRenderer
         extends MobRenderer<LesserSwarm, LivingEntityRenderState, SilverfishModel> {
 

@@ -10,7 +10,8 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 /**
  * Client-only entity renderer registration. Guarded by {@code @EventBusSubscriber(value = Dist.CLIENT)}
  * so the dedicated server never loads {@link RisenHuskRenderer} or any of the client model classes
- * it references (the whole renderer class is {@code @OnlyIn(Dist.CLIENT)}).
+ * it references. (No {@code @OnlyIn}: 26.3 removed its runtime member-stripping, so it is inert and
+ * now only emits a load warning — the Dist-guarded subscriber is the real protection.)
  *
  * <p>26.3 verified: {@code EntityRenderersEvent.RegisterRenderers} implements {@code IModBusEvent}
  * and exposes {@code registerEntityRenderer(EntityType, EntityRendererProvider)}.

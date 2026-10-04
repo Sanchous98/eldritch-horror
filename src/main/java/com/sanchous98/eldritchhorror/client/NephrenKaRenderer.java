@@ -7,14 +7,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.ZombieRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Nephren-Ka: a humanoid king over the vanilla zombie model with our own
  * flat placeholder texture. Art is the user's job.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NephrenKaRenderer
         extends HumanoidMobRenderer<NephrenKa, ZombieRenderState, ZombieModel<ZombieRenderState>> {
 

@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Yig: the vanilla slime cube model with our own flat placeholder texture
@@ -21,7 +19,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * cube-mob renderer, but the plain shape is enough for a placeholder.) Only {@code createRenderState()}
  * and {@code getTextureLocation(state)} are abstract.
  */
-@OnlyIn(Dist.CLIENT)
 public final class YigRenderer extends MobRenderer<Yig, LivingEntityRenderState, SlimeModel> {
 
     private static final Identifier TEXTURE =

@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.PhantomRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the night hag: a {@link MobRenderer} over the vanilla phantom model, with
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * <p>26.3 verified: {@code PhantomModel extends EntityModel<PhantomRenderState>} and vanilla
  * {@code PhantomRenderer} is {@code MobRenderer<Phantom, PhantomRenderState, PhantomModel>}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NightHagRenderer extends MobRenderer<NightHag, PhantomRenderState, PhantomModel> {
 
     private static final Identifier TEXTURE =

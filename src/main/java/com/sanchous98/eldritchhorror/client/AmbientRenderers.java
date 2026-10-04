@@ -20,8 +20,6 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.state.SquidRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderers for the ambient (ambience) drifters. Art is the user's job, so each mob
@@ -34,7 +32,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@link AllayRenderState}; {@code TadpoleModel}/{@code CodModel} state
  * {@link LivingEntityRenderState}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AmbientRenderers {
 
     private static final String NS = "eldritch_horror";

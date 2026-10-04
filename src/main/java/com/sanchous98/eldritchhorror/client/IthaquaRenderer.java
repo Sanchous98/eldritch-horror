@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.WardenRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Ithaqua: the vanilla warden model (a tall, hunched silhouette) with our
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code MobRenderer<Ithaqua, WardenRenderState, WardenModel>}. We deliberately do not add the
  * warden's emissive layers (they need warden-specific render-state animations).
  */
-@OnlyIn(Dist.CLIENT)
 public final class IthaquaRenderer extends MobRenderer<Ithaqua, WardenRenderState, WardenModel> {
 
     private static final Identifier TEXTURE =

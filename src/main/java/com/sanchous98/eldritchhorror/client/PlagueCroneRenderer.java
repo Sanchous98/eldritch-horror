@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.WitchRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the plague crone: a {@link MobRenderer} over the vanilla witch model — the
@@ -18,7 +16,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * <p>26.3 verified: {@code WitchModel extends EntityModel<WitchRenderState>} and vanilla
  * {@code WitchRenderer} is a {@code MobRenderer<Witch, WitchRenderState, WitchModel>}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class PlagueCroneRenderer extends MobRenderer<PlagueCrone, WitchRenderState, WitchModel> {
 
     private static final Identifier TEXTURE =

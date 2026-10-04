@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.PhantomRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the byakhee: a {@link MobRenderer} over the vanilla phantom model, with
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * mirror it and drive the wings from the entity id + age exactly as the phantom does, with a fixed
  * size of 0 (no scaling).
  */
-@OnlyIn(Dist.CLIENT)
 public final class ByakheeRenderer extends MobRenderer<Byakhee, PhantomRenderState, PhantomModel> {
 
     private static final Identifier TEXTURE =

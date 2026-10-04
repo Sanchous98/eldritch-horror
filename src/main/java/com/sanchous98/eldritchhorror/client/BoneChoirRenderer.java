@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.SkeletonRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the bone choir: a {@link HumanoidMobRenderer} over the vanilla skeleton
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * and vanilla {@code SkeletonRenderer} is an {@code AbstractSkeletonRenderer}; we take the plain
  * {@code HumanoidMobRenderer} shape and set {@code isAggressive} ourselves so the arms raise.
  */
-@OnlyIn(Dist.CLIENT)
 public final class BoneChoirRenderer
         extends HumanoidMobRenderer<BoneChoir, SkeletonRenderState, SkeletonModel<SkeletonRenderState>> {
 

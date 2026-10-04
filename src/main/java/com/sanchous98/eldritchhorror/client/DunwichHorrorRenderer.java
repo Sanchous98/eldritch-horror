@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.RavagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the Dunwich Horror: the vanilla ravager quadruped model and a flat
@@ -18,7 +16,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@code RavagerRenderState}, only {@code createRenderState()} and {@code getTextureLocation} to
  * implement.
  */
-@OnlyIn(Dist.CLIENT)
 public final class DunwichHorrorRenderer
         extends MobRenderer<DunwichHorror, RavagerRenderState, RavagerModel> {
 

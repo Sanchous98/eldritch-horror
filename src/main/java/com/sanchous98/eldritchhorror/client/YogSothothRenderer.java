@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Yog-Sothoth: the vanilla wither model, scaled up, with our own flat
@@ -16,7 +14,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  *
  * <p>26.3 verified as for {@link AzathothRenderer}: {@code WitherBossModel} + {@code WitherRenderState}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class YogSothothRenderer extends MobRenderer<YogSothoth, WitherRenderState, WitherBossModel> {
 
     private static final Identifier TEXTURE =

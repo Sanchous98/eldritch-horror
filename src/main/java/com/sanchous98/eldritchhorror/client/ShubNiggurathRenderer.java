@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.RavagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Shub-Niggurath: the vanilla ravager quadruped model, with a flat
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  *
  * <p>26.3 verified as for {@link CthulhuRenderer}: {@code RavagerModel} + {@code RavagerRenderState}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ShubNiggurathRenderer
         extends MobRenderer<ShubNiggurath, RavagerRenderState, RavagerModel> {
 

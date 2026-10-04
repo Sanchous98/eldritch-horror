@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Atlach-Nacha: the vanilla spider model with our own flat placeholder
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * EntityModel<LivingEntityRenderState>}, so the shape is
  * {@code MobRenderer<AtlachNacha, LivingEntityRenderState, SpiderModel>}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AtlachNachaRenderer
         extends MobRenderer<AtlachNacha, LivingEntityRenderState, SpiderModel> {
 

@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the blight pod: a {@link MobRenderer} over the vanilla creeper model,
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * mirror it with our own entity type and texture. The swelling scale/overlay is deliberately not
  * carried over (the pod does not charge), so the default {@code swelling = 0} reads as a plain walk.
  */
-@OnlyIn(Dist.CLIENT)
 public final class BlightPodRenderer extends MobRenderer<BlightPod, CreeperRenderState, CreeperModel> {
 
     private static final Identifier TEXTURE =

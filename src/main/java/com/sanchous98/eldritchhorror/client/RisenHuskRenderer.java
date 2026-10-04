@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.ZombieRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the risen husk: a {@link HumanoidMobRenderer} over the vanilla zombie
@@ -22,7 +20,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * constructor {@code (context, model, shadow)} passes the model as its own baby model, so no second
  * bake is needed. {@code ZombieRenderState} is the matching render state for {@link ZombieModel}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class RisenHuskRenderer
         extends HumanoidMobRenderer<RisenHusk, ZombieRenderState, ZombieModel<ZombieRenderState>> {
 

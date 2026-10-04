@@ -45,8 +45,6 @@ import net.minecraft.client.renderer.entity.state.SheepRenderState;
 import net.minecraft.client.renderer.entity.state.TurtleRenderState;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderers for the mundane passive roster. Art is the user's job, so each mob reuses an
@@ -62,7 +60,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@link PandaRenderState}, {@link TurtleRenderState}, {@link BeeRenderState},
  * {@link IronGolemRenderState}).
  */
-@OnlyIn(Dist.CLIENT)
 public final class PassiveRenderers {
 
     private static final String NS = "eldritch_horror";

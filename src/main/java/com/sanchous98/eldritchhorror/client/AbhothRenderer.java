@@ -8,14 +8,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.SlimeRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Abhoth: the vanilla slime model scaled up (a huge, churning mass) with
  * our own flat placeholder texture. Art is the user's job.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AbhothRenderer extends MobRenderer<Abhoth, SlimeRenderState, SlimeModel> {
 
     private static final Identifier TEXTURE =

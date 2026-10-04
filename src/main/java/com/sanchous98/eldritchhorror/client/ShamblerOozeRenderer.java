@@ -8,8 +8,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.SlimeRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the shambler ooze: a {@link MobRenderer} over the vanilla slime model,
@@ -21,7 +19,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * <p>26.3 verified: {@code SlimeModel extends EntityModel<EntityRenderState>}; the {@link #scale}
  * override reproduces vanilla's {@code AbstractCubeMobRenderer.applySizeAndSquish}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ShamblerOozeRenderer
         extends MobRenderer<ShamblerOoze, SlimeRenderState, SlimeModel> {
 

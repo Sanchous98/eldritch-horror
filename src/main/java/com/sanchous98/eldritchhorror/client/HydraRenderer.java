@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the Hydra: the vanilla creeper model (a single head, which is the joke)
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * deliberately omit its power layer and need only {@code createRenderState()} +
  * {@code getTextureLocation(state)}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class HydraRenderer extends MobRenderer<Hydra, CreeperRenderState, CreeperModel> {
 
     private static final Identifier TEXTURE =

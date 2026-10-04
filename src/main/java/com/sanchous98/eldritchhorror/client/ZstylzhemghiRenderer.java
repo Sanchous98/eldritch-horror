@@ -7,14 +7,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for Zstylzhemghi: the vanilla creeper model (a tall, wrong silhouette) with
  * our own flat placeholder texture. Art is the user's job.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ZstylzhemghiRenderer
         extends MobRenderer<Zstylzhemghi, CreeperRenderState, CreeperModel> {
 

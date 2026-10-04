@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.IllagerRenderState;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Placeholder renderer for the rite binder: the vanilla illager body in the caster's spellcasting
@@ -19,7 +17,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * which drives {@code IllagerModel}'s arms; {@code IllagerModel} is {@code EntityModel}-based, so
  * this is a {@link MobRenderer}.
  */
-@OnlyIn(Dist.CLIENT)
 public final class RiteBinderRenderer extends MobRenderer<RiteBinder, IllagerRenderState, IllagerModel<IllagerRenderState>> {
 
     private static final Identifier TEXTURE =
