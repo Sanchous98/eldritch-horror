@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.classes;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,6 +56,17 @@ public final class Classes {
             case OCCULTIST -> List.of("drowned_blessing");
             case CULTIST -> List.of("call_the_lesser");
         };
+    }
+
+    /** A one-line summary of the archetype's playstyle (design/14-classes.md). */
+    public static Component description(ClassId id) {
+        return Component.translatableWithFallback(
+                "class.eldritch_horror." + id.id() + ".desc",
+                switch (id) {
+                    case INVESTIGATOR -> "Sanity-resilient: beats the occult with tools and wards, not corruption.";
+                    case OCCULTIST -> "The scholar: learns rites faster and reads tomes with less backlash.";
+                    case CULTIST -> "Embraces corruption: strongest rituals and fastest reputation, fragile mind.";
+                });
     }
 
     private static ItemStack stack(String path, int count) {

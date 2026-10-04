@@ -4,8 +4,7 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.Component;import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -82,6 +81,30 @@ public final class ClassAPI {
         if (id != null) {
             applyMaxSanity(player, id);
         }
+    }
+
+    /**
+     * A non-committal preview of {@code id}: the fantasy, the starter kit and the starting rite, so a
+     * player can compare every archetype before choosing one (the choice itself is permanent).
+     */
+    public static void preview(ServerPlayer player, ClassId id) {
+        player.sendSystemMessage(Component.translatableWithFallback(
+                "class.eldritch_horror.preview_head", "— %s —", id.displayName()));
+        player.sendSystemMessage(Classes.description(id));
+        player.sendSystemMessage(Component.translatableWithFallback(
+                "class.eldritch_horror.preview_kit", "Starts with:"));
+        for (ItemStack stack : Classes.starterKit(id)) {
+            if (!stack.isEmpty()) {
+                player.sendSystemMessage(Component.literal("  • ").append(stack.getHoverName()));
+            }
+        }
+        for (String riteId : Classes.startingRites(id)) {
+            player.sendSystemMessage(Component.literal("  • ")
+                    .append(Component.translatable("rite.eldritch_horror." + riteId)));
+        }
+        player.sendSystemMessage(Component.translatableWithFallback(
+                "class.eldritch_horror.preview_confirm",
+                "Right-click the same pedestal again to choose this path."));
     }
 
     private static void grant(ServerPlayer player, ClassId id) {

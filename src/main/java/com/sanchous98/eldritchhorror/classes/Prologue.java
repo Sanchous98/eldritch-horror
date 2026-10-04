@@ -56,6 +56,12 @@ public final class Prologue {
             return;
         }
         teleport(player, target, Threshold.spawn());
+        if (!ClassAPI.hasChosen(player)) {
+            player.sendSystemMessage(Component.translatableWithFallback(
+                    "prologue.eldritch_horror.welcome",
+                    "The Threshold. Right-click a class pedestal to see a path, then again to choose it; "
+                            + "then walk into a city arch."));
+        }
     }
 
     /**

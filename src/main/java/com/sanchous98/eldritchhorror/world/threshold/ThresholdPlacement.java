@@ -3,14 +3,26 @@ package com.sanchous98.eldritchhorror.world.threshold;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.blocks.CityGateBlock;
 import com.sanchous98.eldritchhorror.registry.blocks.PrologueBlocks;
+import com.sanchous98.eldritchhorror.world.city.Cities;
+import com.sanchous98.eldritchhorror.world.city.City;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -55,8 +67,12 @@ public final class ThresholdPlacement {
 
     /** Number of destination gates, one per curated city. */
     private static final int GATE_COUNT = 24;
-    /** Height of each gate arch, in blocks. */
-    private static final int GATE_HEIGHT = 3;
+    /** Height of the walk-through opening: the portal column fills this many blocks above the floor. */
+    private static final int GATE_OPENING_HEIGHT = 3;
+    /** The lintel block sits directly on top of the opening. */
+    private static final int GATE_LINTEL_Y = Threshold.FLOOR_Y + GATE_OPENING_HEIGHT;
+    /** The standing sign sits one block above the lintel. */
+    private static final int GATE_SIGN_Y = GATE_LINTEL_Y + 1;
 
     /** How many chunks either side of the origin to force-load around the island. */
     private static final int FORCELOAD_CHUNK_RADIUS = 4;
@@ -144,26 +160,152 @@ public final class ThresholdPlacement {
         set(level, 0, Threshold.FLOOR_Y + 4, 0, Blocks.SEA_LANTERN.defaultBlockState());
     }
 
-    /** Places the three class pedestals in a triangle around the obelisk. */
+    /** Places the three class pedestals in a triangle around the obelisk, each raised on a plinth
+     * with a named sign so the choice is obvious in-game. */
     private static void buildPedestals(ServerLevel level) {
-        set(level, 0, Threshold.FLOOR_Y, -6, PrologueBlocks.INVESTIGATOR_PEDESTAL.get().defaultBlockState());
-        set(level, -5, Threshold.FLOOR_Y, 4, PrologueBlocks.OCCULTIST_PEDESTAL.get().defaultBlockState());
-        set(level, 5, Threshold.FLOOR_Y, 4, PrologueBlocks.CULTIST_PEDESTAL.get().defaultBlockState());
+        placePedestal(level, 0, -6, PrologueBlocks.INVESTIGATOR_PEDESTAL.get(), "Investigator");
+        placePedestal(level, -5, 4, PrologueBlocks.OCCULTIST_PEDESTAL.get(), "Occultist");
+        placePedestal(level, 5, 4, PrologueBlocks.CULTIST_PEDESTAL.get(), "Cultist");
     }
 
-    /** Lays the path band and raises the 24 evenly-spaced city gates around the platform. */
+    /**
+     * One raised pedestal: a chiseled-deepslate plinth on the platform, the pedestal block above
+     * it, and a standing sign (facing the obelisk) carrying the class name.
+     */
+    private static void placePedestal(ServerLevel level, int x, int z,
+                                      net.minecraft.world.level.block.Block pedestal, String name) {
+        set(level, x, Threshold.FLOOR_Y, z, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
+        set(level, x, Threshold.FLOOR_Y + 1, z, pedestal.defaultBlockState());
+        Direction facing = inwardFacing(Math.atan2(z, x));
+        placeSign(level, new BlockPos(x, Threshold.FLOOR_Y + 2, z), facing, name);
+    }
+
+    /**
+     * Lays the path band and raises the 24 evenly-spaced city gate arches around the platform. Each
+     * arch is one block wide and three tall, oriented along the dominant tangent axis so the player
+     * walks through it toward the ring centre, with a named standing sign over the lintel.
+     */
     private static void buildGateRing(ServerLevel level) {
         fillRing(level, 0, 0, GATE_PATH_INNER, GATE_PATH_OUTER, Threshold.FLOOR_Y,
                 Blocks.DEEPSLATE_TILES.defaultBlockState());
+        List<City> cities = Cities.all();
         for (int i = 0; i < GATE_COUNT; i++) {
             double angle = Math.toRadians(i * (360.0 / GATE_COUNT));
-            int x = (int) Math.round(GATE_RADIUS * Math.cos(angle));
-            int z = (int) Math.round(GATE_RADIUS * Math.sin(angle));
-            BlockState gate = PrologueBlocks.CITY_GATE.get().defaultBlockState()
-                    .setValue(CityGateBlock.CITY, i);
-            for (int y = 0; y < GATE_HEIGHT; y++) {
-                set(level, x, Threshold.FLOOR_Y + y, z, gate);
+            int cx = (int) Math.round(GATE_RADIUS * Math.cos(angle));
+            int cz = (int) Math.round(GATE_RADIUS * Math.sin(angle));
+            double tangentX = -Math.sin(angle);
+            double tangentZ = Math.cos(angle);
+            boolean alongX = Math.abs(tangentX) >= Math.abs(tangentZ);
+            buildGateArch(level, cx, cz, i, alongX);
+            if (i < cities.size()) {
+                placeGateSign(level, cx, cz, angle, cities.get(i).name());
             }
+        }
+    }
+
+    /**
+     * Builds one frame arch and its portal column. When {@code alongX} the opening runs along the X
+     * axis (posts offset in Z); otherwise along Z (posts offset in X). The two posts and the lintel
+     * form a 3 x 3 frame around the non-solid portal column.
+     */
+    private static void buildGateArch(ServerLevel level, int cx, int cz, int city, boolean alongX) {
+        BlockState frame = PrologueBlocks.CITY_GATE_FRAME.get().defaultBlockState();
+        if (alongX) {
+            set(level, cx, GATE_LINTEL_Y, cz - 1, frame);
+            set(level, cx, GATE_LINTEL_Y, cz, frame);
+            set(level, cx, GATE_LINTEL_Y, cz + 1, frame);
+            for (int y = Threshold.FLOOR_Y; y < GATE_LINTEL_Y; y++) {
+                set(level, cx, y, cz - 1, frame);
+                set(level, cx, y, cz + 1, frame);
+            }
+        } else {
+            set(level, cx - 1, GATE_LINTEL_Y, cz, frame);
+            set(level, cx, GATE_LINTEL_Y, cz, frame);
+            set(level, cx + 1, GATE_LINTEL_Y, cz, frame);
+            for (int y = Threshold.FLOOR_Y; y < GATE_LINTEL_Y; y++) {
+                set(level, cx - 1, y, cz, frame);
+                set(level, cx + 1, y, cz, frame);
+            }
+        }
+        BlockState gate = PrologueBlocks.CITY_GATE.get().defaultBlockState()
+                .setValue(CityGateBlock.CITY, city);
+        for (int y = Threshold.FLOOR_Y; y < GATE_LINTEL_Y; y++) {
+            set(level, cx, y, cz, gate);
+        }
+    }
+
+    /**
+     * Places a standing sign on top of an arch lintel, rotated to face the ring centre, with the
+     * city name word-wrapped to the sign's four lines.
+     */
+    private static void placeGateSign(ServerLevel level, int cx, int cz, double angle, String name) {
+        Direction inward = inwardFacing(angle);
+        placeSign(level, new BlockPos(cx, GATE_SIGN_Y, cz), inward, name);
+    }
+
+    /** Places a standing sign at {@code pos}, rotated to {@code facing}, with {@code name} on the front. */
+    private static void placeSign(ServerLevel level, BlockPos pos, Direction facing, String name) {
+        BlockState sign = Blocks.OAK_SIGN.defaultBlockState()
+                .setValue(StandingSignBlock.ROTATION, RotationSegment.convertToSegment(facing));
+        set(level, pos, sign);
+        if (level.getBlockEntity(pos) instanceof SignBlockEntity signEntity) {
+            List<Component> lines = wrapToFourLines(name);
+            signEntity.setText(new SignText(lines, lines, DyeColor.BLACK, false), SignTextSlot.FRONT);
+        }
+    }
+
+    /** @return the nearest cardinal direction pointing from the gate back toward the ring centre. */
+    private static Direction inwardFacing(double angle) {
+        int dx = (int) Math.round(-Math.cos(angle));
+        int dz = (int) Math.round(-Math.sin(angle));
+        Direction direction = Direction.getNearest(dx, 0, dz, Direction.NORTH);
+        return direction == null ? Direction.NORTH : direction;
+    }
+
+    /**
+     * Word-wraps {@code text} into at most four sign lines (<=15 chars each), padding the remainder
+     * with empty components. Falls back to hard splitting when a single word is too long.
+     */
+    private static List<Component> wrapToFourLines(String text) {
+        List<String> lines = new ArrayList<>(4);
+        StringBuilder current = new StringBuilder();
+        for (String word : text.split(" ")) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            while (word.length() > 15) {
+                appendLine(lines, current.toString());
+                current.setLength(0);
+                appendLine(lines, word.substring(0, 15));
+                word = word.substring(15);
+            }
+            if (current.isEmpty()) {
+                current.append(word);
+            } else if (current.length() + 1 + word.length() <= 15) {
+                current.append(' ').append(word);
+            } else {
+                appendLine(lines, current.toString());
+                current.setLength(0);
+                current.append(word);
+            }
+        }
+        if (!current.isEmpty()) {
+            appendLine(lines, current.toString());
+        }
+        while (lines.size() < 4) {
+            lines.add("");
+        }
+        List<Component> components = new ArrayList<>(4);
+        for (int i = 0; i < 4; i++) {
+            components.add(lines.get(i).isEmpty() ? Component.empty() : Component.literal(lines.get(i)));
+        }
+        return components;
+    }
+
+    /** Appends a non-blank line, ignoring overflow past the sign's four lines. */
+    private static void appendLine(List<String> lines, String line) {
+        if (!line.isEmpty() && lines.size() < 4) {
+            lines.add(line);
         }
     }
 
@@ -203,5 +345,9 @@ public final class ThresholdPlacement {
 
     private static void set(ServerLevel level, int x, int y, int z, BlockState state) {
         level.setBlock(new BlockPos(x, y, z), state, Block.UPDATE_ALL);
+    }
+
+    private static void set(ServerLevel level, BlockPos pos, BlockState state) {
+        level.setBlock(pos, state, Block.UPDATE_ALL);
     }
 }
