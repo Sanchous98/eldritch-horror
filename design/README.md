@@ -4,8 +4,7 @@
 bible is right until it is deliberately changed. Everything a designer, implementer, or
 artist needs to know about *what the game is* lives here.
 
-`docs/DESIGN.md` is a short summary; `docs/ARCHITECTURE.md` covers the code. This folder
-is the complete specification.
+`docs/ARCHITECTURE.md` covers the code. This folder is the complete specification.
 
 ## Reading order
 

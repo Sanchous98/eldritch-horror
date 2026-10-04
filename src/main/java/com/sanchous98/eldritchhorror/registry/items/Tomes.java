@@ -31,7 +31,7 @@ public final class Tomes {
         ModItems.add("codex_of_wards", 1, 0, 5, false);
         // Grants rite_of_cleansing — recovery of a corrupted area. Cost: sanity -15, corruption +5.
         ModItems.add("bone_ledger", 1, -15, 5, false);
-        // Grants open_rift — the Veil gate fast-travel branch. Cost: sanity -25, corruption +10.
+        // Grants open_rift — the rift-gate fast-travel branch. Cost: sanity -25, corruption +10.
         ModItems.add("atlas_of_the_veil", 1, -25, 10, false);
         // Grants respec (Rite of Unmaking) — a rewritten self. Cost: sanity -20 (08-rituals).
         ModItems.add("watchers_diary", 1, -20, 0, false);

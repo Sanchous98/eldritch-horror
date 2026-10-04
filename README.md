@@ -18,8 +18,7 @@ The mod is built on three RPG axes and one progression engine:
 | **Cult reputation** | Faction standing gating rites, reagents and services. | Social progression; cults oppose each other. |
 | **Rituals** | Data-driven altar recipes with a block pattern + offerings + outcomes. | Quest-like advancement and the mod's boss/content unlocks. |
 
-See [`design/`](design/README.md) for the complete design bible (source of truth), or
-[`docs/DESIGN.md`](docs/DESIGN.md) for a short summary and
+See [`design/`](design/README.md) for the complete design bible (source of truth), and
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the code is laid out.
 
 ## Requirements
@@ -227,15 +226,13 @@ The project is early; conventions are deliberately small:
   progression, the three axes (sanity/corruption/reputation), the ritual engine, factions, horror
   & atmosphere, endgame, multiplayer, UI/UX, and all content (rituals, cults, quests, classes,
   skills, items, mobs, bosses, events, map).
-- [`docs/DESIGN.md`](docs/DESIGN.md) — a short summary of the systems.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — code layout, layers and conventions.
 - [`docs/WORLDGEN.md`](docs/WORLDGEN.md) — the Overworld map generator (continents, oceans, vanilla biomes).
-- [`docs/DEVELOPMENT-PLAN.md`](docs/DEVELOPMENT-PLAN.md) — where to start.
 
 ## Roadmap & progress
 
-See [`docs/DEVELOPMENT-PLAN.md`](docs/DEVELOPMENT-PLAN.md) for **where to start** (the
-recommended order of work), and the board below for the full backlog.
+The project board (linked below) is the full backlog; `docs/STATUS.md` is the current handoff
+snapshot.
 
 Implementation is tracked as GitHub **issues** (one per story) grouped into
 **milestones** (`M1 Foundations` → `M5 Content & Endgame`, plus `Backlog`), and mirrored

@@ -133,7 +133,6 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   a `max_sanity` modifier; 24 waystation gates (blockstate `city=0..23`) teleport to the chosen
   curated city's safe surface and end the prologue (one-way, no return). Class scales drain/gain
   via `Progression` in the sanity/corruption tickers. `/eh class get|set` + `ENABLE_PROLOGUE`.
-  Contract: `docs/PROLOGUE-CONTRACT.md`.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost

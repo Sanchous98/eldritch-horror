@@ -47,7 +47,7 @@ public record RiteDefinition(
         TRANSFORM,
         /** {@code curse} — apply a lasting bane. */
         CURSE,
-        /** {@code open_rift} — open a Veil gate / rift. */
+        /** {@code open_rift} — open a rift gate / rift. */
         OPEN_RIFT,
         /** {@code close_rift} — seal a rift. */
         CLOSE_RIFT,

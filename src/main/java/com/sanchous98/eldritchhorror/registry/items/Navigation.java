@@ -16,7 +16,7 @@ public final class Navigation {
         ModItems.add("cartographers_lens", 1);
         // Compass of Longing; points toward the nearest rift.
         ModItems.add("compass_of_longing", 1);
-        // Sextant; fixes position under the Veil's shifting sky.
+        // Sextant; fixes position by the shifting stars of this world.
         ModItems.add("sextant", 1);
         // Veil Compass; points toward active ritual sites.
         ModItems.add("veil_compass", 1);

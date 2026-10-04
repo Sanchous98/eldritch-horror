@@ -1012,9 +1012,8 @@ public final class ModConfig {
 
     // --- Ancient Ones, batch 4 (design/28): the last six presences ----------------------------
     // Four new minor sites own one each (yellow_court / black_pyramid / spawning_pool /
-    // temple_of_the_feaster); Tulzscha and Zstylzhemghi share the existing rift_scar as the
-    // Veil-centre proxy (a real the_veil dimension is deferred). Same site-bound spawn shape and
-    // same shared SOOTHE solve outcome as the earlier batches.
+    // temple_of_the_feaster); Tulzscha and Zstylzhemghi share the existing rift_scar. Same
+    // site-bound spawn shape and same shared SOOTHE solve outcome as the earlier batches.
 
     /** Hastur: the unspoken name in the yellow_court. */
     public static final ModConfigSpec.BooleanValue HASTUR_KILLABLE =
@@ -1108,7 +1107,7 @@ public final class ModConfig {
             BUILDER.comment("Radius (blocks) of Chaugnar Faugn's sanity drain.")
                     .defineInRange("sanityChaugnarFaugnRadius", 32, 1, 96);
 
-    /** Tulzscha: the green flame at the Veil-centre (attached to the rift_scar for now). */
+    /** Tulzscha: the green flame at the centre of the rift_scar. */
     public static final ModConfigSpec.BooleanValue TULZSCHA_KILLABLE =
             BUILDER.comment("Allow Tulzscha to be killed. False = permanently invulnerable.")
                     .define("tulzschaKillable", true);

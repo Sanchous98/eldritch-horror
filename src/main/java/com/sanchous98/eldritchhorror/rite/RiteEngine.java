@@ -451,7 +451,7 @@ public final class RiteEngine {
             EventTicker.forceStart(player, "cleansing_dawn", level.getServer().getTickCount());
         }
         return new Result(true, Component.literal("The Way is sealed; " + removed
-                + " rift marker(s) removed and the Veil recedes."));
+                + " rift marker(s) removed and the rift's influence recedes."));
     }
 
     /** {@code rite_of_cleansing}: lower the player's corruption AND the local taint. */

@@ -730,7 +730,7 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("chaugnar_faugn_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(CHAUGNAR_FAUGN.get())));
 
-    /** Tulzscha: 1.4 x 2.4, the green flame at the rift_scar (Veil-centre proxy). */
+    /** Tulzscha: 1.4 x 2.4, the green flame at the rift_scar. */
     public static final DeferredHolder<EntityType<?>, EntityType<Tulzscha>> TULZSCHA =
             ENTITY_TYPES.register("tulzscha", () ->
                     EntityType.Builder.<Tulzscha>of(Tulzscha::new, MobCategory.MONSTER)

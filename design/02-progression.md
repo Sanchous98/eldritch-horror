@@ -10,7 +10,7 @@ reputation** as much as numbers.
 | **Survive the whisper** | First tome/altar; sanity drains in the dark | Tier-1 rites, codex | Learning that reading costs you |
 | **Find a faction** | Chose/attracted a cult; reputation > 0 | Services, tier-2 rites | Choosing sides |
 | **Work the rites** | Reagents gathered; first rift opened | Summoning, corruption stage `Touched` | Corruption starts to matter |
-| **Go deeper** | `Marked`+ corruption; skill tree depth | Tier-3 rites, dark paths, Veil | Resistance vs. summoning diverges |
+| **Go deeper** | `Marked`+ corruption; skill tree depth | Tier-3 rites, dark paths, deep rifts | Resistance vs. summoning diverges |
 | **The horror stirs** | High total corruption; rifts open | Endgame | Banish or summon |
 
 ## Experience & levels

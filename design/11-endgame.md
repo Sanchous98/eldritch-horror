@@ -14,7 +14,7 @@ and the rifts are open, two paths diverge — and they are not symmetric.
 
 **Fantasy:** pay everything to put it back. The resistance ending.
 
-- **Steps:** a chained rite (`close_rift` → `rite_of_cleansing`) at a Veil gate, requiring
+- **Steps:** a chained rite (`close_rift` → `rite_of_cleansing`) at a `rift_gate`, requiring
   rare reagents and the Order's aid.
 - **Cost:** a large part of your **corruption resets**, along with a portion of progression
   and reputation; rifts close; corrupted biomes recede.
@@ -56,5 +56,5 @@ The Horror (`18-bosses.md`) is the stage on which the fork plays out:
 
 ## Open questions
 
-- A possible third outcome: seal the Veil without banishing (backlog).
+- A possible third outcome: seal every rift without banishing (backlog).
 - Whether the endgame is per-player or per-world in multiplayer.

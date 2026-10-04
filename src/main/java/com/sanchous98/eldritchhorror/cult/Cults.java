@@ -50,7 +50,7 @@ public final class Cults {
 
         register(new CultDefinition(
                 "hollow_choir", "The Hollow Choir",
-                "Deep places, rifts, the Veil",
+                "Deep places, rifts, the space behind them",
                 List.of(Component.translatable("rank.eldritch_horror.hollow_choir.0"),
                         Component.translatable("rank.eldritch_horror.hollow_choir.1"),
                         Component.translatable("rank.eldritch_horror.hollow_choir.2"),

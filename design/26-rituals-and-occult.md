@@ -36,18 +36,18 @@ cost, it is not a rite. Failure is not a no-op: the listed `on_failure` cost app
 (sanity and/or corruption), and at high corruption a failure can still consume offerings or
 summon something unwanted (`05-ritual-engine.md`).
 
-## The Veil gate (the occult travel branch)
+## The rift gate (the occult travel branch)
 
 The travel principle in `23-boundary-and-travel.md` is frozen: cities are network nodes,
-and the **occult branch** is the Veil gate.
+and the **occult branch** is the rift gate.
 
-- A **Veil gate** is opened by rite (`open_rift` / gate rite) at a deep rift or a
+- A **rift gate** is opened by rite (`open_rift` / gate rite) at a deep rift or a
   `ritual_altar_site`; it is a two-way anchor (`20-map.md`).
 - **Cost model:** occult fast-travel pays in **corruption**, not coin — the fast route is the
-  tainted route. City travel stays mundane/costly-in-kind; Veil travel is fast, dangerous,
+  tainted route. City travel stays mundane/costly-in-kind; rift travel is fast, dangerous,
   and marks you.
 - **Instability:** a gate the horror also uses; rifts can open *near where you arrive*
-  (map event `rift_opened`), and the Veil itself has constant sanity drain
+  (map event `rift_opened`), and the route itself drains sanity constantly
   (`20-map.md`). Travel is progression-gated by learning the gate rite, not by gear.
 - Exact node-linking rules remain deferred (`23-boundary-and-travel.md` open questions).
 
@@ -92,7 +92,7 @@ Rites are the engine that moves the map and the codex:
 
 | Rite action | Map event (`22-map-and-knowledge.md`) | Knowledge effect |
 |---|---|---|
-| `open_rift` | `rift_opened` — adds a pulsing rift marker | unlocks Veil content |
+| `open_rift` | `rift_opened` — adds a pulsing rift marker | unlocks deeper rift content |
 | `close_rift` | `rift_closed` / `cleansing_dawn` | reveals what the rift hid |
 | summoning / dark rites | `veil_thin`, `settlement_uneasy` | codex entries, cult rank |
 | cleansing / reclaim | `settlement_reclaimed` | Order favour, safe nodes |
@@ -108,7 +108,7 @@ Rites are the engine that moves the map and the codex:
 - Matcher strategy for the multi-block pattern (structure templates vs bespoke matcher;
   see `05-ritual-engine.md` / `docs/ARCHITECTURE.md`).
 - Whether a failed rite can partially consume offerings at high corruption.
-- How Veil-gate nodes link: a fixed graph, discovered anchors, or per-player.
+- How rift-gate nodes link: a fixed graph, discovered anchors, or per-player.
 - Whether wards are physical blocks, applied effects, or both.
 
 ## Implementation notes (later)

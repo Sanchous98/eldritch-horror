@@ -29,7 +29,7 @@ and opposed pairs mean favouring one costs another.
 
 ## The Hollow Choir
 
-- **Domain:** deep places, rifts, the Veil.
+- **Domain:** deep places, rifts, the space behind them.
 - **Services:** the strongest summoning rites, blood magic, corruption gifts.
 - **Ranks:** Aspirant → Vessel → Hollowed → Chorus-Speaker.
 - **Demands:** sacrifice, open rifts, corruption above `Marked`.

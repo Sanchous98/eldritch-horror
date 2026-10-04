@@ -67,7 +67,7 @@ depends on a loader class that would break the dedicated-server side.
   offerings, optional conditions (time, moon, dimension, corruption stage), and a list of
   **outcomes** (registered `RitualOutcome` types: spawn, transform, grant item, curse, open rift).
 - A resolver validates the pattern around an altar and consumes inputs atomically.
-- Failed/refused rituals cost sanity or corruption instead of no-op — see `DESIGN.md`.
+- Failed/refused rituals cost sanity or corruption instead of no-op — see `design/05-ritual-engine.md`.
 
 ### `client/`
 - HUD meters, the madness overlay, particles, entity renderers. Registered from

@@ -8,8 +8,8 @@ in [bosses.md](bosses.md).
 | `worshipper` | Worshipper | Cult NPC | Cult sites | Neutral (faction) |
 | `cult_zealot` | Cult Zealot | Cult combatant | Cult sites, territory | Hostile to rivals |
 | `lesser_swarm` | Lesser Swarm | Pack creature | Corrupted areas, rifts | Hostile |
-| `star_spawn` | Star-Spawn | Summoned horror-adjacent | Rifts, the Veil | Hostile |
-| `shoggoth_mass` | Shoggoth Mass | Amorphous horror | The Veil, deep rifts | Hostile |
+| `star_spawn` | Star-Spawn | Summoned horror-adjacent | Rifts, deep rifts | Hostile |
+| `shoggoth_mass` | Shoggoth Mass | Amorphous horror | The deepest rifts | Hostile |
 | `watcher` | The Watcher | Ambient stalker | Near the corrupted | Passive (drains) |
 | `tainted_fauna` | Tainted Fauna | Corrupted animal | Corrupted biomes | Varies |
 

@@ -101,7 +101,7 @@ boss gate.
 | guardian | `drowned_thrall` | lesser | tide-guard of the Choir; prey on coastal villagers | sanity / faction |
 | ravager | `dunwich_horror` | named (Ancient One) | the lumbering thing eating a settlement from uphill | boss gate (`28`) |
 | wither skeleton | `ashen_revenant` | lesser | burning dead of the ashen waste; leaves scorch-taint | corruption vector |
-| zombified piglin / hoglin / piglin | `veil_swine` | lesser | the Veil's parody of a herd; aggressive, territorial | sanity |
+| zombified piglin / hoglin / piglin | `veil_swine` | lesser | a parody of a herd from behind the veil; aggressive, territorial | sanity |
 | ghast | `choir_leviathan` spawn / `wail_husk` | lesser | floating mourner whose wail is a line-of-sight drain | boss gate / sanity |
 | blaze | `ashen_wisp` | lesser | fire that watches (Cthugha's kin); light no longer comforts | corruption vector |
 | warden | `ithaqual_shade` | named (Ancient One) | wind-that-walks near the cold edge and deep places | boss gate (`28`) |
@@ -109,7 +109,7 @@ boss gate.
 | ender dragon | `yog_sothoth` | named (Ancient One) | the gate that is the boss | boss gate (`28`) |
 | wither | `azathoth` | named (Ancient One) | no fight; the will to act is unmade | boss gate (`28`) |
 
-The remaining roster fills no single vanilla slot but populates rifts, the Veil and sites:
+The remaining roster fills no single vanilla slot but populates rifts and sites:
 `lesser_swarm`, `star_spawn`, `shoggoth_mass`, `tainted_fauna`, plus site-owned things. These
 stay as defined above; the table only guarantees nothing vanilla is left uncovered.
 

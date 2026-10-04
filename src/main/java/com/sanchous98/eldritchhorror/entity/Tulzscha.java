@@ -14,7 +14,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 
 /**
- * Tulzscha — the <b>green flame at the centre</b> of the Veil, proxied by the <b>rift_scar</b>
+ * Tulzscha — the <b>green flame at the centre</b> of the rift_scar
  * ({@code design/28-ancient-ones.md}). Looking into it costs what you remember, so its aura is
  * <b>sanity</b>, and the non-combat solve ({@code quench_tulzscha}, resolve {@link Solve#SOOTHED})
  * closes the flame's eye and lets memory return.
@@ -93,7 +93,7 @@ public final class Tulzscha extends AncientOne {
         return ModSounds.TULZSCHA_DEATH.get();
     }
 
-    /** A flame at the centre of the Veil: it carries far. */
+    /** A flame at the centre of the rift_scar: it carries far. */
     @Override
     protected float getSoundVolume() {
         return 2.2F;

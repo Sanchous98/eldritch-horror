@@ -64,14 +64,14 @@ free teleports. Frozen principle:
 - **Early game**: on foot / horse / boat.
 - **Mid/late game**: a network linking opened nodes (form TBD), probably with a **cost**
   (time, coin, or sanity/corruption for occult routes).
-- Exact mechanics and the occult "Veil gate" branch are **deferred**.
+- Exact mechanics and the occult "rift gate" branch are **deferred**.
 
 ## Open questions
 
 - Polar repeat: **exact** (surreal sameness) or **seeded** (99% same + rare "wrong" details,
   the imitation)? Leaning to the seeded hybrid — it hides the technical join *and* unnerves.
-- How does Morok interact with the future **Veil dimension** and Map events
-  (see `22-map-and-knowledge.md`)?
+- How does Morok interact with Map events (see `22-map-and-knowledge.md`)? (There is no Veil
+  dimension: the horror behind the veil is reached *through* rifts inside the Overworld.)
 - Does the Morok debuff also apply off the polar ice, or only at the map edge proper?
 
 ## Implementation notes (later)

@@ -12,7 +12,7 @@ Material components consumed by rites.
 | `salt_reagent` | Consecrated Salt | Order vaults, warding | `ward_of_the_eye`, `close_rift` |
 | `chalk_reagent` | Ritual Chalk | Crafted | `ward_of_the_eye`, `close_rift` |
 | `bone_reagent` | Grave Bone | Skeletons, ossuaries | `call_the_lesser` |
-| `star_reagent` | Star-Iron Fragment | Meteors, the Veil | `summon_star_spawn` |
+| `star_reagent` | Star-Iron Fragment | Meteors, deep rifts | `summon_star_spawn` |
 | `void_reagent` | Void Residue | Rifts, corrupted chunks | `open_rift` |
 | `silver_reagent` | Moonlit Silver | Order trade, ruined vaults | `rite_of_cleansing`, `respec` |
 | `pearl_reagent` | Drowned Pearl | Coast, Choir trade | `drowned_blessing` |

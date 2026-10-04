@@ -28,15 +28,14 @@ They expand from rifts and altars as the corruption field grows and recede after
 | id | Name | Access | Rules |
 |---|---|---|---|
 | `overworld` | Overworld | — | Baseline sanity/corruption |
-| `the_veil` | The Veil | `open_rift` / portal rite | Sanity drains constantly; corruption gains doubled; `shoggoth_mass`, `star_spawn` |
+| `eldritch_horror:threshold` | The Threshold | one-time prologue | No drain; the class/city prologue ([29-prologue.md](29-prologue.md)) |
 
-### The Veil
-
-- **Fantasy:** the plane behind the veil — where the horror actually lives.
-- **Terrain:** non-Euclidean, shifting; landmarks move between visits (data-driven seeds).
-- **Rules:** constant sanity drain; ambient corruption; no natural day.
-- **Content:** `void_reagent`, star-iron, the deeper rite tiers, `shoggoth_mass`.
-- **Travel:** stable and reversible (a return anchor is set on entry).
+There is **no traversable Veil dimension** (decided). "The Veil" stays only as the *idea* of the
+barrier between the known world and what is behind it: it manifests as rifts and events in the
+Overworld, never as a place to visit. The edge of the charted world is **Morok** (the lethal polar
+repeat, [23-boundary-and-travel.md](23-boundary-and-travel.md)); the horror behind the veil is
+reached *through* a rift, and nothing ever leaves the Overworld. A playable Veil plane is backlog,
+and only if it earns a mechanic no other system already provides.
 
 ## Structures
 
@@ -47,7 +46,7 @@ They expand from rifts and altars as the corruption field grows and recede after
 | `order_vault` | Order Vault | `observatory_plateau` | Tomes, silver, cleansing services |
 | `cult_stronghold` | Cult Stronghold | Overworld, generated | Faction base; worship; shops |
 | `rift_scar` | Rift Scar | `ashen_waste` | A stable opening; corruption source |
-| `rift_gate` | Veil Gate | Deep rifts | Two-way travel anchor |
+| `rift_gate` | Rift Gate | Deep rifts | A two-way anchor for the rift network; opens passages within the Overworld |
 | `settlement` | Settlement | Land, temperate/coastal (real city coords) | Civilian hub: trade, inn, quests — see [`21-settlements.md`](21-settlements.md) |
 
 ### Ritual Altar Site (pattern, tier 1)
@@ -67,9 +66,9 @@ per-rite (see `rituals.md`).
 
 - Worldgen is compatibility-sensitive: features and placement are datapack-driven.
 - Corruption spreads *into* the world; biomes are symptoms, not fixed regions.
-- The Veil is the only dimension planned for the first release; more are backlog.
+- Only the Overworld is populated; the Threshold is the one added dimension (prologue only). A
+  playable Veil plane is backlog.
 
 ## Open questions
 
-- Whether the Veil is a single shared plane or per-player instanced.
 - Rift network linking rules (see the *Rift network & linking* story).

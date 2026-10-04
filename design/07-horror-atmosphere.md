@@ -16,7 +16,7 @@ attacks.
 | **Consequence** | Failure costs; corruption is permanent |
 | **Ambience** | Soundscape, fog, colour grading, particles |
 | **Escalation** | Ambient events scale with corruption and rifts |
-| **The uncanny** | Hallucinations, non-Euclidean Veil, moving landmarks |
+| **The uncanny** | Hallucinations, non-Euclidean rifts, moving landmarks |
 | **Helplessness** | Early entities that cannot be killed; sanity as the real health bar |
 
 ## The Watcher

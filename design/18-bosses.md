@@ -22,7 +22,7 @@ brute force. Each has phases and a documented arena.
 
 ## The Horror
 
-- **Where:** wherever the endgame path opens it, or in the Veil.
+- **Where:** wherever the endgame path opens it, at a deep rift.
 - **Fantasy:** the thing the whole mod points at — a presence, barely embodied.
 - **Phases:**
   1. *Attention* — reality distorts; sanity drains hard; no damage yet.

@@ -32,7 +32,7 @@ Quest chains tie the factions, rites and map together. Objectives are typed
 | 2 | *Requires* corruption stage `marked` | `hollow_choir` | unlock `summoning` skill |
 | 3 | `rite` perform `summon_star_spawn` | `hollow_choir` | reputation +20, `star_codex` |
 | 4 | `rite` perform `open_rift` in a storm | `hollow_choir` | reputation +25 |
-| 5 | `reach` the Veil | `hollow_choir` | endgame access |
+| 5 | `reach` a `rift_gate` | `hollow_choir` | endgame access |
 
 ## Side / repeatable quests
 
@@ -41,7 +41,7 @@ Quest chains tie the factions, rites and map together. Objectives are typed
 | `cleansing_contract` | Cleansing Contract | `unblinking_eye` | `rite` `rite_of_cleansing` | weekly |
 | `tide_offering` | Tide Offering | `drowned_choir` | `gather` fish/pearls | daily |
 | `star_hunt` | Star Hunt | `unblinking_eye` | `kill` star-spawn | daily |
-| `veil_scout` | Veil Scout | any | `reach` the Veil and return | once per rift |
+| `rift_scout` | Rift Scout | any | `reach` a `rift_scar` and return | once per rift |
 
 ## Design notes
 

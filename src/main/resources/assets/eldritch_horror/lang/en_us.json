@@ -276,7 +276,7 @@
   "item.eldritch_horror.world_atlas.tooltip": "World atlas; consolidated view of explored regions and cult territory.",
   "item.eldritch_horror.cartographers_lens.tooltip": "Cartographer's Lens; reveals structures and ruins at a distance.",
   "item.eldritch_horror.compass_of_longing.tooltip": "Compass of Longing; points toward the nearest rift.",
-  "item.eldritch_horror.sextant.tooltip": "Sextant; fixes position under the Veil's shifting sky.",
+  "item.eldritch_horror.sextant.tooltip": "Sextant; fixes position by the shifting stars of this world.",
   "item.eldritch_horror.veil_compass.tooltip": "Veil Compass; points toward active ritual sites.",
   "item.eldritch_horror.marked_map.tooltip": "Marked map; stores and reveals player-placed waypoints.",
   "item.eldritch_horror.route_ledger.tooltip": "Route ledger; records safe travel routes between strongholds.",

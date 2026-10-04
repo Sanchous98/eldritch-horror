@@ -1,8 +1,8 @@
 # Events
 
-Status: **implemented** (all 10 events of the table below; see `docs/EVENTS-BATCH2-CONTRACT.md` for
-the second batch). Ambient and world events that make the horror a *presence*. Events scale with the
-total corruption of the area/players and the number of open rifts.
+Status: **implemented** (all 10 events of the table below). Ambient and world events that make the
+horror a *presence*. Events scale with the total corruption of the area/players and the number of
+open rifts.
 
 | id | Name | Trigger | Effect | Duration |
 |---|---|---|---|---|

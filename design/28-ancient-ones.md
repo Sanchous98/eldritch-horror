@@ -1,8 +1,8 @@
 # 28 — Ancient Ones
 
-Status: **implemented (20/20)** — the boss layer of the bestiary is in code (see
-`docs/ANCIENT-ONES-BATCH4-CONTRACT.md` for the last six). This is the **boss layer** of the
-bestiary: the named presences that replace the removed vanilla bosses (see the *Replacement
+Status: **implemented (20/20)** — the boss layer of the bestiary is in code. This is the **boss
+layer** of the bestiary: the named presences that replace the removed vanilla bosses (see the
+*Replacement
 contract* in `25-bestiary-and-entities.md`). It is a spirit-analogue of the board game
 Eldritch Horror, **not a port** — the names are public-domain literary names, the mechanics,
 sites and numbers are ours. We copy no FFG stat block, card or art.
@@ -26,7 +26,7 @@ site. ★ marks the **first three to implement** (smallest scope — see below).
 | **Cthulhu** | Elder Guardian | `drowned_temple` | Dreams leak from the flooded hall; sleeping near it is worse than being awake | ★ |
 | **The Dunwich Horror** | Ravager | `blighted_woods` village edge | A giant you hear and never see; it is always uphill from a settlement it is eating | ★ |
 | **Shub-Niggurath** | none | `blighted_woods` (biome) | The woods breathe; standing still costs sanity, running costs corruption | ★ |
-| **Azathoth** | Wither | `rift_scar` / the Veil | No fight — the music at the centre unmakes the will to act | |
+| **Azathoth** | Wither | `rift_scar` | No fight — the music at the centre unmakes the will to act | |
 | **Yog-Sothoth** | Ender Dragon | `rift_gate` / `observatory_plateau` | The gate *is* the boss; every step toward it, it takes one toward you | |
 | **Ithaqua** | Warden | polar edge / Morok (`23-boundary-and-travel.md`) | Wind that walks; each gust drains and drags you toward the cold edge | |
 | **Nyarlathotep** | none | `cult_stronghold` | Wears a face you trust; the drain is betrayal, not damage | |
@@ -41,8 +41,8 @@ site. ★ marks the **first three to implement** (smallest scope — see below).
 | **Hydra** | none | `drowned_marsh` | Cut one head and the presence grows; the answer is never the sword | |
 | **Nyogtha** | none | deep caves / new `underworld_stair` | It is under the floor; you cannot see it, only hear it coming | |
 | **Rhan-Tegoth** | none | polar / new `ice_idol` | An idol that is not an idol; worship sustains it — and you are worshipping | |
-| **Tulzscha** | none | the Veil, at the centre | A green flame at the centre; looking into it costs what you remember | |
-| **Zstylzhemghi** | none | the Veil (eroding court) | A name forgotten on purpose; the world erodes around it | |
+| **Tulzscha** | none | `rift_scar` (the green flame at the scar's centre) | A green flame at the centre; looking into it costs what you remember | |
+| **Zstylzhemghi** | none | `rift_scar` (the eroding court) | A name forgotten on purpose; the world erodes around it | |
 
 Two of the existing named entries in `25` stay as they are and are not duplicated here:
 `choir_leviathan` (drowned-temple, soothable by a Choir rite) and `the_horror` (the endgame
