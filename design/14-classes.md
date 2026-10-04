@@ -1,42 +1,57 @@
-# Classes (archetypes)
+# 14 — Investigators (named characters)
 
-Three starting archetypes. Each is a bundle of bonuses and a skill-tree focus; the
-choice is a *lean*, not a wall — cross-archetype synergies exist but are costly.
+Replaces the three archetypes. As in the board game, you choose a **named investigator**, not a
+class. Each has an **occupation** (flavour), a **role** (a one-word strategy label — Research,
+Combat, Gate Closer, Magic, Support, Expedition, All-Rounder), a **starting kit**, a starting
+**rite**, and **two abilities**: one **passive** (always on) and one **active** (a signature item,
+right-click, with a cooldown).
 
-| id | Name | Playstyle | Bonuses |
-|---|---|---|---|
-| `investigator` | Investigator | Sanity-resilient; beats the occult with evidence, tools and wards rather than corruption. | `max_sanity +20%`, `corruption_gain −25%`, `ritual_power −20%` |
-| `occultist` | Occultist | Balanced scholar; learns rites faster and reads tomes with less backlash. | `learning_speed +30%`, `ritual_power +25%`, `max_sanity −10%` |
-| `cultist` | Cultist | Embraces corruption; strongest rituals, fastest reputation, fragile mind. | `cult_reputation_gain +50%`, `ritual_power +40%`, `sanity_drain +25%` |
+The names and abilities are **ours** (a spirit-analogue, not a port). We copy no FFG investigator,
+stat block, card or art — same rule as the Ancient Ones (`28-ancient-ones.md`).
 
-## Investigator
+## The roster (12)
 
-- **Fantasy:** the rationalist in an irrational world. Documents what others flee.
-- **Starting skills:** `iron_will`, `observe`.
-- **Progression focus:** `investigation`, `warding` (secondary `occultism`).
-- **Signature:** wards that slow corruption; sensing rifts and entities.
-- **Weakness:** rituals are weaker, so late power comes from gear and knowledge, not pacts.
+| id | Name | Occupation | Role | Passive | Active |
+|---|---|---|---|---|---|
+| `eleanor_vance` | Eleanor Vance | Parapsychologist | Research | `max_sanity +15%` | **Read the Signs** — reveal nearby rifts and codex-worthy landmarks |
+| `jack_corrigan` | Jack Corrigan | Private Eye | Research | `corruption_gain −20%` | **Stake Out** — mark the nearest rift; brief `Resistance` |
+| `tom_mallory` | Tom Mallory | Ex-Soldier | Combat | `sanity_drain −25%` | **Hold the Line** — `Resistance` + `Regeneration` for 12s |
+| `cormac_blackwood` | Cormac Blackwood | Smuggler | Combat | `corruption_gain +25%`, `sanity_drain −15%` | **Dirty Trick** — brief `Invisibility` + `Speed` to break away |
+| `sister_agatha` | Sister Agatha | Nun | Gate Closer | `corruption_gain −25%` | **Benediction** — cleanse the local taint patch; small sanity |
+| `marion_delacroix` | Marion Delacroix | Medium | Gate Closer | `max_sanity +10%` | **Commune** — sense the nearest Ancient One (direction + distance) |
+| `vera_nightingale` | Vera Nightingale | Occultist | Magic | `corruption_gain +25%`, one extra starting rite | **Blood Offering** — trade a burst of sanity for a burst of corruption |
+| `nikolai_volkov` | Nikolai Volkov | Scholar | Magic | `max_sanity −10%`, `sanity_drain +15%` | **Forbidden Insight** — learn a random unknown rite |
+| `dr_amos_hartley` | Dr. Amos Hartley | Alienist | Support | city sanity recovery `+50%` | **Sedate** — clear `Madness`/`Marked`, restore sanity |
+| `evelyn_ashcombe` | Evelyn Ashcombe | Heiress | Support | starts with extra currency | **Buy Time** — `Resistance` for 20s |
+| `aldous_pemberton` | Aldous Pemberton | Antiquarian | Expedition | better site/ruin loot | **Survey** — reveal the nearest site/city coordinates |
+| `hazel_quinn` | Hazel Quinn | Journalist | All-Rounder | small spread of the above | **Exposé** — reduce own corruption a little; brief `Speed` |
 
-## Occultist
+## Ability mechanics (how they map to our systems)
 
-- **Fantasy:** the scholar who pays in sanity for answers.
-- **Starting skills:** `forbidden_lore`, `rite_affinity`.
-- **Progression focus:** `occultism`, `divination` (secondary `corruption`).
-- **Signature:** fast learning, dream visions, broad rite access.
-- **Weakness:** lower max sanity; must manage drain actively.
+- **Passives** are read through `Progression` (the same seam the old classes used): multipliers for
+  `max_sanity`, `sanity_drain`, `corruption_gain`, city recovery, loot, etc. Only bonuses whose
+  systems exist are live; the rest are recorded for when their systems land.
+- **Actives** are the investigator's **signature item** (given in the starting kit, one shared item
+  id whose behaviour is dispatched by the owner's investigator). Right-click triggers it with a
+  per-player cooldown. Server-authoritative, bounded, built from effects + the public
+  `SanityAPI`/`CorruptionAPI`/`TaintAPI`/`RiteKnowledge` facades. No GUI.
+- **Choice is permanent** except the debug reset, exactly as before: a preview-then-confirm
+  interaction, now on a pedestal per investigator.
 
-## Cultist
+## Starting kits
 
-- **Fantasy:** the devotee who bargains with the horror for power.
-- **Starting skills:** `devotion`, `blood_offering`.
-- **Progression focus:** `corruption`, `blood_magic` (secondary `summoning`).
-- **Signature:** blood offerings, summoning, fast cult rank.
-- **Weakness:** sanity drains fast; high corruption locks out the resistance questline.
+Each investigator starts with a small thematic kit plus the signature item; the Magic investigators
+also start with a tome/reagents. Exact item lists live in the registry data table (one place).
 
-## Cross-archetype synergies
+## How the roster is presented
 
-| Pair | Synergy |
-|---|---|
-| Investigator + Occultist | Wards that also *detect*: reveal radius doubles while a ward is active. |
-| Investigator + Cultist | Inquisitor: +damage vs. eldritch entities, but cults trust you less. |
-| Occultist + Cultist | Prophet: summoning cost reduced, but sanity floor is lower. |
+- 12 pedestals in the Threshold (an inner ring, or two arcs), each with a sign: the investigator's
+  name and role. Preview-then-confirm on right-click.
+- The prologue flow is unchanged: choose an investigator at a pedestal, then walk through a city
+  arch. The chosen investigator is the permanent `INVESTIGATOR` attachment (was `PLAYER_CLASS`).
+
+## Notes
+
+- Role is a **label**, not a separate choice — a hint for the player, as in the board game.
+- Cross-investigator synergies (`14-classes.md`'s old "synergies") are dropped for now; they were
+  speculative and had no systems.

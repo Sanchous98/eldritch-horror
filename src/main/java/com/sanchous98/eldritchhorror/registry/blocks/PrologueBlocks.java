@@ -1,47 +1,53 @@
 package com.sanchous98.eldritchhorror.registry.blocks;
 
-import com.sanchous98.eldritchhorror.classes.ClassId;
 import com.sanchous98.eldritchhorror.registry.ModBlocks;
 import com.sanchous98.eldritchhorror.registry.ModItems;
+import com.sanchous98.eldritchhorror.registry.items.SignatureItem;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredItem;
 
 /**
- * The Threshold prologue's blocks: three class pedestals, the 24-variant city gate portal and the
- * solid frame the gate arches are built from.
+ * The Threshold prologue's blocks: the 12-variant investigator pedestal, the 24-variant city gate
+ * portal and the solid frame the gate arches are built from. Also registers the shared
+ * {@code signature_charm} item every investigator's active is fired through.
  *
  * <p>Registered through the shared {@link ModBlocks#BLOCKS} register so they land in
  * {@link ModBlocks#ALL} (creative tab) and get a {@code BlockItem}, exactly like the other block
- * categories. The five static fields register themselves at class-initialisation time;
- * {@link #init()} exists only as the explicit entry point {@link ModBlocks#registerCategories()}
- * calls, which forces that initialisation. Placeholder textures reference vanilla blocks until the
- * final art lands (see the asset JSONs).
+ * categories. The static fields register themselves at class-initialisation time; {@link #init()}
+ * exists only as the explicit entry point {@link ModBlocks#registerCategories()} calls, which forces
+ * that initialisation (and the item registration below it). Placeholder textures reference vanilla
+ * blocks until the final art lands (see the asset JSONs).
  */
 public final class PrologueBlocks {
 
     private PrologueBlocks() {
     }
 
-    /** Brass-and-paper investigator pedestal; softly lit. */
+    /**
+     * The single investigator pedestal, property-carrying ({@code investigator=0..11}); each of the
+     * 12 Threshold pedestals is one variant. Brass-and-paper; softly lit.
+     */
     public static final DeferredBlock<Block> INVESTIGATOR_PEDESTAL = register(
             "investigator_pedestal",
-            p -> new ClassPedestalBlock(ClassId.INVESTIGATOR, p),
+            InvestigatorPedestalBlock::new,
             p -> p.strength(3.5f, 6.0f).lightLevel(s -> 7));
 
-    /** Tome-lectern occultist pedestal; softly lit. */
-    public static final DeferredBlock<Block> OCCULTIST_PEDESTAL = register(
-            "occultist_pedestal",
-            p -> new ClassPedestalBlock(ClassId.OCCULTIST, p),
-            p -> p.strength(3.5f, 6.0f).lightLevel(s -> 7));
+    /**
+     * The shared signature item. Stack size 1; right-click fires the owner's
+     * {@link com.sanchous98.eldritchhorror.investigator.SignatureAbilities active}. Registered here
+     * because this is the prologue's content entry point; recorded in {@link ModItems#ALL} so it is
+     * discoverable in the creative tab.
+     */
+    public static final DeferredItem<SignatureItem> SIGNATURE_CHARM = ModItems.ITEMS.registerItem(
+            "signature_charm", p -> new SignatureItem(p.stacksTo(1)));
 
-    /** Black-altar cultist pedestal; a dim red ember. */
-    public static final DeferredBlock<Block> CULTIST_PEDESTAL = register(
-            "cultist_pedestal",
-            p -> new ClassPedestalBlock(ClassId.CULTIST, p),
-            p -> p.strength(4.0f, 8.0f).lightLevel(s -> 4));
+    static {
+        ModItems.ALL.add(SIGNATURE_CHARM);
+    }
 
     /**
      * A destination gate portal; its {@code city} property (0–23) selects the curated city. No
@@ -59,9 +65,10 @@ public final class PrologueBlocks {
             p -> p.strength(5.0f, 6.0f));
 
     /**
-     * Forces this class to initialise, registering the five blocks. Called once from
-     * {@link ModBlocks#registerCategories()}; the actual registration lives in the field
-     * initialisers above so the {@link DeferredBlock} constants stay {@code final}.
+     * Forces this class to initialise, registering the blocks and the signature item. Called once
+     * from {@link ModBlocks#registerCategories()}; the actual registration lives in the field
+     * initialisers above so the {@link DeferredBlock}/{@link DeferredItem} constants stay
+     * {@code final}.
      */
     public static void init() {
         // Intentionally empty: touching this method initialises the class and runs the field

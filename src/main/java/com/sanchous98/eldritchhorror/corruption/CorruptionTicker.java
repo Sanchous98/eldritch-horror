@@ -1,7 +1,7 @@
 package com.sanchous98.eldritchhorror.corruption;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
-import com.sanchous98.eldritchhorror.classes.Progression;
+import com.sanchous98.eldritchhorror.investigator.Progression;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
 import java.util.Map;
@@ -90,7 +90,7 @@ public final class CorruptionTicker {
         for (CorruptionSource source : CorruptionSources.all()) {
             delta += source.deltaPerSecond(player, ctx);
         }
-        // Class archetype scales gain only: corruption loss (cleansing) is never penalised.
+        // Investigator passive scales gain only: corruption loss (cleansing) is never penalised.
         if (delta > 0.0) {
             delta *= Progression.corruptionGainMultiplier(player);
         }

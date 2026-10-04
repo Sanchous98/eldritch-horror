@@ -1,4 +1,4 @@
-package com.sanchous98.eldritchhorror.classes;
+package com.sanchous98.eldritchhorror.investigator;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
@@ -22,8 +22,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The one-time Threshold prologue: on a player's first join they are carried to the authored
- * dimension to choose a class (pedestals → {@link ClassAPI}) and a starting city (gates → here).
- * See {@code design/29-prologue.md} and {@code docs/PROLOGUE-CONTRACT.md}.
+ * dimension to choose an investigator (pedestals → {@link InvestigatorAPI}) and a starting city
+ * (gates → here). See {@code design/29-prologue.md} and {@code docs/PROLOGUE-CONTRACT.md}.
  *
  * <p>Server-authoritative: every teleport happens server-side. The only persisted state is the
  * {@code PROLOGUE_DONE} attachment, set by {@link #complete}; a disconnect mid-prologue therefore
@@ -56,24 +56,24 @@ public final class Prologue {
             return;
         }
         teleport(player, target, Threshold.spawn());
-        if (!ClassAPI.hasChosen(player)) {
+        if (!InvestigatorAPI.hasChosen(player)) {
             player.sendSystemMessage(Component.translatableWithFallback(
                     "prologue.eldritch_horror.welcome",
-                    "The Threshold. Right-click a class pedestal to see a path, then again to choose it; "
-                            + "then walk into a city arch."));
+                    "The Threshold. Right-click an investigator pedestal to read their path, then "
+                            + "again to choose; then walk into a city arch."));
         }
     }
 
     /**
      * Marks the prologue complete and teleports {@code player} to {@code city}'s safe surface. Must
-     * be a no-op-with-message until a class has been chosen — you pick who you are before where you
-     * start.
+     * be a no-op-with-message until an investigator has been chosen — you pick who you are before
+     * where you start.
      */
     public static void complete(ServerPlayer player, City city) {
-        if (!ClassAPI.hasChosen(player)) {
+        if (!InvestigatorAPI.hasChosen(player)) {
             player.sendSystemMessage(Component.translatableWithFallback(
                     "prologue.eldritch_horror.choose_class",
-                    "Choose a class at a pedestal before you take a gate."));
+                    "Choose an investigator at a pedestal before you take a gate."));
             return;
         }
         MinecraftServer server = player.level().getServer();
@@ -94,22 +94,22 @@ public final class Prologue {
         }
     }
 
-    /** First join: re-assert the class bonus; send a brand-new player into the Threshold. */
+    /** First join: re-assert the investigator bonus; send a brand-new player into the Threshold. */
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            ClassAPI.reapply(player);
+            InvestigatorAPI.reapply(player);
             if (needsPrologue(player)) {
                 enter(player);
             }
         }
     }
 
-    /** Respawn drops attribute modifiers, so re-assert the class bonus. */
+    /** Respawn drops attribute modifiers, so re-assert the investigator bonus. */
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            ClassAPI.reapply(player);
+            InvestigatorAPI.reapply(player);
         }
     }
 

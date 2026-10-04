@@ -3,6 +3,6 @@
  * {@link org.jspecify.annotations.Nullable}.
  */
 @NullMarked
-package com.sanchous98.eldritchhorror.classes;
+package com.sanchous98.eldritchhorror.investigator;
 
 import org.jspecify.annotations.NullMarked;

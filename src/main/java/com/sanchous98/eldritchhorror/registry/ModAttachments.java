@@ -125,12 +125,13 @@ public final class ModAttachments {
                             .build());
 
     /**
-     * Per-player chosen class id ({@code ""} = none chosen), synced to the owner and copied on
-     * death so the prologue choice survives a respawn. Written only through
-     * {@link com.sanchous98.eldritchhorror.classes.ClassAPI}. See {@code design/29-prologue.md}.
+     * Per-player chosen investigator id ({@code ""} = none chosen), synced to the owner and copied
+     * on death so the prologue choice survives a respawn. Written only through
+     * {@link com.sanchous98.eldritchhorror.investigator.InvestigatorAPI}. See
+     * {@code design/29-prologue.md}.
      */
-    public static final Supplier<AttachmentType<String>> PLAYER_CLASS =
-            ATTACHMENT_TYPES.register("player_class",
+    public static final Supplier<AttachmentType<String>> INVESTIGATOR =
+            ATTACHMENT_TYPES.register("investigator",
                     () -> AttachmentType.<String>builder(() -> "")
                             .serialize(com.mojang.serialization.Codec.STRING.fieldOf("id"))
                             .sync((holder, to) -> holder == to, ByteBufCodecs.STRING_UTF8)
@@ -139,7 +140,7 @@ public final class ModAttachments {
 
     /**
      * Whether the one-time Threshold prologue has been completed, synced to the owner and copied on
-     * death. Set only by {@link com.sanchous98.eldritchhorror.classes.Prologue#complete}. See
+     * death. Set only by {@link com.sanchous98.eldritchhorror.investigator.Prologue#complete}. See
      * {@code design/29-prologue.md}.
      */
     public static final Supplier<AttachmentType<Boolean>> PROLOGUE_DONE =

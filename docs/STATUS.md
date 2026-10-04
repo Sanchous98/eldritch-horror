@@ -125,14 +125,16 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   generated from the registries, so it grows with content);
   `/eh codex`. **Recipes/economy** (design/16): 25 crafting/smelting recipes make the reagents,
   ritual blocks, tools, gear and utility items obtainable; every reagent has an in-game source.
-- **Prologue — the Threshold** (`classes/`, `world/threshold/`, design/29): a one-time onboarding.
+- **Prologue — the Threshold** (`investigator/`, `world/threshold/`, design/29): a one-time onboarding.
   A new player is teleported to the `eldritch_horror:threshold` dimension (flat, dark, no
   sanity/corruption/event tickers — they gate on `minecraft:overworld`), stamped deterministically
-  at `ServerStarted` (idempotent, forceload -> place -> release). Three class pedestals grant a
-  permanent archetype (`investigator`/`occultist`/`cultist`) with a starter kit, a tier-1 rite and
-  a `max_sanity` modifier; 24 waystation gates (blockstate `city=0..23`) teleport to the chosen
-  curated city's safe surface and end the prologue (one-way, no return). Class scales drain/gain
-  via `Progression` in the sanity/corruption tickers. `/eh class get|set` + `ENABLE_PROLOGUE`.
+  at `ServerStarted` (idempotent, forceload -> place -> release). **12 named investigator pedestals**
+  (inner ring, each with a name+role sign; preview-then-confirm) grant a permanent investigator with
+  a starter kit, starting rite and passive bonuses, plus the shared `signature_charm` active ability;
+  24 waystation arch portals (`city=0..23`, walked into, with city signs) teleport to the chosen
+  curated city's safe surface and end the prologue (one-way, no return). The hub is
+  destruction-proof (`ThresholdProtection`). Passives scale drain/gain via `Progression` in the
+  sanity/corruption tickers. `/eh investigator get|set` + `ENABLE_PROLOGUE`.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost

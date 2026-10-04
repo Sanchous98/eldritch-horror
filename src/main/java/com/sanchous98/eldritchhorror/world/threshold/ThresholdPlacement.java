@@ -1,7 +1,9 @@
 package com.sanchous98.eldritchhorror.world.threshold;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.investigator.Investigator;
 import com.sanchous98.eldritchhorror.registry.blocks.CityGateBlock;
+import com.sanchous98.eldritchhorror.registry.blocks.InvestigatorPedestalBlock;
 import com.sanchous98.eldritchhorror.registry.blocks.PrologueBlocks;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
@@ -33,7 +35,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
  *
  * <p>The dimension's chunk generator is a plain flat plane (see {@code dimension/threshold.json}),
  * so everything that makes the Threshold a place is built here instead: a central observatory
- * platform with the three class pedestals, a ring of 24 city gates, and a barrier wall that keeps
+ * platform with the 12 investigator pedestals, a ring of 24 city gates, and a barrier wall that keeps
  * players on the island. The layout is fully deterministic — fixed coordinates, no randomness — so
  * it is reproducible across worlds and can be reviewed as code.
  *
@@ -50,6 +52,9 @@ public final class ThresholdPlacement {
 
     /** Radius of the raised central platform, in blocks. */
     private static final int PLATFORM_RADIUS = 12;
+
+    /** Radius of the inner ring on which the 12 investigator pedestals stand. */
+    private static final int PEDESTAL_RADIUS = 8;
 
     /** Radius of the ring on which the 24 gates stand. */
     private static final int GATE_RADIUS = 34;
@@ -160,24 +165,33 @@ public final class ThresholdPlacement {
         set(level, 0, Threshold.FLOOR_Y + 4, 0, Blocks.SEA_LANTERN.defaultBlockState());
     }
 
-    /** Places the three class pedestals in a triangle around the obelisk, each raised on a plinth
-     * with a named sign so the choice is obvious in-game. */
+    /** Places the 12 investigator pedestals on an inner ring around the obelisk, each raised on a
+     * plinth with a named sign so the choice is obvious in-game. */
     private static void buildPedestals(ServerLevel level) {
-        placePedestal(level, 0, -6, PrologueBlocks.INVESTIGATOR_PEDESTAL.get(), "Investigator");
-        placePedestal(level, -5, 4, PrologueBlocks.OCCULTIST_PEDESTAL.get(), "Occultist");
-        placePedestal(level, 5, 4, PrologueBlocks.CULTIST_PEDESTAL.get(), "Cultist");
+        List<Investigator> investigators = List.of(Investigator.values());
+        for (int i = 0; i < investigators.size(); i++) {
+            double angle = i * (2.0 * Math.PI / investigators.size());
+            int x = (int) Math.round(PEDESTAL_RADIUS * Math.cos(angle));
+            int z = (int) Math.round(PEDESTAL_RADIUS * Math.sin(angle));
+            Investigator investigator = investigators.get(i);
+            placePedestal(level, x, z, i, investigator);
+        }
     }
 
     /**
-     * One raised pedestal: a chiseled-deepslate plinth on the platform, the pedestal block above
-     * it, and a standing sign (facing the obelisk) carrying the class name.
+     * One raised pedestal: a chiseled-deepslate plinth on the platform, the investigator pedestal
+     * variant ({@code investigator=i}) above it, and a standing sign (facing the obelisk) carrying the
+     * investigator's name on line 0 and their role on line 1.
      */
-    private static void placePedestal(ServerLevel level, int x, int z,
-                                      net.minecraft.world.level.block.Block pedestal, String name) {
+    private static void placePedestal(ServerLevel level, int x, int z, int index,
+                                      Investigator investigator) {
         set(level, x, Threshold.FLOOR_Y, z, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
-        set(level, x, Threshold.FLOOR_Y + 1, z, pedestal.defaultBlockState());
+        BlockState pedestal = PrologueBlocks.INVESTIGATOR_PEDESTAL.get().defaultBlockState()
+                .setValue(InvestigatorPedestalBlock.INVESTIGATOR, index);
+        set(level, x, Threshold.FLOOR_Y + 1, z, pedestal);
         Direction facing = inwardFacing(Math.atan2(z, x));
-        placeSign(level, new BlockPos(x, Threshold.FLOOR_Y + 2, z), facing, name);
+        placeSign(level, new BlockPos(x, Threshold.FLOOR_Y + 2, z), facing,
+                List.of(investigator.displayName(), investigator.role().displayName()));
     }
 
     /**
@@ -245,13 +259,27 @@ public final class ThresholdPlacement {
 
     /** Places a standing sign at {@code pos}, rotated to {@code facing}, with {@code name} on the front. */
     private static void placeSign(ServerLevel level, BlockPos pos, Direction facing, String name) {
+        placeSign(level, pos, facing, wrapToFourLines(name));
+    }
+
+    /** Places a standing sign at {@code pos}, rotated to {@code facing}, with the given front lines. */
+    private static void placeSign(ServerLevel level, BlockPos pos, Direction facing, List<Component> front) {
         BlockState sign = Blocks.OAK_SIGN.defaultBlockState()
                 .setValue(StandingSignBlock.ROTATION, RotationSegment.convertToSegment(facing));
         set(level, pos, sign);
         if (level.getBlockEntity(pos) instanceof SignBlockEntity signEntity) {
-            List<Component> lines = wrapToFourLines(name);
+            List<Component> lines = padToFourLines(front);
             signEntity.setText(new SignText(lines, lines, DyeColor.BLACK, false), SignTextSlot.FRONT);
         }
+    }
+
+    /** Pads (or truncates) {@code lines} to exactly the sign's four display lines. */
+    private static List<Component> padToFourLines(List<Component> lines) {
+        List<Component> padded = new ArrayList<>(4);
+        for (int i = 0; i < 4; i++) {
+            padded.add(i < lines.size() ? lines.get(i) : Component.empty());
+        }
+        return padded;
     }
 
     /** @return the nearest cardinal direction pointing from the gate back toward the ring centre. */

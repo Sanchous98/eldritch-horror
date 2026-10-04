@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
-      "model": "eldritch_horror:block/investigator_pedestal"
-    }
+    "investigator=0": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=1": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=2": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=3": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=4": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=5": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=6": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=7": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=8": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=9": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=10": { "model": "eldritch_horror:block/investigator_pedestal" },
+    "investigator=11": { "model": "eldritch_horror:block/investigator_pedestal" }
   }
 }

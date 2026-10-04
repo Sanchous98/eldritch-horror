@@ -7,8 +7,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.sanchous98.eldritchhorror.classes.ClassAPI;
-import com.sanchous98.eldritchhorror.classes.ClassId;
 import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import com.sanchous98.eldritchhorror.codex.CodexCategory;
 import com.sanchous98.eldritchhorror.codex.CodexEntry;
@@ -25,6 +23,8 @@ import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.event.EldritchEvent;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.Events;
+import com.sanchous98.eldritchhorror.investigator.Investigator;
+import com.sanchous98.eldritchhorror.investigator.InvestigatorAPI;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
@@ -171,11 +171,11 @@ public final class EldritchCommands {
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(EldritchCommands::performRite)))
                         .then(Commands.literal("rites").executes(EldritchCommands::listRites))
-                        .then(Commands.literal("class")
-                                .then(Commands.literal("get").executes(EldritchCommands::getClass))
+                        .then(Commands.literal("investigator")
+                                .then(Commands.literal("get").executes(EldritchCommands::getInvestigator))
                                 .then(Commands.literal("set")
                                         .then(Commands.argument("id", StringArgumentType.word())
-                                                .executes(EldritchCommands::setClass))))
+                                                .executes(EldritchCommands::setInvestigator))))
                         .then(Commands.literal("cult")
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(EldritchCommands::cultInfo)))
@@ -290,13 +290,13 @@ public final class EldritchCommands {
         return 1;
     }
 
-    /** {@code /eh class get}: prints the caller's chosen class, or "none". */
-    private static int getClass(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if (commandsDisabled(ctx, ModConfig.ENABLE_CLASS_COMMANDS.get())) {
+    /** {@code /eh investigator get}: prints the caller's chosen investigator, or "none". */
+    private static int getInvestigator(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_INVESTIGATOR_COMMANDS.get())) {
             return 0;
         }
         ServerPlayer p = ctx.getSource().getPlayerOrException();
-        ClassId id = ClassAPI.get(p);
+        Investigator id = InvestigatorAPI.get(p);
         if (id == null) {
             ctx.getSource().sendSuccess(() -> Component.literal("none"), false);
         } else {
@@ -307,12 +307,12 @@ public final class EldritchCommands {
     }
 
     /**
-     * {@code /eh class set <id>}: gamemaster debug reset that switches the caller to {@code id} and
-     * re-grants that archetype's kit and rites, even if a different class was already chosen (the
-     * only way to change a class).
+     * {@code /eh investigator set <id>}: gamemaster debug reset that switches the caller to
+     * {@code id} and re-grants that investigator's kit and rites, even if a different one was already
+     * chosen (the only way to change an investigator).
      */
-    private static int setClass(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if (commandsDisabled(ctx, ModConfig.ENABLE_CLASS_COMMANDS.get())) {
+    private static int setInvestigator(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (commandsDisabled(ctx, ModConfig.ENABLE_INVESTIGATOR_COMMANDS.get())) {
             return 0;
         }
         if (!ctx.getSource().permissions().hasPermission(
@@ -321,15 +321,14 @@ public final class EldritchCommands {
             return 0;
         }
         String id = StringArgumentType.getString(ctx, "id");
-        ClassId target = ClassId.byId(id);
+        Investigator target = Investigator.byId(id);
         if (target == null) {
-            ctx.getSource().sendFailure(Component.literal("Unknown class: " + id
-                    + " (expected investigator, occultist or cultist)"));
+            ctx.getSource().sendFailure(Component.literal("Unknown investigator: " + id));
             return 0;
         }
         ServerPlayer p = ctx.getSource().getPlayerOrException();
-        ClassAPI.forceSet(p, target);
-        ctx.getSource().sendSuccess(() -> Component.literal("class set to " + target.id()), true);
+        InvestigatorAPI.forceSet(p, target);
+        ctx.getSource().sendSuccess(() -> Component.literal("investigator set to " + target.id()), true);
         return 1;
     }
 

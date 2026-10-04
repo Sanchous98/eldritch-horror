@@ -1,6 +1,6 @@
 package com.sanchous98.eldritchhorror.registry.blocks;
 
-import com.sanchous98.eldritchhorror.classes.Prologue;
+import com.sanchous98.eldritchhorror.investigator.Prologue;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import java.util.List;
@@ -30,7 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * <p>Registered with {@code noCollision()} so a player can stand in the gate and be carried through
  * by {@link #entityInside}. Interaction is server-authoritative: the client path only swings the
  * arm. A short per-player cooldown keyed on game time stops a gate that cannot complete (e.g. no
- * class chosen yet) from spamming its message every tick.
+ * investigator chosen yet) from spamming its message every tick.
  *
  * <p>The index is a blockstate rather than a block entity so the whole ring stays deterministic and
  * persists in the world save with no extra state. No property is user-settable beyond the 24

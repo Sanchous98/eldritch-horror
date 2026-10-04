@@ -14,15 +14,15 @@ public final class ModConfig {
             BUILDER.comment("Enable the Sanity system. Disable for a pure-content playthrough.")
                     .define("enableSanity", true);
 
-    /** One-time prologue: new players start in the Threshold and pick a class + city. */
+    /** One-time prologue: new players start in the Threshold and pick an investigator + city. */
     public static final ModConfigSpec.BooleanValue ENABLE_PROLOGUE =
-            BUILDER.comment("Enable the one-time Threshold prologue (class choice + city gate).")
+            BUILDER.comment("Enable the one-time Threshold prologue (investigator choice + city gate).")
                     .define("enablePrologue", true);
 
-    /** Whether the /eh class command is available. */
-    public static final ModConfigSpec.BooleanValue ENABLE_CLASS_COMMANDS =
-            BUILDER.comment("Enable the /eh class command (get / set).")
-                    .define("enableClassCommands", true);
+    /** Whether the /eh investigator command is available. */
+    public static final ModConfigSpec.BooleanValue ENABLE_INVESTIGATOR_COMMANDS =
+            BUILDER.comment("Enable the /eh investigator command (get / set).")
+                    .define("enableInvestigatorCommands", true);
 
     public static final ModConfigSpec.DoubleValue SANITY_DRAIN_MULTIPLIER =
             BUILDER.comment("Global multiplier applied to all sanity drain.")
