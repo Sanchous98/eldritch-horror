@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.BestiarySupport;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.threshold.Threshold;
 import java.util.Set;
@@ -15,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.storage.LevelData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -91,7 +93,43 @@ public final class Prologue {
         // leaves the player in the Threshold to try again.
         if (teleport(player, overworld, spot)) {
             player.setData(ModAttachments.PROLOGUE_DONE.get(), true);
+            // Remember the starting city and make it the respawn point, so death returns you home.
+            player.setData(ModAttachments.HOME_CITY.get(), city.id());
+            setHomeRespawn(player, overworld, spot);
         }
+    }
+
+    /** The curated city the player began in, or {@code null} if none/unknown. */
+    public static @Nullable City homeCity(ServerPlayer player) {
+        String id = player.getData(ModAttachments.HOME_CITY.get());
+        if (id.isEmpty()) {
+            return null;
+        }
+        for (City city : Cities.all()) {
+            if (city.id().equals(id)) {
+                return city;
+            }
+        }
+        return null;
+    }
+
+    /** Teleports {@code player} back to their starting city; used by {@code /eh home}. */
+    public static boolean recallHome(ServerPlayer player) {
+        City home = homeCity(player);
+        MinecraftServer server = player.level().getServer();
+        ServerLevel overworld = server == null ? null : server.getLevel(Level.OVERWORLD);
+        if (home == null || overworld == null) {
+            return false;
+        }
+        BlockPos spot = citySpot(overworld, home);
+        return spot != null && teleport(player, overworld, spot);
+    }
+
+    /** Sets the player's respawn to {@code spot} in {@code overworld}, forced so it survives. */
+    private static void setHomeRespawn(ServerPlayer player, ServerLevel overworld, BlockPos spot) {
+        LevelData.RespawnData data = LevelData.RespawnData.of(
+                overworld.dimension(), spot, player.getYRot(), player.getXRot());
+        player.setRespawnPosition(new ServerPlayer.RespawnConfig(data, true), false);
     }
 
     /** First join: re-assert the investigator bonus; send a brand-new player into the Threshold. */

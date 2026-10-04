@@ -151,6 +151,19 @@ public final class ModAttachments {
                             .copyOnDeath()
                             .build());
 
+    /**
+     * The curated-city id the player began in (the prologue gate they took), or {@code ""}. Set by
+     * {@link com.sanchous98.eldritchhorror.investigator.Prologue#complete}; drives the respawn point
+     * and {@code /eh home}. See {@code design/29-prologue.md}.
+     */
+    public static final Supplier<AttachmentType<String>> HOME_CITY =
+            ATTACHMENT_TYPES.register("home_city",
+                    () -> AttachmentType.<String>builder(() -> "")
+                            .serialize(com.mojang.serialization.Codec.STRING.fieldOf("id"))
+                            .sync((holder, to) -> holder == to, ByteBufCodecs.STRING_UTF8)
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }

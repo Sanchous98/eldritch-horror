@@ -25,6 +25,7 @@ import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.Events;
 import com.sanchous98.eldritchhorror.investigator.Investigator;
 import com.sanchous98.eldritchhorror.investigator.InvestigatorAPI;
+import com.sanchous98.eldritchhorror.investigator.Prologue;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
@@ -197,7 +198,25 @@ public final class EldritchCommands {
                         .then(Commands.argument("id", StringArgumentType.word())
                                 .executes(EldritchCommands::forceEvent)))
                 .then(Commands.literal("events").executes(EldritchCommands::listEvents));
+        // Debug travel to the starting city (respawn handles the normal case).
+        eh.then(Commands.literal("home").executes(EldritchCommands::goHome));
         dispatcher.register(eh);
+    }
+
+    /** {@code /eh home}: debug teleport to the city chosen in the prologue (respawn does it normally). */
+    private static int goHome(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("Requires gamemaster permissions."));
+            return 0;
+        }
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        if (Prologue.recallHome(p)) {
+            ctx.getSource().sendSuccess(() -> Component.literal("Returned to your starting city."), false);
+            return 1;
+        }
+        ctx.getSource().sendFailure(Component.literal("No starting city is set for you."));
+        return 0;
     }
 
     /** {@code /eh ...}: refuses when the feature's command toggle is off (config read at runtime). */

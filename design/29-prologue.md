@@ -51,9 +51,11 @@ A tiny, finite, self-contained dimension: `eldritch_horror:threshold`.
    - applies the investigator's passive where the system exists (e.g. the `max_sanity`
      attribute), and records the rest for when their systems land.
 3. **Choose a city.** 24 gates. Walking into one teleports the player to that city's curated,
-   safe surface point in the Overworld and marks the prologue **complete**.
+   safe surface point in the Overworld, sets that city as the player's **home** (the `HOME_CITY`
+   attachment) and their **respawn point**, and marks the prologue **complete**.
 4. **Done.** The prologue is one-time; there is **no return** to the Threshold. A fresh
-   player is placed at a city, standing at the start of `design/02-progression.md`.
+   player is placed at a city, standing at the start of `design/02-progression.md`. On death the
+   player respawns in their home city; `/eh home` (gamemaster debug) teleports there on demand.
 
 ## Investigators
 
@@ -85,6 +87,7 @@ Each investigator's **active** ability is invoked through the shared `signature_
 |---|---|
 | `/eh investigator get` | Prints your current investigator. |
 | `/eh investigator set <id>` | Gamemaster debug: sets and re-grants an investigator. |
+| `/eh home` | Gamemaster debug: teleport to your starting city (respawn does this normally). |
 
 ## What is deliberately *not* here
 
@@ -96,5 +99,3 @@ Each investigator's **active** ability is invoked through the shared `signature_
 ## Deferred / open
 
 - Which rite each investigator starts with (depends on the rite roster's tier-1 list).
-- Whether the starting city is remembered as the player's "home" for later systems
-  (respawn, city reputation) — likely yes, but out of scope here.
