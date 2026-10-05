@@ -10,7 +10,7 @@ public final class Navigation {
     public static void init() {
         // City map; reveals the layout of the nearest settlement.
         ModItems.add("city_map", 1);
-        // World atlas; consolidated view of explored regions and cult territory.
+        // World atlas; opens the fullscreen world map (client-side, by item id).
         ModItems.add("world_atlas", 1);
         // Cartographer's Lens; reveals structures and ruins at a distance.
         ModItems.add("cartographers_lens", 1);

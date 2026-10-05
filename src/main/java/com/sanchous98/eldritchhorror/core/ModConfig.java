@@ -24,6 +24,11 @@ public final class ModConfig {
             BUILDER.comment("Enable the /eh investigator command (get / set).")
                     .define("enableInvestigatorCommands", true);
 
+    /** Whether players get a chat line when a world event starts or ends. */
+    public static final ModConfigSpec.BooleanValue ENABLE_EVENT_NOTIFICATIONS =
+            BUILDER.comment("Tell players in chat when a world event starts or ends.")
+                    .define("enableEventNotifications", true);
+
     public static final ModConfigSpec.DoubleValue SANITY_DRAIN_MULTIPLIER =
             BUILDER.comment("Global multiplier applied to all sanity drain.")
                     .defineInRange("sanityDrainMultiplier", 1.0, 0.0, 10.0);

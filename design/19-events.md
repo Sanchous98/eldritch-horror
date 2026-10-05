@@ -26,6 +26,9 @@ falling, rifts opening, cults taking over. Those are listed in
 - Events are **data-driven**: trigger, weight, effect, duration, cooldown.
 - Several are *warnings* (whispers, darkness) that telegraph bigger events.
 - Events should be readable in the log for debugging, but not spoil the first encounter.
+- **Legibility:** when an event starts or ends the player gets a chat line naming it
+  (`ENABLE_EVENT_NOTIFICATIONS`), in addition to the diegetic cues (sound, particles, drain). The
+  codex learns the event automatically via discovery.
 - Accessibility: visual intensity tied to the accessibility options (see `design/README.md`).
 
 ## Open questions

@@ -96,8 +96,7 @@ public final class ModItems {
     }
 
     /** Forces every category class to initialise and register its items. Called at mod construction. */
-    public static void registerCategories() {
-        Reagents.init();
+    public static void registerCategories() {        Reagents.init();
         Tomes.init();
         Artifacts.init();
         Weapons.init();

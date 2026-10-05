@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -189,6 +190,7 @@ public final class EventTicker {
                 if (tick >= active.endTick || endedEarly(active)) {
                     it.remove();
                     cooldownUntil(id, active.event, tick);
+                    notifyEvent(player, active.event, false);
                     EldritchHorror.LOGGER.info("event {} ended for {}", active.event.id(),
                             player.getName().getString());
                     continue;
@@ -300,8 +302,43 @@ public final class EventTicker {
     private static void start(ServerPlayer player, EldritchEvent def, int tick, EventContext ctx) {
         Map<String, Active> map = ACTIVE.computeIfAbsent(player.getUUID(), k -> new HashMap<>());
         map.put(def.id(), new Active(def, tick, tick + Math.max(1, def.duration()), ctx));
+        notifyEvent(player, def, true);
         EldritchHorror.LOGGER.info("event {} started for {} ({}t)", def.id(),
                 player.getName().getString(), def.duration());
+    }
+
+    /**
+     * Tells the player an event began or ended: a short action-bar line plus a system-chat toast.
+     * Diegetic cues (sound, particles, drain) already come from the effects; this is the legibility
+     * layer so a player knows <i>what</i> is happening, not just that something is.
+     */
+    private static void notifyEvent(ServerPlayer player, EldritchEvent def, boolean started) {
+        if (!ModConfig.ENABLE_EVENT_NOTIFICATIONS.get()) {
+            return;
+        }
+        String key = "event.eldritch_horror." + def.id()
+                + (started ? ".start" : ".end");
+        String fallback = (started ? "The world stirs: " : "The world settles: ")
+                + prettify(def.id()) + ".";
+        Component line = Component.translatableWithFallback(key, fallback);
+        player.sendSystemMessage(line);
+    }
+
+    /** {@code darkness_pulse} → {@code Darkeness Pulse}. */
+    private static String prettify(String id) {
+        StringBuilder sb = new StringBuilder(id.length());
+        boolean upper = true;
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+            if (c == '_') {
+                sb.append(' ');
+                upper = true;
+            } else {
+                sb.append(upper ? Character.toUpperCase(c) : c);
+                upper = false;
+            }
+        }
+        return sb.toString();
     }
 
     private static boolean onCooldown(UUID id, EldritchEvent def, int tick) {
