@@ -145,6 +145,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   types); dependencies bumped to NeoForge `26.3.0.48-beta`, moddev `2.0.148`, JUnit `5.14.4`,
   Gradle `9.8.0`. City arrival now samples a ring of street-level spots and lands on the modal
   height (never on the central landmark — e.g. Rio's statue). Rio's floating halo lanterns removed.
+- **Code-review fixes**: the atlas opens via `Item#use` through a dist-safe `ClientHooks` slot (so
+  it works while pointing at a block, not only at air); the map screen no longer double-draws the
+  background; `/eh event` requires `ENABLE_EVENTS` (a forced event with the master switch off would
+  never advance); event/investigator lang keys added and the phantom
+  `investigator.eldritch_horror.active.*` key removed (ability messages carry live data — bearing,
+  rite name — so they stay literals); dead `InvestigatorRole.id()` removed.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost

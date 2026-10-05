@@ -109,11 +109,17 @@ public final class EventTicker {
     }
 
     /**
-     * Force-starts {@code id} for {@code player}, ignoring the master switch, the per-event toggle
-     * and cooldowns (the operator/debug escape hatch behind {@code /eh event}). Returns the started
-     * event, or {@code null} if the id is unknown or the player is not in the overworld.
+     * Force-starts {@code id} for {@code player}, ignoring the per-event toggle and cooldowns (the
+     * operator/debug escape hatch behind {@code /eh event}). Still requires the master switch
+     * {@code ENABLE_EVENTS}, because a forced event that the ticker will not advance (the ticker
+     * early-returns when the master switch is off) would start and then never end. Returns the
+     * started event, or {@code null} if events are disabled, the id is unknown, or the player is not
+     * in the overworld.
      */
     public static @Nullable EldritchEvent forceStart(ServerPlayer player, String id, int tick) {
+        if (!ModConfig.ENABLE_EVENTS.get()) {
+            return null;
+        }
         Events.init();
         EldritchEvent def = Events.byId(id);
         if (def == null || !player.level().dimension().equals(Level.OVERWORLD)) {

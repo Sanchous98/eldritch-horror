@@ -241,7 +241,8 @@ public final class EldritchCommands {
         int tick = ctx.getSource().getServer().getTickCount();
         EldritchEvent started = EventTicker.forceStart(player, id, tick);
         if (started == null) {
-            ctx.getSource().sendFailure(Component.literal("Unknown event (or not in the overworld): " + id));
+            ctx.getSource().sendFailure(Component.literal(
+                    "Event not started (unknown id, events disabled, or not in the overworld): " + id));
             return 0;
         }
         ctx.getSource().sendSuccess(() -> Component.literal("[" + started.id() + "] started ("

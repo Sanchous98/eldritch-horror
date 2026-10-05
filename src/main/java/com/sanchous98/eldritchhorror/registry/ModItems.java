@@ -24,6 +24,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Item registry — the single shared surface every item category registers through.
@@ -54,6 +55,18 @@ public final class ModItems {
      */
     public static DeferredItem<Item> add(String id, int maxStack) {
         DeferredItem<Item> item = ITEMS.registerSimpleItem(id, p -> p.stacksTo(maxStack));
+        ALL.add(item);
+        return item;
+    }
+
+    /**
+     * Registers one functional item built from a factory and records it in {@link #ALL}. Use this
+     * for items with behaviour (e.g. the atlas that opens the map); the plain {@link #add(String,int)}
+     * stub cannot carry a custom class. Assets are already generated for the reused ids.
+     */
+    public static <I extends Item> DeferredItem<I> addItem(
+            String id, Function<Item.Properties, I> factory, int maxStack) {
+        DeferredItem<I> item = ITEMS.registerItem(id, p -> factory.apply(p.stacksTo(maxStack)));
         ALL.add(item);
         return item;
     }

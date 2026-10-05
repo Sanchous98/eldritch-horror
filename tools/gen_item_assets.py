@@ -53,7 +53,9 @@ STYLE = {
 
 def ids_for(path):
     src = open(path).read()
-    return re.findall(r'ModItems\.add\("([a-z_]+)"', src)
+    # Plain stubs use add("id", …); functional items use addItem("id", …). Match both so the atlas
+    # (a custom class) keeps getting a model/texture/item-definition on regeneration.
+    return re.findall(r'ModItems\.add(?:Item)?\("([a-z_]+)"', src)
 
 
 def registry():

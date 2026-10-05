@@ -10,8 +10,8 @@ public final class Navigation {
     public static void init() {
         // City map; reveals the layout of the nearest settlement.
         ModItems.add("city_map", 1);
-        // World atlas; opens the fullscreen world map (client-side, by item id).
-        ModItems.add("world_atlas", 1);
+        // World atlas; opens the fullscreen world map (client-side, via a dist-safe hook).
+        ModItems.addItem("world_atlas", WorldAtlasItem::new, 1);
         // Cartographer's Lens; reveals structures and ruins at a distance.
         ModItems.add("cartographers_lens", 1);
         // Compass of Longing; points toward the nearest rift.

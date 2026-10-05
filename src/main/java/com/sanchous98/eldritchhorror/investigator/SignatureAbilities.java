@@ -70,36 +70,36 @@ public final class SignatureAbilities {
             case TOM_MALLORY -> {
                 effect(player, MobEffects.RESISTANCE, 240);
                 effect(player, MobEffects.REGENERATION, 240);
-                message(player, id, "Hold the Line: you brace for 12 seconds.");
+                message(player, "Hold the Line: you brace for 12 seconds.");
             }
             case CORMAC_BLACKWOOD -> {
                 effect(player, MobEffects.INVISIBILITY, 120);
                 effect(player, MobEffects.SPEED, 120);
-                message(player, id, "Dirty Trick: you slip away for 6 seconds.");
+                message(player, "Dirty Trick: you slip away for 6 seconds.");
             }
             case SISTER_AGATHA -> benediction(player, level);
             case MARION_DELACROIX -> commune(player, level);
             case VERA_NIGHTINGALE -> {
                 SanityAPI.add(player, -15.0);
                 CorruptionAPI.add(player, 10.0);
-                message(player, id, "Blood Offering: sanity spent, corruption gained.");
+                message(player, "Blood Offering: sanity spent, corruption gained.");
             }
             case NIKOLAI_VOLKOV -> forbiddenInsight(player);
             case DR_AMOS_HARTLEY -> {
                 player.removeEffect(ModEffects.MADNESS);
                 player.removeEffect(ModEffects.MARKED);
                 SanityAPI.add(player, 20.0);
-                message(player, id, "Sedate: the madness recedes; sanity restored.");
+                message(player, "Sedate: the madness recedes; sanity restored.");
             }
             case EVELYN_ASHCOMBE -> {
                 effect(player, MobEffects.RESISTANCE, 400);
-                message(player, id, "Buy Time: resistance for 20 seconds.");
+                message(player, "Buy Time: resistance for 20 seconds.");
             }
             case ALDOUS_PEMBERTON -> survey(player);
             case HAZEL_QUINN -> {
                 CorruptionAPI.add(player, -5.0);
                 effect(player, MobEffects.SPEED, 160);
-                message(player, id, "Expos\u00e9: your corruption eases and you move quickly.");
+                message(player, "Expos\u00e9: your corruption eases and you move quickly.");
             }
         }
     }
@@ -108,10 +108,9 @@ public final class SignatureAbilities {
     private static void readTheSigns(ServerPlayer player, ServerLevel level) {
         BlockPos nearest = nearestRift(player, level);
         if (nearest == null) {
-            message(player, Investigator.ELEANOR_VANCE, "Read the Signs: no rifts close by.");
+            message(player, "Read the Signs: no rifts close by.");
         } else {
-            message(player, Investigator.ELEANOR_VANCE,
-                    "Read the Signs: nearest rift " + bearing(player, nearest) + ".");
+            message(player, "Read the Signs: nearest rift " + bearing(player, nearest) + ".");
         }
         effect(player, MobEffects.NIGHT_VISION, 300);
     }
@@ -120,10 +119,9 @@ public final class SignatureAbilities {
     private static void stakeOut(ServerPlayer player, ServerLevel level) {
         BlockPos nearest = nearestRift(player, level);
         if (nearest == null) {
-            message(player, Investigator.JACK_CORRIGAN, "Stake Out: no rifts close by.");
+            message(player, "Stake Out: no rifts close by.");
         } else {
-            message(player, Investigator.JACK_CORRIGAN,
-                    "Stake Out: nearest rift " + bearing(player, nearest) + ".");
+            message(player, "Stake Out: nearest rift " + bearing(player, nearest) + ".");
         }
         effect(player, MobEffects.RESISTANCE, 160);
     }
@@ -138,8 +136,7 @@ public final class SignatureAbilities {
             }
         }
         SanityAPI.add(player, 5.0);
-        message(player, Investigator.SISTER_AGATHA,
-                "Benediction: the local taint is cleansed; sanity restored.");
+        message(player, "Benediction: the local taint is cleansed; sanity restored.");
     }
 
     /** Marion Delacroix — sense the nearest loaded Ancient One direction/distance. */
@@ -156,11 +153,10 @@ public final class SignatureAbilities {
             }
         }
         if (nearest == null) {
-            message(player, Investigator.MARION_DELACROIX, "Commune: no presence answers.");
+            message(player, "Commune: no presence answers.");
             return;
         }
-        message(player, Investigator.MARION_DELACROIX,
-                "Commune: a presence " + bearing(player, nearest.blockPosition()) + ".");
+        message(player, "Commune: a presence " + bearing(player, nearest.blockPosition()) + ".");
     }
 
     /** Nikolai Volkov — teach one random rite the player does not already know. */
@@ -169,15 +165,13 @@ public final class SignatureAbilities {
                 .filter(rite -> !RiteKnowledge.knows(player, rite.id()))
                 .toList();
         if (unknown.isEmpty()) {
-            message(player, Investigator.NIKOLAI_VOLKOV,
-                    "Forbidden Insight: you already know every rite.");
+            message(player, "Forbidden Insight: you already know every rite.");
             return;
         }
         RandomSource random = player.getRandom();
         RiteDefinition chosen = unknown.get(random.nextInt(unknown.size()));
         RiteKnowledge.add(player, chosen.id());
-        message(player, Investigator.NIKOLAI_VOLKOV,
-                "Forbidden Insight: you learn " + chosen.name().getString() + ".");
+        message(player, "Forbidden Insight: you learn " + chosen.name().getString() + ".");
     }
 
     /** Aldous Pemberton — reveal the nearest registered site/city direction/distance. */
@@ -194,12 +188,11 @@ public final class SignatureAbilities {
             }
         }
         if (nearest == null) {
-            message(player, Investigator.ALDOUS_PEMBERTON, "Survey: no known places to report.");
+            message(player, "Survey: no known places to report.");
             return;
         }
         BlockPos site = new BlockPos(Locations.xOf(nearest), player.getBlockY(), Locations.zOf(nearest));
-        message(player, Investigator.ALDOUS_PEMBERTON,
-                "Survey: nearest place " + bearing(player, site) + ".");
+        message(player, "Survey: nearest place " + bearing(player, site) + ".");
     }
 
     /** The nearest rift anchor within the scan radius, or {@code null} when none is loaded. */
@@ -233,11 +226,11 @@ public final class SignatureAbilities {
     }
 
     /**
-     * Sends the ability's short system message, keyed per investigator so the main agent's lang can
-     * localise it; the fallback keeps it readable without lang.
+     * Sends the ability's short system message. Each ability composes its own line (several carry
+     * live data such as a bearing or a rite name, so a static lang key would drop it); this is just
+     * the single send point.
      */
-    private static void message(ServerPlayer player, Investigator id, String fallback) {
-        player.sendSystemMessage(Component.translatableWithFallback(
-                "investigator.eldritch_horror.active." + id.id(), fallback));
+    private static void message(ServerPlayer player, String text) {
+        player.sendSystemMessage(Component.literal(text));
     }
 }

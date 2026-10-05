@@ -22,11 +22,6 @@ public enum InvestigatorRole {
         this.id = id;
     }
 
-    /** The stable, namespaced-free id used in lang keys and on signs. */
-    public String id() {
-        return this.id;
-    }
-
     /** The localised display name, from lang key {@code role.eldritch_horror.<id>}. */
     public Component displayName() {
         return Component.translatable("role.eldritch_horror." + this.id);

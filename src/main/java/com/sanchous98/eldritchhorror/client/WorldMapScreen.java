@@ -18,9 +18,8 @@ import net.minecraft.resources.Identifier;
 
 /**
  * The fullscreen world map (design/22-map-and-knowledge.md). Draws the baked Earth landmask scaled
- * to the 131072×65536 world, then overlays markers: the player's position and facing, their home
- * city, every curated city (always known — it is Earth), and the sites/rifts the player has
- * discovered (codex-gated).
+ * to the 131072×65536 world, then overlays markers: the player's position, their home city, every
+ * curated city (always known — it is Earth), and the sites the player has discovered (codex-gated).
  *
  * <p>Client-only and read-only: it renders synced data ({@code LORE}, {@code HOME_CITY}) and never
  * touches server state. The map image is {@code textures/gui/world_map.png}, a downscaled copy of
@@ -64,8 +63,8 @@ public final class WorldMapScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        this.extractBackground(g, mouseX, mouseY, partialTick);
-
+        // The engine already draws the background before this method (Screen#extractRenderState is
+        // invoked after extractBackground), so do not call extractBackground again here.
         // The Earth itself: the full texture stretched to the fitted rect (src = whole texture).
         g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, MAP_TEXTURE,
                 mapX, mapY, 0.0F, 0.0F, mapW, mapH, TEX_W, TEX_H, TEX_W, TEX_H);
