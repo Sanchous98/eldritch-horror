@@ -94,17 +94,9 @@ public final class RioStyle implements CityStyle {
         b.put(cx - arm, sy - 2, cz, p.accent());
         b.put(cx + arm, sy - 2, cz, p.accent());
 
-        // Head and a ringed halo.
+        // Head, crowned with a single beacon (a halo ring here floated unsupported in the sky).
         b.fill(cx - 1, sy + 2, cz - 1, cx + 1, sy + 3, cz + 1, p.accent());
-        b.put(cx, sy + 4, cz, p.accent());
-        int haloY = sy + 6;
-        for (int a = 0; a < 360; a += 30) {
-            double rad = Math.toRadians(a);
-            int hx = cx + (int) Math.round(5 * Math.cos(rad));
-            int hz = cz + (int) Math.round(5 * Math.sin(rad));
-            b.put(hx, haloY, hz, p.light());
-        }
-        b.put(cx, haloY + 1, cz, p.light());
+        b.put(cx, sy + 4, cz, p.light());
     }
 
     @Override

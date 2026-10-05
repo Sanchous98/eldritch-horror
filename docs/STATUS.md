@@ -135,6 +135,16 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   curated city's safe surface and end the prologue (one-way, no return). The hub is
   destruction-proof (`ThresholdProtection`). Passives scale drain/gain via `Progression` in the
   sanity/corruption tickers. `/eh investigator get|set` + `ENABLE_PROLOGUE`.
+- **Client world map** (`client/WorldMapScreen`): right-clicking the `world_atlas` opens a
+  fullscreen Earth map — the baked landmask (`textures/gui/world_map.png`, 2048×1024) scaled to the
+  world extent, with markers for the player, the home city, every curated city, and codex-discovered
+  sites. Opened from a `Dist.CLIENT` `RightClickItem` handler by item id, so no GUI class is loaded
+  server-side. **Event notifications**: a chat line names each world event when it starts/ends
+  (`ENABLE_EVENT_NOTIFICATIONS`), so a player knows what is happening, not just that it is.
+- **Startup fixes / deps**: config type `SERVER`→`SYNCED` (NeoForge `.37` renamed the FML config
+  types); dependencies bumped to NeoForge `26.3.0.48-beta`, moddev `2.0.148`, JUnit `5.14.4`,
+  Gradle `9.8.0`. City arrival now samples a ring of street-level spots and lands on the modal
+  height (never on the central landmark — e.g. Rio's statue). Rio's floating halo lanterns removed.
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
@@ -195,16 +205,16 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   world-conversion, world events, codex and the recipe economy. Sanity and corruption have real
   tickers, states, effects, config and item interaction. Morok is implemented on both axes (mob
   effects + a sanity source).
-- **Still deferred:** 6 Ancient Ones (Hastur, Nephren-Ka, Abhoth, Chaugnar Faugn, Tulzscha,
-  Zstylzhemghi) need new minor sites; 4 bespoke events (`cult_procession`, `blood_moon_rite`,
-  `star_fall`, `hollow_call`); rite **reagent-cost consumption** (needs a change to the frozen
-  `RiteDefinition`); a client map/codex screen; city services.
+- **Still deferred:** rite **reagent-cost consumption** (needs a change to the frozen
+  `RiteDefinition`); city services; per-investigator signature items (one shared `signature_charm`
+  today); a few unused public-API nits from review.
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,
   so it is judged in-game rather than on the map PNGs.
 - Spawn is decided by the prologue (the Threshold city gate), not vanilla; a player who skips the
-  prologue falls back to the vanilla spawn search.
+  prologue falls back to the vanilla spawn search. Arrival picks a street ring around the city heart
+  (never the landmark) and sets it as the home respawn.
 - **No third-party builds are imported.** Landmarks/cities are generated procedurally from our
   own code. Community schematics (e.g. Planet Minecraft) were considered and rejected: most are
   All-Rights-Reserved (we publish to a public repo), and raw `.schematic/.litematic` do not drop

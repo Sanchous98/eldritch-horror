@@ -66,9 +66,9 @@ public final class WorldMapScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         this.extractBackground(g, mouseX, mouseY, partialTick);
 
-        // The Earth itself: full texture stretched to the fitted rect.
+        // The Earth itself: the full texture stretched to the fitted rect (src = whole texture).
         g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, MAP_TEXTURE,
-                mapX, mapY, 0.0F, 0.0F, mapW, mapH, mapW, mapH, TEX_W, TEX_H);
+                mapX, mapY, 0.0F, 0.0F, mapW, mapH, TEX_W, TEX_H, TEX_W, TEX_H);
 
         drawCities(g);
         drawHome(g);

@@ -7,6 +7,8 @@ import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.threshold.Threshold;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -35,10 +37,18 @@ import org.jspecify.annotations.Nullable;
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class Prologue {
 
+    /**
+     * Arrival-ring radii (blocks from the city centre), tried in order. The landmark and plaza
+     * occupy the centre, so the first ring sits just outside the kept-clear heart on a street.
+     */
+    private static final int[] ARRIVAL_RADII = {48, 64, 80};
+    /** Number of angles sampled on each arrival ring before widening. */
+    private static final int ARRIVAL_SAMPLES = 16;
+
     private Prologue() {
     }
 
-    /** @return whether the prologue feature is enabled (SERVER config, read at runtime). */
+    /** @return whether the prologue feature is enabled (synced SERVER config, read at runtime). */
     public static boolean enabled() {
         return ModConfig.ENABLE_PROLOGUE.get();
     }
@@ -157,19 +167,45 @@ public final class Prologue {
     }
 
     /**
-     * The city's safe standing spot. The destination chunk is force-generated first: reading the
+     * The city's safe standing spot. The destination chunks are force-generated first: reading the
      * height of an unloaded chunk returns the dimension's min Y (inside the bedrock), and
-     * {@link BestiarySupport#surfaceSpot} returns {@code null} for unloaded chunks. Returns
-     * {@code null} if no safe surface can be found.
+     * {@link BestiarySupport#surfaceSpot} returns {@code null} for unloaded chunks.
+     *
+     * <p>The exact centre is deliberately skipped: every city's landmark (Rio's statue, a cathedral,
+     * a pagoda …) stands on the centre column, so a height scan there lands the player on top of the
+     * monument. Instead several rings of street-level candidates around the heart are sampled and
+     * the modal (most common) height wins — streets and paving outnumber roofs and monuments, so
+     * that level is the city's ground. Returns {@code null} if no safe surface can be found.
      */
     private static @Nullable BlockPos citySpot(ServerLevel level, City city) {
-        level.getChunk(city.x() >> 4, city.z() >> 4, ChunkStatus.FULL, true);
-        BlockPos spot = BestiarySupport.surfaceSpot(level, city.x(), city.z(), false);
-        if (spot != null) {
-            return spot;
+        // Sample rings of street-level candidates and keep the most frequent height: streets and
+        // paving outnumber roofs and monuments, so the modal Y is the city's ground level. This
+        // also avoids landing on the landmark even when its footprint reaches the first ring.
+        Map<Integer, BlockPos> byY = new HashMap<>();
+        Map<Integer, Integer> countY = new HashMap<>();
+        for (int radius : ARRIVAL_RADII) {
+            for (int i = 0; i < ARRIVAL_SAMPLES; i++) {
+                double angle = i * (2.0 * Math.PI / ARRIVAL_SAMPLES);
+                int x = city.x() + (int) Math.round(radius * Math.cos(angle));
+                int z = city.z() + (int) Math.round(radius * Math.sin(angle));
+                level.getChunk(x >> 4, z >> 4, ChunkStatus.FULL, true);
+                BlockPos spot = BestiarySupport.surfaceSpot(level, x, z, false);
+                if (spot != null) {
+                    byY.putIfAbsent(spot.getY(), spot);
+                    countY.merge(spot.getY(), 1, Integer::sum);
+                }
+            }
         }
+        if (!byY.isEmpty()) {
+            int modalY = countY.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .orElseThrow()
+                    .getKey();
+            return byY.get(modalY);
+        }
+        // Last resort: the centre height, whatever it is (never the void).
+        level.getChunk(city.x() >> 4, city.z() >> 4, ChunkStatus.FULL, true);
         int y = level.getHeight(Heightmap.Types.OCEAN_FLOOR, city.x(), city.z());
-        // getHeight of a missing chunk yields getMinY(); never teleport into the void.
         return y > level.getMinY() ? new BlockPos(city.x(), y, city.z()) : null;
     }
 

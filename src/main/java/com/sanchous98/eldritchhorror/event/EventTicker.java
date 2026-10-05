@@ -308,9 +308,9 @@ public final class EventTicker {
     }
 
     /**
-     * Tells the player an event began or ended: a short action-bar line plus a system-chat toast.
-     * Diegetic cues (sound, particles, drain) already come from the effects; this is the legibility
-     * layer so a player knows <i>what</i> is happening, not just that something is.
+     * Tells the player an event began or ended with a chat line naming it. Diegetic cues (sound,
+     * particles, drain) already come from the effects; this is the legibility layer so a player
+     * knows <i>what</i> is happening, not just that something is.
      */
     private static void notifyEvent(ServerPlayer player, EldritchEvent def, boolean started) {
         if (!ModConfig.ENABLE_EVENT_NOTIFICATIONS.get()) {
