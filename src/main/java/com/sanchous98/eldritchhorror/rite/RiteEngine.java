@@ -113,6 +113,16 @@ public final class RiteEngine {
         }
         ServerLevel level = player.level();
 
+        // Offerings: checked up front (all the listed reagents present), removed only once the rite
+        // actually resolves. A refused rite therefore costs nothing; design/08's "cost on failure"
+        // is the sanity/corruption price below, which is still paid on every attempt.
+        List<RiteReagents.Reagent> offerings = RiteReagents.offerings(rite);
+        boolean reagentsEnabled = ModConfig.REQUIRE_RITE_REAGENTS.get();
+        if (reagentsEnabled && !RiteReagents.has(player, offerings)) {
+            return new Result(false, Component.literal("The altar lacks the offerings: ")
+                    .append(RiteReagents.describe(offerings)).append(Component.literal(".")));
+        }
+
         // Cost is paid on every known-rite attempt, matching design/08-rituals.md.
         if (rite.sanity() != 0) {
             SanityAPI.add(player, rite.sanity());
@@ -121,7 +131,7 @@ public final class RiteEngine {
             CorruptionAPI.add(player, rite.corruption());
         }
 
-        return switch (rite.outcome()) {
+        Result result = switch (rite.outcome()) {
             case GRANT -> grant(player, rite);
             case GRANT_SKILL -> grantSkill(player, rite);
             case SPAWN -> spawn(level, player, rite);
@@ -133,6 +143,11 @@ public final class RiteEngine {
                     new Result(false, Component.literal("The rite's outcome " + rite.outcome()
                             + " is not implemented for " + rite.id() + "."));
         };
+        // Offerings are spent only on a rite that actually took effect (atomic, all-or-nothing).
+        if (reagentsEnabled && result.ok()) {
+            RiteReagents.consume(player, offerings);
+        }
+        return result;
     }
 
     /**

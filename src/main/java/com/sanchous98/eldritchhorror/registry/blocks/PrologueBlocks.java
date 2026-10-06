@@ -2,18 +2,15 @@ package com.sanchous98.eldritchhorror.registry.blocks;
 
 import com.sanchous98.eldritchhorror.registry.ModBlocks;
 import com.sanchous98.eldritchhorror.registry.ModItems;
-import com.sanchous98.eldritchhorror.registry.items.SignatureItem;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredItem;
 
 /**
  * The Threshold prologue's blocks: the 12-variant investigator pedestal, the 24-variant city gate
- * portal and the solid frame the gate arches are built from. Also registers the shared
- * {@code signature_charm} item every investigator's active is fired through.
+ * portal and the solid frame the gate arches are built from.
  *
  * <p>Registered through the shared {@link ModBlocks#BLOCKS} register so they land in
  * {@link ModBlocks#ALL} (creative tab) and get a {@code BlockItem}, exactly like the other block
@@ -35,19 +32,6 @@ public final class PrologueBlocks {
             "investigator_pedestal",
             InvestigatorPedestalBlock::new,
             p -> p.strength(3.5f, 6.0f).lightLevel(s -> 7));
-
-    /**
-     * The shared signature item. Stack size 1; right-click fires the owner's
-     * {@link com.sanchous98.eldritchhorror.investigator.SignatureAbilities active}. Registered here
-     * because this is the prologue's content entry point; recorded in {@link ModItems#ALL} so it is
-     * discoverable in the creative tab.
-     */
-    public static final DeferredItem<SignatureItem> SIGNATURE_CHARM = ModItems.ITEMS.registerItem(
-            "signature_charm", p -> new SignatureItem(p.stacksTo(1)));
-
-    static {
-        ModItems.ALL.add(SIGNATURE_CHARM);
-    }
 
     /**
      * A destination gate portal; its {@code city} property (0–23) selects the curated city. No

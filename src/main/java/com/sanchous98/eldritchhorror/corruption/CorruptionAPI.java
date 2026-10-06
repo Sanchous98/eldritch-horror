@@ -30,9 +30,4 @@ public final class CorruptionAPI {
     public static double set(ServerPlayer player, double value) {
         return CorruptionSystem.set(player, value);
     }
-
-    /** The current state band for {@code player}, derived from the meter. */
-    public static CorruptionState state(ServerPlayer player) {
-        return CorruptionSystem.state(player);
-    }
 }

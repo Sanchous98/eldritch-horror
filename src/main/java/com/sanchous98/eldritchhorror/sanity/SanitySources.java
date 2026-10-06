@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.world.BoundaryTravel;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.CityStates;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -154,7 +155,14 @@ public final class SanitySources {
             if (!ctx.level().dimension().equals(Level.OVERWORLD)) {
                 return 0.0;
             }
-            return ctx.nearCity() ? ModConfig.SANITY_CITY_RATE.get() : 0.0;
+            if (!ctx.nearCity()) {
+                return 0.0;
+            }
+            // A corrupted city shelters the mind less: scale recovery by the city's state
+            // (Thriving → Fallen; design/21). Derived from loaded-chunk taint, never force-loaded.
+            City city = CityStates.nearestCity(ctx.level(), player.blockPosition());
+            double shelter = city == null ? 1.0 : CityStates.stateOf(ctx.level(), city).recoveryMultiplier();
+            return ModConfig.SANITY_CITY_RATE.get() * shelter;
         }
     }
 

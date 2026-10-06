@@ -1,6 +1,9 @@
 package com.sanchous98.eldritchhorror.registry.blocks;
 
+import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
+import com.sanchous98.eldritchhorror.rite.RiteReagents;
+import com.sanchous98.eldritchhorror.rite.Rites;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,8 +46,17 @@ public class RitualAltarBlock extends Block {
                 serverPlayer.sendSystemMessage(Component.literal(
                         "The altar is cold: you know no rites. Seek a tome or a cult."));
             } else {
-                serverPlayer.sendSystemMessage(Component.literal("Known rites: "
-                        + String.join(" ", known) + ". Use /eh rite <id> to perform one."));
+                serverPlayer.sendSystemMessage(Component.literal("Known rites (offerings):"));
+                for (String id : known) {
+                    RiteDefinition rite = Rites.byId(id);
+                    if (rite == null) {
+                        continue;
+                    }
+                    serverPlayer.sendSystemMessage(Component.literal("  " + id + " — ")
+                            .append(RiteReagents.describe(RiteReagents.offerings(rite))));
+                }
+                serverPlayer.sendSystemMessage(Component.literal(
+                        "Use /eh rite <id> to lay the offerings and perform one."));
             }
         }
         return InteractionResult.SUCCESS;

@@ -10,6 +10,7 @@ import com.sanchous98.eldritchhorror.registry.items.Factions;
 import com.sanchous98.eldritchhorror.registry.items.Keys;
 import com.sanchous98.eldritchhorror.registry.items.Navigation;
 import com.sanchous98.eldritchhorror.registry.items.Reagents;
+import com.sanchous98.eldritchhorror.registry.items.SignatureItems;
 import com.sanchous98.eldritchhorror.registry.items.Tomes;
 import com.sanchous98.eldritchhorror.registry.items.Utility;
 import com.sanchous98.eldritchhorror.registry.items.Weapons;
@@ -120,6 +121,7 @@ public final class ModItems {
         Factions.init();
         Keys.init();
         Utility.init();
+        SignatureItems.init();
     }
 
     /** The mod's creative tab, listing every item in {@link #ALL}. */

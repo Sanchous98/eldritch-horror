@@ -57,6 +57,25 @@ public final class ModConfig {
             BUILDER.comment("[demo] Sanity change per second inside a city (positive recovers).")
                     .defineInRange("sanityCityRate", 0.08, 0.0, 10.0);
 
+    // --- City state (design/21): a city's condition tracks the corruption on its district, and
+    // scales how much shelter it gives (Thriving → Uneasy → Besieged → Fallen). Derived from the
+    // per-chunk taint field, never stored; see world/city/CityStates.
+
+    /** District-average taint at/above which a city is Uneasy. */
+    public static final ModConfigSpec.DoubleValue CITY_STATE_UNEASY_TAINT =
+            BUILDER.comment("District taint at which a city becomes Uneasy (thinner shelter).")
+                    .defineInRange("cityStateUneasyTaint", 0.10, 0.0, 1.0);
+
+    /** District-average taint at/above which a city is Besieged. */
+    public static final ModConfigSpec.DoubleValue CITY_STATE_BESIEGED_TAINT =
+            BUILDER.comment("District taint at which a city becomes Besieged.")
+                    .defineInRange("cityStateBesiegedTaint", 0.30, 0.0, 1.0);
+
+    /** District-average taint at/above which a city is Fallen (no shelter). */
+    public static final ModConfigSpec.DoubleValue CITY_STATE_FALLEN_TAINT =
+            BUILDER.comment("District taint at which a city becomes Fallen (no shelter).")
+                    .defineInRange("cityStateFallenTaint", 0.55, 0.0, 1.0);
+
     /** Source: the lethal polar end of the world (Morok) drains sanity with depth. */
     public static final ModConfigSpec.BooleanValue ENABLE_SANITY_MOROK =
             BUILDER.comment("Enable the 'morok' sanity source (polar drain past the charted edge).")
@@ -919,6 +938,11 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue RITUAL_COOLDOWN_TICKS =
             BUILDER.comment("Minimum ticks between a player's rite performances (0 disables).")
                     .defineInRange("ritualCooldownTicks", 40, 0, 72000);
+
+    /** Whether performing a rite consumes its listed offerings (design/08). Off = creative testing. */
+    public static final ModConfigSpec.BooleanValue REQUIRE_RITE_REAGENTS =
+            BUILDER.comment("Require and consume a rite's offerings. Disable for costless testing.")
+                    .define("requireRiteReagents", true);
 
     // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
     // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,

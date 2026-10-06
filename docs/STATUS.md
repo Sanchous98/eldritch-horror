@@ -130,7 +130,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   sanity/corruption/event tickers — they gate on `minecraft:overworld`), stamped deterministically
   at `ServerStarted` (idempotent, forceload -> place -> release). **12 named investigator pedestals**
   (inner ring, each with a name+role sign; preview-then-confirm) grant a permanent investigator with
-  a starter kit, starting rite and passive bonuses, plus the shared `signature_charm` active ability;
+  a starter kit, starting rite and passive bonuses, plus their own signature item active ability;
   24 waystation arch portals (`city=0..23`, walked into, with city signs) teleport to the chosen
   curated city's safe surface and end the prologue (one-way, no return). The hub is
   destruction-proof (`ThresholdProtection`). Passives scale drain/gain via `Progression` in the
@@ -151,6 +151,15 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   never advance); event/investigator lang keys added and the phantom
   `investigator.eldritch_horror.active.*` key removed (ability messages carry live data — bearing,
   rite name — so they stay literals); dead `InvestigatorRole.id()` removed.
+- **Deferred work finished**: rite **offerings are now required and consumed** (all-or-nothing,
+  per design/08: the eight seed rites' reagent costs plus a default for the Ancient One solves;
+  `REQUIRE_RITE_REAGENTS` gates it; the altar lists each known rite's offerings). The investigator
+  actives are now **twelve per-investigator signature items** (`seers_lens`, `rosary`, …) instead of
+  one shared charm. **Investigator passives are live**: Dr. Amos recovers +50% in cities, Aldous
+  finds bonus mob loot. **City state** (`CityState`: Thriving→Uneasy→Besieged→Fallen) is derived from
+  the district's taint field (`CityStates`, loaded chunks only) and scales city shelter; `/eh city`.
+  Removed the dead `CorruptionAPI.state`, `TaintAPI.getAt`, `CodexAPI.entry`, `SanitySystem.max()`
+  nits (`EventTicker.activeCount` is live).
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
@@ -211,9 +220,8 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   world-conversion, world events, codex and the recipe economy. Sanity and corruption have real
   tickers, states, effects, config and item interaction. Morok is implemented on both axes (mob
   effects + a sanity source).
-- **Still deferred:** rite **reagent-cost consumption** (needs a change to the frozen
-  `RiteDefinition`); city services; per-investigator signature items (one shared `signature_charm`
-  today); a few unused public-API nits from review.
+- **Still deferred:** chest/site loot tables (Antiquarian currently improves mob drops only);
+  a few unused public-API nits from review.
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,

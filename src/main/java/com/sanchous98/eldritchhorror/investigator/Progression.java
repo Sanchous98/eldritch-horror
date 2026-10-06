@@ -57,6 +57,15 @@ public final class Progression {
         };
     }
 
+    /**
+     * The investigator's city sanity-recovery multiplier ({@code 1.0} = no change). Applied by
+     * {@code SanityTicker} only to the recovery gained while inside a curated city footprint, so it
+     * never amplifies an unrelated positive source.
+     */
+    public static double cityRecoveryMultiplier(ServerPlayer player) {
+        return investigatorOf(player) == Investigator.DR_AMOS_HARTLEY ? 1.5 : 1.0;
+    }
+
     private static @Nullable Investigator investigatorOf(ServerPlayer player) {
         return InvestigatorAPI.get(player);
     }

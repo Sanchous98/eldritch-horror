@@ -78,7 +78,12 @@ public final class SanityTicker {
 
         double delta = 0.0;
         for (SanitySource source : SanitySources.all()) {
-            delta += source.deltaPerSecond(player, ctx);
+            double sourceDelta = source.deltaPerSecond(player, ctx);
+            // Dr. Amos recovers faster in cities: scale the city source's recovery at the source.
+            if (sourceDelta > 0.0 && "city".equals(source.id())) {
+                sourceDelta *= Progression.cityRecoveryMultiplier(player);
+            }
+            delta += sourceDelta;
         }
         // Investigator passive scales drain only: recovery is never penalised.
         if (delta < 0.0) {

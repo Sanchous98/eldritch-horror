@@ -45,11 +45,6 @@ public final class SanitySystem {
         return set(player, get(player) + delta);
     }
 
-    /** The meter ceiling: the player's {@code max_sanity} attribute, or {@link #DEFAULT_MAX} if absent. */
-    public static double max() {
-        return DEFAULT_MAX;
-    }
-
     /** The meter ceiling for {@code player}: the {@code max_sanity} attribute, or {@link #DEFAULT_MAX}. */
     public static double max(net.minecraft.world.entity.player.Player player) {
         var instance = player.getAttribute(ModAttributes.MAX_SANITY);

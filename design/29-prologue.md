@@ -64,7 +64,10 @@ The 12 named investigators (occupation, role, passive, active, kit, rite) are de
 (the `investigator` registry), so the prologue, commands and future investigator-gated content
 all read the same source.
 
-Each investigator's **active** ability is invoked through the shared `signature_charm` item
+Each investigator's **active** ability is invoked through their own **signature item** (e.g.
+`seers_lens` for Eleanor, `rosary` for Agatha; the item is bound to its owner and given in their
+starting kit) — right-click, with a cooldown. Behaviour is dispatched by item identity, not a shared
+id.
 (given in every kit); it has a 20-second per-player cooldown.
 
 ## Rules & invariants

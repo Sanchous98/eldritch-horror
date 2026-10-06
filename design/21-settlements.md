@@ -74,6 +74,12 @@ A settlement's state tracks the local corruption:
 A **Fallen** city is a loss — a hub gone, a quest line cut, a marker on the world map turned
 black. This is the horror made *geographic*, and it gives the session its stakes.
 
+State is **derived** from the district's per-chunk corruption (no stored value): `world/city/CityStates`
+averages the taint of a sampling of already-loaded district chunks and maps it, via config
+thresholds, to `CityState` (Thriving → Uneasy → Besieged → Fallen). The one wired effect so far is the
+city sanity-recovery source, whose shelter scales with the state (`Fallen` gives none); `/eh city`
+reports the nearest city's state. Fallen-city conversion, map markers and quest effects remain future.
+
 ## Relation to factions
 
 - Cults **recruit** in settlements (a preacher, a cellar meeting) — the first contact.

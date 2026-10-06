@@ -31,6 +31,9 @@ import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import com.sanchous98.eldritchhorror.rite.Rites;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
+import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.CityState;
+import com.sanchous98.eldritchhorror.world.city.CityStates;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -200,7 +203,28 @@ public final class EldritchCommands {
                 .then(Commands.literal("events").executes(EldritchCommands::listEvents));
         // Debug travel to the starting city (respawn handles the normal case).
         eh.then(Commands.literal("home").executes(EldritchCommands::goHome));
+        // Debug: report the nearest curated city's condition (derived from district taint).
+        eh.then(Commands.literal("city").executes(EldritchCommands::cityState));
         dispatcher.register(eh);
+    }
+
+    /** {@code /eh city}: report the nearest curated city and its corruption-driven state. */
+    private static int cityState(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        if (!(player.level() instanceof ServerLevel level)) {
+            ctx.getSource().sendFailure(Component.literal("Not in a server level."));
+            return 0;
+        }
+        City city = CityStates.nearestCity(level, player.blockPosition());
+        if (city == null) {
+            ctx.getSource().sendFailure(Component.literal("You are not inside a curated city."));
+            return 0;
+        }
+        CityState state = CityStates.stateOf(level, city);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                city.name() + ": " + state.name().toLowerCase(java.util.Locale.ROOT)
+                        + " (shelter x" + state.recoveryMultiplier() + ")"), false);
+        return 1;
     }
 
     /** {@code /eh home}: debug teleport to the city chosen in the prologue (respawn does it normally). */
