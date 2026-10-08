@@ -153,7 +153,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   rite name — so they stay literals); dead `InvestigatorRole.id()` removed.
 - **Deferred work finished**: rite **offerings are now required and consumed** (all-or-nothing,
   per design/08: the eight seed rites' reagent costs plus a default for the Ancient One solves;
-  `REQUIRE_RITE_REAGENTS` gates it; the altar lists each known rite's offerings). The investigator
+  `REQUIRE_RITE_REAGENTS` gates it; the altar lists each known rite's offerings). **Rite conditions**
+  are enforced too (`RiteConditions`): time/moon/weather/near-water/corruption-stage/rift, checked
+  before the outcome, refusing with a message and charging the meter cost (not the offerings);
+  `REQUIRE_RITE_CONDITIONS` gates it. The investigator
   actives are now **twelve per-investigator signature items** (`seers_lens`, `rosary`, …) instead of
   one shared charm. **Investigator passives are live**: Dr. Amos recovers +50% in cities, Aldous
   finds bonus mob loot. **City state** (`CityState`: Thriving→Uneasy→Besieged→Fallen) is derived from

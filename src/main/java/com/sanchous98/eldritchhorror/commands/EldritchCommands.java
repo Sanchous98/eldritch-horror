@@ -205,7 +205,27 @@ public final class EldritchCommands {
         eh.then(Commands.literal("home").executes(EldritchCommands::goHome));
         // Debug: report the nearest curated city's condition (derived from district taint).
         eh.then(Commands.literal("city").executes(EldritchCommands::cityState));
+        // Debug: reset the one-time prologue and return to the Threshold.
+        eh.then(Commands.literal("prologue")
+                .then(Commands.literal("reset").executes(EldritchCommands::resetPrologue)));
         dispatcher.register(eh);
+    }
+
+    /** {@code /eh prologue reset}: clear PROLOGUE_DONE and teleport back to the Threshold. */
+    private static int resetPrologue(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("Requires gamemaster permissions."));
+            return 0;
+        }
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        if (!Prologue.reset(player)) {
+            ctx.getSource().sendFailure(Component.literal("The Threshold dimension is not loaded."));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "Prologue reset: returned to the Threshold."), false);
+        return 1;
     }
 
     /** {@code /eh city}: report the nearest curated city and its corruption-driven state. */

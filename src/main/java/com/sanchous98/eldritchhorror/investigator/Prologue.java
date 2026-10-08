@@ -59,6 +59,23 @@ public final class Prologue {
     }
 
     /**
+     * Debug reset (gamemaster): clears {@link ModAttachments#PROLOGUE_DONE} and carries the player
+     * straight back into the Threshold, so the prologue can be re-tested without a fresh world. The
+     * chosen investigator is left as-is (change it with {@code /eh investigator set}).
+     *
+     * @return whether the player is now in the Threshold
+     */
+    public static boolean reset(ServerPlayer player) {
+        player.setData(ModAttachments.PROLOGUE_DONE.get(), false);
+        ServerLevel target = threshold(player);
+        if (target == null) {
+            return false;
+        }
+        teleport(player, target, Threshold.spawn());
+        return true;
+    }
+
+    /**
      * Carries {@code player} into the Threshold at its fixed spawn. A no-op if the dimension or
      * spawn is unavailable (the prologue degrades rather than throwing).
      */

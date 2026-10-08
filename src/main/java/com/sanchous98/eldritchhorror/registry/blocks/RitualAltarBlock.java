@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.registry.blocks;
 
+import com.sanchous98.eldritchhorror.rite.RiteConditions;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import com.sanchous98.eldritchhorror.rite.RiteReagents;
@@ -53,7 +54,9 @@ public class RitualAltarBlock extends Block {
                         continue;
                     }
                     serverPlayer.sendSystemMessage(Component.literal("  " + id + " — ")
-                            .append(RiteReagents.describe(RiteReagents.offerings(rite))));
+                            .append(RiteReagents.describe(RiteReagents.offerings(rite)))
+                            .append(Component.literal("  [").append(RiteConditions.of(rite).describe())
+                                    .append(Component.literal("]"))));
                 }
                 serverPlayer.sendSystemMessage(Component.literal(
                         "Use /eh rite <id> to lay the offerings and perform one."));

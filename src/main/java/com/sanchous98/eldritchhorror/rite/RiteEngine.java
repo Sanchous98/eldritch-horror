@@ -113,6 +113,20 @@ public final class RiteEngine {
         }
         ServerLevel level = player.level();
 
+        // Conditions (design/08): the world must look right before the rite resolves. Like a missing
+        // offering this refuses before the outcome, but unlike an offering it is not something the
+        // player can simply carry — so the meter cost below is still paid (design/08: "failure always
+        // costs something"), while the offerings are not spent.
+        boolean conditionsEnabled = ModConfig.REQUIRE_RITE_CONDITIONS.get();
+        RiteConditions conditions = RiteConditions.of(rite);
+        if (conditionsEnabled) {
+            Component unmet = conditions.unmet(level, player);
+            if (unmet != null) {
+                payMeterCost(player, rite);
+                return new Result(false, Component.literal("The rite will not take: ").append(unmet));
+            }
+        }
+
         // Offerings: checked up front (all the listed reagents present), removed only once the rite
         // actually resolves. A refused rite therefore costs nothing; design/08's "cost on failure"
         // is the sanity/corruption price below, which is still paid on every attempt.
@@ -124,12 +138,7 @@ public final class RiteEngine {
         }
 
         // Cost is paid on every known-rite attempt, matching design/08-rituals.md.
-        if (rite.sanity() != 0) {
-            SanityAPI.add(player, rite.sanity());
-        }
-        if (rite.corruption() != 0) {
-            CorruptionAPI.add(player, rite.corruption());
-        }
+        payMeterCost(player, rite);
 
         Result result = switch (rite.outcome()) {
             case GRANT -> grant(player, rite);
@@ -148,6 +157,16 @@ public final class RiteEngine {
             RiteReagents.consume(player, offerings);
         }
         return result;
+    }
+
+    /** Applies the rite's sanity/corruption price (design/08's cost, paid on every attempt). */
+    private static void payMeterCost(ServerPlayer player, RiteDefinition rite) {
+        if (rite.sanity() != 0) {
+            SanityAPI.add(player, rite.sanity());
+        }
+        if (rite.corruption() != 0) {
+            CorruptionAPI.add(player, rite.corruption());
+        }
     }
 
     /**

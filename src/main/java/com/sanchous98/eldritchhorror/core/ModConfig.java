@@ -944,6 +944,11 @@ public final class ModConfig {
             BUILDER.comment("Require and consume a rite's offerings. Disable for costless testing.")
                     .define("requireRiteReagents", true);
 
+    /** Whether a rite's Conditions (time/moon/weather/corruption/rift) are enforced (design/08). */
+    public static final ModConfigSpec.BooleanValue REQUIRE_RITE_CONDITIONS =
+            BUILDER.comment("Enforce a rite's world conditions (night, moon, weather, stage, rift).")
+                    .define("requireRiteConditions", true);
+
     // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
     // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,
     // which finds the nearest compatible AncientOne within riteSolveRadius and asks it to solve.

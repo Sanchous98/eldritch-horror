@@ -54,6 +54,7 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
 | `/eh event <id>` / `/eh events` | force a world event / list active |
 | `/eh home` | debug teleport to the chosen starting city |
 | `/eh city` | state of the nearest curated city |
+| `/eh prologue reset` | clear `PROLOGUE_DONE` and teleport back to the Threshold (retest the prologue) |
 
 ### Rite ids (28)
 `ward_of_the_eye`, `drowned_blessing`, `call_the_lesser`, `summon_star_spawn`, `open_rift`,
@@ -82,8 +83,8 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
 
 ## 4. Testing recipes
 
-- **Prologue / hub.** Only a first-time player (no `PROLOGUE_DONE`) enters the Threshold. There is no
-  in-game reset — test on a fresh world or a new player name, or set `enablePrologue=false` and use
+- **Prologue / hub.** Only a first-time player (no `PROLOGUE_DONE`) enters the Threshold. Use
+  `/eh prologue reset` to return to the Threshold and retest, or set `enablePrologue=false` and use
   `/eh investigator set` directly.
 - **Rites + offerings.** Rites now **consume reagents** (all-or-nothing). For a fast sweep of all 28,
   set `requireRiteReagents=false` in the config (see §6) and use `/eh rite <id>`. With it on, put the
@@ -123,7 +124,7 @@ Config is the **`SYNCED`** type. It defaults to `config/eldritch_horror-synced.t
 `<world>/syncedconfig/` file overrides it). It holds hundreds of toggles:
 
 - Master switches: `enableSanity`, `enableCorruption`, `enableEvents`, `enablePrologue`, `enableCodex`.
-- Testing aids: `requireRiteReagents`, `ritualCooldownTicks`.
+- Testing aids: `requireRiteReagents`, `requireRiteConditions`, `ritualCooldownTicks`.
 - Per-content gates: `enableSanity<X>`, `enableCorruption<X>`, `enable<X>Spawns`, `enableSite<X>`,
   `enableRite<X>`, each event's `enableEvent<X>`, city-state thresholds (`cityStateUneasyTaint`, …).
 
