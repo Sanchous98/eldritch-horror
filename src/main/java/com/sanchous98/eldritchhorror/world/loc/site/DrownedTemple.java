@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
@@ -84,6 +86,9 @@ public final class DrownedTemple implements Location {
         decay(b, rng, cx, cz, y0, p);
 
         b.marker("drowned_temple", cx, y0, cz);
+        // Relics lost in the two subsidiary sanctuaries.
+        SiteLoot.fillRoom(b, cx - 18 - 4, cz - 14 - 4, cx - 18 + 4, cz - 14 + 4, y0, SiteLoot.RELIC);
+        SiteLoot.fillRoom(b, cx + 18 - 4, cz - 14 - 4, cx + 18 + 4, cz - 14 + 4, y0, SiteLoot.RELIC);
     }
 
     // ------------------------------------------------------------------ pieces

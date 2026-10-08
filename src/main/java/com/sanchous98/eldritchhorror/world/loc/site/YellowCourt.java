@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -88,6 +90,8 @@ public final class YellowCourt implements Location {
                 Palette.cobweb(), 0.03f);
 
         b.marker("yellow_court", cx, y0, cz);
+        // Tribute piled at the throne dais.
+        SiteLoot.fillRoom(b, cx - 6, cz - 6, cx + 6, cz + 6, y0, SiteLoot.RELIC);
     }
 
     // ------------------------------------------------------------------ pieces

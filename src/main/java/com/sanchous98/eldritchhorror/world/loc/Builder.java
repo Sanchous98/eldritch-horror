@@ -62,6 +62,27 @@ public final class Builder implements StructureBuilder {
 
     // ------------------------------------------------------------------ shapes
     @Override
+    public void chest(int x, int y, int z, net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootTable) {
+        if (x >> 4 != this.chunk.x() || z >> 4 != this.chunk.z()) {
+            return; // outside the chunk currently generating
+        }
+        if (y < this.minY || y > this.maxY) {
+            return;
+        }
+        this.pos.set(x, y, z);
+        if (this.level.getBlockState(this.pos).is(Blocks.CHEST)) {
+            return; // already placed by another write
+        }
+        this.level.setBlock(this.pos, Blocks.CHEST.defaultBlockState(), FLAGS);
+        if (this.level.getBlockEntity(this.pos)
+                instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest) {
+            // Deterministic seed from the location's rng, so the chest contents are reproducible
+            // per world and identical in every chunk that stamps the site.
+            chest.setLootTable(lootTable, this.rng.nextLong());
+        }
+    }
+
+    @Override
     public void fill(int x0, int y0, int z0, int x1, int y1, int z1, BlockState state) {
         int ax = Math.min(x0, x1);
         int bx = Math.max(x0, x1);

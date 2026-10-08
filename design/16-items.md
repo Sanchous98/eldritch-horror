@@ -57,6 +57,15 @@ Knowledge items. Reading grants a known rite or lore and applies a cost.
 | `mark_of_favour` | Mark of Favour | Cult rewards; spend with cults |
 | `relic_coin` | Relic Coin | Ruins, structures |
 
+## Site chests
+
+The fixed sites place a bounded pair of loot chests apiece (interior cells only, chunk-clipped,
+deterministic seed). Four tables ship under `data/eldritch_horror/loot_table/chests/`: `common`
+(ruin supplies: salt/chalk/bone/grave dust), `order` (silver/consecrated oil/iron nail/moonwater +
+order scrip), `cult` (blood/eﬀigy/spirit ash/black candle/ichor + cult token) and `relic`
+(star/void/veil dust/mirror shard + relic coin). See `world/loc/SiteLoot`. Chests are filled from
+their table when first opened; the Antiquarian's bonus is currently mob-drops only.
+
 ## Cursed items
 
 | id | Name | Boon | Curse |

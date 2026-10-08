@@ -12,19 +12,19 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - **Done:** `rite/RiteConditions` (per-rite time/moon/weather/near-water/corruption-stage/rift,
   loaded-chunks only), checked before the outcome; unmet → refuse + message, meter cost charged,
   offerings untouched; `REQUIRE_RITE_CONDITIONS` gates it; the altar shows conditions. Commit
-  `TBD`.
+  `d8632f6`.
 
 ### 2. Prologue reset command
 - [x] **Gap:** only a first-time player entered the Threshold; there was no way to reset
   `PROLOGUE_DONE` for testing.
 - **Done:** `/eh prologue reset` (gamemaster) clears `PROLOGUE_DONE` and teleports back to the
-  Threshold; documented in `docs/TESTING.md`. Commit `TBD`.
+  Threshold; documented in `docs/TESTING.md`. Commit `d8632f6`.
 
-### 3. Site chests + loot tables; Antiquarian extends site loot (design/16, design/21)
-- [ ] **Gap:** no container loot exists anywhere, so "better site/ruin loot" (Aldous) only affects
-  mob drops.
-- **DoD:** sites place a bounded, deterministic number of chests with a small loot palette
-  (reagents/currency/relics); Aldous rolls an extra favourable item from site chests too.
+### 3. Site chests + loot tables (design/16, design/21)
+- [x] **Gap:** no container loot existed anywhere; Aldous only affected mob drops.
+- **Done:** `StructureBuilder.chest` + `Builder` place loot-block chests deterministically; `SiteLoot`
+  wires a chest or two into all nine fixed sites from four JSON tables (`common`/`order`/`cult`/
+  `relic`). Commit `TBD`. (Antiquarian extension to chest loot still open — see below.)
 
 ### 4. Map markers: rifts and cult strongholds (design/22)
 - [ ] **Gap:** the map shows cities/home/player/discovered sites, but not known rifts or cult

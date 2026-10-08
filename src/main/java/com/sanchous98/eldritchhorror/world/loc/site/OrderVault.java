@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -99,6 +101,8 @@ public final class OrderVault implements Location {
         decay(b, rng, cx, cz, y0, p);
 
         b.marker("order_vault", cx, y0, cz);
+        // The Order's sanctified stores, in the strongroom interior (chunk-clipped like the rest).
+        SiteLoot.fillRoom(b, cx - 8, cz - 8, cx + 8, cz + 8, y0, SiteLoot.ORDER);
     }
 
     // ------------------------------------------------------------------ pieces

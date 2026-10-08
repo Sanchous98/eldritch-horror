@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -90,6 +92,8 @@ public final class CultStronghold implements Location {
         decay(b, rng, cx, cz, y0, p);
 
         b.marker("cult_stronghold", cx, y0, cz);
+        // Cult offerings in the keep interior.
+        SiteLoot.fillRoom(b, cx - 7, cz - 7, cx + 7, cz + 7, y0, SiteLoot.CULT);
     }
 
     // ------------------------------------------------------------------ pieces

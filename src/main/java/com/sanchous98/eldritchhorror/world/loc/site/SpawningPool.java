@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -87,6 +89,9 @@ public final class SpawningPool implements Location {
         }
 
         b.marker("spawning_pool", cx, y0, cz);
+        // Drowned offerings at the pool's edge (kept clear of the fluid centre).
+        SiteLoot.place(b, cx + 13, y0, cz, SiteLoot.CULT);
+        SiteLoot.place(b, cx - 13, y0, cz, SiteLoot.COMMON);
     }
 
     // ------------------------------------------------------------------ pieces

@@ -1,0 +1,56 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:silver_reagent",
+          "weight": 18,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 5 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:consecrated_oil",
+          "weight": 12,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 3 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:iron_nail",
+          "weight": 12,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 6 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:moonwater",
+          "weight": 10,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 3 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:holy_water",
+          "weight": 8,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 2 } }
+        },
+        { "type": "minecraft:empty", "weight": 14 }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "eldritch_horror:order_scrip", "weight": 12,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 8 } } },
+        { "type": "minecraft:item", "name": "eldritch_horror:relic_coin", "weight": 8,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 3, "max": 8 } } },
+        { "type": "minecraft:item", "name": "eldritch_horror:black_obol", "weight": 4 },
+        { "type": "minecraft:empty", "weight": 16 }
+      ]
+    }
+  ]
+}

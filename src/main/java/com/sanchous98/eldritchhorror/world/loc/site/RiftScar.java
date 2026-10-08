@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
@@ -95,6 +97,9 @@ public final class RiftScar implements Location {
         monolith(b, p, cx + 16, cz - 6, ground);
 
         b.marker("rift_scar", cx, y0, cz);
+        // Scavenged supplies near the monolith, clear of the trench.
+        SiteLoot.place(b, cx + 13, y0, cz - 6, SiteLoot.RELIC);
+        SiteLoot.place(b, cx + 19, y0, cz - 6, SiteLoot.COMMON);
     }
 
     // ------------------------------------------------------------------ pieces

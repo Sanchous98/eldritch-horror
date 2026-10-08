@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -117,6 +119,13 @@ public final class RitualAltarSite implements Location {
         }
 
         b.marker("ritual_altar_site", cx, y0, cz);
+        // Offerings left at the ring: the standing stones line the field, so scatter a few chests.
+        for (int i = 0; i < STONES; i += 3) {
+            double a = i * 2.0 * Math.PI / STONES;
+            int ox = cx + (int) Math.round(Math.cos(a) * (RING + 5));
+            int oz = cz + (int) Math.round(Math.sin(a) * (RING + 5));
+            SiteLoot.place(b, ox, y0, oz, SiteLoot.CULT);
+        }
     }
 
     // ------------------------------------------------------------------ pieces

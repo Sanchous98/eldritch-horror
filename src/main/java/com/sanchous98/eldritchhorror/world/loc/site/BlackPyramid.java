@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -87,6 +89,8 @@ public final class BlackPyramid implements Location {
         causeway(b, cx, cz, ground);
 
         b.marker("black_pyramid", cx, y0, cz);
+        // Grave goods beside the sarcophagus (burial-chamber interior).
+        SiteLoot.fillRoom(b, cx - 4, cz - 4, cx + 4, cz + 4, y0, SiteLoot.RELIC);
     }
 
     // ------------------------------------------------------------------ pieces

@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.site;
 
+import com.sanchous98.eldritchhorror.world.loc.SiteLoot;
+
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
@@ -81,6 +83,9 @@ public final class TempleOfTheFeaster implements Location {
         feast(b, cx, cz, ground);
 
         b.marker("temple_of_the_feaster", cx, ground + FLOOR, cz);
+        // The cult's feast-day offerings, laid out in the hall.
+        SiteLoot.fillRoom(b, cx - HALF + 4, cz - HALF + 4, cx + HALF - 4, cz + HALF - 4,
+                ground + FLOOR, SiteLoot.CULT);
     }
 
     // ------------------------------------------------------------------ pieces

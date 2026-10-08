@@ -1,0 +1,60 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:salt_reagent",
+          "weight": 20,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 5 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:chalk_reagent",
+          "weight": 20,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 5 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:bone_reagent",
+          "weight": 15,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 4 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:grave_dust",
+          "weight": 12,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 4 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:torch",
+          "weight": 14,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 4, "max": 12 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bread",
+          "weight": 10,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 4 } }
+        },
+        { "type": "minecraft:empty", "weight": 12 }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "eldritch_horror:relic_coin", "weight": 10,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 6 } } },
+        { "type": "minecraft:item", "name": "eldritch_horror:mark_of_favour", "weight": 4 },
+        { "type": "minecraft:empty", "weight": 22 }
+      ]
+    }
+  ]
+}

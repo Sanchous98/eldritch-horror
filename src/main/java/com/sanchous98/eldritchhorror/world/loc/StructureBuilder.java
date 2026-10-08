@@ -15,6 +15,13 @@ public interface StructureBuilder {
     /** Writes one block, clipped to the chunk currently generating. */
     void put(int x, int y, int z, BlockState state);
 
+    /**
+     * Places a loot chest at {@code (x,y,z)}, filled from {@code lootTable} with a deterministic
+     * seed. Clipped to the current chunk like {@link #put}; a cell already holding a chest is left
+     * alone so two overlapping writes cannot double-place.
+     */
+    void chest(int x, int y, int z, net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootTable);
+
     /** Fills an inclusive box. */
     void fill(int x0, int y0, int z0, int x1, int y1, int z1, BlockState state);
 

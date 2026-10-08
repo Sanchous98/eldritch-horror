@@ -1,0 +1,49 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:star_reagent",
+          "weight": 14,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 5 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:void_reagent",
+          "weight": 14,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 4 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:veil_dust",
+          "weight": 10,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 3 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:mirror_shard",
+          "weight": 8,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 2 } }
+        },
+        { "type": "minecraft:empty", "weight": 16 }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "eldritch_horror:relic_coin", "weight": 12,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 3, "max": 9 } } },
+        { "type": "minecraft:item", "name": "eldritch_horror:mark_of_favour", "weight": 6 },
+        { "type": "minecraft:item", "name": "eldritch_horror:cult_token", "weight": 6 },
+        { "type": "minecraft:empty", "weight": 16 }
+      ]
+    }
+  ]
+}
