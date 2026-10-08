@@ -217,7 +217,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 
 ## Known limitations / deferred
 
-- Cities have **no services/state** yet (deferred until those features exist).
+- See **`docs/TODO.md`** for the ordered backlog (rite conditions, map keybind and site chests are
+  now done; map markers, city-state depth, skill tree/quests, altar patterns, Antiquarian-on-chests
+  remain).
+- Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
+  services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
+  backlog.
 - **Implemented and playable:** bestiary (Ancient Ones + lesser/mundane/ambient), cults (definitions
   + synced reputation + ranks), rites (`RiteEngine` resolves wards/summons/rifts/cleansing), taint
   world-conversion, world events, codex and the recipe economy. Sanity and corruption have real

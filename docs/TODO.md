@@ -39,7 +39,7 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - [x] **Rite conditions (design/08)** — `d8632f6`.
 - [x] **Prologue reset command (`/eh prologue reset`)** — `d8632f6`.
 - [x] **Site chests + loot tables (design/16)** — `a6daaad`.
-- [x] **Map keybind (design/22)** — `M` opens the map while the atlas is held — `PENDING`.
+- [x] **Map keybind (design/22)** — `M` opens the map while the atlas is held — `b40cd01`.
 - [x] **World map + event notifications** — `770c919` (fixed in `202240b`).
 - [x] **Rite offerings consumed; per-investigator signature items; live passives (city recovery,
   mob loot); city state derived from taint; dead API nits removed** — `d3ce502`.
