@@ -7,23 +7,17 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Open
 
-### 6. City-state depth (design/21) — larger
-- [x] **Done:** (a) the map colours city markers by the player's discovered state (`CityStateDiscovery`
-  + synced `CITY_STATES`); a Fallen city is taken over by a bounded Hollow Choir presence
-  (`CityFall`). Commit `PENDING`.
-
-### 7. Skill tree & quest journal (design/13)
-- [x] **Done:** `quest/` journal (seed quests advanced by existing systems; synced `QUESTS`;
-  `/eh quests`) and `skill/` tree (points from quests; `lucid_mind` +10% max sanity, `warded_soul`
-  −10% corruption gain; `/eh skill`, `/eh skill unlock`). No client screen yet. Commit `PENDING`.
-
-### 8. Altar block-pattern matching (design/05)
-- [x] **Done:** `rite/RitualAltar` requires an `altar_core` marked with `rune_stone`/`ritual_chalk`
-  near the performer (`requireRiteAltar`, radius/marks config); `ritual_altar_site` now places a real
-  core + eight rune stones. Commit `PENDING`.
+_(all seed backlog items are done; see Done. Future work: client screens for the codex, quest
+journal and skill tree; Fallen-city block conversion; more quests/skills and content.)_
 
 ## Done
 
+- [x] **Altar block-pattern gate (design/05)** — rite needs an `altar_core` marked with runes/chalk;
+  the ritual site now builds a real altar — `10e0abb`.
+- [x] **Fallen-city Hollow Choir takeover (design/21)** — bounded, capped, loaded-chunks only —
+  `10e0abb`.
+- [x] **Quest journal + skill tree (design/13)** — seed quests advanced by existing systems;
+  two real skill nodes; `/eh quests`, `/eh skill` — `10e0abb`.
 - [x] **Antiquarian bonus on site chests (design/16, design/14)** — the passive now applies to our
   `chests/*` tables too (global loot modifier) — `b8b773e`.
 - [x] **Map markers: rifts (design/22)** — discovered rifts recorded and drawn; cult strongholds
