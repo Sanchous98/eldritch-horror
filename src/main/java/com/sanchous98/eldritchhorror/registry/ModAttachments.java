@@ -191,6 +191,27 @@ public final class ModAttachments {
                             .copyOnDeath()
                             .build());
 
+    /**
+     * Per-player map of curated-city id → discovered {@code CityState} ordinal, synced to the owner
+     * so the world map can colour city markers by their condition (design/21, design/22). Written
+     * only through {@link com.sanchous98.eldritchhorror.world.city.CityStateKnowledge}.
+     */
+    public static final Supplier<AttachmentType<Map<String, Integer>>> CITY_STATES =
+            ATTACHMENT_TYPES.register("city_states",
+                    () -> AttachmentType.<Map<String, Integer>>builder(Map::of)
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.INT)
+                                    .fieldOf("states"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.<RegistryFriendlyByteBuf, String, Integer,
+                                                    Map<String, Integer>>map(
+                                                    java.util.HashMap::new,
+                                                    ByteBufCodecs.STRING_UTF8,
+                                                    ByteBufCodecs.VAR_INT))
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }

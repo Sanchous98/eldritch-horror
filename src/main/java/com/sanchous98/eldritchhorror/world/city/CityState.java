@@ -40,6 +40,12 @@ public enum CityState {
         return Component.translatable("city.state.eldritch_horror." + this.id);
     }
 
+    /** @return the state for an ordinal stored in the synced map, or {@link #THRIVING} if out of range. */
+    public static CityState byOrdinal(int ordinal) {
+        CityState[] values = values();
+        return ordinal >= 0 && ordinal < values.length ? values[ordinal] : THRIVING;
+    }
+
     /** @return the state for a district-average taint in {@code [0, 1]}, by the configured cut-offs. */
     public static CityState of(double averageTaint) {
         if (averageTaint >= ModConfig.CITY_STATE_FALLEN_TAINT.get()) {

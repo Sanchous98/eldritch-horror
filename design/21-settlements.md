@@ -76,9 +76,12 @@ black. This is the horror made *geographic*, and it gives the session its stakes
 
 State is **derived** from the district's per-chunk corruption (no stored value): `world/city/CityStates`
 averages the taint of a sampling of already-loaded district chunks and maps it, via config
-thresholds, to `CityState` (Thriving → Uneasy → Besieged → Fallen). The one wired effect so far is the
-city sanity-recovery source, whose shelter scales with the state (`Fallen` gives none); `/eh city`
-reports the nearest city's state. Fallen-city conversion, map markers and quest effects remain future.
+thresholds, to `CityState` (Thriving → Uneasy → Besieged → Fallen). The wired effects so far are the
+city sanity-recovery source, whose shelter scales with the state (`Fallen` gives none), and the
+**world-map marker**: `CityStateDiscovery` records the state of the city a player stands in to the
+owner-synced `CITY_STATES` attachment (written only on change), and the map colours city markers
+(green/amber/orange/grey). `/eh city` reports the nearest city. Fallen-city conversion, Hollow Choir
+takeover and quest effects remain future.
 
 ## Relation to factions
 

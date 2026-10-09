@@ -8,6 +8,7 @@ import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Locations;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The fullscreen world map (design/22-map-and-knowledge.md). Draws the baked Earth landmask scaled
@@ -79,9 +81,28 @@ public final class WorldMapScreen extends Screen {
     }
 
     private void drawCities(GuiGraphicsExtractor g) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        Map<String, Integer> states = player == null
+                ? Map.of()
+                : player.getData(ModAttachments.CITY_STATES.get());
         for (City city : Cities.all()) {
-            marker(g, city.x(), city.z(), 0xFFE8C86A, 2);
+            Integer ordinal = states.get(city.id());
+            // Cities are always known; the colour reflects the state the player has seen (default yellow).
+            marker(g, city.x(), city.z(), stateColour(ordinal), 2);
         }
+    }
+
+    /** Marker colour for a discovered {@code CityState} ordinal, or the default when not yet seen. */
+    private static int stateColour(@Nullable Integer ordinal) {
+        if (ordinal == null) {
+            return 0xFFE8C86A; // unseen: neutral gold
+        }
+        return switch (ordinal) {
+            case 0 -> 0xFF6AE86A; // thriving
+            case 1 -> 0xFFE8C86A; // uneasy
+            case 2 -> 0xFFE08040; // besieged
+            default -> 0xFF505050; // fallen
+        };
     }
 
     private void drawHome(GuiGraphicsExtractor g) {
