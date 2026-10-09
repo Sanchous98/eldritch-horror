@@ -11,7 +11,7 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - [~] **Gap:** `CityState` only scaled the shelter source.
 - (a) **Done:** the map colours city markers by the player's discovered state — `CityStateDiscovery`
   records it to the owner-synced `CITY_STATES` attachment; `WorldMapScreen` reads it. Commit
-  `PENDING`.
+  `2bdde13`.
 - [ ] (b) Fallen-city block conversion / Hollow Choir takeover / defend quests / price changes.
 
 ### 7. Skill tree & quest journal (design/13) — larger
