@@ -8,10 +8,11 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 ## Open
 
 ### 4. Map markers: rifts and cult strongholds (design/22)
-- [ ] **Gap:** the map shows cities/home/player/discovered sites, but not known rifts or cult
-  strongholds.
-- **DoD:** discovered rifts (via `observe`/proximity) and known cult strongholds render as distinct
-  markers; unknown ones stay hidden.
+- [x] **Gap:** the map showed cities/home/player/discovered sites, but not rifts.
+- **Done:** `KNOWN_RIFTS` attachment + `RiftKnowledge`; `RiftDiscovery` records nearby rifts
+  (loaded chunks only) and the one from `open_rift`, forgets sealed ones; synced to the owner so
+  `WorldMapScreen` draws them. Cult strongholds are a site id, already shown among discovered sites.
+  Commit `PENDING`.
 
 ### 6. City-state depth (design/21) — larger
 - [ ] **Gap:** `CityState` only scales the shelter source. Not done: fallen-city block conversion,

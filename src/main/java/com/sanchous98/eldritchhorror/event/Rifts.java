@@ -68,4 +68,10 @@ public final class Rifts {
         }
         return anchorBlock == Blocks.AIR ? null : anchorBlock;
     }
+
+    /** @return whether {@code pos} is a loaded rift marker (never force-loads a chunk). */
+    public static boolean isRift(ServerLevel level, BlockPos pos) {
+        Block anchor = resolve();
+        return anchor != null && level.isLoaded(pos) && level.getBlockState(pos).is(anchor);
+    }
 }

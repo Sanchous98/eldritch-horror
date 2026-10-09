@@ -72,6 +72,7 @@ public final class WorldMapScreen extends Screen {
         drawCities(g);
         drawHome(g);
         drawSites(g);
+        drawRifts(g);
         drawPlayer(g);
 
         g.centeredText(this.font, this.title, this.width / 2, mapY - 14, 0xFFE0D0A0);
@@ -88,7 +89,8 @@ public final class WorldMapScreen extends Screen {
         if (player == null) {
             return;
         }
-        String id = player.getData(ModAttachments.HOME_CITY.get());        if (id.isEmpty()) {
+        String id = player.getData(ModAttachments.HOME_CITY.get());
+        if (id.isEmpty()) {
             return;
         }
         for (City city : Cities.all()) {
@@ -105,11 +107,31 @@ public final class WorldMapScreen extends Screen {
         if (player == null) {
             return;
         }
-        Set<String> known = player.getData(ModAttachments.LORE.get());        for (Location loc : Locations.all()) {
+        Set<String> known = player.getData(ModAttachments.LORE.get());
+        for (Location loc : Locations.all()) {
             if (loc instanceof CityLocation || !known.contains(loc.id())) {
                 continue;
             }
             marker(g, Locations.xOf(loc), Locations.zOf(loc), 0xFFB060D0, 2);
+        }
+    }
+
+    /** Discovered rifts (design/22), drawn from the synced {@code KNOWN_RIFTS} set. */
+    private void drawRifts(GuiGraphicsExtractor g) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
+        for (String key : player.getData(ModAttachments.KNOWN_RIFTS.get())) {
+            String[] parts = key.split(",");
+            if (parts.length != 3) {
+                continue;
+            }
+            try {
+                marker(g, Integer.parseInt(parts[0]), Integer.parseInt(parts[2]), 0xFFFF5050, 2);
+            } catch (NumberFormatException ignored) {
+                // malformed entry: skip rather than fail the whole map
+            }
         }
     }
 

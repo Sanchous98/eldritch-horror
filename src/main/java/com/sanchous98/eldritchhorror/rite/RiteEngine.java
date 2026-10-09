@@ -6,6 +6,7 @@ import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.EventTicker;
+import com.sanchous98.eldritchhorror.event.RiftKnowledge;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import net.minecraft.core.BlockPos;
@@ -444,6 +445,7 @@ public final class RiteEngine {
         }
         BlockState rift = riftBlock.defaultBlockState();
         level.setBlock(anchor, rift, Block.UPDATE_ALL);
+        RiftKnowledge.discover(player, anchor);
 
         // A small, deterministic sculk cross marks the tear if the ground allows it.
         for (Direction dir : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
@@ -470,6 +472,7 @@ public final class RiteEngine {
                         BlockPos p = origin.offset(dx, dy, dz);
                         if (level.isLoaded(p) && level.getBlockState(p).is(riftBlock)) {
                             level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                            RiftKnowledge.forget(player, p);
                             removed++;
                         }
                     }

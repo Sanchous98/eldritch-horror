@@ -949,6 +949,23 @@ public final class ModConfig {
             BUILDER.comment("Enforce a rite's world conditions (night, moon, weather, stage, rift).")
                     .define("requireRiteConditions", true);
 
+    // --- Rift discovery for the world map (design/22) ------------------------------------------
+
+    /** Whether players discover nearby rifts and mark them on the world map. */
+    public static final ModConfigSpec.BooleanValue ENABLE_RIFT_DISCOVERY =
+            BUILDER.comment("Discover nearby rifts and show them on the world map.")
+                    .define("enableRiftDiscovery", true);
+
+    /** Chunk radius scanned around a player for discovered rifts (loaded chunks only). */
+    public static final ModConfigSpec.IntValue RIFT_DISCOVERY_CHUNK_RADIUS =
+            BUILDER.comment("Chunk radius scanned around a player for rift discovery.")
+                    .defineInRange("riftDiscoveryChunkRadius", 2, 0, 8);
+
+    /** Cap on rifts collected per scan (so a rift field cannot blow up the player's marker set). */
+    public static final ModConfigSpec.IntValue RIFT_DISCOVERY_MAX =
+            BUILDER.comment("Max rifts recorded per player per discovery pass.")
+                    .defineInRange("riftDiscoveryMax", 32, 1, 256);
+
     // --- Ancient One non-combat solves (design/28: "always a non-combat solve") ---------------
     // Three solve rites (rite/Rites.java) resolve through the shared RiteEngine SOOTHE outcome,
     // which finds the nearest compatible AncientOne within riteSolveRadius and asks it to solve.

@@ -97,7 +97,10 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
   effect; `/eh events` lists active. (`rift_bloom` needs a rift nearby, or it ends immediately.)
 - **Bestiary / Ancient Ones.** Spawn eggs; each Ancient One has a corruption/sanity aura and a
   non-combat solve — learn the matching rite from a tome, then `/eh rite soothe_<name>` near it.
-- **Rites that place world features.** `open_rift`/`close_rift` place a `rift_anchor` and move taint.
+- **Rites that place world features.** `open_rift`/`close_rift` place a `rift_anchor` and move taint;
+  an opened rift is also recorded on the opener's map (discovered rifts show as red markers).
+- **Rift discovery.** Rifts near a player are recorded for their map (`enableRiftDiscovery`,
+  `riftDiscoveryChunkRadius`); sealing one removes the marker. `/eh rite open_rift` on open ground.
 - **Cults.** `/eh rep set drowned_choir 60` then `/eh service drowned_choir cleansing` (needs the
   rank). Interact with a `worshipper` for the read-only report.
 - **Aldous loot passive.** Be `aldous_pemberton`, kill a mob → 35% chance of a bonus drop.

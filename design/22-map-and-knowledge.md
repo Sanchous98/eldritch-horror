@@ -61,6 +61,19 @@ server-authoritative with a client-side render (see [`../docs/MULTIPLAYER.md`](.
   `assets/…/map/landmask_…png`), scaled to the world extent.
 - A server-sent **marker set** (`Settlements`, discovered structures, rifts) with per-marker
   state, updated by the map-change events above.
+
+### What is implemented
+
+- The fullscreen map (`client/WorldMapScreen`, opened by right-clicking `world_atlas` or the `M`
+  key) draws the landmask, all cities, the home city, the player, **discovered sites** (from the
+  codex `LORE` set) and **discovered rifts** (from the synced `KNOWN_RIFTS` set).
+- Rift discovery (`event/RiftDiscovery`, `event/RiftKnowledge`): each player records rift markers
+  near them (loaded chunks only, config `enableRiftDiscovery`), plus the one they open with the
+  `open_rift` rite; a sealed rift is forgotten. The set is synced to the owner, so the map reads it
+  client-side. Cult strongholds are a site id (`cult_stronghold`), so they already appear among
+  discovered sites.
+- Still open: settlement-state markers (see [`21-settlements.md`](21-settlements.md)), the
+  corruption overlay, and the `star_fall`/`dread` tints.
 - Optional **corruption overlay** from the per-chunk field when the client is near.
 - Markers are **world coordinates**, so they line up with the map image directly (the same
   `x = lon × 45.51` mapping the generator uses).

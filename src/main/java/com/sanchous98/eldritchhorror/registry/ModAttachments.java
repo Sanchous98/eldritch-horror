@@ -164,6 +164,33 @@ public final class ModAttachments {
                             .copyOnDeath()
                             .build());
 
+    /**
+     * Per-player set of rift marker positions the player has discovered, encoded as {@code "x,y,z"}
+     * strings. Persisted, copied on death, and synced to the owner so the world map can draw them
+     * (design/22). Written only through
+     * {@link com.sanchous98.eldritchhorror.event.RiftKnowledge}. Mirrors {@link #LORE}.
+     */
+    public static final Supplier<AttachmentType<Set<String>>> KNOWN_RIFTS =
+            ATTACHMENT_TYPES.register("known_rifts",
+                    () -> AttachmentType.<Set<String>>builder(() -> Set.of())
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.BOOL)
+                                    .xmap(set -> Set.copyOf(set.keySet()), key -> {
+                                        java.util.Map<String, Boolean> map = new java.util.HashMap<>();
+                                        for (String k : key) {
+                                            map.put(k, Boolean.TRUE);
+                                        }
+                                        return map;
+                                    })
+                                    .fieldOf("known"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.collection(
+                                            java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
+                                            .map(java.util.Set::copyOf, java.util.HashSet::new))
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }
