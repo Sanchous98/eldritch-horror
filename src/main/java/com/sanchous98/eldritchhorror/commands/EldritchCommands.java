@@ -208,7 +208,61 @@ public final class EldritchCommands {
         // Debug: reset the one-time prologue and return to the Threshold.
         eh.then(Commands.literal("prologue")
                 .then(Commands.literal("reset").executes(EldritchCommands::resetPrologue)));
+        // Quest journal (server-authoritative progress; synced to the owner for a future screen).
+        eh.then(Commands.literal("quests").executes(EldritchCommands::listQuests));
+        // Skill tree.
+        eh.then(Commands.literal("skill")
+                .executes(EldritchCommands::listSkills)
+                .then(Commands.literal("unlock")
+                        .then(Commands.argument("id", StringArgumentType.word())
+                                .executes(EldritchCommands::unlockSkill))));
         dispatcher.register(eh);
+    }
+
+    /** {@code /eh skill}: skill points and nodes. */
+    private static int listSkills(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "Skill points: " + com.sanchous98.eldritchhorror.skill.SkillTree.points(player)), false);
+        for (com.sanchous98.eldritchhorror.skill.Skill skill
+                : com.sanchous98.eldritchhorror.skill.Skills.all()) {
+            boolean has = com.sanchous98.eldritchhorror.skill.SkillTree.has(player, skill.id());
+            ctx.getSource().sendSuccess(() -> Component.literal((has ? "[x] " : "[ ] ")
+                    + skill.id() + " (" + skill.cost() + ") — ").append(skill.description()), false);
+        }
+        return 1;
+    }
+
+    /** {@code /eh skill unlock <id>}: spend a point on a node. */
+    private static int unlockSkill(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String id = StringArgumentType.getString(ctx, "id");
+        if (com.sanchous98.eldritchhorror.skill.Skills.byId(id) == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown skill: " + id));
+            return 0;
+        }
+        if (com.sanchous98.eldritchhorror.skill.SkillTree.unlock(player, id)) {
+            ctx.getSource().sendSuccess(() -> Component.literal("Unlocked skill: " + id), true);
+            return 1;
+        }
+        ctx.getSource().sendFailure(Component.literal(
+                "Cannot unlock " + id + " (already known, or not enough points)."));
+        return 0;
+    }
+
+    /** {@code /eh quests}: the journal and the caller's progress. */
+    private static int listQuests(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        for (com.sanchous98.eldritchhorror.quest.Quest quest
+                : com.sanchous98.eldritchhorror.quest.Quests.all()) {
+            int progress = com.sanchous98.eldritchhorror.quest.QuestJournal.progress(player, quest.id());
+            int target = quest.target();
+            boolean done = progress >= target;
+            ctx.getSource().sendSuccess(() -> Component.literal((done ? "[x] " : "[ ] ")
+                    + quest.id() + " " + Math.min(progress, target) + "/" + target + " — ")
+                    .append(quest.description()), false);
+        }
+        return 1;
     }
 
     /** {@code /eh prologue reset}: clear PROLOGUE_DONE and teleport back to the Threshold. */

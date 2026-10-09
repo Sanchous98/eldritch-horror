@@ -78,10 +78,7 @@ public final class InvestigatorAPI {
 
     /** Re-applies the stored investigator's attribute bonus; call after respawn, which drops it. */
     public static void reapply(ServerPlayer player) {
-        Investigator id = get(player);
-        if (id != null) {
-            applyMaxSanity(player, id);
-        }
+        applyMaxSanity(player, get(player));
     }
 
     /**
@@ -132,15 +129,16 @@ public final class InvestigatorAPI {
         }
     }
 
-    /** Adds the investigator's {@code max_sanity} fraction, replacing any previous modifier. */
-    private static void applyMaxSanity(ServerPlayer player, Investigator id) {
+    /** Adds the investigator's + skill {@code max_sanity} fraction, replacing any previous modifier. */
+    private static void applyMaxSanity(ServerPlayer player, @Nullable Investigator id) {
         AttributeInstance instance = player.getAttribute(ModAttributes.MAX_SANITY);
         if (instance == null) {
             return; // attribute absent (non-player or removed): never throw
         }
         instance.removeModifier(MAX_SANITY_MODIFIER);
         // Permanent, so the attribute survives save/reload; transient modifiers are not persisted.
-        double amount = Progression.maxSanityBonus(id);
+        double amount = (id == null ? 0.0 : Progression.maxSanityBonus(id))
+                + com.sanchous98.eldritchhorror.skill.SkillTree.maxSanityBonus(player);
         if (amount != 0.0) {
             instance.addOrReplacePermanentModifier(new AttributeModifier(
                     MAX_SANITY_MODIFIER, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));

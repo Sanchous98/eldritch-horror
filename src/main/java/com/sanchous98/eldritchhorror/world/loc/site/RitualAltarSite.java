@@ -8,6 +8,7 @@ import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
 import com.sanchous98.eldritchhorror.world.loc.Tier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A minor open-air ritual site: a clearly built raised plinth and a marked central altar, ringed
@@ -150,21 +151,30 @@ public final class RitualAltarSite implements Location {
         }
         int top = y0 + TIERS - 1;
         int topHalf = Math.max(1, PLINTH - (TIERS - 1) * 2);
-        // Accent posts around the top step mark the ritual margin.
+        // Accent posts around the top step mark the ritual margin: real rune stones, so the site is a
+        // working altar for the block-pattern gate (rite/RitualAltar).
+        BlockState rune = block("rune_stone", p.accent());
         for (int i = 0; i < 8; i++) {
             double a = i * Math.PI / 4.0;
             int px = cx + (int) Math.round(Math.cos(a) * topHalf);
             int pz = cz + (int) Math.round(Math.sin(a) * topHalf);
-            b.put(px, top + 1, pz, p.accent());
+            b.put(px, top + 1, pz, rune);
         }
-        // The defiled altar block itself: weathered, deliberately distinct from the plinth.
-        b.fill(cx - 1, top + 1, cz - 1, cx + 1, top + 1, cz + 1, p.weathered());
-        b.put(cx, top + 2, cz, p.frame());
+        // The altar core itself, on the top step, with a brazier beside it.
+        b.fill(cx - 1, top + 1, cz - 1, cx + 1, top + 1, cz + 1, p.foundation());
+        b.put(cx, top + 1, cz, block("altar_core", p.frame()));
         b.put(cx + 1, top + 1, cz + 1, p.light());
         // A lit brazier beside the altar, with a fuel course beneath the flame.
         b.put(cx - 2, top + 1, cz, p.foundation());
         b.put(cx - 2, top + 2, cz, p.light());
         b.put(cx - 1, top + 2, cz + 1, p.accent());
+    }
+
+    /** Resolves a mod block by id for worldgen, falling back to {@code fallback} if unregistered. */
+    private static BlockState block(String id, BlockState fallback) {
+        BlockState resolved = net.minecraft.core.registries.BuiltInRegistries.BLOCK
+                .getValue(com.sanchous98.eldritchhorror.EldritchHorror.id(id)).defaultBlockState();
+        return resolved.isAir() ? fallback : resolved;
     }
 
     /** One standing stone: a TALL, slightly irregular pillar on its paved base. */

@@ -3,6 +3,17 @@
 What the player sees and reads. Horror works best with **partial information**, but RPG
 players expect legibility — this doc resolves that tension.
 
+## Quest journal & skill tree (implemented, server-side)
+
+- **Quest journal** (`quest/`, design/13): a small seed list (`Quests`) whose progress the existing
+  systems advance — taking a starting city, performing a rite, sealing a rift, soothing a presence,
+  discovering codex entries — stored per player on the synced `QUESTS` attachment and read with
+  `/eh quests`. No client screen yet; the data is synced for one.
+- **Skill tree** (`skill/`): points are earned by finishing quests and spent on nodes
+  (`SKILL_POINTS`, `SKILLS` attachments), read with `/eh skill` / `/eh skill unlock <id>`. The two
+  seed nodes have real effects: `lucid_mind` (+10% max sanity, folded into the attribute modifier)
+  and `warded_soul` (−10% corruption gain, folded into `Progression`). No client screen yet.
+
 ## Screens
 
 | Surface | Purpose | Horror stance |

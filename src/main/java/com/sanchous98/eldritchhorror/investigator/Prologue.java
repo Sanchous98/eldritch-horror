@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.investigator;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.BestiarySupport;
+import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
@@ -123,6 +124,7 @@ public final class Prologue {
             // Remember the starting city and make it the respawn point, so death returns you home.
             player.setData(ModAttachments.HOME_CITY.get(), city.id());
             setHomeRespawn(player, overworld, spot);
+            QuestJournal.add(player, "first_steps", 1);
         }
     }
 

@@ -212,6 +212,62 @@ public final class ModAttachments {
                             .copyOnDeath()
                             .build());
 
+    /**
+     * Per-player quest progress: {@code questId -> count}, synced to the owner (design/13, quest
+     * journal). A quest is complete when its count reaches its target (see
+     * {@link com.sanchous98.eldritchhorror.quest.Quests}). Written only through
+     * {@link com.sanchous98.eldritchhorror.quest.QuestJournal}.
+     */
+    public static final Supplier<AttachmentType<Map<String, Integer>>> QUESTS =
+            ATTACHMENT_TYPES.register("quests",
+                    () -> AttachmentType.<Map<String, Integer>>builder(Map::of)
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.INT)
+                                    .fieldOf("progress"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.<RegistryFriendlyByteBuf, String, Integer,
+                                                    Map<String, Integer>>map(
+                                                    java.util.HashMap::new,
+                                                    ByteBufCodecs.STRING_UTF8,
+                                                    ByteBufCodecs.VAR_INT))
+                            .copyOnDeath()
+                            .build());
+
+    /**
+     * Per-player set of unlocked skill ids, synced to the owner (design/13, skill tree). Written only
+     * through {@link com.sanchous98.eldritchhorror.skill.SkillTree}.
+     */
+    public static final Supplier<AttachmentType<Set<String>>> SKILLS =
+            ATTACHMENT_TYPES.register("skills",
+                    () -> AttachmentType.<Set<String>>builder(() -> Set.of())
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.BOOL)
+                                    .xmap(set -> Set.copyOf(set.keySet()), key -> {
+                                        java.util.Map<String, Boolean> map = new java.util.HashMap<>();
+                                        for (String k : key) {
+                                            map.put(k, Boolean.TRUE);
+                                        }
+                                        return map;
+                                    })
+                                    .fieldOf("unlocked"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.collection(
+                                            java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
+                                            .map(java.util.Set::copyOf, java.util.HashSet::new))
+                            .copyOnDeath()
+                            .build());
+
+    /** Per-player unspent skill points, synced to the owner (design/13). */
+    public static final Supplier<AttachmentType<Integer>> SKILL_POINTS =
+            ATTACHMENT_TYPES.register("skill_points",
+                    () -> AttachmentType.<Integer>builder(() -> 0)
+                            .serialize(com.mojang.serialization.Codec.INT.fieldOf("points"))
+                            .sync((holder, to) -> holder == to, ByteBufCodecs.VAR_INT)
+                            .copyOnDeath()
+                            .build());
+
     private ModAttachments() {
     }
 }

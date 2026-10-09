@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.codex;
 
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,17 +43,23 @@ public final class CodexAPI {
         if (entry == null) {
             return false;
         }
+        boolean learned;
         if (entry.category() == CodexCategory.RITE) {
-            return RiteKnowledge.add(player, id);
+            learned = RiteKnowledge.add(player, id);
+        } else {
+            Set<String> known = player.getData(ModAttachments.LORE);
+            if (known.contains(id)) {
+                return false;
+            }
+            Set<String> next = new HashSet<>(known);
+            next.add(id);
+            player.setData(ModAttachments.LORE, Set.copyOf(next));
+            learned = true;
         }
-        Set<String> known = player.getData(ModAttachments.LORE);
-        if (known.contains(id)) {
-            return false;
+        if (learned) {
+            QuestJournal.add(player, "lorekeeper", 1);
         }
-        Set<String> next = new HashSet<>(known);
-        next.add(id);
-        player.setData(ModAttachments.LORE, Set.copyOf(next));
-        return true;
+        return learned;
     }
 
     /**

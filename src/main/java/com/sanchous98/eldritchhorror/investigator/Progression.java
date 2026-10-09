@@ -45,7 +45,7 @@ public final class Progression {
 
     /** The investigator's corruption-gain multiplier ({@code 1.0} = no change). */
     public static double corruptionGainMultiplier(ServerPlayer player) {
-        return switch (investigatorOf(player)) {
+        double investigator = switch (investigatorOf(player)) {
             case JACK_CORRIGAN -> 0.80;
             case CORMAC_BLACKWOOD -> 1.25;
             case SISTER_AGATHA -> 0.75;
@@ -55,6 +55,7 @@ public final class Progression {
                  EVELYN_ASHCOMBE, ALDOUS_PEMBERTON -> 1.0;
             case null -> 1.0;
         };
+        return investigator * com.sanchous98.eldritchhorror.skill.SkillTree.corruptionGainMultiplier(player);
     }
 
     /**

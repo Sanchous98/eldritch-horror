@@ -7,6 +7,7 @@ import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
+import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import net.minecraft.core.BlockPos;
@@ -114,6 +115,16 @@ public final class RiteEngine {
         }
         ServerLevel level = player.level();
 
+        // The altar (design/05): a rite must be performed at a matching pattern. Like the other
+        // preconditions this refuses before the outcome and (unlike conditions) is not something the
+        // rite's meter cost should punish, so no cost is paid.
+        if (ModConfig.REQUIRE_RITE_ALTAR.get()
+                && !RitualAltar.valid(level, player.blockPosition(),
+                        ModConfig.RITE_ALTAR_RADIUS.get(), ModConfig.RITE_ALTAR_MARKS.get())) {
+            return new Result(false, Component.literal(
+                    "You must perform the rite at an altar (a core marked with rune stones or chalk)."));
+        }
+
         // Conditions (design/08): the world must look right before the rite resolves. Like a missing
         // offering this refuses before the outcome, but unlike an offering it is not something the
         // player can simply carry — so the meter cost below is still paid (design/08: "failure always
@@ -156,6 +167,9 @@ public final class RiteEngine {
         // Offerings are spent only on a rite that actually took effect (atomic, all-or-nothing).
         if (reagentsEnabled && result.ok()) {
             RiteReagents.consume(player, offerings);
+        }
+        if (result.ok()) {
+            QuestJournal.add(player, "first_rite", 1);
         }
         return result;
     }
@@ -209,6 +223,7 @@ public final class RiteEngine {
         if (!nearest.solve(solveFor(target), ticks)) {
             return new Result(false, Component.literal("That presence is already answered."));
         }
+        QuestJournal.add(player, "soothe_a_presence", 1);
         // Drawing the Horror off a settlement also cleanses the ground it was eating (bounded patch).
         if ("dunwich_horror".equals(target)) {
             taintPatch(level, nearest.blockPosition(), CLEANSE_TAINT, true);
@@ -482,6 +497,7 @@ public final class RiteEngine {
         // Only cleanse when a rift was actually sealed here, so the rite is not a free area-cleanser.
         if (removed > 0) {
             taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
+            QuestJournal.add(player, "seal_the_way", 1);
             // design/08: sealing grants sanity +10 as its OUTCOME (the corruption +5 is its cost).
             SanityAPI.add(player, 10);
             // design/19: sealing a rift is the trigger for the cleansing dawn.

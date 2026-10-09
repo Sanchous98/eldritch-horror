@@ -55,6 +55,9 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
 | `/eh home` | debug teleport to the chosen starting city |
 | `/eh city` | state of the nearest curated city |
 | `/eh prologue reset` | clear `PROLOGUE_DONE` and teleport back to the Threshold (retest the prologue) |
+| `/eh quests` | quest journal: each quest's progress/target |
+| `/eh skill` · `/eh skill unlock <id>` | skill points and nodes |
+| `/eh rite <id>` | perform a rite (now needs an altar: `altar_core` + 4 `rune_stone`/`ritual_chalk` within 6 blocks, unless `requireRiteAltar=false`) |
 
 ### Rite ids (28)
 `ward_of_the_eye`, `drowned_blessing`, `call_the_lesser`, `summon_star_spawn`, `open_rift`,
@@ -127,7 +130,7 @@ Config is the **`SYNCED`** type. It defaults to `config/eldritch_horror-synced.t
 `<world>/syncedconfig/` file overrides it). It holds hundreds of toggles:
 
 - Master switches: `enableSanity`, `enableCorruption`, `enableEvents`, `enablePrologue`, `enableCodex`.
-- Testing aids: `requireRiteReagents`, `requireRiteConditions`, `ritualCooldownTicks`.
+- Testing aids: `requireRiteReagents`, `requireRiteConditions`, `requireRiteAltar`, `ritualCooldownTicks`.
 - Per-content gates: `enableSanity<X>`, `enableCorruption<X>`, `enable<X>Spawns`, `enableSite<X>`,
   `enableRite<X>`, each event's `enableEvent<X>`, city-state thresholds (`cityStateUneasyTaint`, …).
 

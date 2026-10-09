@@ -4,6 +4,14 @@ Rituals are the progression engine. A rite is a **data-driven** recipe performed
 altar: match a block pattern, satisfy conditions, consume offerings, resolve outcomes.
 Failure always costs something.
 
+## Altar pattern (implemented)
+
+`RiteEngine` refuses a rite unless an `altar_core` stands within `riteAltarRadius` (default 6) of
+the performer, marked by at least `riteAltarMarks` (default 4) `rune_stone` or `ritual_chalk` blocks
+(`rite/RitualAltar`, loaded chunks only). `requireRiteAltar` disables the gate. The
+`ritual_altar_site` places a real core plus eight rune stones, so it is a working altar; all three
+blocks are craftable.
+
 > Content: the actual rites are in [`08-rituals.md`](08-rituals.md). This document is the
 > engine's rules.
 

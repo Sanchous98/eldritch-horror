@@ -949,6 +949,21 @@ public final class ModConfig {
             BUILDER.comment("Enforce a rite's world conditions (night, moon, weather, stage, rift).")
                     .define("requireRiteConditions", true);
 
+    /** Whether a rite must be performed at a matching altar pattern (design/05). */
+    public static final ModConfigSpec.BooleanValue REQUIRE_RITE_ALTAR =
+            BUILDER.comment("Require a rite to be performed at an altar_core marked with runes/chalk.")
+                    .define("requireRiteAltar", true);
+
+    /** Horizontal radius searched for the altar core and its marks. */
+    public static final ModConfigSpec.IntValue RITE_ALTAR_RADIUS =
+            BUILDER.comment("Radius searched for an altar core and its rune/chalk marks.")
+                    .defineInRange("riteAltarRadius", 6, 2, 16);
+
+    /** How many rune_stone / ritual_chalk marks the altar needs around its core. */
+    public static final ModConfigSpec.IntValue RITE_ALTAR_MARKS =
+            BUILDER.comment("Rune/chalk marks required around the altar core.")
+                    .defineInRange("riteAltarMarks", 4, 0, 24);
+
     // --- Rift discovery for the world map (design/22) ------------------------------------------
 
     /** Whether players discover nearby rifts and mark them on the world map. */

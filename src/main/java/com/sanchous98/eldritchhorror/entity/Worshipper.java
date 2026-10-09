@@ -94,6 +94,18 @@ public final class Worshipper extends PathfinderMob {
         return data;
     }
 
+    /** Binds this worshipper to a specific cult (used when a Fallen city is taken over). */
+    public void setCult(String cultId, CultRank rank) {
+        this.identity.set(cultId, rank);
+        this.setPersistenceRequired();
+        this.setHomeTo(this.blockPosition(), ModConfig.WORSHIPPER_HOME_RADIUS.get());
+    }
+
+    /** @return the id of the cult this worshipper belongs to. */
+    public String cultId() {
+        return this.identity.cultId();
+    }
+
 
     /**
      * The explicit service hook: the services this cult offers to the interacting player, with the

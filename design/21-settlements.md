@@ -80,8 +80,9 @@ thresholds, to `CityState` (Thriving → Uneasy → Besieged → Fallen). The wi
 city sanity-recovery source, whose shelter scales with the state (`Fallen` gives none), and the
 **world-map marker**: `CityStateDiscovery` records the state of the city a player stands in to the
 owner-synced `CITY_STATES` attachment (written only on change), and the map colours city markers
-(green/amber/orange/grey). `/eh city` reports the nearest city. Fallen-city conversion, Hollow Choir
-takeover and quest effects remain future.
+(green/amber/orange/grey). `/eh city` reports the nearest city. A Fallen city is **taken over**: every
+10s it is topped up towards a small Hollow Choir presence (`world/city/CityFall`), bounded and
+loaded-chunks-only. Fallen-city block conversion and quest effects remain future.
 
 ## Relation to factions
 

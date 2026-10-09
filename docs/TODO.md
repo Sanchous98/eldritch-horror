@@ -8,20 +8,19 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 ## Open
 
 ### 6. City-state depth (design/21) — larger
-- [~] **Gap:** `CityState` only scaled the shelter source.
-- (a) **Done:** the map colours city markers by the player's discovered state — `CityStateDiscovery`
-  records it to the owner-synced `CITY_STATES` attachment; `WorldMapScreen` reads it. Commit
-  `2bdde13`.
-- [ ] (b) Fallen-city block conversion / Hollow Choir takeover / defend quests / price changes.
+- [x] **Done:** (a) the map colours city markers by the player's discovered state (`CityStateDiscovery`
+  + synced `CITY_STATES`); a Fallen city is taken over by a bounded Hollow Choir presence
+  (`CityFall`). Commit `PENDING`.
 
-### 7. Skill tree & quest journal (design/13) — larger
-- [ ] **Gap:** not started. Sanity/corruption HUD and the codex exist; skill spend and quest tracking
-  do not.
-- **DoD:** scoped in its own design pass before implementation.
+### 7. Skill tree & quest journal (design/13)
+- [x] **Done:** `quest/` journal (seed quests advanced by existing systems; synced `QUESTS`;
+  `/eh quests`) and `skill/` tree (points from quests; `lucid_mind` +10% max sanity, `warded_soul`
+  −10% corruption gain; `/eh skill`, `/eh skill unlock`). No client screen yet. Commit `PENDING`.
 
-### 8. Altar block-pattern matching (design/05) — optional
-- [ ] **Gap:** rites are performed only via `/eh rite`; the altar pattern is decorative.
-- **DoD:** decide command-only vs a pattern matcher, then implement or explicitly drop.
+### 8. Altar block-pattern matching (design/05)
+- [x] **Done:** `rite/RitualAltar` requires an `altar_core` marked with `rune_stone`/`ritual_chalk`
+  near the performer (`requireRiteAltar`, radius/marks config); `ritual_altar_site` now places a real
+  core + eight rune stones. Commit `PENDING`.
 
 ## Done
 
