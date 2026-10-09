@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror;
 
 import com.mojang.logging.LogUtils;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.loot.LootModifiers;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
 import com.sanchous98.eldritchhorror.registry.ModBlocks;
@@ -60,6 +61,7 @@ public final class EldritchHorror {
         ModSounds.SOUND_EVENTS.register(modEventBus);
         ModWorldGen.CHUNK_GENERATORS.register(modEventBus);
         ModWorldGen.BIOME_SOURCES.register(modEventBus);
+        LootModifiers.SERIALIZERS.register(modEventBus);
 
         // Config. Sanity/corruption knobs are gameplay rules, so they live in the SYNCED config
         // (server-owned, synced to clients) rather than LOCAL — see design/27-systems-framework.md.

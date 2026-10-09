@@ -23,15 +23,14 @@ stat block, card or art — same rule as the Ancient Ones (`28-ancient-ones.md`)
 | `nikolai_volkov` | Nikolai Volkov | Scholar | Magic | `max_sanity −10%`, `sanity_drain +15%` | **Forbidden Insight** — learn a random unknown rite |
 | `dr_amos_hartley` | Dr. Amos Hartley | Alienist | Support | city sanity recovery `+50%` | **Sedate** — clear `Madness`/`Marked`, restore sanity |
 | `evelyn_ashcombe` | Evelyn Ashcombe | Heiress | Support | starts with extra currency | **Buy Time** — `Resistance` for 20s |
-| `aldous_pemberton` | Aldous Pemberton | Antiquarian | Expedition | better site/ruin loot | **Survey** — reveal the nearest site/city coordinates |
-| `hazel_quinn` | Hazel Quinn | Journalist | All-Rounder | small spread of the above | **Exposé** — reduce own corruption a little; brief `Speed` |
+| `aldous_pemberton` | Aldous Pemberton | Antiquarian | Expedition | better site/ruin loot | **Survey** — reveal the nearest site/city coordinates || `hazel_quinn` | Hazel Quinn | Journalist | All-Rounder | small spread of the above | **Exposé** — reduce own corruption a little; brief `Speed` |
 
 ## Ability mechanics (how they map to our systems)
 
 - **Passives** are read through `Progression` (the same seam the old classes used): multipliers for
   `max_sanity`, `sanity_drain`, `corruption_gain`, city recovery, loot, etc. Bonuses whose systems
-  exist are live (max sanity, sanity drain, corruption gain, city recovery, mob loot); the rest are
-  recorded for when their systems land.
+  exist are live (max sanity, sanity drain, corruption gain, city recovery, Aldous's better loot on
+  mob drops and site chests); the rest are recorded for when their systems land.
 - **Actives** are the investigator's **signature item** (a per-investigator item given in the
   starting kit, e.g. `seers_lens` for Eleanor, `rosary` for Agatha; the item is bound to its owner
   and dispatching is by item identity). Right-click triggers it with a per-player cooldown.

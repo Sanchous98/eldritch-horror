@@ -12,7 +12,7 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - **Done:** `KNOWN_RIFTS` attachment + `RiftKnowledge`; `RiftDiscovery` records nearby rifts
   (loaded chunks only) and the one from `open_rift`, forgets sealed ones; synced to the owner so
   `WorldMapScreen` draws them. Cult strongholds are a site id, already shown among discovered sites.
-  Commit `PENDING`.
+  Commit `da2882b`.
 
 ### 6. City-state depth (design/21) — larger
 - [ ] **Gap:** `CityState` only scales the shelter source. Not done: fallen-city block conversion,
@@ -30,10 +30,11 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - **DoD:** decide command-only vs a pattern matcher, then implement or explicitly drop.
 
 ### 9. Antiquarian bonus on site chests (design/16, design/14)
-- [ ] **Gap:** Aldous's loot passive currently only affects mob drops, not the new site chests.
-- **DoD:** opening a site chest yields an extra favourable item for Aldous — needs either a custom
-  container or a loot-context hook (vanilla `unpackLootTable` gives no player context to a global
-  loot modifier), so this is scoped as its own small system.
+- [x] **Gap:** Aldous's loot passive only affected mob drops, not the site chests.
+- **Done:** a global loot modifier (`loot/AntiquarianLootModifier`, serializer `LootModifiers`,
+  datapack `loot_modifiers/antiquarian.json`) adds one bonus item when Aldous kills a mob or opens
+  one of our `chests/*` tables (NeoForge `modifyLoot` sets the queried table id and the opener is
+  `THIS_ENTITY`). Replaces the old `LivingDropsEvent` handler. Commit `PENDING`.
 
 ## Done
 
