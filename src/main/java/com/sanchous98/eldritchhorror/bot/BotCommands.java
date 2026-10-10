@@ -23,12 +23,14 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -40,6 +42,11 @@ import java.util.ArrayList;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.world.item.crafting.RecipeType;
 
 /**
@@ -136,9 +143,22 @@ public final class BotCommands {
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("block", StringArgumentType.string())
                                         .executes(BotCommands::find))))
+                .then(Commands.literal("findentity")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("type", StringArgumentType.string())
+                                        .executes(BotCommands::findentity))))
+                .then(Commands.literal("equip")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("item", StringArgumentType.string())
+                                        .executes(BotCommands::equip))))
                 .then(Commands.literal("spawnjoin")
                         .then(Commands.argument("name", StringArgumentType.word())
-                                .executes(BotCommands::spawnjoin)));
+                                .executes(BotCommands::spawnjoin)))
+                .then(Commands.literal("walk")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("x", DoubleArgumentType.doubleArg())
+                                        .then(Commands.argument("z", DoubleArgumentType.doubleArg())
+                                                .executes(BotCommands::walk)))));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -307,6 +327,7 @@ public final class BotCommands {
                 .min(Comparator.comparingDouble(bot::distanceToSqr))
                 .orElse(targets.get(0));
         bot.attack(target);
+        vacuum(bot);
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " attacked " + target.getName().getString()), true);
         return 1;
@@ -339,6 +360,12 @@ public final class BotCommands {
         BlockPos pos = blockTarget(bot).getBlockPos();
         BlockState state = bot.level().getBlockState(pos);
         boolean ok = bot.gameMode.destroyBlock(pos);
+        if (ok) {
+            // stand on the broken block and collect its dropped items
+            bot.teleportTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+            bot.resetFallDistance();
+            vacuum(bot);
+        }
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " mined " + state.getBlock() + " at " + pos.toShortString() + " -> " + ok), true);
         return 1;
@@ -357,6 +384,12 @@ public final class BotCommands {
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
         BlockState state = bot.level().getBlockState(pos);
         boolean ok = bot.gameMode.destroyBlock(pos);
+        if (ok) {
+            // stand on the broken block and collect its dropped items
+            bot.teleportTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+            bot.resetFallDistance();
+            vacuum(bot);
+        }
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " mined " + state.getBlock() + " at " + pos.toShortString() + " -> " + ok), true);
         return 1;
@@ -407,10 +440,6 @@ public final class BotCommands {
         BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
         ServerLevel level = bot.level();
-        if (!level.getBlockState(pos).canBeReplaced()) {
-            ctx.getSource().sendFailure(Component.literal("Target occupied: " + pos.toShortString()));
-            return 0;
-        }
         var inv = bot.getInventory();
         boolean consumed = false;
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -444,6 +473,9 @@ public final class BotCommands {
         Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
         Item target = BuiltInRegistries.ITEM.getValue(id);
         if (target == null || target == Items.AIR) {
+            target = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(itemId));
+        }
+        if (target == null || target == Items.AIR) {
             ctx.getSource().sendFailure(Component.literal("Unknown item: " + itemId));
             return 0;
         }
@@ -468,7 +500,7 @@ public final class BotCommands {
             inv.add(result.copy());
             ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                     + " smelted " + result.getCount() + "x "
-                    + new ItemStack(target).getHoverName().getString()), true);
+                    + result.getHoverName().getString()), true);
             return 1;
         }
         ctx.getSource().sendFailure(Component.literal("Nothing in the inventory smelts into " + itemId));
@@ -488,40 +520,99 @@ public final class BotCommands {
         Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
         Item target = BuiltInRegistries.ITEM.getValue(id);
         if (target == null || target == Items.AIR) {
+            target = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(itemId));
+        }
+        if (target == null || target == Items.AIR) {
             ctx.getSource().sendFailure(Component.literal("Unknown item: " + itemId));
             return 0;
         }
         ServerLevel level = bot.level();
         var inv = bot.getInventory();
-        List<Integer> slots = new ArrayList<>();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            if (!inv.getItem(i).isEmpty()) {
-                slots.add(i);
-            }
-        }
-        // Brute force subsets of the inventory (up to 4 distinct slots) against the crafting table.
-        for (int[] picks : combinations(slots.size(), 4)) {
-            List<ItemStack> grid = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
-            for (int i = 0; i < picks.length; i++) {
-                grid.set(i, inv.getItem(slots.get(picks[i])).copyWithCount(1));
-            }
-            CraftingInput input = CraftingInput.of(3, 3, grid);
-            var found = level.getServer().getRecipeManager()
-                    .getRecipeFor(RecipeType.CRAFTING, input, level);
-            if (found.isEmpty()) {
+        // Recipe-driven: reconstruct each crafting recipe's pattern from PlacementInfo, satisfy it
+        // from the bot's inventory, then confirm by matching + assembling. This handles shaped
+        // recipes with empty cells and more than four ingredients (e.g. altar_core "RRR"/"SOS").
+        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+            if (!(holder.value() instanceof CraftingRecipe recipe)) {
                 continue;
             }
-            ItemStack result = found.get().value().assemble(input);
-            if (result.isEmpty() || !result.is(target)) {
+            PlacementInfo info = recipe.placementInfo();
+            if (info.isImpossibleToPlace()) {
                 continue;
             }
-            for (int p : picks) {
-                inv.getItem(slots.get(p)).shrink(1);
+            List<Ingredient> ingredients = info.ingredients();
+            IntList slots = info.slotsToIngredientIndex();
+            List<ItemStack> items = new ArrayList<>(java.util.Collections.nCopies(slots.size(), ItemStack.EMPTY));
+            List<Integer> chosen = new ArrayList<>();
+            boolean ok = true;
+            for (int s = 0; s < slots.size(); s++) {
+                int idx = slots.getInt(s);
+                if (idx < 0) {
+                    continue;
+                }
+                int slot = findMatch(inv, ingredients.get(idx));
+                if (slot < 0) {
+                    ok = false;
+                    break;
+                }
+                chosen.add(slot);
+                items.set(s, inv.getItem(slot).copyWithCount(1));
+            }
+            if (!ok) {
+                continue;
+            }
+            java.util.Map<Integer, Integer> need = new java.util.HashMap<>();
+            for (int slot : chosen) {
+                need.merge(slot, 1, Integer::sum);
+            }
+            boolean enough = true;
+            for (var e : need.entrySet()) {
+                if (inv.getItem(e.getKey()).getCount() < e.getValue()) {
+                    enough = false;
+                }
+            }
+            if (!enough) {
+                continue;
+            }
+            // The pattern's own width is unknown, so try 1..3 wide placements until one matches.
+            ItemStack result = null;
+            for (int w = 1; w <= 3 && result == null; w++) {
+                List<ItemStack> grid = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
+                boolean fits = true;
+                for (int s = 0; s < slots.size(); s++) {
+                    ItemStack it = items.get(s);
+                    if (it.isEmpty()) {
+                        continue;
+                    }
+                    int row = s / w;
+                    int col = s % w;
+                    if (row > 2 || col > 2) {
+                        fits = false;
+                        break;
+                    }
+                    grid.set(row * 3 + col, it);
+                }
+                if (!fits) {
+                    continue;
+                }
+                CraftingInput input = CraftingInput.of(3, 3, grid);
+                if (recipe.matches(input, level)) {
+                    ItemStack made = recipe.assemble(input);
+                    if (!made.isEmpty() && made.is(target)) {
+                        result = made;
+                    }
+                }
+            }
+            if (result == null) {
+                continue;
+            }
+            for (int slot : chosen) {
+                inv.getItem(slot).shrink(1);
             }
             inv.add(result.copy());
+            ItemStack made = result;
             ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
-                    + " crafted " + result.getCount() + "x "
-                    + new ItemStack(target).getHoverName().getString()), true);
+                    + " crafted " + made.getCount() + "x "
+                    + made.getHoverName().getString()), true);
             return 1;
         }
         ctx.getSource().sendFailure(Component.literal("No craftable recipe for " + itemId
@@ -529,30 +620,27 @@ public final class BotCommands {
         return 0;
     }
 
-    /** Every subset of {@code 0..n-1} of size {@code 1..max}. */
-    private static List<int[]> combinations(int n, int max) {
-        List<int[]> out = new ArrayList<>();
-        for (int k = 1; k <= max && k <= n; k++) {
-            int[] idx = new int[k];
-            for (int i = 0; i < k; i++) {
-                idx[i] = i;
-            }
-            while (true) {
-                out.add(idx.clone());
-                int p = k - 1;
-                while (p >= 0 && idx[p] == n - k + p) {
-                    p--;
-                }
-                if (p < 0) {
-                    break;
-                }
-                idx[p]++;
-                for (int i = p + 1; i < k; i++) {
-                    idx[i] = idx[i - 1] + 1;
-                }
+    /** Moves dropped item entities near the bot into its inventory (a bot cannot "walk over" loot). */
+    private static void vacuum(BotPlayer bot) {
+        for (ItemEntity ie : bot.level().getEntitiesOfClass(ItemEntity.class,
+                bot.getBoundingBox().inflate(8.0))) {
+            ItemStack st = ie.getItem();
+            if (!st.isEmpty()) {
+                bot.getInventory().add(st.copy());
+                ie.discard();
             }
         }
-        return out;
+    }
+
+    /** First inventory slot whose stack matches the ingredient, or -1. */
+    private static int findMatch(net.minecraft.world.entity.player.Inventory inv, Ingredient ingredient) {
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack st = inv.getItem(i);
+            if (!st.isEmpty() && ingredient.test(st)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /** {@code /eh bot find <name> <block>}: nearest block of that id within ~24 blocks. */
@@ -576,10 +664,10 @@ public final class BotCommands {
         BlockPos center = bot.blockPosition();
         BlockPos best = null;
         long bd = Long.MAX_VALUE;
-        int r = 24;
+        int r = 40;
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {
-                for (int dy = -12; dy <= 12; dy++) {
+                for (int dy = -16; dy <= 16; dy++) {
                     BlockPos p = center.offset(dx, dy, dz);
                     if (!level.isLoaded(p) || !level.getBlockState(p).is(target)) {
                         continue;
@@ -604,6 +692,82 @@ public final class BotCommands {
         return 1;
     }
 
+    /** {@code /eh bot findentity <name> <type>}: nearest living entity of that type within 64. */
+    private static int findentity(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String typeId = StringArgumentType.getString(ctx, "type");
+        Identifier id = typeId.contains(":") ? Identifier.parse(typeId)
+                : Identifier.withDefaultNamespace(typeId);
+        LivingEntity best = null;
+        double bd = Double.MAX_VALUE;
+        for (LivingEntity e : bot.level().getEntitiesOfClass(LivingEntity.class,
+                bot.getBoundingBox().inflate(64.0), e -> e != bot && e.isAlive())) {
+            if (!BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString().equals(id.toString())) {
+                continue;
+            }
+            double d = bot.distanceToSqr(e);
+            if (d < bd) {
+                bd = d;
+                best = e;
+            }
+        }
+        if (best == null) {
+            ctx.getSource().sendFailure(Component.literal("No " + typeId + " within 64 blocks"));
+            return 0;
+        }
+        LivingEntity found = best;
+        final double fd = bd;
+        ctx.getSource().sendSuccess(() -> Component.literal("found " + typeId + " at "
+                + found.blockPosition().getX() + " " + found.blockPosition().getY() + " "
+                + found.blockPosition().getZ()
+                + " (d=" + String.format(Locale.ROOT, "%.1f", Math.sqrt(fd)) + ")"), false);
+        return 1;
+    }
+
+    /** {@code /eh bot equip <name> <item>}: move one matching item from the inventory to the main hand. */
+    private static int equip(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String itemId = StringArgumentType.getString(ctx, "item");
+        Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
+        Item target = BuiltInRegistries.ITEM.getValue(id);
+        if (target == null || target == Items.AIR) {
+            target = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(itemId));
+        }
+        if (target == null || target == Items.AIR) {
+            ctx.getSource().sendFailure(Component.literal("Unknown item: " + itemId));
+            return 0;
+        }
+        var inv = bot.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack st = inv.getItem(i);
+            if (st.isEmpty() || !st.is(target)) {
+                continue;
+            }
+            ItemStack hand = st.copy();
+            hand.setCount(1);
+            bot.setItemInHand(InteractionHand.MAIN_HAND, hand);
+            st.shrink(1);
+            inv.setChanged();
+            ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                    + " equips " + hand.getHoverName().getString()), true);
+            return 1;
+        }
+        ctx.getSource().sendFailure(Component.literal("No " + itemId + " in the bot's inventory"));
+        return 0;
+    }
+
     /** {@code /eh bot spawnjoin <name>}: spawn a bot and fire login so the prologue routes it. */
     private static int spawnjoin(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
@@ -619,6 +783,42 @@ public final class BotCommands {
         NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(bot));
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "bot " + name + " joined (prologue applies if enabled)"), true);
+        return 1;
+    }
+
+    /** {@code /eh bot walk <name> <x> <z>}: surface-snapping travel toward a column.
+     *  Each step moves up to 8 blocks toward (x,z) and snaps Y to the terrain surface, so a
+     *  headless bot neither gets stuck inside stone nor falls into a void while travelling. */
+    private static int walk(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        double tx = DoubleArgumentType.getDouble(ctx, "x");
+        double tz = DoubleArgumentType.getDouble(ctx, "z");
+        ServerLevel level = bot.level();
+        for (int i = 0; i < 96; i++) {
+            BlockPos cur = bot.blockPosition();
+            double dx = tx - cur.getX();
+            double dz = tz - cur.getZ();
+            if (Math.abs(dx) <= 4 && Math.abs(dz) <= 4) {
+                break;
+            }
+            int sx = (int) Math.max(-8, Math.min(8, Math.round(dx)));
+            int sz = (int) Math.max(-8, Math.min(8, Math.round(dz)));
+            int nx = cur.getX() + sx;
+            int nz = cur.getZ() + sz;
+            level.getChunk(nx >> 4, nz >> 4);
+            int ny = level.getHeight(Heightmap.Types.WORLD_SURFACE, nx, nz);
+            bot.teleportTo(nx + 0.5, ny + 1.0, nz + 0.5);
+            bot.resetFallDistance();
+        }
+        BlockPos end = bot.blockPosition();
+        ctx.getSource().sendSuccess(() -> Component.literal("walked to "
+                + end.getX() + " " + end.getY() + " " + end.getZ()), false);
         return 1;
     }
 
@@ -664,6 +864,7 @@ public final class BotCommands {
         LivingEntity target = targets.stream()
                 .min(Comparator.comparingDouble(bot::distanceToSqr)).orElse(targets.get(0));
         bot.attack(target);
+        vacuum(bot);
         // Teleport the bot onto the target's face so reach is unambiguous for the next hit.
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " attacked " + target.getName().getString() + " hp=" + target.getHealth()

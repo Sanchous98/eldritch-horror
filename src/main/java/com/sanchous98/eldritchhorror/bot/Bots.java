@@ -11,11 +11,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -128,6 +130,21 @@ public final class Bots {
         bot.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
         bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
         bot.setHealth(bot.getMaxHealth());
+        // Ritual kit: enough reagents to build an altar and run a ward rite without grinding rare
+        // hostile mobs for bone. (The altar's rune stones need chalk; the ward offering needs salt.)
+        reagent(bot, "chalk_reagent", 16);
+        reagent(bot, "salt_reagent", 8);
+        reagent(bot, "tome_of_the_eye", 1);
+        // A little stone so the altar can be built even when the spawn area has none to mine.
+        bot.getInventory().add(new ItemStack(Items.STONE, 16));
+    }
+
+    /** Adds {@code count} of the named mod reagent to a bot's inventory. */
+    private static void reagent(BotPlayer bot, String id, int count) {
+        Item item = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(id));
+        if (item != null && item != Items.AIR) {
+            bot.getInventory().add(new ItemStack(item, count));
+        }
     }
 
     private static UUID uuidFor(String name) {        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
