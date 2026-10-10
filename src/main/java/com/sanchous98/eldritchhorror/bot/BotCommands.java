@@ -21,10 +21,13 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -66,6 +69,12 @@ public final class BotCommands {
                 .then(Commands.literal("useitem")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::useitem)))
+                .then(Commands.literal("useat")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("x", DoubleArgumentType.doubleArg())
+                                        .then(Commands.argument("y", DoubleArgumentType.doubleArg())
+                                                .then(Commands.argument("z", DoubleArgumentType.doubleArg())
+                                                        .executes(BotCommands::useat))))))
                 .then(Commands.literal("attack")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::attack)))
@@ -186,6 +195,27 @@ public final class BotCommands {
         return 1;
     }
 
+    /** {@code /eh bot useat <name> <x> <y> <z>}: use a specific block position (bypasses look). */
+    private static int useat(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
+                DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
+        BlockState state = bot.level().getBlockState(pos);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+        ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
+        InteractionResult result = bot.gameMode.useItemOn(bot, bot.level(), stack,
+                InteractionHand.MAIN_HAND, hit);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " used on " + pos.toShortString() + " (" + state.getBlock() + ") -> " + result), true);
+        return 1;
+    }
+
     /** {@code /eh bot useitem <name>}: uses the main-hand item (consumables apply their deltas). */
     private static int useitem(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
@@ -196,6 +226,8 @@ public final class BotCommands {
             return 0;
         }
         ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
+        // Post the right-click-item event first so tome handlers (rite knowledge) fire.
+        NeoForge.EVENT_BUS.post(new PlayerInteractEvent.RightClickItem(bot, InteractionHand.MAIN_HAND));
         InteractionResult result = stack.use(bot.level(), bot, InteractionHand.MAIN_HAND);
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " used item " + stack.getHoverName().getString() + " -> " + result), true);
