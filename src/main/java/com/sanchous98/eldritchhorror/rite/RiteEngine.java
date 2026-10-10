@@ -173,6 +173,7 @@ public final class RiteEngine {
         }
         if (result.ok()) {
             QuestJournal.add(player, "first_rite", 1);
+            QuestJournal.add(player, "ritualist", 1);
         }
         return result;
     }
@@ -227,6 +228,7 @@ public final class RiteEngine {
             return new Result(false, Component.literal("That presence is already answered."));
         }
         QuestJournal.add(player, "soothe_a_presence", 1);
+        QuestJournal.add(player, "soothe_three", 1);
         // Drawing the Horror off a settlement also cleanses the ground it was eating (bounded patch).
         if ("dunwich_horror".equals(target)) {
             taintPatch(level, nearest.blockPosition(), CLEANSE_TAINT, true);
@@ -474,6 +476,7 @@ public final class RiteEngine {
         }
 
         double taint = taintPatch(level, anchor, OPEN_TAINT, false);
+        QuestJournal.add(player, "open_the_way", 1);
         return new Result(true, Component.literal("The Way tears open; the land taints to "
                 + String.format(java.util.Locale.ROOT, "%.2f", taint) + "."));
     }
@@ -520,6 +523,7 @@ public final class RiteEngine {
             CorruptionAPI.add(player, -20);
         }
         double taint = taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
+        QuestJournal.add(player, "cleanse_the_land", 1);
         return new Result(true, Component.literal("Cleansing light sinks into the ground; the taint recedes to "
                 + String.format(java.util.Locale.ROOT, "%.2f", taint) + "."));
     }

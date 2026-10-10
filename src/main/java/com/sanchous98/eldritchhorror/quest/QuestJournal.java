@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.item.Item;
@@ -17,17 +18,10 @@ import net.minecraft.world.item.Items;
  * attachment (design/13). The value is an immutable snapshot, so writes are read-modify-write.
  *
  * <p>Progress is advanced by the systems a quest watches (a rite performed, a codex entry found, a
- * rift sealed, a presence soothed, a starting city taken); completion is announced in chat.
+ * rift sealed, a presence soothed, a starting city taken); completion is announced in chat and pays
+ * the quest's skill point plus its optional item gift, both defined by the loaded data.
  */
 public final class QuestJournal {
-
-    /** Completion gifts, on top of the skill point; paid by {@link #grantReward}. */
-    private static final Map<String, Reward> REWARDS = Map.of(
-            "first_steps", new Reward("black_obol", 1),
-            "first_rite", new Reward("black_obol", 2),
-            "lorekeeper", new Reward("relic_coin", 1),
-            "seal_the_way", new Reward("order_scrip", 2),
-            "soothe_a_presence", new Reward("mark_of_favour", 1));
 
     private QuestJournal() {
     }
@@ -65,28 +59,31 @@ public final class QuestJournal {
         if (next >= quest.target()) {
             player.sendSystemMessage(Component.translatable(
                     "quest.eldritch_horror.complete", quest.name()));
-            // Finishing a quest earns a skill point and a small item gift (design/13).
+            // Finishing a quest earns a skill point and, when the data says so, an item gift.
             com.sanchous98.eldritchhorror.skill.SkillTree.addPoints(player, 1);
-            grantReward(player, questId);
+            grantReward(player, quest);
             return true;
         }
         return false;
     }
 
     /**
-     * Hands over a quest's item gift, if one is configured: the currency a finished quest pays is what
-     * makes the cult trades (and so the ritual reagents) reachable by play.
+     * Hands over a quest's item gift, if its data defines one. The currency a finished quest pays is
+     * what makes the cult trades (and so the ritual reagents) reachable by play.
      */
-    private static void grantReward(ServerPlayer player, String questId) {
-        Reward reward = REWARDS.get(questId);
-        if (reward == null) {
+    private static void grantReward(ServerPlayer player, Quest quest) {
+        if (!quest.paysItem()) {
             return;
         }
-        Item item = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(reward.itemPath()));
+        String path = quest.rewardItem();
+        Identifier id = path.contains(":")
+                ? Identifier.tryParse(path)
+                : EldritchHorror.id(path);
+        Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
         if (item == null || item == Items.AIR) {
             return;
         }
-        ItemStack stack = new ItemStack(item, reward.count());
+        ItemStack stack = new ItemStack(item, quest.rewardCount());
         // Inventory#add consumes the passed stack, so keep a copy for the message.
         ItemStack granted = stack.copy();
         if (!player.getInventory().add(stack)) {
@@ -94,9 +91,5 @@ public final class QuestJournal {
         }
         player.sendSystemMessage(Component.translatable(
                 "quest.eldritch_horror.reward", granted.getCount(), granted.getHoverName()));
-    }
-
-    /** A quest's completion gift: {@code count} of a mod item, by registry path. */
-    private record Reward(String itemPath, int count) {
     }
 }

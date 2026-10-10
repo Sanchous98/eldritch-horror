@@ -1,0 +1,8 @@
+{
+  "id": "soothe_three",
+  "target": 3,
+  "stage": 5,
+  "requires": "soothe_a_presence",
+  "reward_item": "mark_of_favour",
+  "reward_count": 2
+}

@@ -58,6 +58,7 @@ public final class CodexAPI {
         }
         if (learned) {
             QuestJournal.add(player, "lorekeeper", 1);
+            QuestJournal.add(player, "lorekeeper_ii", 1);
         }
         return learned;
     }

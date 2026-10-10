@@ -1,0 +1,8 @@
+{
+  "id": "first_rite",
+  "target": 1,
+  "stage": 1,
+  "requires": "first_steps",
+  "reward_item": "black_obol",
+  "reward_count": 2
+}

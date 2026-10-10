@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.cult;
 
+import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,6 +38,7 @@ public final class CultSystem {
         int v = Math.clamp(value, MIN, MAX);
         map.put(cultId, v);
         player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));
+        notifyRank(player, cultId, v);
         return v;
     }
 
@@ -59,7 +61,18 @@ public final class CultSystem {
             }
         }
         player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));
+        notifyRank(player, cultId, v);
         return v;
+    }
+
+    /**
+     * Emits the journal's cult-membership quest once a cult reaches {@link CultRank#INITIATE}.
+     * Idempotent: the quest caps at its target, so repeated rank changes are harmless.
+     */
+    private static void notifyRank(ServerPlayer player, String cultId, int value) {
+        if (CultRank.of(value).atLeast(CultRank.INITIATE)) {
+            QuestJournal.add(player, "sworn_ally", 1);
+        }
     }
 
     /**

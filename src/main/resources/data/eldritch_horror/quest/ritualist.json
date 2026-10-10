@@ -1,0 +1,8 @@
+{
+  "id": "ritualist",
+  "target": 10,
+  "stage": 3,
+  "requires": "first_rite",
+  "reward_item": "black_obol",
+  "reward_count": 3
+}

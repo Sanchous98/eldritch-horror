@@ -1,0 +1,8 @@
+{
+  "id": "seal_the_way",
+  "target": 1,
+  "stage": 3,
+  "requires": "open_the_way",
+  "reward_item": "order_scrip",
+  "reward_count": 2
+}

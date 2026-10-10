@@ -255,14 +255,28 @@ public final class EldritchCommands {
     /** {@code /eh quests}: the journal and the caller's progress. */
     private static int listQuests(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        for (com.sanchous98.eldritchhorror.quest.Quest quest
-                : com.sanchous98.eldritchhorror.quest.Quests.all()) {
+        java.util.List<com.sanchous98.eldritchhorror.quest.Quest> quests =
+                com.sanchous98.eldritchhorror.quest.Quests.all();
+        if (quests.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("No quests are loaded."), false);
+            return 1;
+        }
+        com.sanchous98.eldritchhorror.quest.Quest next = null;
+        for (com.sanchous98.eldritchhorror.quest.Quest quest : quests) {
             int progress = com.sanchous98.eldritchhorror.quest.QuestJournal.progress(player, quest.id());
             int target = quest.target();
             boolean done = progress >= target;
             ctx.getSource().sendSuccess(() -> Component.literal((done ? "[x] " : "[ ] ")
                     + quest.id() + " " + Math.min(progress, target) + "/" + target + " — ")
                     .append(quest.description()), false);
+            if (!done && next == null) {
+                next = quest;
+            }
+        }
+        if (next != null) {
+            com.sanchous98.eldritchhorror.quest.Quest hint = next;
+            ctx.getSource().sendSuccess(() -> Component.literal("Next: ").append(hint.name())
+                    .append(Component.literal(" — ")).append(hint.description()), false);
         }
         return 1;
     }

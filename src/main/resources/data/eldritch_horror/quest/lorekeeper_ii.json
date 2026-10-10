@@ -1,0 +1,8 @@
+{
+  "id": "lorekeeper_ii",
+  "target": 25,
+  "stage": 4,
+  "requires": "lorekeeper",
+  "reward_item": "relic_coin",
+  "reward_count": 3
+}
