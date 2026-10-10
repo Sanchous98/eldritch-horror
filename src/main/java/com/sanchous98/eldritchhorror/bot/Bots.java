@@ -132,7 +132,7 @@ public final class Bots {
         bot.setHealth(bot.getMaxHealth());
         // Ritual kit: enough reagents to build an altar and run the quest rites without grinding
         // rare hostile mobs for bone. (Altar rune stones need chalk; the offerings need salt.)
-        reagent(bot, "chalk_reagent", 24);
+        reagent(bot, "chalk_reagent", 48);
         reagent(bot, "salt_reagent", 32);
         reagent(bot, "tome_of_the_eye", 1);      // ward_of_the_eye
         reagent(bot, "codex_of_wards", 1);       // close_rift
@@ -142,7 +142,7 @@ public final class Bots {
         reagent(bot, "blood_offering", 6);       // open_rift offering
         reagent(bot, "offering_bowl", 2);        // altar component (so building never stalls on logs)
         // A little stone so the altar can be built even when the spawn area has none to mine.
-        bot.getInventory().add(new ItemStack(Items.STONE, 16));
+        bot.getInventory().add(new ItemStack(Items.STONE, 48));
     }
 
     /** Adds {@code count} of the named mod reagent to a bot's inventory. */
