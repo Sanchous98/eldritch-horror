@@ -21,7 +21,8 @@ public final class FrostWisp extends FlyingAmbientDrifter {
     public static AttributeSupplier.Builder createAttributes() {
         return drifterAttributes()
                 .add(Attributes.MAX_HEALTH, 2.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.22);
+                .add(Attributes.MOVEMENT_SPEED, 0.22)
+                .add(Attributes.FLYING_SPEED, 0.2);
     }
 
     @Override
