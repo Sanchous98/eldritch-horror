@@ -63,6 +63,9 @@ public final class BotCommands {
                 .then(Commands.literal("use")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::use)))
+                .then(Commands.literal("useitem")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::useitem)))
                 .then(Commands.literal("attack")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::attack)))
@@ -183,8 +186,23 @@ public final class BotCommands {
         return 1;
     }
 
-    /** {@code /eh bot attack <name>}: attacks the nearest living entity within 5 blocks. */
-    private static int attack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    /** {@code /eh bot useitem <name>}: uses the main-hand item (consumables apply their deltas). */
+    private static int useitem(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
+        InteractionResult result = stack.use(bot.level(), bot, InteractionHand.MAIN_HAND);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " used item " + stack.getHoverName().getString() + " -> " + result), true);
+        return 1;
+    }
+
+    /** {@code /eh bot attack <name>}: attacks the nearest living entity within 5 blocks. */    private static int attack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
         }
