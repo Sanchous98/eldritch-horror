@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import java.util.Comparator;
 import java.util.List;
@@ -24,12 +25,18 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jspecify.annotations.Nullable;
+import java.util.ArrayList;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeType;
 
 /**
  * {@code /eh bot ...}: dev-only administration of {@link BotPlayer}s for automated playtesting.
@@ -89,7 +96,23 @@ public final class BotCommands {
                 .then(Commands.literal("god")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("value", BoolArgumentType.bool())
-                                        .executes(BotCommands::god))));
+                                        .executes(BotCommands::god))))
+                .then(Commands.literal("mine")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::mine)))
+                .then(Commands.literal("mineat")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("x", DoubleArgumentType.doubleArg())
+                                        .then(Commands.argument("y", DoubleArgumentType.doubleArg())
+                                                .then(Commands.argument("z", DoubleArgumentType.doubleArg())
+                                                        .executes(BotCommands::mineat))))))
+                .then(Commands.literal("inventory")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::inventory)))
+                .then(Commands.literal("craft")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("item", StringArgumentType.word())
+                                        .executes(BotCommands::craft))));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -276,6 +299,147 @@ public final class BotCommands {
         ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("[" + bot.getGameProfile().name() + "] " + text), false);
         return 1;
+    }
+
+    /** {@code /eh bot mine <name>}: breaks the block the bot faces (survival drops are auto-picked). */
+    private static int mine(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        BlockPos pos = blockTarget(bot).getBlockPos();
+        BlockState state = bot.level().getBlockState(pos);
+        boolean ok = bot.gameMode.destroyBlock(pos);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " mined " + state.getBlock() + " at " + pos.toShortString() + " -> " + ok), true);
+        return 1;
+    }
+
+    /** {@code /eh bot mineat <name> <x> <y> <z>}: breaks the block at a position. */
+    private static int mineat(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
+                DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
+        BlockState state = bot.level().getBlockState(pos);
+        boolean ok = bot.gameMode.destroyBlock(pos);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " mined " + state.getBlock() + " at " + pos.toShortString() + " -> " + ok), true);
+        return 1;
+    }
+
+    /** {@code /eh bot inventory <name>}: lists the bot's inventory. */
+    private static int inventory(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        StringBuilder sb = new StringBuilder();
+        var inv = bot.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty()) {
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(s.getCount()).append("x ").append(s.getHoverName().getString());
+            }
+        }
+        String line = sb.length() == 0 ? "(empty)" : sb.toString();
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " inventory: " + line), false);
+        return 1;
+    }
+
+    /** {@code /eh bot craft <name> <item>}: crafts one of {@code item} from the bot's inventory. */
+    private static int craft(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String itemId = StringArgumentType.getString(ctx, "item");
+        Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
+        Item target = BuiltInRegistries.ITEM.getValue(id);
+        if (target == null || target == Items.AIR) {
+            ctx.getSource().sendFailure(Component.literal("Unknown item: " + itemId));
+            return 0;
+        }
+        ServerLevel level = bot.level();
+        var inv = bot.getInventory();
+        List<Integer> slots = new ArrayList<>();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (!inv.getItem(i).isEmpty()) {
+                slots.add(i);
+            }
+        }
+        // Brute force subsets of the inventory (up to 4 distinct slots) against the crafting table.
+        for (int[] picks : combinations(slots.size(), 4)) {
+            List<ItemStack> grid = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
+            for (int i = 0; i < picks.length; i++) {
+                grid.set(i, inv.getItem(slots.get(picks[i])).copyWithCount(1));
+            }
+            CraftingInput input = CraftingInput.of(3, 3, grid);
+            var found = level.getServer().getRecipeManager()
+                    .getRecipeFor(RecipeType.CRAFTING, input, level);
+            if (found.isEmpty()) {
+                continue;
+            }
+            ItemStack result = found.get().value().assemble(input);
+            if (result.isEmpty() || !result.is(target)) {
+                continue;
+            }
+            for (int p : picks) {
+                inv.getItem(slots.get(p)).shrink(1);
+            }
+            inv.add(result.copy());
+            ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                    + " crafted " + result.getCount() + "x "
+                    + new ItemStack(target).getHoverName().getString()), true);
+            return 1;
+        }
+        ctx.getSource().sendFailure(Component.literal("No craftable recipe for " + itemId
+                + " in the bot's inventory"));
+        return 0;
+    }
+
+    /** Every subset of {@code 0..n-1} of size {@code 1..max}. */
+    private static List<int[]> combinations(int n, int max) {
+        List<int[]> out = new ArrayList<>();
+        for (int k = 1; k <= max && k <= n; k++) {
+            int[] idx = new int[k];
+            for (int i = 0; i < k; i++) {
+                idx[i] = i;
+            }
+            while (true) {
+                out.add(idx.clone());
+                int p = k - 1;
+                while (p >= 0 && idx[p] == n - k + p) {
+                    p--;
+                }
+                if (p < 0) {
+                    break;
+                }
+                idx[p]++;
+                for (int i = p + 1; i < k; i++) {
+                    idx[i] = idx[i - 1] + 1;
+                }
+            }
+        }
+        return out;
     }
 
     /** {@code /eh bot god <name> <value>}: toggle a bot's invulnerability (for boss-fight testing). */
