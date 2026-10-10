@@ -272,6 +272,24 @@ The starter kit seeds ritual reagents (`chalk_reagent`, `salt_reagent`, the rift
 `void_reagent`, `blood_offering`, an `offering_bowl` and stone) so the altar is reachable without
 grinding rare night mobs for `minecraft:bone` — a bone/chalk accessibility gap found while testing.
 
+## RPG layer — current seams (found by playing)
+
+Playtesting the questline surfaced four weak spots; all four are now wired:
+
+- **Currencies were inert.** `black_obol`/`cult_token`/… had no sink. `CultService` now has a paid
+  `TRADE` kind (rank-gated, all-or-nothing, drops when the pack is full) and the cults sell ritual
+  reagents (`buy_chalk`, `buy_salt`, `buy_bone`) plus the Hollow Choir's litanies.
+- **Bone was a dead end.** Vanilla mobs are suppressed, so `minecraft:bone` came only from rare mod
+  undead. `bone_reagent` now grinds into `bone_meal` (1 → 3), feeding `chalk_reagent` from the mod's
+  own drops.
+- **Two more skills with real effects:** `iron_will` (+15% max sanity, stacks with `lucid_mind`) and
+  `frugal_rites` (25% of successful rites consume no offerings — hooked in `RiteEngine`).
+- **Quests paid only a point.** Completion now also pays an item (obols / relic coin / order scrip /
+  mark of favour) with its own message.
+
+Still open (not done): the altar is a coarse box check rather than a real block pattern, and a refused
+rite still charges its sanity/corruption cost (design/08's deliberate "pay per attempt").
+
 ## Where things live
 
 | Concern | File |
