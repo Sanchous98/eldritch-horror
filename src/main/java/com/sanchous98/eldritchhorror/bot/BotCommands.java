@@ -28,6 +28,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -129,7 +131,14 @@ public final class BotCommands {
                 .then(Commands.literal("smelt")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("item", StringArgumentType.string())
-                                        .executes(BotCommands::smelt))));
+                                        .executes(BotCommands::smelt))))
+                .then(Commands.literal("find")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("block", StringArgumentType.string())
+                                        .executes(BotCommands::find))))
+                .then(Commands.literal("spawnjoin")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::spawnjoin)));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -544,6 +553,73 @@ public final class BotCommands {
             }
         }
         return out;
+    }
+
+    /** {@code /eh bot find <name> <block>}: nearest block of that id within ~24 blocks. */
+    private static int find(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String blockId = StringArgumentType.getString(ctx, "block");
+        Identifier id = blockId.contains(":") ? Identifier.parse(blockId)
+                : Identifier.fromNamespaceAndPath("minecraft", blockId);
+        Block target = BuiltInRegistries.BLOCK.getValue(id);
+        if (target == net.minecraft.world.level.block.Blocks.AIR) {
+            ctx.getSource().sendFailure(Component.literal("Unknown block: " + blockId));
+            return 0;
+        }
+        ServerLevel level = bot.level();
+        BlockPos center = bot.blockPosition();
+        BlockPos best = null;
+        long bd = Long.MAX_VALUE;
+        int r = 24;
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                for (int dy = -12; dy <= 12; dy++) {
+                    BlockPos p = center.offset(dx, dy, dz);
+                    if (!level.isLoaded(p) || !level.getBlockState(p).is(target)) {
+                        continue;
+                    }
+                    long d = (long) dx * dx + (long) dy * dy + (long) dz * dz;
+                    if (d < bd) {
+                        bd = d;
+                        best = p;
+                    }
+                }
+            }
+        }
+        if (best == null) {
+            ctx.getSource().sendFailure(Component.literal("No " + blockId + " within " + r + " blocks"));
+            return 0;
+        }
+        BlockPos found = best;
+        final long fd = bd;
+        ctx.getSource().sendSuccess(() -> Component.literal("found " + blockId + " at "
+                + found.getX() + " " + found.getY() + " " + found.getZ()
+                + " (d=" + String.format(Locale.ROOT, "%.1f", Math.sqrt(fd)) + ")"), false);
+        return 1;
+    }
+
+    /** {@code /eh bot spawnjoin <name>}: spawn a bot and fire login so the prologue routes it. */
+    private static int spawnjoin(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        String name = StringArgumentType.getString(ctx, "name");
+        if (Bots.get(name) != null) {
+            ctx.getSource().sendFailure(Component.literal("Bot already exists: " + name));
+            return 0;
+        }
+        ServerLevel level = ctx.getSource().getLevel();
+        BotPlayer bot = Bots.spawn(level, name);
+        NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(bot));
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "bot " + name + " joined (prologue applies if enabled)"), true);
+        return 1;
     }
 
     /** {@code /eh bot god <name> <value>}: toggle a bot's invulnerability (for boss-fight testing). */
