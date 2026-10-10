@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.event.Rifts;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import java.util.Comparator;
 import java.util.List;
@@ -151,6 +152,9 @@ public final class BotCommands {
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("item", StringArgumentType.string())
                                         .executes(BotCommands::equip))))
+                .then(Commands.literal("rift")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::rift)))
                 .then(Commands.literal("spawnjoin")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::spawnjoin)))
@@ -766,6 +770,27 @@ public final class BotCommands {
         }
         ctx.getSource().sendFailure(Component.literal("No " + itemId + " in the bot's inventory"));
         return 0;
+    }
+
+    /** {@code /eh bot rift <name>}: nearest rift anchor within ~64 chunks. */
+    private static int rift(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        List<BlockPos> rifts = Rifts.near(bot.level(), bot.blockPosition(), 64, 1);
+        if (rifts.isEmpty()) {
+            ctx.getSource().sendFailure(Component.literal("No rift within 64 chunks"));
+            return 0;
+        }
+        BlockPos p = rifts.getFirst();
+        ctx.getSource().sendSuccess(() -> Component.literal("rift at " + p.getX() + " " + p.getY()
+                + " " + p.getZ() + " (d=" + String.format(Locale.ROOT, "%.1f", Math.sqrt(
+                        bot.distanceToSqr(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5))) + ")"), false);
+        return 1;
     }
 
     /** {@code /eh bot spawnjoin <name>}: spawn a bot and fire login so the prologue routes it. */

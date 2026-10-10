@@ -130,11 +130,17 @@ public final class Bots {
         bot.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
         bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
         bot.setHealth(bot.getMaxHealth());
-        // Ritual kit: enough reagents to build an altar and run a ward rite without grinding rare
-        // hostile mobs for bone. (The altar's rune stones need chalk; the ward offering needs salt.)
-        reagent(bot, "chalk_reagent", 16);
-        reagent(bot, "salt_reagent", 8);
-        reagent(bot, "tome_of_the_eye", 1);
+        // Ritual kit: enough reagents to build an altar and run the quest rites without grinding
+        // rare hostile mobs for bone. (Altar rune stones need chalk; the offerings need salt.)
+        reagent(bot, "chalk_reagent", 24);
+        reagent(bot, "salt_reagent", 32);
+        reagent(bot, "tome_of_the_eye", 1);      // ward_of_the_eye
+        reagent(bot, "codex_of_wards", 1);       // close_rift
+        reagent(bot, "atlas_of_the_veil", 1);    // open_rift
+        reagent(bot, "tome_of_tides", 1);        // soothe_cthulhu
+        reagent(bot, "void_reagent", 8);         // open_rift offering
+        reagent(bot, "blood_offering", 6);       // open_rift offering
+        reagent(bot, "offering_bowl", 2);        // altar component (so building never stalls on logs)
         // A little stone so the altar can be built even when the spawn area has none to mine.
         bot.getInventory().add(new ItemStack(Items.STONE, 16));
     }
