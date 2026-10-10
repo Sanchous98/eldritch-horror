@@ -290,6 +290,23 @@ Playtesting the questline surfaced four weak spots; all four are now wired:
 Still open (not done): the altar is a coarse box check rather than a real block pattern, and a refused
 rite still charges its sanity/corruption cost (design/08's deliberate "pay per attempt").
 
+## Quests are data, not code
+
+The journal lives in `data/eldritch_horror/quest/*.json`, scanned on every server data load (and
+`/reload`) by `quest/QuestReload` — a vanilla `SimpleJsonResourceReloadListener` registered on
+NeoForged's `AddServerReloadListenersEvent`. Schema:
+
+```json
+{ "id": "ritualist", "target": 10, "stage": 3, "requires": "first_rite",
+  "reward_item": "black_obol", "reward_count": 3 }
+```
+
+`id`/`target`/`stage` are required; `requires` and the reward pair are optional. Name and description
+stay lang keys (`quest.eldritch_horror.<id>` / `.desc`). Adding a quest = one JSON file plus its two
+lang keys; if it watches a system with no emission point yet, add one `QuestJournal.add` call there.
+`/eh quests` lists the acts in stage order and names the next objective. Twelve quests ship across
+seven acts.
+
 ## Where things live
 
 | Concern | File |
