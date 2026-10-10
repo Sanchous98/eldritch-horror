@@ -112,7 +112,13 @@ public final class BotCommands {
                 .then(Commands.literal("craft")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("item", StringArgumentType.word())
-                                        .executes(BotCommands::craft))));
+                                        .executes(BotCommands::craft))))
+                .then(Commands.literal("placeat")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("x", DoubleArgumentType.doubleArg())
+                                        .then(Commands.argument("y", DoubleArgumentType.doubleArg())
+                                                .then(Commands.argument("z", DoubleArgumentType.doubleArg())
+                                                        .executes(BotCommands::placeat))))));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -359,6 +365,31 @@ public final class BotCommands {
         String line = sb.length() == 0 ? "(empty)" : sb.toString();
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " inventory: " + line), false);
+        return 1;
+    }
+
+    /** {@code /eh bot placeat <name> <x> <y> <z>}: places the main-hand block on the support below. */
+    private static int placeat(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
+                DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
+        BlockPos below = pos.below();
+        if (bot.level().getBlockState(below).isAir()) {
+            ctx.getSource().sendFailure(Component.literal("No support below " + pos.toShortString()));
+            return 0;
+        }
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(below), Direction.UP, below, false);
+        ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
+        InteractionResult result = bot.gameMode.useItemOn(bot, bot.level(), stack,
+                InteractionHand.MAIN_HAND, hit);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " placed at " + pos.toShortString() + " -> " + result), true);
         return 1;
     }
 
