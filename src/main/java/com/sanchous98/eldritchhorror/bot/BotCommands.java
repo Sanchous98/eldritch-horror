@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.bot;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -84,7 +85,11 @@ public final class BotCommands {
                                         .executes(BotCommands::say))))
                 .then(Commands.literal("sense")
                         .then(Commands.argument("name", StringArgumentType.word())
-                                .executes(BotCommands::sense)));
+                                .executes(BotCommands::sense)))
+                .then(Commands.literal("god")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("value", BoolArgumentType.bool())
+                                        .executes(BotCommands::god))));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -270,6 +275,23 @@ public final class BotCommands {
         String text = StringArgumentType.getString(ctx, "text");
         ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("[" + bot.getGameProfile().name() + "] " + text), false);
+        return 1;
+    }
+
+    /** {@code /eh bot god <name> <value>}: toggle a bot's invulnerability (for boss-fight testing). */
+    private static int god(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        boolean value = BoolArgumentType.getBool(ctx, "value");
+        bot.setGameMode(value ? net.minecraft.world.level.GameType.CREATIVE
+                : net.minecraft.world.level.GameType.SURVIVAL);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " creative=" + value), true);
         return 1;
     }
 
