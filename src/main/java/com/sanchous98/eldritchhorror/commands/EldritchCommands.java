@@ -216,6 +216,8 @@ public final class EldritchCommands {
                 .then(Commands.literal("unlock")
                         .then(Commands.argument("id", StringArgumentType.word())
                                 .executes(EldritchCommands::unlockSkill))));
+        // Server-side bot players for automated playtesting (dev-mode gated inside the handlers).
+        eh.then(com.sanchous98.eldritchhorror.bot.BotCommands.node());
         dispatcher.register(eh);
     }
 
