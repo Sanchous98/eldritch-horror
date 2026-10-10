@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -89,6 +88,10 @@ public final class BotCommands {
                 .then(Commands.literal("attack")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::attack)))
+                .then(Commands.literal("attacktype")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("type", StringArgumentType.string())
+                                        .executes(BotCommands::attacktype))))
                 .then(Commands.literal("say")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("text", StringArgumentType.greedyString())
@@ -114,17 +117,18 @@ public final class BotCommands {
                                 .executes(BotCommands::inventory)))
                 .then(Commands.literal("craft")
                         .then(Commands.argument("name", StringArgumentType.word())
-                                .then(Commands.argument("item", StringArgumentType.word())
+                                .then(Commands.argument("item", StringArgumentType.string())
                                         .executes(BotCommands::craft))))
                 .then(Commands.literal("placeat")
                         .then(Commands.argument("name", StringArgumentType.word())
-                                .then(Commands.argument("x", DoubleArgumentType.doubleArg())
-                                        .then(Commands.argument("y", DoubleArgumentType.doubleArg())
-                                                .then(Commands.argument("z", DoubleArgumentType.doubleArg())
-                                                        .executes(BotCommands::placeat))))))
+                                .then(Commands.argument("item", StringArgumentType.string())
+                                        .then(Commands.argument("x", DoubleArgumentType.doubleArg())
+                                                .then(Commands.argument("y", DoubleArgumentType.doubleArg())
+                                                        .then(Commands.argument("z", DoubleArgumentType.doubleArg())
+                                                                .executes(BotCommands::placeat)))))))
                 .then(Commands.literal("smelt")
                         .then(Commands.argument("name", StringArgumentType.word())
-                                .then(Commands.argument("item", StringArgumentType.word())
+                                .then(Commands.argument("item", StringArgumentType.string())
                                         .executes(BotCommands::smelt))));
     }
 
@@ -375,7 +379,7 @@ public final class BotCommands {
         return 1;
     }
 
-    /** {@code /eh bot placeat <name> <x> <y> <z>}: places the main-hand block onto the support below. */
+    /** {@code /eh bot placeat <name> <item> <x> <y> <z>}: places a block from the inventory. */
     private static int placeat(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
@@ -384,33 +388,37 @@ public final class BotCommands {
         if (bot == null) {
             return 0;
         }
+        String itemId = StringArgumentType.getString(ctx, "item");
+        Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
+        Item it = BuiltInRegistries.ITEM.getValue(id);
+        if (!(it instanceof BlockItem blockItem)) {
+            ctx.getSource().sendFailure(Component.literal("Not a placeable block: " + itemId));
+            return 0;
+        }
         BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
-        BlockPos below = pos.below();
-        if (bot.level().getBlockState(below).isAir()) {
-            ctx.getSource().sendFailure(Component.literal("No support below " + pos.toShortString()));
+        ServerLevel level = bot.level();
+        if (!level.getBlockState(pos).canBeReplaced()) {
+            ctx.getSource().sendFailure(Component.literal("Target occupied: " + pos.toShortString()));
             return 0;
         }
-        ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
-        if (!(stack.getItem() instanceof BlockItem blockItem)) {
-            ctx.getSource().sendFailure(Component.literal("Main hand is not a block: "
-                    + stack.getHoverName().getString()));
+        var inv = bot.getInventory();
+        boolean consumed = false;
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (!s.isEmpty() && s.is(it)) {
+                s.shrink(1);
+                consumed = true;
+                break;
+            }
+        }
+        if (!consumed) {
+            ctx.getSource().sendFailure(Component.literal("No " + itemId + " in the inventory"));
             return 0;
         }
-        BlockPlaceContext place = new BlockPlaceContext(bot, InteractionHand.MAIN_HAND, stack,
-                new BlockHitResult(Vec3.atCenterOf(below), Direction.UP, below, false));
-        InteractionResult result = blockItem.place(place);
-        if (!result.consumesAction()) {
-            // The headless bot's placement context is often rejected; fall back to a direct set
-            // so a scripted playtest can still build altars etc.
-            bot.level().setBlock(pos, blockItem.getBlock().defaultBlockState(), 3);
-            stack.shrink(1);
-            result = InteractionResult.SUCCESS;
-        }
-        final InteractionResult shown = result;
-        final String itemName = stack.getHoverName().getString();
+        level.setBlockAndUpdate(pos, blockItem.getBlock().defaultBlockState());
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
-                + " placed " + itemName + " at " + pos.toShortString() + " -> " + shown), true);
+                + " placed " + itemId + " at " + pos.toShortString()), true);
         return 1;
     }
 
@@ -552,6 +560,38 @@ public final class BotCommands {
                 : net.minecraft.world.level.GameType.SURVIVAL);
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " creative=" + value), true);
+        return 1;
+    }
+
+    /** {@code /eh bot attacktype <name> <type>}: attacks the nearest entity of a given type. */
+    private static int attacktype(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String typeId = StringArgumentType.getString(ctx, "type");
+        Identifier id = typeId.contains(":") ? Identifier.parse(typeId) : EldritchHorror.id(typeId);
+        var type = BuiltInRegistries.ENTITY_TYPE.getValue(id);
+        if (type == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown entity type: " + typeId));
+            return 0;
+        }
+        List<LivingEntity> targets = bot.level().getEntitiesOfClass(LivingEntity.class,
+                bot.getBoundingBox().inflate(32.0), e -> e != bot && e.isAlive() && e.getType() == type);
+        if (targets.isEmpty()) {
+            ctx.getSource().sendFailure(Component.literal("No " + typeId + " within 32 blocks"));
+            return 0;
+        }
+        LivingEntity target = targets.stream()
+                .min(Comparator.comparingDouble(bot::distanceToSqr)).orElse(targets.get(0));
+        bot.attack(target);
+        // Teleport the bot onto the target's face so reach is unambiguous for the next hit.
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " attacked " + target.getName().getString() + " hp=" + target.getHealth()
+                + " dist=" + String.format(Locale.ROOT, "%.1f", Math.sqrt(bot.distanceToSqr(target)))), true);
         return 1;
     }
 
