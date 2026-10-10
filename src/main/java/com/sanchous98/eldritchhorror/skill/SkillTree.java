@@ -17,8 +17,12 @@ public final class SkillTree {
 
     /** Maximum-sanity bonus fraction from {@link Skills#LUCID_MIND}. */
     private static final double LUCID_MIND_SANITY = 0.10;
+    /** Additional maximum-sanity bonus fraction from {@link Skills#IRON_WILL}. */
+    private static final double IRON_WILL_SANITY = 0.15;
     /** Corruption-gain multiplier from {@link Skills#WARDED_SOUL}. */
     private static final double WARDED_SOUL_CORRUPTION = 0.90;
+    /** Chance that {@link Skills#FRUGAL_RITES} saves a successful rite's offerings. */
+    private static final double FRUGAL_RITES_REFUND = 0.25;
 
     private SkillTree() {
     }
@@ -62,7 +66,19 @@ public final class SkillTree {
 
     /** @return the player's maximum-sanity bonus fraction from skills. */
     public static double maxSanityBonus(ServerPlayer player) {
-        return has(player, Skills.LUCID_MIND) ? LUCID_MIND_SANITY : 0.0;
+        double bonus = has(player, Skills.LUCID_MIND) ? LUCID_MIND_SANITY : 0.0;
+        if (has(player, Skills.IRON_WILL)) {
+            bonus += IRON_WILL_SANITY;
+        }
+        return bonus;
+    }
+
+    /**
+     * @return the chance (0..1) that a successful rite's offerings are spared, from
+     *     {@link Skills#FRUGAL_RITES}; read by the rite engine at the point of consumption.
+     */
+    public static double offeringsRefundChance(ServerPlayer player) {
+        return has(player, Skills.FRUGAL_RITES) ? FRUGAL_RITES_REFUND : 0.0;
     }
 
     /** @return the player's corruption-gain multiplier from skills ({@code 1.0} = none). */

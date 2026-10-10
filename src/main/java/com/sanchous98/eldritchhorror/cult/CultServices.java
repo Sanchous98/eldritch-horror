@@ -1,11 +1,17 @@
 package com.sanchous98.eldritchhorror.cult;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 
@@ -55,6 +61,7 @@ public final class CultServices {
         return switch (service.kind()) {
             case TEACH -> teach(player, service);
             case CLEANSE -> cleanse(player, service);
+            case TRADE -> trade(player, service);
         };
     }
 
@@ -78,6 +85,48 @@ public final class CultServices {
         return new Outcome(true, Component.translatable(
                 "service.eldritch_horror.cleanse.success", service.name(),
                 fmt(before), fmt(after), fmt(taint)));
+    }
+
+    /**
+     * Exchanges {@link CultService#costCount()} of {@code costItem} for
+     * {@link CultService#grantCount()} of {@code target}. All-or-nothing: a short purse refuses and
+     * charges nothing. This is the sink that makes the mod's currencies (obols, tokens, scrip)
+     * spendable, and one of the reachable sources of ritual reagents.
+     */
+    private static Outcome trade(ServerPlayer player, CultService service) {
+        Item cost = item(service.costItem());
+        Item grant = item(service.target());
+        if (cost == null || grant == null) {
+            return new Outcome(false, Component.translatable("service.eldritch_horror.trade.unknown"));
+        }
+        int carried = player.getInventory().clearOrCountMatchingItems(
+                stack -> stack.is(cost), true, 0, player.inventoryMenu.getCraftSlots());
+        if (carried < service.costCount()) {
+            return new Outcome(false, Component.translatable("service.eldritch_horror.fail.cost",
+                    service.name(), service.costCount(), new ItemStack(cost).getHoverName(),
+                    carried));
+        }
+        player.getInventory().clearOrCountMatchingItems(
+                stack -> stack.is(cost), false, service.costCount(),
+                player.inventoryMenu.getCraftSlots());
+        ItemStack reward = new ItemStack(grant, service.grantCount());
+        // Inventory#add consumes the passed stack, so keep a copy for the message.
+        ItemStack granted = reward.copy();
+        if (!player.getInventory().add(reward)) {
+            player.drop(reward, false, Prediction.SERVER_ONLY);
+        }
+        return new Outcome(true, Component.translatable("service.eldritch_horror.trade.success",
+                service.name(), granted.getCount(), granted.getHoverName(),
+                service.costCount(), new ItemStack(cost).getHoverName()));
+    }
+
+    /** @return the registered item for a mod path, or {@code null} when unregistered. */
+    private static Item item(String path) {
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        Item resolved = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(path));
+        return resolved == Items.AIR ? null : resolved;
     }
 
     /** Lowers the taint of every loaded chunk in the 3×3 patch; returns the origin chunk's new taint. */

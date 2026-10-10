@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "eldritch_horror:bone_reagent"
+  ],
+  "result": {
+    "id": "minecraft:bone_meal",
+    "count": 3
+  }
+}

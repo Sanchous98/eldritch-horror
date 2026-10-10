@@ -10,6 +10,7 @@ import com.sanchous98.eldritchhorror.event.RiftKnowledge;
 import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.skill.SkillTree;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -165,7 +166,9 @@ public final class RiteEngine {
                             + " is not implemented for " + rite.id() + "."));
         };
         // Offerings are spent only on a rite that actually took effect (atomic, all-or-nothing).
-        if (reagentsEnabled && result.ok()) {
+        // Frugal Rites may spare them outright (design/13 skill tree).
+        if (reagentsEnabled && result.ok()
+                && player.getRandom().nextFloat() >= SkillTree.offeringsRefundChance(player)) {
             RiteReagents.consume(player, offerings);
         }
         if (result.ok()) {

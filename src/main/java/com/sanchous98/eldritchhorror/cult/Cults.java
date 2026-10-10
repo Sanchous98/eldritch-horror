@@ -30,7 +30,9 @@ public final class Cults {
                 "Tide-worshippers who trade breath for devotion.",
                 List.of(
                         new CultService("teach_drowned_blessing", CultRank.INITIATE,
-                                CultService.Kind.TEACH, "drowned_blessing"))));
+                                CultService.Kind.TEACH, "drowned_blessing"),
+                        CultService.trade("buy_salt", CultRank.INITIATE,
+                                "black_obol", 1, "salt_reagent", 2))));
 
         register(new CultDefinition(
                 "unblinking_eye", "The Order of the Unblinking Eye",
@@ -46,7 +48,9 @@ public final class Cults {
                         new CultService("teach_ward_of_the_eye", CultRank.INITIATE,
                                 CultService.Kind.TEACH, "ward_of_the_eye"),
                         new CultService("cleansing", CultRank.DEVOTED,
-                                CultService.Kind.CLEANSE, ""))));
+                                CultService.Kind.CLEANSE, ""),
+                        CultService.trade("buy_chalk", CultRank.INITIATE,
+                                "black_obol", 1, "chalk_reagent", 2))));
 
         register(new CultDefinition(
                 "hollow_choir", "The Hollow Choir",
@@ -64,7 +68,11 @@ public final class Cults {
                         new CultService("teach_summon_star_spawn", CultRank.DEVOTED,
                                 CultService.Kind.TEACH, "summon_star_spawn"),
                         new CultService("teach_open_rift", CultRank.INNER_CIRCLE,
-                                CultService.Kind.TEACH, "open_rift"))));
+                                CultService.Kind.TEACH, "open_rift"),
+                        CultService.trade("buy_bone", CultRank.INITIATE,
+                                "black_obol", 1, "bone_reagent", 2),
+                        CultService.trade("buy_litanies", CultRank.DEVOTED,
+                                "black_obol", 4, "cult_litanies", 1))));
     }
 
     private Cults() {

@@ -15,10 +15,16 @@ public final class Skills {
     public static final String LUCID_MIND = "lucid_mind";
     /** Warded Soul: −10% corruption gain. */
     public static final String WARDED_SOUL = "warded_soul";
+    /** Iron Will: a further +15% maximum sanity, stacking with Lucid Mind. */
+    public static final String IRON_WILL = "iron_will";
+    /** Frugal Rites: a quarter of successful rites consume no offerings. */
+    public static final String FRUGAL_RITES = "frugal_rites";
 
     private static final List<Skill> ALL = List.of(
             new Skill(LUCID_MIND, 1),
-            new Skill(WARDED_SOUL, 1));
+            new Skill(WARDED_SOUL, 1),
+            new Skill(IRON_WILL, 1),
+            new Skill(FRUGAL_RITES, 2));
 
     private static final Map<String, Skill> BY_ID = index(ALL);
 

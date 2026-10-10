@@ -1,10 +1,16 @@
 package com.sanchous98.eldritchhorror.quest;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 /**
  * Server-authoritative quest progress, layered over the synced {@link ModAttachments#QUESTS}
@@ -14,6 +20,14 @@ import net.minecraft.server.level.ServerPlayer;
  * rift sealed, a presence soothed, a starting city taken); completion is announced in chat.
  */
 public final class QuestJournal {
+
+    /** Completion gifts, on top of the skill point; paid by {@link #grantReward}. */
+    private static final Map<String, Reward> REWARDS = Map.of(
+            "first_steps", new Reward("black_obol", 1),
+            "first_rite", new Reward("black_obol", 2),
+            "lorekeeper", new Reward("relic_coin", 1),
+            "seal_the_way", new Reward("order_scrip", 2),
+            "soothe_a_presence", new Reward("mark_of_favour", 1));
 
     private QuestJournal() {
     }
@@ -51,10 +65,38 @@ public final class QuestJournal {
         if (next >= quest.target()) {
             player.sendSystemMessage(Component.translatable(
                     "quest.eldritch_horror.complete", quest.name()));
-            // Finishing a quest earns a skill point.
+            // Finishing a quest earns a skill point and a small item gift (design/13).
             com.sanchous98.eldritchhorror.skill.SkillTree.addPoints(player, 1);
+            grantReward(player, questId);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Hands over a quest's item gift, if one is configured: the currency a finished quest pays is what
+     * makes the cult trades (and so the ritual reagents) reachable by play.
+     */
+    private static void grantReward(ServerPlayer player, String questId) {
+        Reward reward = REWARDS.get(questId);
+        if (reward == null) {
+            return;
+        }
+        Item item = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(reward.itemPath()));
+        if (item == null || item == Items.AIR) {
+            return;
+        }
+        ItemStack stack = new ItemStack(item, reward.count());
+        // Inventory#add consumes the passed stack, so keep a copy for the message.
+        ItemStack granted = stack.copy();
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false, Prediction.SERVER_ONLY);
+        }
+        player.sendSystemMessage(Component.translatable(
+                "quest.eldritch_horror.reward", granted.getCount(), granted.getHoverName()));
+    }
+
+    /** A quest's completion gift: {@code count} of a mod item, by registry path. */
+    private record Reward(String itemPath, int count) {
     }
 }
