@@ -252,6 +252,26 @@ the host `docker.sock` (rw): spawned containers were **siblings**, unbounded by 
 cgroup. Remedy in progress: no host socket; build inside the container cgroup. See
 `docs/HOST-SAFETY.md`. **Do not use the host socket. Run through `scripts/guarded-run.sh`.**
 
+## Server-side bot harness (`bot/`)
+
+A headless **BotPlayer** (a real `ServerPlayer` with an offline UUID, registered in the player
+list and ticked from `ServerTickEvent.Post`) plays the mod with no client, so every per-player
+system sees it. `/eh bot …` exposes the actions a driver needs: `spawnjoin`, `walk` (surface-
+snapping travel), `find`/`findentity`, `mine`/`mineat` (drops are vacuumed into the inventory),
+`craft` (recipe-driven: rebuilds each recipe's pattern from `PlacementInfo` and tries widths 1–3),
+`smelt`, `placeat`, `equip`, `use`/`useitem`/`useat`, `attack`/`attacktype`, `rift`, `sense`. All
+gated behind `-Deh.dev`/`EH_DEV` and gamemaster.
+
+A Python driver (`mcbot/`, **outside this repo**) reads `sense` and issues those commands; it
+completes the whole questline autonomously: prologue → Threshold investigator → city gate →
+overworld → gather/craft the altar → `ward_of_the_eye` → `soothe_cthulhu` → `open_rift` +
+`close_rift`. Verified with **every quest 1/1** (`first_steps`, `first_rite`, `lorekeeper`,
+`seal_the_way`, `soothe_a_presence`) and **0 server exceptions**.
+
+The starter kit seeds ritual reagents (`chalk_reagent`, `salt_reagent`, the rift/solve tomes,
+`void_reagent`, `blood_offering`, an `offering_bowl` and stone) so the altar is reachable without
+grinding rare night mobs for `minecraft:bone` — a bone/chalk accessibility gap found while testing.
+
 ## Where things live
 
 | Concern | File |
