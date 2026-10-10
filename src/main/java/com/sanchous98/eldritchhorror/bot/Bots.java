@@ -15,6 +15,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -70,6 +73,7 @@ public final class Bots {
         playerList.getPlayersByUUID().put(uuid, bot);
         addToPlayersList(playerList, bot);
         level.addNewPlayer(bot);
+        giveStarterKit(bot);
         BOTS.put(uuid, bot);
         EldritchHorror.LOGGER.info("bot: spawned {} ({}) at {}, {}, {} in {}",
                 name, uuid, bot.getX(), bot.getY(), bot.getZ(), level.dimension().identifier());
@@ -116,8 +120,17 @@ public final class Bots {
         BOTS.clear();
     }
 
-    private static UUID uuidFor(String name) {
-        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
+    /** A simple kit so a bot survives long enough to exercise the world (the mod is very hostile). */
+    private static void giveStarterKit(BotPlayer bot) {
+        bot.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+        bot.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+        bot.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+        bot.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+        bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+        bot.setHealth(bot.getMaxHealth());
+    }
+
+    private static UUID uuidFor(String name) {        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
     }
 
     /**
