@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "eldritch_horror:void_reagent"
+  ],
+  "result": {
+    "id": "eldritch_horror:atlas_of_the_veil",
+    "count": 1
+  }
+}

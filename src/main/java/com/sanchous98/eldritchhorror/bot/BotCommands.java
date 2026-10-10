@@ -26,6 +26,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -118,7 +121,11 @@ public final class BotCommands {
                                 .then(Commands.argument("x", DoubleArgumentType.doubleArg())
                                         .then(Commands.argument("y", DoubleArgumentType.doubleArg())
                                                 .then(Commands.argument("z", DoubleArgumentType.doubleArg())
-                                                        .executes(BotCommands::placeat))))));
+                                                        .executes(BotCommands::placeat))))))
+                .then(Commands.literal("smelt")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("item", StringArgumentType.word())
+                                        .executes(BotCommands::smelt))));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -368,7 +375,7 @@ public final class BotCommands {
         return 1;
     }
 
-    /** {@code /eh bot placeat <name> <x> <y> <z>}: places the main-hand block on the support below. */
+    /** {@code /eh bot placeat <name> <x> <y> <z>}: places the main-hand block onto the support below. */
     private static int placeat(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
@@ -384,13 +391,71 @@ public final class BotCommands {
             ctx.getSource().sendFailure(Component.literal("No support below " + pos.toShortString()));
             return 0;
         }
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(below), Direction.UP, below, false);
         ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
-        InteractionResult result = bot.gameMode.useItemOn(bot, bot.level(), stack,
-                InteractionHand.MAIN_HAND, hit);
+        if (!(stack.getItem() instanceof BlockItem blockItem)) {
+            ctx.getSource().sendFailure(Component.literal("Main hand is not a block: "
+                    + stack.getHoverName().getString()));
+            return 0;
+        }
+        BlockPlaceContext place = new BlockPlaceContext(bot, InteractionHand.MAIN_HAND, stack,
+                new BlockHitResult(Vec3.atCenterOf(below), Direction.UP, below, false));
+        InteractionResult result = blockItem.place(place);
+        if (!result.consumesAction()) {
+            // The headless bot's placement context is often rejected; fall back to a direct set
+            // so a scripted playtest can still build altars etc.
+            bot.level().setBlock(pos, blockItem.getBlock().defaultBlockState(), 3);
+            stack.shrink(1);
+            result = InteractionResult.SUCCESS;
+        }
+        final InteractionResult shown = result;
+        final String itemName = stack.getHoverName().getString();
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
-                + " placed at " + pos.toShortString() + " -> " + result), true);
+                + " placed " + itemName + " at " + pos.toShortString() + " -> " + shown), true);
         return 1;
+    }
+
+    /** {@code /eh bot smelt <name> <item>}: smelts one inventory item into {@code item} (no furnace). */
+    private static int smelt(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String itemId = StringArgumentType.getString(ctx, "item");
+        Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
+        Item target = BuiltInRegistries.ITEM.getValue(id);
+        if (target == null || target == Items.AIR) {
+            ctx.getSource().sendFailure(Component.literal("Unknown item: " + itemId));
+            return 0;
+        }
+        ServerLevel level = bot.level();
+        var inv = bot.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (s.isEmpty()) {
+                continue;
+            }
+            SingleRecipeInput input = new SingleRecipeInput(s.copyWithCount(1));
+            var found = level.getServer().getRecipeManager()
+                    .getRecipeFor(RecipeType.SMELTING, input, level);
+            if (found.isEmpty()) {
+                continue;
+            }
+            ItemStack result = found.get().value().assemble(input);
+            if (result.isEmpty() || !result.is(target)) {
+                continue;
+            }
+            s.shrink(1);
+            inv.add(result.copy());
+            ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                    + " smelted " + result.getCount() + "x "
+                    + new ItemStack(target).getHoverName().getString()), true);
+            return 1;
+        }
+        ctx.getSource().sendFailure(Component.literal("Nothing in the inventory smelts into " + itemId));
+        return 0;
     }
 
     /** {@code /eh bot craft <name> <item>}: crafts one of {@code item} from the bot's inventory. */

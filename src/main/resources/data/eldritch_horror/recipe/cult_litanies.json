@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "eldritch_horror:ichor_vial"
+  ],
+  "result": {
+    "id": "eldritch_horror:cult_litanies",
+    "count": 1
+  }
+}

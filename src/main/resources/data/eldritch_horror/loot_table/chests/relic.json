@@ -42,6 +42,8 @@
           "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 3, "max": 9 } } },
         { "type": "minecraft:item", "name": "eldritch_horror:mark_of_favour", "weight": 6 },
         { "type": "minecraft:item", "name": "eldritch_horror:cult_token", "weight": 6 },
+        { "type": "minecraft:item", "name": "eldritch_horror:star_codex", "weight": 3 },
+        { "type": "minecraft:item", "name": "eldritch_horror:atlas_of_the_veil", "weight": 3 },
         { "type": "minecraft:empty", "weight": 16 }
       ]
     }

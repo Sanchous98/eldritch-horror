@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "eldritch_horror:chalk_reagent"
+  ],
+  "result": {
+    "id": "eldritch_horror:tome_of_the_eye",
+    "count": 1
+  }
+}

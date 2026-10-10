@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "eldritch_horror:grave_dust"
+  ],
+  "result": {
+    "id": "eldritch_horror:bone_ledger",
+    "count": 1
+  }
+}
