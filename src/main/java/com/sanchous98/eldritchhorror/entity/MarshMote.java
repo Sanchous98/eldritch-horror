@@ -21,7 +21,8 @@ public final class MarshMote extends FlyingAmbientDrifter {
     public static AttributeSupplier.Builder createAttributes() {
         return drifterAttributes()
                 .add(Attributes.MAX_HEALTH, 3.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.28);
+                .add(Attributes.MOVEMENT_SPEED, 0.28)
+                .add(Attributes.FLYING_SPEED, 0.2);
     }
 
     @Override
