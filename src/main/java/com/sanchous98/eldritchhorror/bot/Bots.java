@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.bot;
 
 import com.mojang.authlib.GameProfile;
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.world.city.Cities;
+import com.sanchous98.eldritchhorror.world.city.City;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -52,7 +54,12 @@ public final class Bots {
         MinecraftServer server = level.getServer();
         GameProfile profile = new GameProfile(uuid, name);
         BotPlayer bot = new BotPlayer(server, level, profile);
-        BlockPos spawn = level.getRespawnData().globalPos().pos();
+        // Spawn on a curated city's street ring (the world spawn is open ocean, where a bot would
+        // drown); fall back to the respawn point if no city is registered.
+        City city = Cities.all().stream().findFirst().orElse(null);
+        BlockPos spawn = city == null
+                ? level.getRespawnData().globalPos().pos()
+                : new BlockPos(city.x() + 48, 0, city.z());
         // Force the spawn chunk so the heightmap reflects generated terrain (an unloaded chunk
         // reports min build height and would drop the bot into the bedrock).
         level.getChunk(spawn.getX() >> 4, spawn.getZ() >> 4);

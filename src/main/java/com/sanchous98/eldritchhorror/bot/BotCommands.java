@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +14,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.Permissions;
@@ -67,7 +69,10 @@ public final class BotCommands {
                 .then(Commands.literal("say")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("text", StringArgumentType.greedyString())
-                                        .executes(BotCommands::say))));
+                                        .executes(BotCommands::say))))
+                .then(Commands.literal("sense")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::sense)));
     }
 
     /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
@@ -215,6 +220,42 @@ public final class BotCommands {
         String text = StringArgumentType.getString(ctx, "text");
         ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(
                 Component.literal("[" + bot.getGameProfile().name() + "] " + text), false);
+        return 1;
+    }
+
+    /** {@code /eh bot sense <name>}: a compact JSON snapshot of the bot for an external agent. */
+    private static int sense(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        List<LivingEntity> near = new java.util.ArrayList<>(bot.level().getEntitiesOfClass(
+                LivingEntity.class, bot.getBoundingBox().inflate(12.0), e -> e != bot && e.isAlive()));
+        near.sort(Comparator.comparingDouble(bot::distanceToSqr));
+        StringBuilder ents = new StringBuilder();
+        for (int i = 0; i < near.size() && i < 6; i++) {
+            LivingEntity e = near.get(i);
+            if (ents.length() > 0) {
+                ents.append(',');
+            }
+            ents.append('"').append(e.getName().getString().replace(' ', '_').replace('"', '_'))
+                    .append(':').append(String.format(Locale.ROOT, "%.1f", Math.sqrt(bot.distanceToSqr(e))))
+                    .append('"');
+        }
+        BlockPos aheadPos = blockTarget(bot).getBlockPos();
+        String ahead = BuiltInRegistries.BLOCK.getKey(bot.level().getBlockState(aheadPos).getBlock())
+                .toString();
+        String json = String.format(Locale.ROOT,
+                "{\"name\":\"%s\",\"dim\":\"%s\",\"pos\":[%.1f,%.1f,%.1f],\"health\":%.1f,"
+                        + "\"onGround\":%b,\"sanity\":%.2f,\"corruption\":%.2f,"
+                        + "\"ahead\":\"%s\",\"entities\":[%s]}",
+                bot.getGameProfile().name(), bot.level().dimension().identifier(),
+                bot.getX(), bot.getY(), bot.getZ(), bot.getHealth(), bot.onGround(),
+                SanitySystem.get(bot), CorruptionSystem.get(bot), ahead, ents);
+        ctx.getSource().sendSuccess(() -> Component.literal(json), false);
         return 1;
     }
 
