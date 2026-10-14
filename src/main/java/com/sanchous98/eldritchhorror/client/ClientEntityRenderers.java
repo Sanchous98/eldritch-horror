@@ -45,6 +45,10 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.CULT_RAIDER.get(), CultistRenderers.Raider::new);
         event.registerEntityRenderer(ModEntities.RITE_BINDER.get(), RiteBinderRenderer::new);
         event.registerEntityRenderer(ModEntities.PLAGUE_CRONE.get(), PlagueCroneRenderer::new);
+        event.registerEntityRenderer(ModEntities.ASHEN_REVENANT.get(), AshenRevenantRenderer::new);
+        event.registerEntityRenderer(ModEntities.VEIL_SWINE.get(), VeilSwineRenderer::new);
+        event.registerEntityRenderer(ModEntities.WAIL_HUSK.get(), WailHuskRenderer::new);
+        event.registerEntityRenderer(ModEntities.ASHEN_WISP.get(), AshenWispRenderer::new);
         event.registerEntityRenderer(ModEntities.DEER.get(), PassiveRenderers.DeerRenderer::new);
         event.registerEntityRenderer(ModEntities.WOOL_HARE.get(), PassiveRenderers.WoolHareRenderer::new);
         event.registerEntityRenderer(ModEntities.MIRE_SOW.get(), PassiveRenderers.MireSowRenderer::new);
@@ -85,6 +89,8 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.CHAUGNAR_FAUGN.get(), ChaugnarFaugnRenderer::new);
         event.registerEntityRenderer(ModEntities.TULZSCHA.get(), TulzschaRenderer::new);
         event.registerEntityRenderer(ModEntities.ZSTYLZHEMGHI.get(), ZstylzhemghiRenderer::new);
+        event.registerEntityRenderer(ModEntities.ITHAQUAL_SHADE.get(), IthaqualShadeRenderer::new);
+        event.registerEntityRenderer(ModEntities.CHOIR_LEVIATHAN.get(), ChoirLeviathanRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_HORROR.get(), TheHorrorRenderer::new);
     }
 }

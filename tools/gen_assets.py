@@ -61,6 +61,13 @@ PALETTES: dict[str, tuple[tuple[int, int, int], tuple[int, int, int], tuple[int,
     "tulzscha": ((12, 26, 10), (60, 120, 40), (180, 240, 120)),
     "zstylzhemghi": ((12, 10, 20), (56, 48, 92), (170, 156, 230)),
     "the_horror": ((8, 5, 16), (48, 26, 78), (170, 110, 210)),
+    # design/25 lesser roster + the two named additions
+    "ashen_revenant": ((18, 14, 12), (122, 48, 28), (240, 120, 60)),
+    "veil_swine": ((26, 20, 22), (122, 98, 102), (222, 170, 176)),
+    "wail_husk": ((30, 30, 32), (142, 142, 148), (232, 232, 226)),
+    "ashen_wisp": ((32, 12, 4), (182, 72, 10), (255, 190, 44)),
+    "ithaqual_shade": ((14, 22, 40), (70, 100, 160), (204, 232, 255)),
+    "choir_leviathan": ((4, 16, 16), (24, 74, 60), (96, 190, 150)),
     # cultists
     "worshipper": ((14, 12, 18), (60, 52, 76), (170, 158, 200)),
     "cult_zealot": ((20, 10, 10), (92, 40, 40), (220, 120, 110)),
@@ -213,8 +220,21 @@ def main() -> None:
     sigil.save(ROOT / "src/main/resources/logo.png")
     sigil.save(ROOT / "src/main/resources/pack.png")
 
-    # 2. Entity skins: same size as the placeholder they replace.
+    # 2. Entity skins: same size as the placeholder they replace. A new mob has no file to measure
+    #    yet, so the sheet size of the vanilla placeholder it reuses is declared here.
+    NEW_ENTITY_SHEETS: dict[str, tuple[int, int]] = {
+        "ashen_revenant": (64, 32),    # skeleton sheet
+        "veil_swine": (128, 64),       # hoglin sheet
+        "wail_husk": (64, 32),         # ghast sheet
+        "ashen_wisp": (64, 32),        # blaze sheet
+        "ithaqual_shade": (128, 128),  # warden sheet
+        "choir_leviathan": (64, 32),   # ghast sheet
+    }
     TEX_ENTITY.mkdir(parents=True, exist_ok=True)
+    for name, size in NEW_ENTITY_SHEETS.items():
+        path = TEX_ENTITY / f"{name}.png"
+        if not path.exists():
+            mob_skin(name, size).save(path)
     count = 0
     for path in sorted(TEX_ENTITY.glob("*.png")):
         with Image.open(path) as old:
@@ -224,7 +244,15 @@ def main() -> None:
 
     # 3. Icons for content that has none: texture, item definition and per-item model.
     TEX_ITEM.mkdir(parents=True, exist_ok=True)
-    missing = {"the_horror_spawn_egg": PALETTES["the_horror"]}
+    missing = {
+        "the_horror_spawn_egg": PALETTES["the_horror"],
+        "ashen_revenant_spawn_egg": PALETTES["ashen_revenant"],
+        "veil_swine_spawn_egg": PALETTES["veil_swine"],
+        "wail_husk_spawn_egg": PALETTES["wail_husk"],
+        "ashen_wisp_spawn_egg": PALETTES["ashen_wisp"],
+        "ithaqual_shade_spawn_egg": PALETTES["ithaqual_shade"],
+        "choir_leviathan_spawn_egg": PALETTES["choir_leviathan"],
+    }
     for item, palette in missing.items():
         spawn_egg_icon(palette[2]).save(TEX_ITEM / f"{item}.png")
         ITEM_DEFS.mkdir(parents=True, exist_ok=True)

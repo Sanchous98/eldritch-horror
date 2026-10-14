@@ -124,6 +124,15 @@ public final class Rites {
         register(new RiteDefinition("erase_zstylzhemghi",
                 RiteDefinition.nameOf("erase_zstylzhemghi"),
                 3, -20, -12, RiteDefinition.Outcome.SOOTHE, "zstylzhemghi"));
+
+        // The design/25 named additions (design/25 replacement table, design/18 boss): the Ithaqual
+        // Shade's ward and the Choir Leviathan's soak rite. Same shared SOOTHE outcome; the reagents
+        // fall to the shared default (their gate is the taught tome, not a new material).
+        register(new RiteDefinition("still_the_shade", RiteDefinition.nameOf("still_the_shade"),
+                2, -12, 0, RiteDefinition.Outcome.SOOTHE, "ithaqual_shade"));
+        register(new RiteDefinition("still_the_leviathan",
+                RiteDefinition.nameOf("still_the_leviathan"),
+                3, -18, -5, RiteDefinition.Outcome.SOOTHE, "choir_leviathan"));
     }
 
     private Rites() {

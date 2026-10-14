@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:drowned_lung"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:mark_of_favour"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:pearl_reagent",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 4
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

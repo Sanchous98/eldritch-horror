@@ -32,6 +32,8 @@ public final class Cults {
                         CultService.offer("offer_pearls", CultRank.NEUTRAL, "pearl_reagent", 1, 5),
                         new CultService("teach_drowned_blessing", CultRank.INITIATE,
                                 CultService.Kind.TEACH, "drowned_blessing"),
+                        new CultService("teach_still_the_leviathan", CultRank.DEVOTED,
+                                CultService.Kind.TEACH, "still_the_leviathan"),
                         CultService.trade("buy_salt", CultRank.INITIATE,
                                 "black_obol", 1, "salt_reagent", 2))));
 
@@ -51,6 +53,8 @@ public final class Cults {
                                 CultService.Kind.TEACH, "ward_of_the_eye"),
                         new CultService("cleansing", CultRank.DEVOTED,
                                 CultService.Kind.CLEANSE, ""),
+                        new CultService("teach_still_the_shade", CultRank.DEVOTED,
+                                CultService.Kind.TEACH, "still_the_shade"),
                         new CultService("teach_banish_the_horror", CultRank.INNER_CIRCLE,
                                 CultService.Kind.TEACH, "banish_the_horror"),
                         CultService.trade("buy_chalk", CultRank.INITIATE,

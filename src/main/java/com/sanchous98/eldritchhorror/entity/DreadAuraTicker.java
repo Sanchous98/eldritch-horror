@@ -78,6 +78,13 @@ public final class DreadAuraTicker {
             BestiarySupport.tickAura(player, ChaugnarFaugn.class, ModConfig.SANITY_CHAUGNAR_FAUGN_RADIUS.get());
             BestiarySupport.tickAura(player, Tulzscha.class, ModConfig.SANITY_TULZSCHA_RADIUS.get());
             BestiarySupport.tickAura(player, Zstylzhemghi.class, ModConfig.CORRUPTION_ZSTYLZHEMGHI_RADIUS.get());
+            // The design/25 lesser roster additions and the two named additions.
+            BestiarySupport.tickAura(player, AshenRevenant.class, ModConfig.CORRUPTION_ASHEN_REVENANT_RADIUS.get());
+            BestiarySupport.tickAura(player, VeilSwine.class, ModConfig.SANITY_VEIL_SWINE_RADIUS.get());
+            BestiarySupport.tickAura(player, WailHusk.class, ModConfig.SANITY_WAIL_HUSK_RADIUS.get());
+            BestiarySupport.tickAura(player, AshenWisp.class, ModConfig.CORRUPTION_ASHEN_WISP_RADIUS.get());
+            BestiarySupport.tickAura(player, IthaqualShade.class, ModConfig.SANITY_ITHAQUAL_SHADE_RADIUS.get());
+            BestiarySupport.tickAura(player, ChoirLeviathan.class, ModConfig.SANITY_CHOIR_LEVIATHAN_RADIUS.get());
         }
     }
 }

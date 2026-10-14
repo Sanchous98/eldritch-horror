@@ -2454,6 +2454,274 @@ public final class ModConfig {
             BUILDER.comment("hollow_call: max choir spites present near one player.")
                     .defineInRange("eventHollowCallSpiteCap", 3, 1, 16);
 
+    // --- Bestiary: lesser roster additions (design/25 replacement table) ----------------------
+    // The remaining hostile roles that had no entity yet: ashen_revenant (wither skeleton),
+    // veil_swine (hoglin/piglin herd), wail_husk (ghast), ashen_wisp (blaze). Same aura + spawner
+    // shapes as the husk/bone choir; every number is config-bounded.
+
+    /** The ashen revenant's scorch-taint: a small corruption vector. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_ASHEN_REVENANT =
+            BUILDER.comment("Enable the 'ashen_revenant' corruption vector (nearby revenants taint).")
+                    .define("enableCorruptionAshenRevenant", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_ASHEN_REVENANT_RATE =
+            BUILDER.comment("Corruption per second per nearby ashen revenant (positive taints).")
+                    .defineInRange("corruptionAshenRevenantRate", 0.05, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_ASHEN_REVENANT_RADIUS =
+            BUILDER.comment("Radius (blocks) in which ashen revenants contribute corruption.")
+                    .defineInRange("corruptionAshenRevenantRadius", 6, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_ASHEN_REVENANT_MAX =
+            BUILDER.comment("Maximum ashen revenants counted toward the corruption vector at once.")
+                    .defineInRange("corruptionAshenRevenantMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_ASHEN_REVENANT_SPAWNS =
+            BUILDER.comment("Allow ashen revenants to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableAshenRevenantSpawns", true);
+
+    public static final ModConfigSpec.IntValue ASHEN_REVENANT_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between ashen-revenant spawn passes (minimum 20).")
+                    .defineInRange("ashenRevenantSpawnIntervalTicks", 240, 20, 24000);
+
+    public static final ModConfigSpec.IntValue ASHEN_REVENANT_SPAWN_COUNT =
+            BUILDER.comment("Max ashen revenants spawned per player per pass.")
+                    .defineInRange("ashenRevenantSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue ASHEN_REVENANT_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which ashen revenants may spawn.")
+                    .defineInRange("ashenRevenantSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue ASHEN_REVENANT_SPAWN_CAP =
+            BUILDER.comment("Max ashen revenants allowed near one player before spawning pauses.")
+                    .defineInRange("ashenRevenantSpawnCap", 6, 1, 64);
+
+    /** The veil swine's parody of a herd: a sanity drain that gets worse in numbers. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_VEIL_SWINE =
+            BUILDER.comment("Enable the 'veil_swine' sanity source (a herd from behind the veil drains sanity).")
+                    .define("enableSanityVeilSwine", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_VEIL_SWINE_RATE =
+            BUILDER.comment("Sanity change per second per nearby veil swine (negative drains).")
+                    .defineInRange("sanityVeilSwineRate", -0.12, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_VEIL_SWINE_RADIUS =
+            BUILDER.comment("Radius (blocks) in which veil swine contribute to the sanity drain.")
+                    .defineInRange("sanityVeilSwineRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue SANITY_VEIL_SWINE_MAX =
+            BUILDER.comment("Maximum veil swine counted toward the sanity drain at once.")
+                    .defineInRange("sanityVeilSwineMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_VEIL_SWINE_SPAWNS =
+            BUILDER.comment("Allow veil swine to spawn near players in dark/tainted loaded terrain.")
+                    .define("enableVeilSwineSpawns", true);
+
+    public static final ModConfigSpec.IntValue VEIL_SWINE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between veil-swine spawn passes (minimum 20).")
+                    .defineInRange("veilSwineSpawnIntervalTicks", 300, 20, 24000);
+
+    public static final ModConfigSpec.IntValue VEIL_SWINE_SPAWN_COUNT =
+            BUILDER.comment("Max veil swine spawned per player per pass (a small herd per pass).")
+                    .defineInRange("veilSwineSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue VEIL_SWINE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which veil swine may spawn.")
+                    .defineInRange("veilSwineSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue VEIL_SWINE_SPAWN_CAP =
+            BUILDER.comment("Max veil swine allowed near one player before spawning pauses.")
+                    .defineInRange("veilSwineSpawnCap", 8, 1, 64);
+
+    /** The wail husk's mourning wail: a line-of-sight sanity drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_WAIL_HUSK =
+            BUILDER.comment("Enable the 'wail_husk' sanity source (a mourner's wail drains sanity).")
+                    .define("enableSanityWailHusk", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_WAIL_HUSK_RATE =
+            BUILDER.comment("Sanity change per second per nearby wail husk (negative drains).")
+                    .defineInRange("sanityWailHuskRate", -0.15, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_WAIL_HUSK_RADIUS =
+            BUILDER.comment("Radius (blocks) in which wail husks contribute to the sanity drain.")
+                    .defineInRange("sanityWailHuskRadius", 16, 1, 48);
+
+    public static final ModConfigSpec.IntValue SANITY_WAIL_HUSK_MAX =
+            BUILDER.comment("Maximum wail husks counted toward the sanity drain at once.")
+                    .defineInRange("sanityWailHuskMax", 2, 1, 16);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_WAIL_HUSK_SPAWNS =
+            BUILDER.comment("Allow wail husks to drift in dark air above players.")
+                    .define("enableWailHuskSpawns", true);
+
+    public static final ModConfigSpec.IntValue WAIL_HUSK_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between wail-husk spawn passes (minimum 20).")
+                    .defineInRange("wailHuskSpawnIntervalTicks", 400, 20, 24000);
+
+    public static final ModConfigSpec.IntValue WAIL_HUSK_SPAWN_COUNT =
+            BUILDER.comment("Max wail husks spawned per player per pass.")
+                    .defineInRange("wailHuskSpawnCount", 1, 0, 8);
+
+    public static final ModConfigSpec.IntValue WAIL_HUSK_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which wail husks may appear.")
+                    .defineInRange("wailHuskSpawnRadius", 40, 8, 128);
+
+    public static final ModConfigSpec.IntValue WAIL_HUSK_SPAWN_CAP =
+            BUILDER.comment("Max wail husks allowed near one player before spawning pauses.")
+                    .defineInRange("wailHuskSpawnCap", 2, 1, 8);
+
+    public static final ModConfigSpec.IntValue WAIL_HUSK_SPAWN_MIN_Y =
+            BUILDER.comment("Minimum Y at which a wail husk may spawn (fliers stay above the deep dark).")
+                    .defineInRange("wailHuskSpawnMinY", 50, -64, 320);
+
+    /** The ashen wisp's watching flame: a corruption vector that makes light feel wrong. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_ASHEN_WISP =
+            BUILDER.comment("Enable the 'ashen_wisp' corruption vector (nearby wisps taint).")
+                    .define("enableCorruptionAshenWisp", true);
+
+    public static final ModConfigSpec.DoubleValue CORRUPTION_ASHEN_WISP_RATE =
+            BUILDER.comment("Corruption per second per nearby ashen wisp (positive taints).")
+                    .defineInRange("corruptionAshenWispRate", 0.06, 0.0, 10.0);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_ASHEN_WISP_RADIUS =
+            BUILDER.comment("Radius (blocks) in which ashen wisps contribute corruption.")
+                    .defineInRange("corruptionAshenWispRadius", 8, 1, 32);
+
+    public static final ModConfigSpec.IntValue CORRUPTION_ASHEN_WISP_MAX =
+            BUILDER.comment("Maximum ashen wisps counted toward the corruption vector at once.")
+                    .defineInRange("corruptionAshenWispMax", 3, 1, 32);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_ASHEN_WISP_SPAWNS =
+            BUILDER.comment("Allow ashen wisps to appear on tainted loaded ground (the ashen waste).")
+                    .define("enableAshenWispSpawns", true);
+
+    public static final ModConfigSpec.IntValue ASHEN_WISP_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between ashen-wisp spawn passes (minimum 20).")
+                    .defineInRange("ashenWispSpawnIntervalTicks", 300, 20, 24000);
+
+    public static final ModConfigSpec.IntValue ASHEN_WISP_SPAWN_COUNT =
+            BUILDER.comment("Max ashen wisps spawned per player per pass.")
+                    .defineInRange("ashenWispSpawnCount", 2, 0, 16);
+
+    public static final ModConfigSpec.IntValue ASHEN_WISP_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which ashen wisps may appear.")
+                    .defineInRange("ashenWispSpawnRadius", 32, 8, 96);
+
+    public static final ModConfigSpec.IntValue ASHEN_WISP_SPAWN_CAP =
+            BUILDER.comment("Max ashen wisps allowed near one player before spawning pauses.")
+                    .defineInRange("ashenWispSpawnCap", 5, 1, 32);
+
+    // --- Bestiary: named additions (design/25 rows: ithaqual_shade / choir_leviathan) ---------
+    // Two presences from the design/25 replacement table that are not in design/28's twenty:
+    // the Ithaqual Shade (the warden row) and the Choir Leviathan (design/18's drowned-temple boss).
+
+    /** The Ithaqual Shade: the walking wind of the cold edge and deep places. */
+    public static final ModConfigSpec.BooleanValue ITHAQUAL_SHADE_KILLABLE =
+            BUILDER.comment("Allow the Ithaqual Shade to be killed. False = permanently invulnerable.")
+                    .define("ithaqualShadeKillable", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_ITHAQUAL_SHADE_SPAWNS =
+            BUILDER.comment("Allow the Ithaqual Shade to stalk the polar edge and deep loaded caves.")
+                    .define("enableIthaqualShadeSpawns", true);
+
+    public static final ModConfigSpec.IntValue ITHAQUAL_SHADE_SPAWN_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between Ithaqual Shade spawn passes (minimum 20).")
+                    .defineInRange("ithaqualShadeSpawnIntervalTicks", 2400, 20, 72000);
+
+    public static final ModConfigSpec.IntValue ITHAQUAL_SHADE_SPAWN_RADIUS =
+            BUILDER.comment("Radius (blocks) around each player in which the Shade may appear.")
+                    .defineInRange("ithaqualShadeSpawnRadius", 48, 8, 128);
+
+    public static final ModConfigSpec.IntValue ITHAQUAL_SHADE_SPAWN_CAP =
+            BUILDER.comment("Max Ithaqual Shades allowed near one player before spawning pauses.")
+                    .defineInRange("ithaqualShadeSpawnCap", 1, 1, 4);
+
+    public static final ModConfigSpec.IntValue ITHAQUAL_SHADE_EDGE_BAND =
+            BUILDER.comment("Blocks inside the polar edge (BoundaryTravel.morokEdgeZ) the Shade may walk.")
+                    .defineInRange("ithaqualShadeEdgeBand", 2048, 64, 8192);
+
+    public static final ModConfigSpec.IntValue ITHAQUAL_SHADE_DEEP_MAX_Y =
+            BUILDER.comment("Highest Y at which the Ithaqual Shade may appear in deep loaded caves.")
+                    .defineInRange("ithaqualShadeDeepMaxY", 0, -64, 64);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_ITHAQUAL_SHADE =
+            BUILDER.comment("Enable the Ithaqual Shade sanity source (the cold drags the will away).")
+                    .define("enableSanityIthaqualShade", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_ITHAQUAL_SHADE_RATE =
+            BUILDER.comment("Sanity change per second while near the Shade (negative drains).")
+                    .defineInRange("sanityIthaqualShadeRate", -0.30, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_ITHAQUAL_SHADE_RADIUS =
+            BUILDER.comment("Radius (blocks) of the Ithaqual Shade's sanity drain.")
+                    .defineInRange("sanityIthaqualShadeRadius", 30, 1, 96);
+
+    /** The Shade's non-combat solve: {@code still_the_shade} stills the wind. */
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_STILL_THE_SHADE =
+            BUILDER.comment("Allow still_the_shade to still the Ithaqual Shade and quiet its drain.")
+                    .define("enableRiteStillTheShade", true);
+
+    /** The Choir Leviathan: the drowned-temple boss of design/18, woken via the drowned_blessing chain. */
+    public static final ModConfigSpec.BooleanValue CHOIR_LEVIATHAN_KILLABLE =
+            BUILDER.comment("Allow the Choir Leviathan to be killed. False = permanently invulnerable.")
+                    .define("choirLeviathanKillable", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_CHOIR_LEVIATHAN_TRIGGER =
+            BUILDER.comment("Allow the Choir Leviathan to wake once at the drowned_temple (Choir rank gate).")
+                    .define("enableChoirLeviathanTrigger", true);
+
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_CHOIR_LEVIATHAN =
+            BUILDER.comment("Enable the Choir Leviathan sanity source (the tide-song drains nearby).")
+                    .define("enableSanityChoirLeviathan", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_CHOIR_LEVIATHAN_RATE =
+            BUILDER.comment("Sanity change per second while near the Leviathan (negative drains).")
+                    .defineInRange("sanityChoirLeviathanRate", -0.40, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_CHOIR_LEVIATHAN_RADIUS =
+            BUILDER.comment("Radius (blocks) of the Choir Leviathan's sanity drain.")
+                    .defineInRange("sanityChoirLeviathanRadius", 40, 1, 128);
+
+    /** Phase 2 (Tidebreak): the arena flood. Bounded to loaded chunks and a hard block cap. */
+    public static final ModConfigSpec.IntValue CHOIR_LEVIATHAN_FLOOD_RADIUS =
+            BUILDER.comment("Tidebreak: radius (blocks) around the Leviathan that may flood.")
+                    .defineInRange("choirLeviathanFloodRadius", 16, 4, 48);
+
+    public static final ModConfigSpec.IntValue CHOIR_LEVIATHAN_FLOOD_BLOCKS =
+            BUILDER.comment("Tidebreak: hard cap on water blocks placed by the flood.")
+                    .defineInRange("choirLeviathanFloodBlocks", 256, 16, 1024);
+
+    public static final ModConfigSpec.IntValue CHOIR_LEVIATHAN_FLOOD_DEPTH =
+            BUILDER.comment("Tidebreak: deepest column scan (blocks below the original surface).")
+                    .defineInRange("choirLeviathanFloodDepth", 6, 1, 24);
+
+    /** Phase 3 (Frenzy): the enrage numbers, mirroring Cthulhu's attack bump plus a speed step. */
+    public static final ModConfigSpec.DoubleValue CHOIR_LEVIATHAN_FRENZY_ATTACK =
+            BUILDER.comment("Frenzy: attack damage added while enraged.")
+                    .defineInRange("choirLeviathanFrenzyAttack", 3.0, 0.0, 20.0);
+
+    public static final ModConfigSpec.DoubleValue CHOIR_LEVIATHAN_FRENZY_SPEED =
+            BUILDER.comment("Frenzy: movement speed added while enraged.")
+                    .defineInRange("choirLeviathanFrenzySpeed", 0.08, 0.0, 1.0);
+
+    /** Phase 1 (Stirring): the summons. One wail husk per pass while under the cap, loaded-only. */
+    public static final ModConfigSpec.IntValue CHOIR_LEVIATHAN_SUMMON_INTERVAL_TICKS =
+            BUILDER.comment("Stirring: ticks between the Leviathan's summon passes.")
+                    .defineInRange("choirLeviathanSummonIntervalTicks", 200, 20, 24000);
+
+    public static final ModConfigSpec.IntValue CHOIR_LEVIATHAN_SUMMON_CAP =
+            BUILDER.comment("Stirring: max wail husks the Leviathan keeps summoned around itself.")
+                    .defineInRange("choirLeviathanSummonCap", 3, 0, 12);
+
+    public static final ModConfigSpec.IntValue CHOIR_LEVIATHAN_SUMMON_RADIUS =
+            BUILDER.comment("Stirring: radius (blocks) around the Leviathan in which it summons.")
+                    .defineInRange("choirLeviathanSummonRadius", 16, 4, 48);
+
+    /** The Leviathan's non-combat solve: {@code still_the_leviathan} (a Choir rite). */
+    public static final ModConfigSpec.BooleanValue ENABLE_RITE_STILL_THE_LEVIATHAN =
+            BUILDER.comment("Allow still_the_leviathan to soothe the Choir Leviathan instead of killing it.")
+                    .define("enableRiteStillTheLeviathan", true);
+
     // --- Codex / world knowledge (design/22-map-and-knowledge.md) ---------------------------
     // The server-authoritative discovery layer. Knowledge is the progression: proximity reveals
     // sites/cities, seeing or killing a mob reveals its bestiary entry, seeing an Ancient One

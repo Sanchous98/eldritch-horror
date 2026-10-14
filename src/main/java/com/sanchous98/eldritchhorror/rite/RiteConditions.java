@@ -79,7 +79,11 @@ public record RiteConditions(
             Map.entry("banish_the_horror", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
                     CorruptionState.CLAIMED, null, 0)),
             Map.entry("summon_the_horror", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
-                    CorruptionState.CLAIMED, null, 0)));
+                    CorruptionState.CLAIMED, null, 0)),
+            // The design/25 named additions: their solves are unrestricted (any weather, no
+            // corruption gate) — listed explicitly so the table shows the intent.
+            Map.entry("still_the_shade", NONE),
+            Map.entry("still_the_leviathan", NONE));
 
     /** @return the conditions for {@code rite} (never {@code null}; {@link #NONE} when unlisted). */
     public static RiteConditions of(RiteDefinition rite) {

@@ -3,6 +3,8 @@ package com.sanchous98.eldritchhorror.registry;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.entity.Abhoth;
 import com.sanchous98.eldritchhorror.entity.AshFowl;
+import com.sanchous98.eldritchhorror.entity.AshenRevenant;
+import com.sanchous98.eldritchhorror.entity.AshenWisp;
 import com.sanchous98.eldritchhorror.entity.AtlachNacha;
 import com.sanchous98.eldritchhorror.entity.Azathoth;
 import com.sanchous98.eldritchhorror.entity.BlightPod;
@@ -12,6 +14,7 @@ import com.sanchous98.eldritchhorror.entity.Burrowling;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.CaveDrifter;
 import com.sanchous98.eldritchhorror.entity.ChaugnarFaugn;
+import com.sanchous98.eldritchhorror.entity.ChoirLeviathan;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
 import com.sanchous98.eldritchhorror.entity.Cthugha;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
@@ -29,6 +32,7 @@ import com.sanchous98.eldritchhorror.entity.HearthCat;
 import com.sanchous98.eldritchhorror.entity.HillHound;
 import com.sanchous98.eldritchhorror.entity.Hydra;
 import com.sanchous98.eldritchhorror.entity.Ithaqua;
+import com.sanchous98.eldritchhorror.entity.IthaqualShade;
 import com.sanchous98.eldritchhorror.entity.LanternJelly;
 import com.sanchous98.eldritchhorror.entity.LesserSwarm;
 import com.sanchous98.eldritchhorror.entity.MarshMote;
@@ -54,7 +58,9 @@ import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.TheHorror;
 import com.sanchous98.eldritchhorror.entity.TideGrazer;
 import com.sanchous98.eldritchhorror.entity.Tulzscha;
+import com.sanchous98.eldritchhorror.entity.VeilSwine;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
+import com.sanchous98.eldritchhorror.entity.WailHusk;
 import com.sanchous98.eldritchhorror.entity.Watcher;
 import com.sanchous98.eldritchhorror.entity.WeaverSpawn;
 import com.sanchous98.eldritchhorror.entity.WoolBeast;
@@ -370,6 +376,55 @@ public final class ModEntities {
     public static final DeferredItem<SpawnEggItem> PLAGUE_CRONE_SPAWN_EGG =
             ModItems.ITEMS.registerItem("plague_crone_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(PLAGUE_CRONE.get())));
+
+    // --- Bestiary lesser roster additions (design/25 replacement table) -----------------------
+    // The four remaining hostile roles with no entity yet. Spawn eggs come from the shared egg()
+    // helper; the types use explicit builders so they keep the hostile notInPeaceful() flag.
+
+    /** Ashen revenant: 0.7 x 2.4, burning dead of the ashen waste (wither-skeleton footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<AshenRevenant>> ASHEN_REVENANT =
+            ENTITY_TYPES.register("ashen_revenant", () ->
+                    EntityType.Builder.<AshenRevenant>of(AshenRevenant::new, MobCategory.MONSTER)
+                            .sized(0.7F, 2.4F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("ashen_revenant"))));
+
+    public static final DeferredItem<SpawnEggItem> ASHEN_REVENANT_SPAWN_EGG =
+            egg("ashen_revenant", ASHEN_REVENANT);
+
+    /** Veil swine: 1.4 x 1.4, a parody herd from behind the veil (hoglin footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<VeilSwine>> VEIL_SWINE =
+            ENTITY_TYPES.register("veil_swine", () ->
+                    EntityType.Builder.<VeilSwine>of(VeilSwine::new, MobCategory.MONSTER)
+                            .sized(1.4F, 1.4F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("veil_swine"))));
+
+    public static final DeferredItem<SpawnEggItem> VEIL_SWINE_SPAWN_EGG = egg("veil_swine", VEIL_SWINE);
+
+    /** Wail husk: 1.6 x 1.6, the floating mourner (ghast silhouette, drawn small). */
+    public static final DeferredHolder<EntityType<?>, EntityType<WailHusk>> WAIL_HUSK =
+            ENTITY_TYPES.register("wail_husk", () ->
+                    EntityType.Builder.<WailHusk>of(WailHusk::new, MobCategory.MONSTER)
+                            .sized(1.6F, 1.6F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("wail_husk"))));
+
+    public static final DeferredItem<SpawnEggItem> WAIL_HUSK_SPAWN_EGG = egg("wail_husk", WAIL_HUSK);
+
+    /** Ashen wisp: 0.6 x 1.8, the watching flame (blaze footprint). */
+    public static final DeferredHolder<EntityType<?>, EntityType<AshenWisp>> ASHEN_WISP =
+            ENTITY_TYPES.register("ashen_wisp", () ->
+                    EntityType.Builder.<AshenWisp>of(AshenWisp::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.8F)
+                            .clientTrackingRange(8)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("ashen_wisp"))));
+
+    public static final DeferredItem<SpawnEggItem> ASHEN_WISP_SPAWN_EGG = egg("ashen_wisp", ASHEN_WISP);
 
     // --- Passive (mundane) fauna (design/25 passive role table) ------------------------------
     // Registered through the compact register()/egg() helpers below; all are our namespace, so
@@ -757,6 +812,36 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("zstylzhemghi_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ZSTYLZHEMGHI.get())));
 
+    // --- Named additions beyond design/28's twenty (design/25 rows) ---------------------------
+    // The Ithaqual Shade (the warden row) and the Choir Leviathan (design/18's drowned-temple
+    // boss). Both are Ancient Ones with eggs, matching the twenty above.
+
+    /** Ithaqual Shade: 0.9 x 2.9, the wind-that-walks of the cold edge and deep places. */
+    public static final DeferredHolder<EntityType<?>, EntityType<IthaqualShade>> ITHAQUAL_SHADE =
+            ENTITY_TYPES.register("ithaqual_shade", () ->
+                    EntityType.Builder.<IthaqualShade>of(IthaqualShade::new, MobCategory.MONSTER)
+                            .sized(0.9F, 2.9F)
+                            .clientTrackingRange(10)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("ithaqual_shade"))));
+
+    public static final DeferredItem<SpawnEggItem> ITHAQUAL_SHADE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("ithaqual_shade_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ITHAQUAL_SHADE.get())));
+
+    /** Choir Leviathan: 5.0 x 5.0, the drowned-temple tide-thing (the ghast silhouette, grown). */
+    public static final DeferredHolder<EntityType<?>, EntityType<ChoirLeviathan>> CHOIR_LEVIATHAN =
+            ENTITY_TYPES.register("choir_leviathan", () ->
+                    EntityType.Builder.<ChoirLeviathan>of(ChoirLeviathan::new, MobCategory.MONSTER)
+                            .sized(5.0F, 5.0F)
+                            .clientTrackingRange(14)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("choir_leviathan"))));
+
+    public static final DeferredItem<SpawnEggItem> CHOIR_LEVIATHAN_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("choir_leviathan_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(CHOIR_LEVIATHAN.get())));
+
     /** The endgame presence ({@code design/11}, {@code design/18}): awakened by rite, resolved by the fork. */
     public static final DeferredHolder<EntityType<?>, EntityType<TheHorror>> THE_HORROR =
             ENTITY_TYPES.register("the_horror", () ->
@@ -785,7 +870,8 @@ public final class ModEntities {
                 YOG_SOTHOTH.get(), ITHAQUA.get(), YIG.get(), ATLACH_NACHA.get(), NYARLATHOTEP.get(),
                 CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get(),
                 HASTUR.get(), NEPHREN_KA.get(), ABHOTH.get(), CHAUGNAR_FAUGN.get(), TULZSCHA.get(),
-                ZSTYLZHEMGHI.get(), THE_HORROR.get());
+                ZSTYLZHEMGHI.get(), THE_HORROR.get(),
+                ITHAQUAL_SHADE.get(), CHOIR_LEVIATHAN.get());
     }
 
     /**
@@ -818,6 +904,10 @@ public final class ModEntities {
             event.accept(CULT_RAIDER_SPAWN_EGG.get());
             event.accept(RITE_BINDER_SPAWN_EGG.get());
             event.accept(PLAGUE_CRONE_SPAWN_EGG.get());
+            event.accept(ASHEN_REVENANT_SPAWN_EGG.get());
+            event.accept(VEIL_SWINE_SPAWN_EGG.get());
+            event.accept(WAIL_HUSK_SPAWN_EGG.get());
+            event.accept(ASHEN_WISP_SPAWN_EGG.get());
             event.accept(DEER_SPAWN_EGG.get());
             event.accept(WOOL_HARE_SPAWN_EGG.get());
             event.accept(MIRE_SOW_SPAWN_EGG.get());
@@ -858,6 +948,8 @@ public final class ModEntities {
             event.accept(CHAUGNAR_FAUGN_SPAWN_EGG.get());
             event.accept(TULZSCHA_SPAWN_EGG.get());
             event.accept(ZSTYLZHEMGHI_SPAWN_EGG.get());
+            event.accept(ITHAQUAL_SHADE_SPAWN_EGG.get());
+            event.accept(CHOIR_LEVIATHAN_SPAWN_EGG.get());
             event.accept(THE_HORROR_SPAWN_EGG.get());
         }
     }
@@ -889,6 +981,10 @@ public final class ModEntities {
         event.put(CULT_RAIDER.get(), CultRaider.createAttributes().build());
         event.put(RITE_BINDER.get(), RiteBinder.createAttributes().build());
         event.put(PLAGUE_CRONE.get(), PlagueCrone.createAttributes().build());
+        event.put(ASHEN_REVENANT.get(), AshenRevenant.createAttributes().build());
+        event.put(VEIL_SWINE.get(), VeilSwine.createAttributes().build());
+        event.put(WAIL_HUSK.get(), WailHusk.createAttributes().build());
+        event.put(ASHEN_WISP.get(), AshenWisp.createAttributes().build());
         event.put(DEER.get(), Deer.createAttributes().build());
         event.put(WOOL_HARE.get(), WoolHare.createAttributes().build());
         event.put(MIRE_SOW.get(), MireSow.createAttributes().build());
@@ -929,6 +1025,8 @@ public final class ModEntities {
         event.put(CHAUGNAR_FAUGN.get(), ChaugnarFaugn.createAttributes().build());
         event.put(TULZSCHA.get(), Tulzscha.createAttributes().build());
         event.put(ZSTYLZHEMGHI.get(), Zstylzhemghi.createAttributes().build());
+        event.put(ITHAQUAL_SHADE.get(), IthaqualShade.createAttributes().build());
+        event.put(CHOIR_LEVIATHAN.get(), ChoirLeviathan.createAttributes().build());
         event.put(THE_HORROR.get(), TheHorror.createAttributes().build());
     }
 

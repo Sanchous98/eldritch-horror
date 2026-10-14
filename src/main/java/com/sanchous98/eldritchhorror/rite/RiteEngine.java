@@ -437,6 +437,8 @@ public final class RiteEngine {
             case "chaugnar_faugn" -> "barter_seal";
             case "tulzscha" -> "void_reagent";
             case "zstylzhemghi" -> "relic_coin";
+            case "ithaqual_shade" -> "order_scrip";
+            case "choir_leviathan" -> "cult_token";
             default -> "";
         };
         if (itemId.isEmpty()) {
@@ -476,6 +478,8 @@ public final class RiteEngine {
             case "chaugnar_faugn" -> ModConfig.ENABLE_RITE_STARVE_CHAUGNAR_FAUGN.get();
             case "tulzscha" -> ModConfig.ENABLE_RITE_QUENCH_TULZSCHA.get();
             case "zstylzhemghi" -> ModConfig.ENABLE_RITE_ERASE_ZSTYLZHEMGHI.get();
+            case "ithaqual_shade" -> ModConfig.ENABLE_RITE_STILL_THE_SHADE.get();
+            case "choir_leviathan" -> ModConfig.ENABLE_RITE_STILL_THE_LEVIATHAN.get();
             default -> false;
         };
     }
@@ -503,6 +507,8 @@ public final class RiteEngine {
             case "chaugnar_faugn" -> AncientOne.Solve.SOOTHED;
             case "tulzscha" -> AncientOne.Solve.SOOTHED;
             case "zstylzhemghi" -> AncientOne.Solve.STILLED;
+            case "ithaqual_shade" -> AncientOne.Solve.SOOTHED;
+            case "choir_leviathan" -> AncientOne.Solve.SOOTHED;
             default -> AncientOne.Solve.NONE;
         };
     }
@@ -549,6 +555,10 @@ public final class RiteEngine {
                     "The green flame closes its eye; what you remember returns, and nothing was killed.");
             case "zstylzhemghi" -> Component.literal(
                     "The forgotten name is forgotten again; the erosion pauses for a time.");
+            case "ithaqual_shade" -> Component.literal(
+                    "The walking wind is stilled at the cold edge; it cannot find the seam, and nothing was killed.");
+            case "choir_leviathan" -> Component.literal(
+                    "The Choir answers with you: the tide-song is sung down, and the Leviathan settles half-asleep.");
             default -> Component.literal("The presence is answered.");
         };
     }
