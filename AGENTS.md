@@ -100,7 +100,10 @@ integration build green.
   ```
   Rules of thumb this caught: never call `.get()` on a registry holder from a `static`
   initialiser; never read SERVER `ModConfig` while building the command tree/registries (gate in
-  the handler instead); loot condition discriminators are `"type"`, not `"condition"`.
+  the handler instead); loot condition discriminators are `"type"`, not `"condition"`;
+  `CustomPacketPayload.createType(String)` prefixes its argument with `minecraft:`, so a payload id
+  must be `new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MODID, path))` — the
+  former throws `IdentifierException` from a `static` initialiser and kills server startup.
 - **Never use `@OnlyIn`.** 26.3 removed its runtime member-stripping: the annotation is now
   inert and its mere presence emits an error + the *"uses the @OnlyIn annotation"* load warning
   (`OnlyInWarningsHandler`). Guard client-only code the real way: a

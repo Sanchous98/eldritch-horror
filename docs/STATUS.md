@@ -387,7 +387,25 @@ zero `eldritchhorror.client` imports outside `client/`).
 
 Caveat: there is no client in the dev environment, so the screens are compile- and
 API-verified (26.3 `extractRenderState`, key mappings, payload signatures were javap-checked),
-not visually. They need one human pass in a real client.
+not visually. They need one human pass in a real client. The UI commit also proved why the
+bounded smoke test is mandatory: it compiled and passed PMD, then died at startup on a payload id
+(`createType` prefixes `minecraft:`) — fixed in the follow-up commit.
+
+## Generated assets (`tools/gen_assets.py`)
+
+Pillow, host-side, deterministic (one seed per file) and palette-driven, so the whole look retunes
+in one place. `python3 tools/gen_assets.py` writes:
+
+- `logo.png` / `pack.png` — the mod sigil (void disc, chalk ring, eight tentacles, one eye);
+  `logoFile` is wired in `src/main/templates/META-INF/neoforge.mods.toml`.
+- An organic "void flesh" skin for **every** entity texture (62), in each entity's palette and at
+  the size of the placeholder it replaces. Before: flat dither/noise, seven duplicated groups.
+  Regenerate after adding a new entity texture.
+- Missing item icons with their item definition and model (`the_horror_spawn_egg` was the only item
+  without one).
+
+Programmer art, but a coherent family; hero assets still deserve a human. Sounds are out of scope
+for this generator (no OGG encoder in the environment).
 
 ## Where things live
 
