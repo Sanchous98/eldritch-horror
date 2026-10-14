@@ -370,6 +370,25 @@ lang keys; if it watches a system with no emission point yet, add one `QuestJour
 `/eh quests` lists the acts in stage order and names the next objective. Twelve quests ship across
 seven acts.
 
+## Client screens (design/13)
+
+The three information screens ship: **quest journal** (`J`), **codex** (`C`) and **skill tree**
+(`K`), alongside the world map (`M`). They read the already-synced attachments (QUESTS, SKILLS,
+SKILL_POINTS, LORE, RITE_KNOWLEDGE) and the common Java registries, so nothing new needed syncing
+except the quest **definitions** (`network/QuestSyncPayload`, shipped on `OnDatapackSyncEvent`,
+which covers both a joining player and a `/reload`; `client/ClientQuests` mirrors them and is
+dropped on logout). Unlocking a skill from the screen sends `SkillUnlockPayload`, re-validated
+server-side through `SkillTree.unlock`.
+
+Dist safety: the common `network/ModPayloads` registers the clientbound type **without** a handler;
+the handler is attached in `Dist.CLIENT`-only `client/ClientPayloadHandlers` through NeoForge's
+`RegisterClientPayloadHandlersEvent` (a dedicated server never resolves a client class — scanned:
+zero `eldritchhorror.client` imports outside `client/`).
+
+Caveat: there is no client in the dev environment, so the screens are compile- and
+API-verified (26.3 `extractRenderState`, key mappings, payload signatures were javap-checked),
+not visually. They need one human pass in a real client.
+
 ## Where things live
 
 | Concern | File |
