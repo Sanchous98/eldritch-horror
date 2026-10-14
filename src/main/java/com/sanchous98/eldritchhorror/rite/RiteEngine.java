@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
+import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
@@ -13,6 +14,7 @@ import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -20,7 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
-import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
+import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -49,10 +52,12 @@ import org.jspecify.annotations.Nullable;
  * taint. Everything is deterministic (no {@code Math.random}), radius-limited around the player,
  * touches only loaded chunks, and never floods the world.
  *
- * <p>Outcomes with no seeded content (reputation / transform / curse / sanity) return a
- * {@code ok=false} result explaining that they are not implemented for this rite — never a silent
- * no-op. {@link RiteDefinition.Outcome#SOOTHE} is the shared Ancient One non-combat solve
- * ({@code design/28}).
+ * <p>Every outcome type in {@code design/08-rituals.md} resolves here: grants, skill grants (and the
+ * {@code respec} reset), capped summons, ground transformation, curses, rift opening/sealing,
+ * cleansing, reputation, sanity and the shared Ancient One non-combat solve
+ * ({@link RiteDefinition.Outcome#SOOTHE}, {@code design/28}). A rite that fails pays its on_failure
+ * meter price; a rite that takes effect applies its {@link RiteDefinition.Gains} instead — never a
+ * silent no-op either way.
  */
 public final class RiteEngine {
 
@@ -83,13 +88,18 @@ public final class RiteEngine {
             new java.util.concurrent.ConcurrentHashMap<>();
     /** Drowned Blessing buff duration (ticks). */
     private static final int BLESSING_TICKS = 1200;
+    /** Curse duration per rite tier (ticks): the bane a {@code CURSE} rite lays on the performer. */
+    private static final int CURSE_TICKS_PER_TIER = 600;
+    /** Taint a {@code TRANSFORM} rite adds per tier to the local patch (design/05: convert blocks). */
+    private static final double TRANSFORM_TAINT = 0.15;
 
     private RiteEngine() {
     }
 
     /**
-     * What actually happened. {@code ok=false} means the rite did not take effect (the cost is still
-     * applied for known rites); {@code message} is always safe to show the performer.
+     * What actually happened. {@code ok=false} means the rite did not take effect: its on_failure
+     * meter price is applied (a rite that never started — altar, cooldown, missing offerings — pays
+     * nothing); {@code message} is always safe to show the performer.
      */
     public record Result(boolean ok, Component message) {
     }
@@ -141,8 +151,7 @@ public final class RiteEngine {
         }
 
         // Offerings: checked up front (all the listed reagents present), removed only once the rite
-        // actually resolves. A refused rite therefore costs nothing; design/08's "cost on failure"
-        // is the sanity/corruption price below, which is still paid on every attempt.
+        // actually resolves. A rite that never starts (missing offerings) pays nothing at all.
         List<RiteReagents.Reagent> offerings = RiteReagents.offerings(rite);
         boolean reagentsEnabled = ModConfig.REQUIRE_RITE_REAGENTS.get();
         if (reagentsEnabled && !RiteReagents.has(player, offerings)) {
@@ -150,35 +159,121 @@ public final class RiteEngine {
                     .append(RiteReagents.describe(offerings)).append(Component.literal(".")));
         }
 
-        // Cost is paid on every known-rite attempt, matching design/08-rituals.md.
-        payMeterCost(player, rite);
-
         Result result = switch (rite.outcome()) {
             case GRANT -> grant(player, rite);
             case GRANT_SKILL -> grantSkill(player, rite);
             case SPAWN -> spawn(level, player, rite);
+            case TRANSFORM -> transform(level, player, rite);
+            case CURSE -> curse(player, rite);
             case OPEN_RIFT -> openRift(level, player);
             case CLOSE_RIFT -> closeRift(level, player);
             case CORRUPTION -> cleanse(level, player, rite);
             case SOOTHE -> soothe(level, player, rite);
-            case REPUTATION, TRANSFORM, CURSE, SANITY ->
-                    new Result(false, Component.literal("The rite's outcome " + rite.outcome()
-                            + " is not implemented for " + rite.id() + "."));
+            case REPUTATION -> reputation(rite);
+            case SANITY -> sanity(rite);
         };
-        // Offerings are spent only on a rite that actually took effect (atomic, all-or-nothing).
+        if (!result.ok()) {
+            // A rite that started and did not resolve is a failure (design/08: "failure always costs
+            // something"): the on_failure meter price applies and the offerings are not spent.
+            payMeterCost(player, rite);
+            return result;
+        }
+        // Success: the definition's Outcome deltas and signature-rite reputation (design/08, 09) ...
+        applyGains(player, rite);
+        // ... then the offerings, spent only on a rite that took effect (atomic, all-or-nothing).
         // Frugal Rites may spare them outright (design/13 skill tree).
-        if (reagentsEnabled && result.ok()
-                && player.getRandom().nextFloat() >= SkillTree.offeringsRefundChance(player)) {
+        if (reagentsEnabled && player.getRandom().nextFloat() >= SkillTree.offeringsRefundChance(player)) {
             RiteReagents.consume(player, offerings);
         }
-        if (result.ok()) {
-            QuestJournal.add(player, "first_rite", 1);
-            QuestJournal.add(player, "ritualist", 1);
-        }
+        QuestJournal.add(player, "first_rite", 1);
+        QuestJournal.add(player, "ritualist", 1);
         return result;
     }
 
-    /** Applies the rite's sanity/corruption price (design/08's cost, paid on every attempt). */
+    /**
+     * Applies a successful rite's Outcome deltas and signature-rite reputation: the gains from the
+     * Outcome column of {@code design/08-rituals.md} and {@code design/09-cults.md}'s "performing
+     * their signature rite" (+10), routed through {@link CultSystem} so opposed pairs still cost.
+     */
+    private static void applyGains(ServerPlayer player, RiteDefinition rite) {
+        RiteDefinition.Gains gains = rite.gains();
+        if (gains.silent()) {
+            return;
+        }
+        if (gains.sanity() != 0) {
+            SanityAPI.add(player, gains.sanity());
+        }
+        if (gains.corruption() != 0) {
+            CorruptionAPI.add(player, gains.corruption());
+        }
+        if (!gains.cult().isEmpty() && gains.amount() != 0) {
+            CultSystem.add(player, gains.cult(), gains.amount());
+        }
+    }
+
+    /**
+     * {@code reputation}: standing itself is the outcome. The gain is applied by {@link #applyGains},
+     * so this only reports it — or refuses when the definition names no cult.
+     */
+    private static Result reputation(RiteDefinition rite) {
+        if (rite.gains().cult().isEmpty() || rite.gains().amount() == 0) {
+            return new Result(false, Component.literal("The rite names no cult to honour."));
+        }
+        return new Result(true, Component.literal("The rite is well received: "
+                + rite.gains().cult() + " " + signed(rite.gains().amount()) + "."));
+    }
+
+    /**
+     * {@code sanity}: the outcome is the sanity delta itself (applied by {@link #applyGains}), so
+     * this only reports it — or refuses when the definition names no change.
+     */
+    private static Result sanity(RiteDefinition rite) {
+        if (rite.gains().sanity() == 0) {
+            return new Result(false, Component.literal("The rite names no change of mind."));
+        }
+        return new Result(true, Component.literal("The rite steadies what it unmade (sanity "
+                + signed(rite.gains().sanity()) + ")."));
+    }
+
+    /**
+     * {@code transform}: turn the ground around the performer toward the taint, scaled by tier
+     * {@value #TRANSFORM_TAINT} per step (design/05: "convert blocks — e.g. corruption").
+     */
+    private static Result transform(ServerLevel level, ServerPlayer player, RiteDefinition rite) {
+        double amount = TRANSFORM_TAINT * Math.clamp(rite.tier(), 1, 3);
+        double taint = taintPatch(level, player.blockPosition(), amount, false);
+        return new Result(true, Component.literal("The ground drinks the rite; the taint rises to "
+                + String.format(java.util.Locale.ROOT, "%.2f", taint) + "."));
+    }
+
+    /**
+     * {@code curse}: lay the harmful effect named by {@code grant} on the performer, for
+     * {@value #CURSE_TICKS_PER_TIER} ticks per tier (design/05: "apply a negative effect").
+     */
+    private static Result curse(ServerPlayer player, RiteDefinition rite) {
+        String key = rite.grant();
+        if (key.isEmpty()) {
+            return new Result(false, Component.literal("The rite names no power to lay on you."));
+        }
+        Identifier id = key.contains(":") ? Identifier.tryParse(key) : EldritchHorror.id(key);
+        Optional<Holder.Reference<MobEffect>> effect =
+                id == null ? Optional.empty() : BuiltInRegistries.MOB_EFFECT.get(id);
+        if (effect.isEmpty()) {
+            return new Result(false, Component.literal("The rite names an unknown power: " + key + "."));
+        }
+        int ticks = CURSE_TICKS_PER_TIER * Math.clamp(rite.tier(), 1, 3);
+        player.addEffect(new MobEffectInstance(effect.get(), ticks, 0, true, false, true));
+        return new Result(true, Component.literal("The mark settles: "
+                + effect.get().value().getDisplayName().getString() + " for " + (ticks / 20) + "s."));
+    }
+
+    /** Formats a signed delta ({@code +10} / {@code -3}). */
+    private static String signed(int value) {
+        return (value > 0 ? "+" : "") + value;
+    }
+
+    /** Applies the rite's on_failure sanity/corruption price (design/08's Cost on failure column),
+     * paid whenever a rite that started does not take effect. */
     private static void payMeterCost(ServerPlayer player, RiteDefinition rite) {
         if (rite.sanity() != 0) {
             SanityAPI.add(player, rite.sanity());
@@ -408,16 +503,12 @@ public final class RiteEngine {
                 + (ticks / 20) + "s)."));
     }
 
-    /** {@code drowned_blessing} / {@code respec}: water buffs, or a full skill reset. */
+    /** {@code drowned_blessing} / {@code respec}: water buffs, or a full skill reset + 80% refund. */
     private static Result grantSkill(ServerPlayer player, RiteDefinition rite) {
         if ("respec".equals(rite.grant())) {
-            for (MobEffectInstance instance : List.copyOf(player.getActiveEffects())) {
-                if (instance.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
-                    player.removeEffect(instance.getEffect());
-                }
-            }
-            player.setHealth(player.getMaxHealth());
-            return new Result(true, Component.literal("Unmade and remade: afflictions lifted, body whole."));
+            int refund = SkillTree.reset(player);
+            return new Result(true, Component.literal(
+                    "Unmade and remade: every skill is released, " + refund + " points return (80%)."));
         }
         player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, BLESSING_TICKS, 0, true, false, false));
         player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, BLESSING_TICKS, 0, true, false, false));
@@ -504,8 +595,8 @@ public final class RiteEngine {
         if (removed > 0) {
             taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
             QuestJournal.add(player, "seal_the_way", 1);
-            // design/08: sealing grants sanity +10 as its OUTCOME (the corruption +5 is its cost).
-            SanityAPI.add(player, 10);
+            // design/08: sealing grants sanity +10 as its OUTCOME — applied with the other gains by
+            // perform() (the corruption +5 is its on_failure cost).
             // design/19: sealing a rift is the trigger for the cleansing dawn.
             EventTicker.forceStart(player, "cleansing_dawn", level.getServer().getTickCount());
         }
@@ -516,16 +607,13 @@ public final class RiteEngine {
     /** {@code rite_of_cleansing}: lower the player's corruption AND the local taint. */
     private static Result cleanse(ServerLevel level, ServerPlayer player, RiteDefinition rite) {
         // design/08 defines rite_of_cleansing's outcome as corruption -20 on the player meter,
-        // distinct from the chunk taint field; both recede.
-        if (rite.corruption() != 0) {
-            // (the corruption *cost* was already applied by perform(); the outcome delta is the
-            // magnitude of the cleansing, applied here as a reduction of the meter)
-            CorruptionAPI.add(player, -20);
-        }
+        // distinct from the chunk taint field; both recede. The meter delta is the definition's
+        // gain, applied with the other gains by perform(); here only the taint recedes.
         double taint = taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
         QuestJournal.add(player, "cleanse_the_land", 1);
         return new Result(true, Component.literal("Cleansing light sinks into the ground; the taint recedes to "
-                + String.format(java.util.Locale.ROOT, "%.2f", taint) + "."));
+                + String.format(java.util.Locale.ROOT, "%.2f", taint) + " (corruption "
+                + signed(rite.gains().corruption()) + ")."));
     }
 
     /**

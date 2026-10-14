@@ -29,6 +29,7 @@ public final class Cults {
                 "drowned_blessing",
                 "Tide-worshippers who trade breath for devotion.",
                 List.of(
+                        CultService.offer("offer_pearls", CultRank.NEUTRAL, "pearl_reagent", 1, 5),
                         new CultService("teach_drowned_blessing", CultRank.INITIATE,
                                 CultService.Kind.TEACH, "drowned_blessing"),
                         CultService.trade("buy_salt", CultRank.INITIATE,
@@ -45,6 +46,7 @@ public final class Cults {
                 "ward_of_the_eye",
                 "Scholars who catalogue the horror to survive it.",
                 List.of(
+                        CultService.offer("offer_pages", CultRank.NEUTRAL, "fragment_page", 1, 5),
                         new CultService("teach_ward_of_the_eye", CultRank.INITIATE,
                                 CultService.Kind.TEACH, "ward_of_the_eye"),
                         new CultService("cleansing", CultRank.DEVOTED,
@@ -63,8 +65,13 @@ public final class Cults {
                 "summon_star_spawn",
                 "The cult that wants the horror summoned.",
                 List.of(
+                        CultService.offer("offer_blood", CultRank.NEUTRAL, "blood_offering", 1, 5),
                         new CultService("teach_call_the_lesser", CultRank.INITIATE,
                                 CultService.Kind.TEACH, "call_the_lesser"),
+                        new CultService("teach_blight_the_earth", CultRank.INITIATE,
+                                CultService.Kind.TEACH, "blight_the_earth"),
+                        new CultService("teach_take_the_hollow_mark", CultRank.MEMBER,
+                                CultService.Kind.TEACH, "take_the_hollow_mark"),
                         new CultService("teach_summon_star_spawn", CultRank.DEVOTED,
                                 CultService.Kind.TEACH, "summon_star_spawn"),
                         new CultService("teach_open_rift", CultRank.INNER_CIRCLE,

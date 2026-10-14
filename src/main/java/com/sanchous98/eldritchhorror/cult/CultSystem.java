@@ -11,10 +11,11 @@ import java.util.Map;
 /**
  * The cult reputation axis: a per-player, per-cult integer in {@code −100…+100}.
  *
- * <p><b>This is a stub.</b> Values go up and down, persist and copy on death, and expose
- * {@link #rank}; opposed pairs apply a cross-consequence — but nothing reads reputation for
- * gameplay yet (no services, quests or dialogue). See {@code design/03c-reputation.md} and
- * {@code design/27-systems-framework.md}.
+ * <p>Values persist and copy on death, expose {@link #rankOf}, and opposed pairs apply a
+ * cross-consequence on every change. Reputation is live gameplay: it gates {@code CultService}s
+ * (teachings, trades, offerings, cleansing), is paid by signature rites, cult quests and demanded
+ * offerings, and a rank reaching {@code INITIATE} emits the {@code sworn_ally} journal quest. See
+ * {@code design/03c-reputation.md} and {@code design/27-systems-framework.md}.
  */
 public final class CultSystem {
     public static final int MIN = -100;

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.cult;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
@@ -19,8 +20,9 @@ import java.util.Locale;
 
 /**
  * Server-authoritative resolution for a {@link CultService}: checks the caller's {@link CultRank}
- * against the service's {@link CultService#minRank()} and then performs it. Reputation is the gate,
- * so nothing is deducted (services are earned, not bought) — see {@link #perform}.
+ * against the service's {@link CultService#minRank()} and then performs it. Reputation is the gate:
+ * {@code TEACH} and {@code CLEANSE} are earned and free, while {@code TRADE} and {@code OFFER}
+ * charge an item — see {@link #perform}.
  *
  * <p>Effects are deterministic and never force a chunk to load:
  * <ul>
@@ -31,6 +33,9 @@ import java.util.Locale;
  *       {@code RiteEngine}'s private cleanse path, so the documented outcome is re-expressed here:
  *       corruption {@code −20} on the meter and {@code −0.30} taint across the loaded 3×3 chunk patch,
  *       mirroring the rite's numbers.</li>
+ *   <li>{@link CultService.Kind#OFFER} — consumes the cult's demanded item and pays reputation
+ *       ({@code design/03c-reputation.md}: "+5 per offering"), so standing has a source that is not
+ *       combat or a rite.</li>
  * </ul>
  */
 public final class CultServices {
@@ -62,12 +67,13 @@ public final class CultServices {
             case TEACH -> teach(player, service);
             case CLEANSE -> cleanse(player, service);
             case TRADE -> trade(player, service);
+            case OFFER -> offer(player, cultId, service);
         };
     }
 
     /** Teaches {@link CultService#target()}; a player who already knows it is told so. */
     private static Outcome teach(ServerPlayer player, CultService service) {
-        if (RiteKnowledge.add(player, service.target())) {
+        if (CodexAPI.learn(player, service.target())) {
             return new Outcome(true, Component.translatable(
                     "service.eldritch_horror.teach.success", service.name(),
                     RiteKnowledge.name(service.target())));
@@ -118,6 +124,35 @@ public final class CultServices {
         return new Outcome(true, Component.translatable("service.eldritch_horror.trade.success",
                 service.name(), granted.getCount(), granted.getHoverName(),
                 service.costCount(), new ItemStack(cost).getHoverName()));
+    }
+
+    /**
+     * Consumes the cult's demanded offering and pays reputation (design/03c: "Offer a demanded item:
+     * +5 per offering"). All-or-nothing; the gain still crosses the opposed pairs through
+     * {@link CultSystem#add}. Reports the actual shift, which clamping or an opposed loss can differ
+     * from the nominal amount.
+     */
+    private static Outcome offer(ServerPlayer player, String cultId, CultService service) {
+        Item cost = item(service.costItem());
+        if (cost == null) {
+            return new Outcome(false, Component.translatable("service.eldritch_horror.offer.unknown"));
+        }
+        int carried = player.getInventory().clearOrCountMatchingItems(
+                stack -> stack.is(cost), true, 0, player.inventoryMenu.getCraftSlots());
+        if (carried < service.costCount()) {
+            return new Outcome(false, Component.translatable("service.eldritch_horror.fail.cost",
+                    service.name(), service.costCount(), new ItemStack(cost).getHoverName(),
+                    carried));
+        }
+        player.getInventory().clearOrCountMatchingItems(
+                stack -> stack.is(cost), false, service.costCount(),
+                player.inventoryMenu.getCraftSlots());
+        player.containerMenu.broadcastChanges();
+        int before = CultSystem.get(player, cultId);
+        int after = CultSystem.add(player, cultId, service.grantCount());
+        return new Outcome(true, Component.translatable("service.eldritch_horror.offer.success",
+                service.name(), service.costCount(), new ItemStack(cost).getHoverName(),
+                after - before, after));
     }
 
     /** @return the registered item for a mod path, or {@code null} when unregistered. */

@@ -23,6 +23,8 @@ public final class SkillTree {
     private static final double WARDED_SOUL_CORRUPTION = 0.90;
     /** Chance that {@link Skills#FRUGAL_RITES} saves a successful rite's offerings. */
     private static final double FRUGAL_RITES_REFUND = 0.25;
+    /** Fraction of spent points returned by the {@code respec} rite (design/08: refund 80%). */
+    private static final double RESPEC_REFUND = 0.80;
 
     private SkillTree() {
     }
@@ -36,6 +38,32 @@ public final class SkillTree {
     public static void addPoints(ServerPlayer player, int delta) {
         int next = Math.max(0, points(player) + delta);
         player.setData(ModAttachments.SKILL_POINTS, next);
+    }
+
+    /** @return the points currently invested in unlocked skills. */
+    public static int spent(ServerPlayer player) {
+        int total = 0;
+        for (String skillId : player.getData(ModAttachments.SKILLS)) {
+            Skill skill = Skills.byId(skillId);
+            if (skill != null) {
+                total += skill.cost();
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Unmakes every unlocked skill and refunds {@value #RESPEC_REFUND} of the points spent — the
+     * {@code respec} rite's outcome (design/08: "grant_skill reset, refund 80% points").
+     *
+     * @return how many points were returned
+     */
+    public static int reset(ServerPlayer player) {
+        int refund = (int) Math.floor(spent(player) * RESPEC_REFUND);
+        player.setData(ModAttachments.SKILLS, Set.of());
+        addPoints(player, refund);
+        com.sanchous98.eldritchhorror.investigator.InvestigatorAPI.reapply(player);
+        return refund;
     }
 
     /** @return whether {@code player} has unlocked {@code skillId}. */

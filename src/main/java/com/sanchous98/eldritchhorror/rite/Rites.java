@@ -5,8 +5,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The rite registry: the eight seed rites from {@code design/08-rituals.md}, seeded in table order,
- * plus the three Ancient One non-combat solve rites from {@code design/28-ancient-ones.md}.
+ * The rite registry: the eight seed rites from {@code design/08-rituals.md} plus two Hollow Choir
+ * rites that exercise the {@code TRANSFORM}/{@code CURSE} outcomes, all seeded in table order, then
+ * the Ancient One non-combat solve rites from {@code design/28-ancient-ones.md}.
  *
  * <p>A Java registry for now; a datapack loader can populate {@link #register} later without
  * changing callers (mirrors {@code cult/Cults.java}). Definitions are immutable data and this class
@@ -28,21 +29,37 @@ public final class Rites {
         // Tier / outcomes are from design/08-rituals.md; the sanity/corruption fields are that
         // table's COST column (the price paid on success), not its Outcome column.
         register(new RiteDefinition("ward_of_the_eye", RiteDefinition.nameOf("ward_of_the_eye"),
-                1, -8, 0, RiteDefinition.Outcome.GRANT, "ward_token"));
+                1, -8, 0, RiteDefinition.Outcome.GRANT, "ward_token",
+                new RiteDefinition.Gains(0, -3, "unblinking_eye", 10)));
         register(new RiteDefinition("drowned_blessing", RiteDefinition.nameOf("drowned_blessing"),
-                1, -10, 0, RiteDefinition.Outcome.GRANT_SKILL, "water_breathing"));
+                1, -10, 0, RiteDefinition.Outcome.GRANT_SKILL, "water_breathing",
+                new RiteDefinition.Gains(0, 0, "drowned_choir", 10)));
         register(new RiteDefinition("call_the_lesser", RiteDefinition.nameOf("call_the_lesser"),
                 2, -15, 5, RiteDefinition.Outcome.SPAWN, ""));
         register(new RiteDefinition("summon_star_spawn", RiteDefinition.nameOf("summon_star_spawn"),
-                3, -20, 8, RiteDefinition.Outcome.SPAWN, ""));
+                3, -20, 8, RiteDefinition.Outcome.SPAWN, "",
+                new RiteDefinition.Gains(0, 12, "hollow_choir", 10)));
         register(new RiteDefinition("open_rift", RiteDefinition.nameOf("open_rift"),
-                3, -25, 10, RiteDefinition.Outcome.OPEN_RIFT, ""));
+                3, -25, 10, RiteDefinition.Outcome.OPEN_RIFT, "",
+                new RiteDefinition.Gains(0, 15, "", 0)));
         register(new RiteDefinition("close_rift", RiteDefinition.nameOf("close_rift"),
-                2, 0, 5, RiteDefinition.Outcome.CLOSE_RIFT, ""));
+                2, 0, 5, RiteDefinition.Outcome.CLOSE_RIFT, "",
+                new RiteDefinition.Gains(10, 0, "", 0)));
         register(new RiteDefinition("rite_of_cleansing", RiteDefinition.nameOf("rite_of_cleansing"),
-                3, -15, 5, RiteDefinition.Outcome.CORRUPTION, ""));
+                3, -15, 5, RiteDefinition.Outcome.CORRUPTION, "",
+                new RiteDefinition.Gains(0, -20, "", 0)));
         register(new RiteDefinition("respec", RiteDefinition.nameOf("respec"),
                 3, -20, 0, RiteDefinition.Outcome.GRANT_SKILL, "respec"));
+
+        // Hollow Choir additions (design/26: pacts and the corruption axis). These two exercise the
+        // TRANSFORM and CURSE outcome types: turning the ground toward the taint, and taking a lasting
+        // bane in exchange for standing. Both are taught by the Hollow Choir (cult/Cults.java).
+        register(new RiteDefinition("blight_the_earth", RiteDefinition.nameOf("blight_the_earth"),
+                2, -12, 0, RiteDefinition.Outcome.TRANSFORM, "",
+                new RiteDefinition.Gains(0, 4, "hollow_choir", 5)));
+        register(new RiteDefinition("take_the_hollow_mark", RiteDefinition.nameOf("take_the_hollow_mark"),
+                2, -12, 0, RiteDefinition.Outcome.CURSE, "minecraft:weakness",
+                new RiteDefinition.Gains(0, 5, "hollow_choir", 10)));
 
         // Ancient One non-combat solves (design/28-ancient-ones.md). One shared SOOTHE outcome,
         // parameterised by the entity to find in the `grant` field (mirroring how grant/grantSkill

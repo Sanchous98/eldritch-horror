@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.rite;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -82,7 +83,9 @@ public final class TomeRiteKnowledge {
             return;
         }
         for (String riteId : rites) {
-            RiteKnowledge.add(player, riteId);
+            // Route through the codex facade: reading a tome is a codex discovery (design/22), which
+            // is what records the rite and advances the journal's lorekeeper quest.
+            CodexAPI.learn(player, riteId);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.investigator;
 
+import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
@@ -170,7 +171,7 @@ public final class SignatureAbilities {
         }
         RandomSource random = player.getRandom();
         RiteDefinition chosen = unknown.get(random.nextInt(unknown.size()));
-        RiteKnowledge.add(player, chosen.id());
+        CodexAPI.learn(player, chosen.id());
         message(player, "Forbidden Insight: you learn " + chosen.name().getString() + ".");
     }
 

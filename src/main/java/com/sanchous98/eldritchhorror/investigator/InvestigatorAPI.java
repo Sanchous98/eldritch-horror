@@ -1,9 +1,9 @@
 package com.sanchous98.eldritchhorror.investigator;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
-import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -111,7 +111,7 @@ public final class InvestigatorAPI {
         player.setData(ModAttachments.INVESTIGATOR.get(), id.id());
         grantKit(player, id);
         for (String riteId : Investigators.startingRites(id)) {
-            RiteKnowledge.add(player, riteId);
+            CodexAPI.learn(player, riteId);
         }
         applyMaxSanity(player, id);
         player.sendSystemMessage(Component.translatableWithFallback(

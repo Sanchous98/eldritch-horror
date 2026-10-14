@@ -1,6 +1,9 @@
 package com.sanchous98.eldritchhorror.quest;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.cult.CultDefinition;
+import com.sanchous98.eldritchhorror.cult.CultSystem;
+import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,28 +71,34 @@ public final class QuestJournal {
     }
 
     /**
-     * Hands over a quest's item gift, if its data defines one. The currency a finished quest pays is
-     * what makes the cult trades (and so the ritual reagents) reachable by play.
+     * Hands over a quest's completion gifts, each only if its data defines one: the item (currency
+     * that makes the cult trades, and so the ritual reagents, reachable by play) and the reputation
+     * (design/03c: "complete a cult quest" is a gain source; the opposed pairs still cost).
      */
     private static void grantReward(ServerPlayer player, Quest quest) {
-        if (!quest.paysItem()) {
-            return;
+        if (quest.paysItem()) {
+            String path = quest.rewardItem();
+            Identifier id = path.contains(":")
+                    ? Identifier.tryParse(path)
+                    : EldritchHorror.id(path);
+            Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
+            if (item != null && item != Items.AIR) {
+                ItemStack stack = new ItemStack(item, quest.rewardCount());
+                // Inventory#add consumes the passed stack, so keep a copy for the message.
+                ItemStack granted = stack.copy();
+                if (!player.getInventory().add(stack)) {
+                    player.drop(stack, false, Prediction.SERVER_ONLY);
+                }
+                player.sendSystemMessage(Component.translatable(
+                        "quest.eldritch_horror.reward", granted.getCount(), granted.getHoverName()));
+            }
         }
-        String path = quest.rewardItem();
-        Identifier id = path.contains(":")
-                ? Identifier.tryParse(path)
-                : EldritchHorror.id(path);
-        Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
-        if (item == null || item == Items.AIR) {
-            return;
+        if (quest.paysReputation()) {
+            CultDefinition cult = Cults.byId(quest.rewardRepCult());
+            int before = CultSystem.get(player, quest.rewardRepCult());
+            int after = CultSystem.add(player, quest.rewardRepCult(), quest.rewardRepAmount());
+            player.sendSystemMessage(Component.translatable("quest.eldritch_horror.reward.rep",
+                    after - before, cult == null ? quest.rewardRepCult() : cult.name(), after));
         }
-        ItemStack stack = new ItemStack(item, quest.rewardCount());
-        // Inventory#add consumes the passed stack, so keep a copy for the message.
-        ItemStack granted = stack.copy();
-        if (!player.getInventory().add(stack)) {
-            player.drop(stack, false, Prediction.SERVER_ONLY);
-        }
-        player.sendSystemMessage(Component.translatable(
-                "quest.eldritch_horror.reward", granted.getCount(), granted.getHoverName()));
     }
 }

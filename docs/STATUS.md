@@ -262,11 +262,14 @@ snapping travel), `find`/`findentity`, `mine`/`mineat` (drops are vacuumed into 
 `smelt`, `placeat`, `equip`, `use`/`useitem`/`useat`, `attack`/`attacktype`, `rift`, `sense`. All
 gated behind `-Deh.dev`/`EH_DEV` and gamemaster.
 
-A Python driver (`mcbot/`, **outside this repo**) reads `sense` and issues those commands; it
+The driver (`mcbot/`, **outside this repo**) reads `sense` and issues those commands; it
 completes the whole questline autonomously: prologue → Threshold investigator → city gate →
 overworld → gather/craft the altar → `ward_of_the_eye` → `soothe_cthulhu` → `open_rift` +
 `close_rift`. Verified with **every quest 1/1** (`first_steps`, `first_rite`, `lorekeeper`,
-`seal_the_way`, `soothe_a_presence`) and **0 server exceptions**.
+`seal_the_way`, `soothe_a_presence`) and **0 server exceptions**. Two flaky spots found on a clean
+world are fixed there: a summoned presence needs a couple of seconds before the solve query can see
+it (poll instead of a 0.6 s wait), and boss fights drift the bot off the altar before sealing (walk
+back to the remembered core before the rite).
 
 The starter kit seeds ritual reagents (`chalk_reagent`, `salt_reagent`, the rift/solve tomes,
 `void_reagent`, `blood_offering`, an `offering_bowl` and stone) so the altar is reachable without
@@ -287,8 +290,39 @@ Playtesting the questline surfaced four weak spots; all four are now wired:
 - **Quests paid only a point.** Completion now also pays an item (obols / relic coin / order scrip /
   mark of favour) with its own message.
 
-Still open (not done): the altar is a coarse box check rather than a real block pattern, and a refused
-rite still charges its sanity/corruption cost (design/08's deliberate "pay per attempt").
+Still open (not done): the altar is a coarse box check rather than a real block pattern.
+
+## RPG completion pass — outcomes & reputation (design/08, 03c, 09)
+
+The rite engine now resolves the whole outcome vocabulary and pays the design's costs exactly:
+
+- **Success applies the Outcome column**: `ward_of_the_eye` corruption −3, `summon_star_spawn` +12,
+  `open_rift` +15, `close_rift` sanity +10, `rite_of_cleansing` −20, plus the signature-rite
+  reputation of design/09 (`drowned_blessing` / `ward_of_the_eye` / `summon_star_spawn` +10 with
+  their cults, crossing the opposed pairs).
+- **Failure applies the Cost-on-failure column** (an unmet condition or an outcome that could not
+  resolve); a rite that never starts (no altar, missing offerings, cooldown) costs nothing.
+  `respec` is the design's skill reset + 80% refund instead of a heal.
+- **`transform` and `curse` are live**: two Hollow Choir rites (`blight_the_earth`,
+  `take_the_hollow_mark`; design/08 additions) taint the ground and lay a lasting weakness in
+  exchange for standing.
+- **Reputation sources** (design/03c): signature rites, quest rewards (new
+  `reward_rep_cult` / `reward_rep_amount` keys in the quest datapack — `lorekeeper`,
+  `open_the_way`, `seal_the_way` use them) and demanded offerings: a new `OFFER` cult service
+  trades one item for +5 standing, open from Neutral, so a rank can be built from zero.
+
+Verified in game: failure `open_rift` at low corruption cost sanity −25 / corruption +10 and paid no
+gains; `ward_of_the_eye` success gave corruption −3 and unblinking_eye +10; `blight_the_earth`
+tainted +0.30 and +4 corruption; `take_the_hollow_mark` applied weakness, +5 corruption and +10
+standing; `offer_pages` traded a page for +5; `respec` released two skills and returned 1 of 2
+points (80%).
+
+**Learning a rite is a codex discovery.** Tome reading, cult teachings, investigator starting rites
+and Forbidden Insight now route through `CodexAPI.learn`, so every learned rite appears in the codex
+and advances the journal's `lorekeeper` quest. Before this, a fresh-world bot learned the kit's tomes
+but could not reach `lorekeeper` 10/10 — which is what carries the Order to Initiate and completes
+`sworn_ally`. A clean-world run now completes `first_steps`, `first_rite`, `lorekeeper 10/10`,
+`open_the_way`, `seal_the_way`, `soothe_a_presence` and `sworn_ally` with 0 exceptions.
 
 ## Quests are data, not code
 

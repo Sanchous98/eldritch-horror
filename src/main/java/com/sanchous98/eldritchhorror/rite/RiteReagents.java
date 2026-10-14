@@ -13,9 +13,10 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The offerings a rite consumes, and the code that checks and removes them.
  *
- * <p>From {@code design/08-rituals.md}'s Offerings column for the eight seed rites; the Ancient One
- * solve rites (design/28) share a single modest default, because their gate is the rite-knowledge
- * tome rather than a new material. The design's {@code fish_offering} and {@code prayer_bead} are
+ * <p>From {@code design/08-rituals.md}'s Offerings column for the seed rites plus the two Hollow
+ * Choir rites (design/26); the Ancient One solve rites (design/28) share a single modest default,
+ * because their gate is the rite-knowledge tome rather than a new material. The design's
+ * {@code fish_offering} and {@code prayer_bead} are
  * not shipped items, so their slots use the nearest shipped reagent (the pearl; salt) — we invent no
  * new item for a single rite. All-or-nothing, per {@code design/05-ritual-engine.md}: the engine
  * checks every line is present before the rite starts and removes them only on success.
@@ -43,15 +44,18 @@ public final class RiteReagents {
      * Offerings per rite id, from the design tables. Missing ids fall back to {@link #DEFAULT}.
      * The solve rites are intentionally absent: they all take the default.
      */
-    private static final Map<String, List<Reagent>> OFFERINGS = Map.of(
-            "ward_of_the_eye", List.of(new Reagent("salt_reagent", 4), new Reagent("chalk_reagent", 1)),
-            "drowned_blessing", List.of(new Reagent("pearl_reagent", 2)),
-            "call_the_lesser", List.of(new Reagent("bone_reagent", 4), new Reagent("blood_offering", 1)),
-            "summon_star_spawn", List.of(new Reagent("star_reagent", 8), new Reagent("blood_offering", 2)),
-            "open_rift", List.of(new Reagent("void_reagent", 6), new Reagent("blood_offering", 4)),
-            "close_rift", List.of(new Reagent("salt_reagent", 8), new Reagent("chalk_reagent", 2)),
-            "rite_of_cleansing", List.of(new Reagent("silver_reagent", 4)),
-            "respec", List.of(new Reagent("mirror_shard", 4), new Reagent("silver_reagent", 4)));
+    private static final Map<String, List<Reagent>> OFFERINGS = Map.ofEntries(
+            Map.entry("ward_of_the_eye", List.of(new Reagent("salt_reagent", 4), new Reagent("chalk_reagent", 1))),
+            Map.entry("drowned_blessing", List.of(new Reagent("pearl_reagent", 2))),
+            Map.entry("call_the_lesser", List.of(new Reagent("bone_reagent", 4), new Reagent("blood_offering", 1))),
+            Map.entry("summon_star_spawn", List.of(new Reagent("star_reagent", 8), new Reagent("blood_offering", 2))),
+            Map.entry("open_rift", List.of(new Reagent("void_reagent", 6), new Reagent("blood_offering", 4))),
+            Map.entry("close_rift", List.of(new Reagent("salt_reagent", 8), new Reagent("chalk_reagent", 2))),
+            Map.entry("rite_of_cleansing", List.of(new Reagent("silver_reagent", 4))),
+            Map.entry("respec", List.of(new Reagent("mirror_shard", 4), new Reagent("silver_reagent", 4))),
+            // Hollow Choir additions (design/26): the ground and the mark, priced in bone and blood.
+            Map.entry("blight_the_earth", List.of(new Reagent("bone_reagent", 4), new Reagent("blood_offering", 1))),
+            Map.entry("take_the_hollow_mark", List.of(new Reagent("blood_offering", 2))));
 
     /** The default for every rite without an explicit row: the Ancient One solves. */
     private static final List<Reagent> DEFAULT = List.of(new Reagent("salt_reagent", 2));

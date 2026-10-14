@@ -4,5 +4,7 @@
   "stage": 3,
   "requires": "open_the_way",
   "reward_item": "order_scrip",
-  "reward_count": 2
+  "reward_count": 2,
+  "reward_rep_cult": "unblinking_eye",
+  "reward_rep_amount": 10
 }
