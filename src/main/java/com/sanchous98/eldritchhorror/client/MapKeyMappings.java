@@ -9,9 +9,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
 /**
- * Registers the mod's key bindings. Currently one: <b>open the world map</b> (default {@code M}),
- * which opens the fullscreen map when the player is holding the world atlas — the key equivalent of
- * right-clicking it ({@code design/22}). The key is rebindable in Options → Controls.
+ * Registers the mod's key bindings, all rebindable in Options → Controls:
+ * <ul>
+ *   <li><b>open the world map</b> (default {@code M}) — while the world atlas is held ({@code design/22});</li>
+ *   <li><b>open the quest journal</b> (default {@code J}) — {@link JournalScreen};</li>
+ *   <li><b>open the codex</b> (default {@code C}) — {@link CodexScreen};</li>
+ *   <li><b>open the skill tree</b> (default {@code K}) — {@link SkillScreen}.</li>
+ * </ul>
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID, value = Dist.CLIENT)
 public final class MapKeyMappings {
@@ -22,6 +26,12 @@ public final class MapKeyMappings {
 
     /** The map key; {@code null} until {@link #onRegisterKeyMappings} runs. */
     static KeyMapping openMap;
+    /** The journal key; {@code null} until {@link #onRegisterKeyMappings} runs. */
+    static KeyMapping openJournal;
+    /** The codex key; {@code null} until {@link #onRegisterKeyMappings} runs. */
+    static KeyMapping openCodex;
+    /** The skill-tree key; {@code null} until {@link #onRegisterKeyMappings} runs. */
+    static KeyMapping openSkills;
 
     private MapKeyMappings() {
     }
@@ -29,8 +39,16 @@ public final class MapKeyMappings {
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.registerCategory(CATEGORY);
-        openMap = new KeyMapping("key.eldritch_horror.map",
-                InputConstants.Type.KEYBOARD, InputConstants.KEY_M, CATEGORY);
-        event.register(openMap);
+        openMap = register(event, "key.eldritch_horror.map", InputConstants.KEY_M);
+        openJournal = register(event, "key.eldritch_horror.journal", InputConstants.KEY_J);
+        openCodex = register(event, "key.eldritch_horror.codex", InputConstants.KEY_C);
+        openSkills = register(event, "key.eldritch_horror.skills", InputConstants.KEY_K);
+    }
+
+    /** Creates and registers one keyboard binding under {@link #CATEGORY}. */
+    private static KeyMapping register(RegisterKeyMappingsEvent event, String name, int defaultKey) {
+        KeyMapping mapping = new KeyMapping(name, InputConstants.Type.KEYBOARD, defaultKey, CATEGORY);
+        event.register(mapping);
+        return mapping;
     }
 }
