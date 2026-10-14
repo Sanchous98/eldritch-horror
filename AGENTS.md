@@ -98,6 +98,10 @@ integration build green.
   docker compose run --rm --no-deps dev bash -c \
     'cd /workspace && timeout 200 ./gradlew runServer --no-daemon --console=plain'
   ```
+  **`timeout` does not stop a dev server over the raw `docker run` path** — the CLI keeps waiting
+  for the container, so the job can hang for hours (seen: 21 min). End a bounded run with
+  `docker rm -f <name>`; when a longer session follows, start detached (`docker run -d`) and poll
+  `docker logs <name> | grep 'Done ('`.
   Rules of thumb this caught: never call `.get()` on a registry holder from a `static`
   initialiser; never read SERVER `ModConfig` while building the command tree/registries (gate in
   the handler instead); loot condition discriminators are `"type"`, not `"condition"`;

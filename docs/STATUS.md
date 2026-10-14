@@ -12,7 +12,7 @@ Read this together with `AGENTS.md` after any context compaction. It is the shor
 ## Project
 
 Eldritch Horror — an RPG-flavoured horror mod for **Minecraft 26.3 / NeoForge / Java 25**.
-Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed).
+Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Done (verified)
 
@@ -108,6 +108,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   (`deer`, `wool_hare`, `mire_sow`, `ash_fowl`, `burrowling`, `pack_beast`, `grey_fox`, `hill_hound`,
   `hearth_cat`, `wool_beast`, `bog_bear`, `tide_grazer`, `spore_bee`, `stone_sentinel`) and ambient
   (`cave_drifter`, `pale_drifter`, `lantern_jelly`, `marsh_mote`, `drowned_minnow`, `frost_wisp`).
+  **design/25 additions** (`80d4fdc`): the five replacements `ashen_revenant` (wither skeleton,
+  corruption), `veil_swine` (hoglin, sanity, herd), `wail_husk` (ghast, sanity, line-of-sight
+  drain), `ashen_wisp` (blaze, corruption) and the named `ithaqual_shade` (warden, cold-edge
+  spawner, `still_the_shade`); the Choir **Leviathan** (`design/18`, drowned temple, three phases,
+  drowned-choir trigger, `still_the_leviathan`). All six have loot tables and generated skins.
   Shared: a dread-aura trait + one ticker, one `topUp`/`topUpAir` spawner, a goals library
   (stalk/pack-alert/retreat/ambush), a mundane taint-conversion helper, and a reusable
   mundane-weapon ward (`EldritchWarded`). **Site populations** inhabit the 5 sites via one bounded
@@ -118,7 +123,9 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
   and a **non-combat solve** (`Outcome.SOOTHE`, taught from a tome). The last six ship with four
   new minor sites (`yellow_court`, `black_pyramid`, `spawning_pool`, `temple_of_the_feaster`);
   Tulzscha and Zstylzhemghi share `rift_scar` as the Veil-centre proxy (a real `the_veil`
-  dimension is deferred). **World events** (`event/`, design/19): a bounded
+  dimension is deferred). The named `ithaqual_shade` joins them as a roaming 21st presence from the
+  polar edge/deep places (`still_the_shade`), and the Choir **Leviathan** is the drowned-temple
+  boss (`still_the_leviathan`) — both live since `80d4fdc`. **World events** (`event/`, design/19): a bounded
   data-driven framework + whisper, darkness_pulse, rift_bloom, veil_thin, hallucination_wave,
   cleansing_dawn, cult_procession, blood_moon_rite, star_fall, hollow_call (`/eh event`, `/eh events`). **Codex** (`codex/`, design/22): a per-player LORE
   attachment + discovery of every site, city, boss, bestiary mob, rite and event (the entry set is
@@ -217,9 +224,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`, all pushed
 
 ## Known limitations / deferred
 
-- See **`docs/TODO.md`** for the ordered backlog (rite conditions, map keybind and site chests are
-  now done; map markers, city-state depth, skill tree/quests, altar patterns, Antiquarian-on-chests
-  remain).
+- See **`docs/TODO.md`** for the ordered backlog. Open now: item mechanics (`registry/items/`,
+  in progress), sound wiring, reputation decay / the cultist-kill penalty, the third ending ("seal
+  every rift"), and a **human visual pass on the `J`/`C`/`K` screens** (API-verified only). Done
+  since the last snapshot: altar ring pattern, map markers, site chests, skill tree/quests.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
@@ -290,7 +298,10 @@ Playtesting the questline surfaced four weak spots; all four are now wired:
 - **Quests paid only a point.** Completion now also pays an item (obols / relic coin / order scrip /
   mark of favour) with its own message.
 
-Still open (not done): the altar is a coarse box check rather than a real block pattern.
+The altar gate is a **real ring** now (`0a28711`): the nearest `altar_core` must have at least
+`riteAltarMarks` rune/chalk marks that stand **off** it (≥ 2 blocks) and **surround** it (the
+largest angular gap between neighbouring marks ≤ 180°), so a pile of marks on one side is refused.
+Rotation-aware by construction. Bot-verified live: the ring passes the gate, the pile is refused.
 
 ## RPG completion pass — outcomes & reputation (design/08, 03c, 09)
 
@@ -404,8 +415,21 @@ in one place. `python3 tools/gen_assets.py` writes:
 - Missing item icons with their item definition and model (`the_horror_spawn_egg` was the only item
   without one).
 
-Programmer art, but a coherent family; hero assets still deserve a human. Sounds are out of scope
-for this generator (no OGG encoder in the environment).
+Programmer art, but a coherent family; hero assets still deserve a human.
+
+## Generated sounds (`tools/gen_sounds.py`)
+
+Host-side, deterministic, stdlib synthesis (no numpy); encoded to mono ogg with ffmpeg — the host
+binary if present, otherwise the `linuxserver/ffmpeg` container (`DOCKER_HOST` must point at the
+session's docker socket). CLI: `--list`, `--only NAME`, `--force`. Ten sounds ship (~448 KiB): the
+ritual hum and the two outcome stings, the endgame fork (awaken / banish / summon), the Horror's
+ambient and stage change, and the whisper/dread ambience. **Not wired yet**: `sounds.json`,
+`ModSounds` and the play hooks (the Horror still vocalises with vanilla wither sounds).
+
+## Docs for players
+
+`README.md` now describes the playable alpha (systems, keys, `/eh`, screens) with the dev sections
+kept; `CHANGELOG.md` summarises the snapshot; `docs/TODO.md` is the live backlog.
 
 ## Where things live
 
