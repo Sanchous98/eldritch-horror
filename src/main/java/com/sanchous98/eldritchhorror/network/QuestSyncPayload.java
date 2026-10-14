@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.network;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.quest.Quest;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 /**
  * Server → client: the loaded quest definitions, so the journal screen can render names, targets
@@ -24,7 +26,7 @@ public record QuestSyncPayload(List<Quest> quests) implements CustomPacketPayloa
 
     /** The payload id used by the registrar; namespaced by the mod id. */
     public static final CustomPacketPayload.Type<QuestSyncPayload> TYPE =
-            CustomPacketPayload.createType("eldritch_horror:quest_sync");
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "quest_sync"));
 
     /** One quest as NBT, the same schema as a {@code quest/*.json} file. */
     private static final StreamCodec<FriendlyByteBuf, List<Quest>> QUESTS =

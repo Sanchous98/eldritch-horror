@@ -1,9 +1,11 @@
 package com.sanchous98.eldritchhorror.network;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 /**
  * Client → server: spend skill points on a node (design/13, skill tree). The skill screen sends one
@@ -17,7 +19,7 @@ public record SkillUnlockPayload(String skillId) implements CustomPacketPayload 
 
     /** The payload id used by the registrar; namespaced by the mod id. */
     public static final CustomPacketPayload.Type<SkillUnlockPayload> TYPE =
-            CustomPacketPayload.createType("eldritch_horror:skill_unlock");
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "skill_unlock"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SkillUnlockPayload> STREAM_CODEC =
             StreamCodec.composite(ByteBufCodecs.STRING_UTF8, SkillUnlockPayload::skillId,
