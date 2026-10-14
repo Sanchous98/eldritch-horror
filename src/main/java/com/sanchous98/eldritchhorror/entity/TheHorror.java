@@ -3,12 +3,12 @@ package com.sanchous98.eldritchhorror.entity;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import com.sanchous98.eldritchhorror.registry.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -110,11 +110,14 @@ public final class TheHorror extends AncientOne {
 
     /** One second of escalation: state transitions, the arena and the capped answers. */
     private void advance(ServerLevel level) {
+        if (this.ageTicks <= 20) {
+            // It arrives: the horn sounds once, before the first stage change (design/11).
+            this.playSound(ModSounds.ENDGAME_AWAKEN.get(), 4.0F, 1.0F);
+        }
         Stage next = this.stageFor(this.ageTicks);
         if (next != this.stage) {
             this.stage = next;
-            this.playSound(next == Stage.DECISION ? SoundEvents.WITHER_SPAWN : SoundEvents.WITHER_AMBIENT,
-                    3.0F, 0.5F);
+            this.playSound(ModSounds.THE_HORROR_STAGE.get(), 3.0F, next == Stage.DECISION ? 0.6F : 0.9F);
         }
         switch (this.stage) {
             case ATTENTION -> {
@@ -259,17 +262,17 @@ public final class TheHorror extends AncientOne {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WITHER_AMBIENT;
+        return ModSounds.THE_HORROR_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WITHER_HURT;
+        return ModSounds.THE_HORROR_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WITHER_DEATH;
+        return ModSounds.THE_HORROR_DEATH.get();
     }
 
     @Override

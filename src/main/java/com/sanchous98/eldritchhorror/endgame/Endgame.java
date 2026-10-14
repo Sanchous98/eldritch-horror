@@ -12,6 +12,7 @@ import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
 import com.sanchous98.eldritchhorror.event.Rifts;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -19,6 +20,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.item.Item;
@@ -83,6 +85,8 @@ public final class Endgame {
     public static Component banish(ServerLevel level, ServerPlayer player, AncientOne horror) {
         horror.solve(AncientOne.Solve.BANISHED, 0);
         EndgameState.of(level).setOutcome(EndgameState.Outcome.BANISHED);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                ModSounds.ENDGAME_BANISH.get(), SoundSource.AMBIENT, 0.9F, 1.0F);
         // A prior summon's permanent floor is exactly what the banishment is for: lift it first.
         CorruptionAPI.setFloor(player, 0.0);
         CorruptionAPI.add(player, -BANISH_CORRUPTION);
@@ -106,6 +110,8 @@ public final class Endgame {
     public static Component summon(ServerLevel level, ServerPlayer player, AncientOne horror) {
         horror.solve(AncientOne.Solve.SUMMONED, 0);
         EndgameState.of(level).setOutcome(EndgameState.Outcome.SUMMONED);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                ModSounds.ENDGAME_SUMMON.get(), SoundSource.AMBIENT, 0.9F, 1.0F);
         // design/11: "corruption Claimed becomes permanent" — a floor, not a value, so every cleanse
         // path (rite, service, event) is refused by the meter itself, with no per-path special case.
         CorruptionAPI.setFloor(player, ModConfig.CORRUPTION_CLAIMED.get() * CorruptionSystem.DEFAULT_MAX);

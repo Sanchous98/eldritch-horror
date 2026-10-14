@@ -826,5 +826,53 @@
   "entity.zstylzhemghi.death": {
     "subtitle": "subtitles.entity.eldritch_horror.zstylzhemghi.death",
     "sounds": [ { "name": "minecraft:entity.enderman.death", "type": "event" } ]
+  },
+  "ritual.hum": {
+    "subtitle": "subtitles.eldritch_horror.ritual.hum",
+    "sounds": [ { "name": "eldritch_horror:ritual/ritual_hum" } ]
+  },
+  "ritual.success": {
+    "subtitle": "subtitles.eldritch_horror.ritual.success",
+    "sounds": [ { "name": "eldritch_horror:ritual/ritual_success" } ]
+  },
+  "ritual.failure": {
+    "subtitle": "subtitles.eldritch_horror.ritual.failure",
+    "sounds": [ { "name": "eldritch_horror:ritual/ritual_failure" } ]
+  },
+  "endgame.awaken": {
+    "subtitle": "subtitles.eldritch_horror.endgame.awaken",
+    "sounds": [ { "name": "eldritch_horror:endgame/awaken" } ]
+  },
+  "endgame.banish": {
+    "subtitle": "subtitles.eldritch_horror.endgame.banish",
+    "sounds": [ { "name": "eldritch_horror:endgame/banish" } ]
+  },
+  "endgame.summon": {
+    "subtitle": "subtitles.eldritch_horror.endgame.summon",
+    "sounds": [ { "name": "eldritch_horror:endgame/summon" } ]
+  },
+  "entity.the_horror.ambient": {
+    "subtitle": "subtitles.eldritch_horror.entity.the_horror.ambient",
+    "sounds": [ { "name": "eldritch_horror:entity/the_horror_ambient" } ]
+  },
+  "entity.the_horror.hurt": {
+    "subtitle": "subtitles.eldritch_horror.entity.the_horror.hurt",
+    "sounds": [ { "name": "eldritch_horror:entity/the_horror_hurt" } ]
+  },
+  "entity.the_horror.death": {
+    "subtitle": "subtitles.eldritch_horror.entity.the_horror.death",
+    "sounds": [ { "name": "eldritch_horror:entity/the_horror_death" } ]
+  },
+  "entity.the_horror.stage": {
+    "subtitle": "subtitles.eldritch_horror.entity.the_horror.stage",
+    "sounds": [ { "name": "eldritch_horror:entity/the_horror_stage" } ]
+  },
+  "ambient.whisper": {
+    "subtitle": "subtitles.eldritch_horror.ambient.whisper",
+    "sounds": [ { "name": "eldritch_horror:ambient/whisper" } ]
+  },
+  "ambient.dread": {
+    "subtitle": "subtitles.eldritch_horror.ambient.dread",
+    "sounds": [ { "name": "eldritch_horror:ambient/dread" } ]
   }
 }

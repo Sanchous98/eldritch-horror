@@ -4,11 +4,13 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.investigator.Progression;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
+import com.sanchous98.eldritchhorror.registry.ModSounds;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.Level;
@@ -95,6 +97,11 @@ public final class SanityTicker {
         SanityState before = PREVIOUS.put(player.getUUID(), after);
         if (before != after) {
             applyState(player, after);
+        }
+        // At the deep end the mind supplies its own company — rarely.
+        if (after == SanityState.MARKED && player.getRandom().nextInt(90) == 0) {
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                    ModSounds.AMBIENT_WHISPER.get(), SoundSource.AMBIENT, 0.6F, 1.0F);
         }
     }
 

@@ -13,6 +13,8 @@ import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
 import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import com.sanchous98.eldritchhorror.registry.ModSounds;
+import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
 import net.minecraft.core.BlockPos;
@@ -23,6 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.effect.MobEffect;
@@ -118,6 +121,11 @@ public final class RiteEngine {
         // Per-player cooldown (design/05): a rejected attempt changes nothing and pays no cost.
         int cooldown = ModConfig.RITUAL_COOLDOWN_TICKS.get();
         if (cooldown > 0) {
+            // A carried ring_of_focus speeds the casting along 20% (design/16, "-20% ritual casting
+            // time"): the wait is shortened, but never below one tick.
+            if (CarriedItems.carries(player, "ring_of_focus")) {
+                cooldown = Math.max(1, cooldown * 4 / 5);
+            }
             long now = player.level().getGameTime();
             long ready = RITE_READY.getOrDefault(player.getUUID(), 0L);
             if (now < ready) {
@@ -182,6 +190,8 @@ public final class RiteEngine {
             // A rite that started and did not resolve is a failure (design/08: "failure always costs
             // something"): the on_failure meter price applies and the offerings are not spent.
             payMeterCost(player, rite);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    ModSounds.RITUAL_FAILURE.get(), SoundSource.AMBIENT, 0.8F, 1.0F);
             return result;
         }
         // Success: the definition's Outcome deltas and signature-rite reputation (design/08, 09) ...
@@ -193,6 +203,8 @@ public final class RiteEngine {
         }
         QuestJournal.add(player, "first_rite", 1);
         QuestJournal.add(player, "ritualist", 1);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                ModSounds.RITUAL_SUCCESS.get(), SoundSource.AMBIENT, 0.8F, 1.0F);
         return result;
     }
 

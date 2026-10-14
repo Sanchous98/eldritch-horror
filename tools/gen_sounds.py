@@ -286,6 +286,31 @@ def _horror_stage():
     return tr.room(0.40)
 
 
+@sound("entity.the_horror.hurt", "entity/the_horror_hurt", "entity.the_horror.hurt",
+       "the Horror is struck: a descending horn with a breathy grunt")
+def _horror_hurt():
+    dur = 2.2
+    tr = Track(dur)
+    tr.osc(lambda t: 150.0 - 70.0 * min(1.0, t / 0.5), lambda t: 0.45 * strike(t, 0.003, 0.45),
+           harm=((1, 1.0), (2, 0.5), (3, 0.25)), drift=0.6, seed=131)
+    tr.noise(lambda t: 0.22 * strike(t, 0.002, 0.35), lp=750.0, hp=180.0, seed=17)
+    tr.osc(lambda t: 50.0, lambda t: 0.35 * strike(t, 0.002, 0.3), seed=132)
+    return tr.room(0.35)
+
+
+@sound("entity.the_horror.death", "entity/the_horror_death", "entity.the_horror.death",
+       "the Horror goes down: a long descending collapse into the room's tail")
+def _horror_death():
+    dur = 3.5
+    tr = Track(dur)
+    tr.osc(lambda t: 95.0 - 55.0 * min(1.0, t / 1.5), lambda t: 0.50 * env(dur, 0.01, 1.6)(t),
+           harm=((1, 1.0), (2, 0.45), (3, 0.22), (4, 0.12)), drift=0.7, seed=141)
+    tr.noise(lambda t: 0.30 * strike(t, 0.002, 0.8), lp=650.0, seed=18)
+    tr.osc(lambda t: 42.0, lambda t: 0.30 * strike(t, 0.002, 1.2), seed=142)
+    tr.noise(lambda t: 0.10 * envelope(t, dur, 0.2, 1.4) if t > 0.5 else 0.0, hp=1800.0, seed=19)
+    return tr.room(0.60, taps=((0.093, 0.65), (0.141, 0.5), (0.207, 0.38), (0.317, 0.26)))
+
+
 @sound("ambient.whisper", "ambient/whisper", "ambient.whisper",
        "sanity pressure: breathy syllables that never resolve into words")
 def _whisper():

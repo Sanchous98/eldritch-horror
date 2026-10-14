@@ -323,6 +323,44 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> DROWNED_MINNOW_AMBIENT = register("entity.drowned_minnow.ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> FROST_WISP_AMBIENT = register("entity.frost_wisp.ambient");
 
+    // --- The rites, the endgame and the Horror (tools/gen_sounds.py) ---------------------------
+
+    /** A working altar's drone. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RITUAL_HUM = register("ritual.hum");
+
+    /** A rite resolves. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RITUAL_SUCCESS = register("ritual.success");
+
+    /** A rite refuses. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> RITUAL_FAILURE = register("ritual.failure");
+
+    /** The Horror wakes: a horn swell. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ENDGAME_AWAKEN = register("endgame.awaken");
+
+    /** The banishment resolves. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ENDGAME_BANISH = register("endgame.banish");
+
+    /** The summoning resolves. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ENDGAME_SUMMON = register("endgame.summon");
+
+    /** The Horror itself, breathing. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> THE_HORROR_AMBIENT =
+            register("entity.the_horror.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THE_HORROR_HURT =
+            register("entity.the_horror.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THE_HORROR_DEATH =
+            register("entity.the_horror.death");
+
+    /** A stage of the Horror changes. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> THE_HORROR_STAGE =
+            register("entity.the_horror.stage");
+
+    /** Sanity pressure: breathy syllables. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT_WHISPER = register("ambient.whisper");
+
+    /** Corruption deepens: a low pad. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT_DREAD = register("ambient.dread");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(EldritchHorror.id(name)));
     }

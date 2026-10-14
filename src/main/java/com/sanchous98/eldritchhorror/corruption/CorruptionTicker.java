@@ -4,12 +4,14 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.investigator.Progression;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
+import com.sanchous98.eldritchhorror.registry.ModSounds;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.Level;
@@ -100,6 +102,12 @@ public final class CorruptionTicker {
         CorruptionState before = PREVIOUS.put(player.getUUID(), after);
         if (before != after) {
             applyState(player, after);
+            // First tick for this player: there is no previous band, so nothing has "deepened" yet.
+            if (before != null && after.ordinal() > before.ordinal()) {
+                // The corruption deepens: a low pad.
+                player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                        ModSounds.AMBIENT_DREAD.get(), SoundSource.AMBIENT, 0.7F, 1.0F);
+            }
         }
     }
 
