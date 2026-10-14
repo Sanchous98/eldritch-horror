@@ -1,10 +1,14 @@
 package com.sanchous98.eldritchhorror.corruption;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +25,12 @@ import net.minecraft.world.level.chunk.LevelChunk;
  * the existing {@code TAINT} attachment.
  */
 public final class TaintSystem {
+
+    /** Radius in blocks within which a carried {@code warden_sigil} damps spread (design/16). */
+    private static final double SIGIL_RADIUS = 16.0;
+
+    /** Fraction of the bleed a carried sigil removes inside its radius (design/16: −40%). */
+    private static final double SIGIL_SUPPRESSION = 0.4;
 
     private TaintSystem() {
     }
@@ -44,6 +54,14 @@ public final class TaintSystem {
         ServerChunkCache cache = level.getChunkSource();
         Map<Long, Double> gains = new HashMap<>();
         Set<Long> visited = new HashSet<>();
+        // Warden's Sigil (design/16): a carried sigil damps spread within its radius. Collect the
+        // carriers once, so each candidate source chunk is a cheap distance test against a short list.
+        List<BlockPos> sigils = new ArrayList<>();
+        for (ServerPlayer player : level.players()) {
+            if (CarriedItems.carries(player, "warden_sigil")) {
+                sigils.add(player.blockPosition());
+            }
+        }
         for (ServerPlayer player : level.players()) {
             ChunkPos centre = player.chunkPosition();
             // Candidate sources: the player's chunk and its immediate neighbours, if loaded.
@@ -57,7 +75,7 @@ public final class TaintSystem {
                     if (taint <= threshold) {
                         continue;
                     }
-                    double bleed = (taint - threshold) * rate;
+                    double bleed = (taint - threshold) * rate * sigilFactor(chunk.getPos(), sigils);
                     ChunkPos pos = chunk.getPos();
                     addGain(gains, pos.x() + 1, pos.z(), bleed);
                     addGain(gains, pos.x() - 1, pos.z(), bleed);
@@ -79,5 +97,26 @@ public final class TaintSystem {
 
     private static void addGain(Map<Long, Double> gains, int x, int z, double amount) {
         gains.merge(ChunkPos.pack(x, z), amount, Double::sum);
+    }
+
+    /**
+     * @return {@code 1.0}, or the suppressed factor when a sigil carrier sits within
+     *         {@value #SIGIL_RADIUS} blocks of {@code pos}'s centre (a 16-block radius covers the
+     *         carrier's own chunk and parts of its neighbours, so only that bleed is damped)
+     */
+    private static double sigilFactor(ChunkPos pos, List<BlockPos> sigils) {
+        if (sigils.isEmpty()) {
+            return 1.0;
+        }
+        int x = pos.getMiddleBlockX();
+        int z = pos.getMiddleBlockZ();
+        for (BlockPos sigil : sigils) {
+            double dx = x - sigil.getX();
+            double dz = z - sigil.getZ();
+            if (dx * dx + dz * dz <= SIGIL_RADIUS * SIGIL_RADIUS) {
+                return 1.0 - SIGIL_SUPPRESSION;
+            }
+        }
+        return 1.0;
     }
 }
