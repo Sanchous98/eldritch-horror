@@ -95,6 +95,14 @@ services:
       - run-data:/workspace/run
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XDG_RUNTIME_DIR:-/tmp/xdg}:/tmp/xdg:rw
+    # Intel/AMD integrated GPU for the dev client or local inference (llama.cpp Vulkan).
+    # The host must start this container with the GPU device visible; here we map it into
+    # the nested container and add the render/video groups so the device nodes are usable.
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - "44"    # video
+      - "104"   # render
     # For NVIDIA: install the container toolkit and uncomment:
     # deploy:
     #   resources:

@@ -19,6 +19,7 @@ RUN apt-get update \
       libx11-6 libxext6 libxrender1 libxtst6 libxi6 libxrandr2 \
       libxcursor1 libxinerama1 libxxf86vm1 libgl1 libglu1-mesa \
       libopenal1 libpulse0 \
+      libvulkan1 mesa-vulkan-drivers vulkan-tools \
  && rm -rf /var/lib/apt/lists/*
 
 # Create a user matching the host; tolerate a base image that already owns the ids.
