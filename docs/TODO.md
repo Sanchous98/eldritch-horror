@@ -7,29 +7,29 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Open
 
-- [~] **Item debt (design/16)** — audit of all 140 registered items: 39 live, 53 referenced
-  elsewhere (loot, crafting, kits, rewards, offerings, service costs), 48 inert. Plan: wire the
-  effects the design/comments already record — consume deltas on the reagent row
-  (`grave_dust`…`ritual_ash`), weapon attributes (a new components pattern), the artefact passives
-  with a named hook (`ring_of_focus` ritual speed, `warden_sigil` taint spread, `eye_of_the_watcher`,
-  `drowned_lung`), navigation reveal items where the map-knowledge API allows; keep pure-flavour
-  items flavour; armour stays stat-less until equipment assets exist.
-- [~] **Altar block pattern: a real ring (design/05)** — `RitualAltar` now wants a core whose
-  rune/chalk marks stand off it and *surround* it (largest angular gap ≤ 180°); the bot driver
-  builds an 8-mark ring. Pending: an end-to-end rite run on a fresh world.
-- [~] **Sound wiring** — `tools/gen_sounds.py` renders the pack (`ritual.*`, `endgame.*`,
-  `entity.the_horror.*`, `ambient.whisper|dread`, 10 ogg, mono); pending: `sounds.json` entries,
-  `ModSounds` registration, subtitles, and the play hooks (rites, endgame, the Horror — which still
-  uses vanilla wither sounds).
 - [ ] **Reputation decay & the cultist-kill penalty (design/03c)** — rep decay over time and −40 for
   killing a cultist of that faction.
 - [ ] **Third ending: seal every rift (design/11)** — the banish path resolves at the finale;
   consider a "sealed world" outcome when every rift scar is closed.
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
+- [ ] **Items, second slice** — armour wants 26.3 equipment assets; the on-hit weapon effects and the
+  remaining artefacts (`prophet_mask`, `mirror_shard`, `compass_of_quiet`, `chalice_of_echoes`,
+  `veil_lens`, `bone_charm`, `lantern_of_steadfast`, `wardstone_pendant`, `marked_map`,
+  `route_ledger`) wait for the systems they describe.
 
 ## Done
 
+- [x] **Item mechanics (design/16)** — weapon/tool stats, the reagent deltas, the four carried
+  artefacts and five navigation items; the rest documented as flavour — `0be6ae6`.
+- [x] **The sound pack is live (design/07)** — 14 mono ogg, `ModSounds` + `sounds.json` +
+  subtitles; rite outcomes, the endgame fork, the Horror's own voice, whisper/dread — `7a70d48`.
+- [x] **The altar pattern is a ring (design/05)** — the core's marks must stand off it and surround
+  it (max angular gap ≤ 180°); a pile is refused; bot-verified — `0a28711`.
+- [x] **Bestiary additions (design/25, 18)** — the five replacements, the Ithaqual Shade and the
+  Choir Leviathan — `80d4fdc`.
+- [x] **Russian locale** — `ru_ru` (785 keys + subtitles), independently reviewed — `a4c3dbc`,
+  `92c3983`.
 - [x] **Altar block-pattern gate (design/05)** — rite needs an `altar_core` marked with runes/chalk;
   the ritual site now builds a real altar — `10e0abb`.
 - [x] **Fallen-city Hollow Choir takeover (design/21)** — bounded, capped, loaded-chunks only —

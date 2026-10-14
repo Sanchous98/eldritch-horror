@@ -46,6 +46,14 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 ### Added — content & tools
 
 - Bestiary sounds, item/reagent catalogue, tomes and class/skill unlocks.
+- **Bestiary completed** (`design/25`, `design/18`): the five vanilla replacements with their own
+  aura axes, the roaming named `ithaqual_shade` and the drowned-temple Choir **Leviathan** (3
+  phases) — each with a loot table and a generated skin.
+- **Items wired** (`design/16`): real weapon/tool stats, the reagent row's deltas, carried-artefact
+  passives (rite cooldown, taint suppression, the watcher's drain) and five navigation items.
+- **Audio wired**: fourteen procedural ogg through `ModSounds`/`sounds.json` — the rites, the
+  endgame fork, the Horror's own voice (it no longer sounds like a wither), whispers and dread.
+- **Russian locale** (`ru_ru`, 797 keys), independently reviewed.
 - **Bot harness**: a headless server-side test player under `/eh bot …` (spawn, perceive,
   travel, craft, mine, place altars, perform rites, fight) — used to prove the arc end to end.
 - **Procedural asset generator** `tools/gen_assets.py`: logo/pack icon, every entity skin,

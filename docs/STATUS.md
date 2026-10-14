@@ -224,10 +224,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Known limitations / deferred
 
-- See **`docs/TODO.md`** for the ordered backlog. Open now: item mechanics (`registry/items/`,
-  in progress), sound wiring, reputation decay / the cultist-kill penalty, the third ending ("seal
-  every rift"), and a **human visual pass on the `J`/`C`/`K` screens** (API-verified only). Done
-  since the last snapshot: altar ring pattern, map markers, site chests, skill tree/quests.
+- See **`docs/TODO.md`** for the ordered backlog. Open now: reputation decay / the cultist-kill
+  penalty (`design/03c`), the third ending ("seal every rift", `design/11`), armour equipment
+  assets and the remaining flavour items, and a **human visual pass on the `J`/`C`/`K` screens**
+  (API-verified only). The item pass, the altar ring pattern, sound wiring and the Russian locale
+  are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
@@ -421,15 +422,37 @@ Programmer art, but a coherent family; hero assets still deserve a human.
 
 Host-side, deterministic, stdlib synthesis (no numpy); encoded to mono ogg with ffmpeg — the host
 binary if present, otherwise the `linuxserver/ffmpeg` container (`DOCKER_HOST` must point at the
-session's docker socket). CLI: `--list`, `--only NAME`, `--force`. Ten sounds ship (~448 KiB): the
-ritual hum and the two outcome stings, the endgame fork (awaken / banish / summon), the Horror's
-ambient and stage change, and the whisper/dread ambience. **Not wired yet**: `sounds.json`,
-`ModSounds` and the play hooks (the Horror still vocalises with vanilla wither sounds).
+session's docker socket). CLI: `--list`, `--only NAME`, `--force`. **Fourteen** sounds ship
+(~510 KiB): the ritual hum and the two outcome stings, the endgame fork (awaken / banish / summon),
+the Horror's own ambient / hurt / death / stage change, and the whisper/dread ambience. **Wired**
+through `ModSounds` + `sounds.json` (subtitles in both locales): the outcome stings fire for every
+rite that started (success or a paid failure), the fork sounds in `Endgame`, the Horror's set and
+the awakening horn in `TheHorror`, whisper at the MARKED band and dread when the corruption deepens.
 
 ## Docs for players
 
 `README.md` now describes the playable alpha (systems, keys, `/eh`, screens) with the dev sections
 kept; `CHANGELOG.md` summarises the snapshot; `docs/TODO.md` is the live backlog.
+
+## The item pass (design/16)
+
+The audit found 140 registered items: 39 live, 53 referenced elsewhere (loot, crafting, kits,
+rewards, offerings, service costs), 48 inert. The effects the design/comments already recorded are
+wired where a system exists:
+
+- **Weapons/tools carry real stats** — wooden/iron/netherite swords, two maces, a trident, a bow,
+  an iron tool; `star_iron_sword` keeps its `ward_breakers` tag.
+- **The reagent row is usable** — `grave_dust`…`ritual_ash` apply their recorded sanity/corruption
+  deltas and are consumed; `drowned_lung` is a reusable Water Breathing (corruption +2).
+- **Carried artefacts** (`registry/items/CarriedItems`: no trinket slot, "carried" is anywhere in
+  the inventory) — `ring_of_focus` −20% rite cooldown, `warden_sigil` −40% taint spread within 16
+  blocks (`TaintSystem`), `eye_of_the_watcher` sanity −0.1/s + a bearing to the nearest known rift.
+- **Navigation answers in chat** — `city_map`, `cartographers_lens`, `compass_of_longing`,
+  `veil_compass`, `sextant`.
+- **Still flavour** (documented in the code, no hook yet): armour (26.3 wants equipment assets),
+  weapon on-hit effects, `prophet_mask`, `mirror_shard`, `compass_of_quiet`, `chalice_of_echoes`,
+  `veil_lens`, `bone_charm`, `lantern_of_steadfast`, `wardstone_pendant`, `marked_map`,
+  `route_ledger`. Tooltips state only what the item really does.
 
 ## Where things live
 

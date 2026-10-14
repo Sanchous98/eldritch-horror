@@ -102,6 +102,11 @@ integration build green.
   for the container, so the job can hang for hours (seen: 21 min). End a bounded run with
   `docker rm -f <name>`; when a longer session follows, start detached (`docker run -d`) and poll
   `docker logs <name> | grep 'Done ('`.
+  **A clean boot is not enough for per-player code.** The sanity/corruption tickers only run for
+  online players, and `Map.put` returns `null` — not the previous state — on the first tick, so a
+  `before.ordinal()`-style bug stays invisible until someone joins. Have the bot join
+  (`/eh bot spawnjoin <name>`) before trusting a ticker change; the NPE that crashed the server
+  during the sound pass was found exactly this way.
   Rules of thumb this caught: never call `.get()` on a registry holder from a `static`
   initialiser; never read SERVER `ModConfig` while building the command tree/registries (gate in
   the handler instead); loot condition discriminators are `"type"`, not `"condition"`;
