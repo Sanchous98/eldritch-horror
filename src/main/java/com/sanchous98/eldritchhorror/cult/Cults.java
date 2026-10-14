@@ -51,6 +51,8 @@ public final class Cults {
                                 CultService.Kind.TEACH, "ward_of_the_eye"),
                         new CultService("cleansing", CultRank.DEVOTED,
                                 CultService.Kind.CLEANSE, ""),
+                        new CultService("teach_banish_the_horror", CultRank.INNER_CIRCLE,
+                                CultService.Kind.TEACH, "banish_the_horror"),
                         CultService.trade("buy_chalk", CultRank.INITIATE,
                                 "black_obol", 1, "chalk_reagent", 2))));
 
@@ -76,6 +78,10 @@ public final class Cults {
                                 CultService.Kind.TEACH, "summon_star_spawn"),
                         new CultService("teach_open_rift", CultRank.INNER_CIRCLE,
                                 CultService.Kind.TEACH, "open_rift"),
+                        new CultService("teach_awaken_the_horror", CultRank.INNER_CIRCLE,
+                                CultService.Kind.TEACH, "awaken_the_horror"),
+                        new CultService("teach_summon_the_horror", CultRank.INNER_CIRCLE,
+                                CultService.Kind.TEACH, "summon_the_horror"),
                         CultService.trade("buy_bone", CultRank.INITIATE,
                                 "black_obol", 1, "bone_reagent", 2),
                         CultService.trade("buy_litanies", CultRank.DEVOTED,

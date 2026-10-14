@@ -75,7 +75,12 @@ public abstract class AncientOne extends Monster implements DreadAura {
         /** {@code draw_away_dunwich}: drawn off and retreating from the settlement. */
         BANISHED,
         /** {@code still_shub_niggurath}: aura suppressed until the solve window lapses. */
-        STILLED
+        STILLED,
+        /**
+         * The endgame summon ({@code design/11-endgame.md}): the presence is claimed, not killed and
+         * not drawn off. It stops hunting and keeps its aura — the world has tipped.
+         */
+        SUMMONED
     }
 
     private static final String TAG_PHASE = "AncientOnePhase";
@@ -218,6 +223,11 @@ public abstract class AncientOne extends Monster implements DreadAura {
             return this.level().getGameTime() < this.solveUntil;
         }
         return this.solve != Solve.NONE;
+    }
+
+    /** @return how this presence was solved (or {@link Solve#NONE}). */
+    public final Solve solveKind() {
+        return this.solve;
     }
 
     /** The one place a subclass adds solve-specific world work; default is inert. */

@@ -324,6 +324,35 @@ but could not reach `lorekeeper` 10/10 — which is what carries the Order to In
 `sworn_ally`. A clean-world run now completes `first_steps`, `first_rite`, `lorekeeper 10/10`,
 `open_the_way`, `seal_the_way`, `soothe_a_presence` and `sworn_ally` with 0 exceptions.
 
+## The endgame is real (design/11, design/18)
+
+- **`endgame/EndgameState`** — the per-world decision as `SavedData` (lenient codec);
+  `/eh endgame` reads it, `/eh endgame set <none|banished|summoned>` repairs it.
+- **`entity/TheHorror`** — invulnerable presence (design/18: "sanity is the real health bar"),
+  four stages on an age clock: attention (NoAI, nausea pulses) → approach (AI, taint, capped lesser
+  swarms) → grasp (star-spawn, peak aura) → decision (the fork). The aura scales with the stage.
+  The clock lives in `tick()` on purpose: attention sets `NoAI`, which stops `customServerAiStep`,
+  and a clock there froze the encounter at age 20 (found by playtesting).
+- **Three rites** (`rite/Rites.java`, tier 3, taught by the cults at Inner Circle): 
+  `awaken_the_horror` (rift within 8 + Claimed), `banish_the_horror` (Order) and
+  `summon_the_horror` (Hollow, Devoted).
+- **Banish** — closes the loaded rifts, recedes the taint, lifts a summon's floor, resets a large
+  part of corruption, costs a skill point and a quarter of every cult's standing, grants
+  `banishment_focus`.
+- **Summon** — pins the corruption **floor** at the Claimed band (a floor on the meter itself, so
+  every cleanse path is refused by the system, no per-path special case), raises Hollow standing,
+  tears open rifts, grants `hollow_crown`.
+- **Journal**: `awaken_the_horror`, `the_decision` (14 quests load now).
+
+Verified in game: the Horror wakes at a rift and drains sanity; its clock runs through attention
+(`NoAI=1b`, age 29) into approach (age 653, AI on); banish closed 5 rifts and set
+`endgame = banished` (corruption 100 → 41.93, token granted); summon set `endgame = summoned`,
+granted the crown and clamped a `corruption set 5` back to 85 (Claimed); both journal quests
+completed. 0 exceptions, PMD 0 violations.
+
+Still open from design/11: the possible third outcome (seal every rift) and whether the endgame is
+per-player or per-world in multiplayer (it is per-world today).
+
 ## Quests are data, not code
 
 The journal lives in `data/eldritch_horror/quest/*.json`, scanned on every server data load (and

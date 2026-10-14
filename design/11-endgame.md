@@ -54,6 +54,25 @@ The Horror (`18-bosses.md`) is the stage on which the fork plays out:
 | Player corruption | Largely reset | Permanent `Claimed` |
 | Tone | Loss/lucidity | Power/doom |
 
+## Implemented (completion pass)
+
+- **The world's decision is saved**: `endgame/EndgameState` is a per-overworld `SavedData`;
+  `/eh endgame` reads it, `/eh endgame set <none|banished|summoned>` repairs it.
+- **The Horror** (`entity/TheHorror`, `18-bosses.md`) is an invulnerable presence with four stages
+  (attention → approach → grasp → decision), a sanity aura that deepens with the stage, taint and
+  capped answers; it is awakened by its own rite at a rift. The escalation clock lives in `tick()`
+  because attention sets `NoAI`, which stops the AI step.
+- **Three rites** (`rite/Rites.java`): `awaken_the_horror` (needs a rift), `banish_the_horror`
+  (Order-taught) and `summon_the_horror` (Hollow-taught, Devoted).
+- **Banish**: closes the loaded rifts, recedes the taint, lifts any permanent floor, resets a large
+  part of corruption, costs a skill point and a quarter of every cult's standing, grants
+  `banishment_focus`.
+- **Summon**: pins the corruption floor at the Claimed band — a floor on the meter itself, so every
+  cleanse path (rite, service, event) is refused by the system — raises Hollow standing, tears open
+  rifts, grants `hollow_crown`.
+- **Journal**: `awaken_the_horror` and `the_decision` (data files under
+  `data/eldritch_horror/quest`).
+
 ## Open questions
 
 - A possible third outcome: seal every rift without banishing (backlog).

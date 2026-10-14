@@ -59,19 +59,27 @@ public record RiteConditions(
     public static final RiteConditions NONE =
             new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false, null, null, 0);
 
-    private static final Map<String, RiteConditions> BY_RITE = Map.of(
-            "ward_of_the_eye", new RiteConditions(Time.NIGHT, Moon.ANY, Weather.CLEAR, false, null, null, 0),
-            "drowned_blessing", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, true, null, null, 0),
-            "call_the_lesser", new RiteConditions(Time.MIDNIGHT, Moon.FULL_OR_NEW, Weather.ANY, false, null, null, 0),
-            "summon_star_spawn", new RiteConditions(Time.MIDNIGHT, Moon.ANY, Weather.ANY, false,
-                    CorruptionState.TOUCHED, null, 0),
-            "open_rift", new RiteConditions(Time.ANY, Moon.ANY, Weather.STORM, false,
-                    CorruptionState.MARKED, null, 0),
-            "close_rift", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false, null, null, 8),
-            "rite_of_cleansing", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false, null,
-                    CorruptionState.MARKED, 0),
-            "respec", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
-                    CorruptionState.TOUCHED, null, 0));
+    private static final Map<String, RiteConditions> BY_RITE = Map.ofEntries(
+            Map.entry("ward_of_the_eye", new RiteConditions(Time.NIGHT, Moon.ANY, Weather.CLEAR, false, null, null, 0)),
+            Map.entry("drowned_blessing", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, true, null, null, 0)),
+            Map.entry("call_the_lesser", new RiteConditions(Time.MIDNIGHT, Moon.FULL_OR_NEW, Weather.ANY, false, null, null, 0)),
+            Map.entry("summon_star_spawn", new RiteConditions(Time.MIDNIGHT, Moon.ANY, Weather.ANY, false,
+                    CorruptionState.TOUCHED, null, 0)),
+            Map.entry("open_rift", new RiteConditions(Time.ANY, Moon.ANY, Weather.STORM, false,
+                    CorruptionState.MARKED, null, 0)),
+            Map.entry("close_rift", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false, null, null, 8)),
+            Map.entry("rite_of_cleansing", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false, null,
+                    CorruptionState.MARKED, 0)),
+            Map.entry("respec", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
+                    CorruptionState.TOUCHED, null, 0)),
+            // The endgame fork (design/11): all three need the deep corruption; the awakening needs
+            // the rift it opens at (design/18: "wherever the endgame path opens it, at a deep rift").
+            Map.entry("awaken_the_horror", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
+                    CorruptionState.CLAIMED, null, 8)),
+            Map.entry("banish_the_horror", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
+                    CorruptionState.CLAIMED, null, 0)),
+            Map.entry("summon_the_horror", new RiteConditions(Time.ANY, Moon.ANY, Weather.ANY, false,
+                    CorruptionState.CLAIMED, null, 0)));
 
     /** @return the conditions for {@code rite} (never {@code null}; {@link #NONE} when unlisted). */
     public static RiteConditions of(RiteDefinition rite) {

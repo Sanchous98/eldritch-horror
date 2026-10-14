@@ -140,7 +140,7 @@ public final class Bots {
         reagent(bot, "tome_of_tides", 1);        // soothe_cthulhu
         reagent(bot, "void_reagent", 8);         // open_rift offering
         reagent(bot, "blood_offering", 6);       // open_rift offering
-        reagent(bot, "offering_bowl", 2);        // altar component (so building never stalls on logs)
+        reagent(bot, "offering_bowl", 4);        // altar components: a rebuild never stalls on a bowl
         // A little stone so the altar can be built even when the spawn area has none to mine.
         bot.getInventory().add(new ItemStack(Items.STONE, 48));
     }

@@ -19,6 +19,8 @@ import com.sanchous98.eldritchhorror.cult.CultRank;
 import com.sanchous98.eldritchhorror.cult.CultService;
 import com.sanchous98.eldritchhorror.cult.CultServices;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
+import com.sanchous98.eldritchhorror.endgame.Endgame;
+import com.sanchous98.eldritchhorror.endgame.EndgameState;
 import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.event.EldritchEvent;
 import com.sanchous98.eldritchhorror.event.EventTicker;
@@ -216,6 +218,12 @@ public final class EldritchCommands {
                 .then(Commands.literal("unlock")
                         .then(Commands.argument("id", StringArgumentType.word())
                                 .executes(EldritchCommands::unlockSkill))));
+        // The endgame decision (design/11): readable by anyone, settable for testing/repair.
+        eh.then(Commands.literal("endgame")
+                .executes(EldritchCommands::getEndgame)
+                .then(Commands.literal("set")
+                        .then(Commands.argument("outcome", StringArgumentType.word())
+                                .executes(EldritchCommands::setEndgame))));
         // Server-side bot players for automated playtesting (dev-mode gated inside the handlers).
         eh.then(com.sanchous98.eldritchhorror.bot.BotCommands.node());
         dispatcher.register(eh);
@@ -249,6 +257,29 @@ public final class EldritchCommands {
         }
         ctx.getSource().sendFailure(Component.literal(
                 "Cannot unlock " + id + " (already known, or not enough points)."));
+        return 0;
+    }
+
+    /** {@code /eh endgame}: the world's decision so far (design/11). */
+    private static int getEndgame(CommandContext<CommandSourceStack> ctx) {
+        String outcome = Endgame.outcome(ctx.getSource().getLevel()).name()
+                .toLowerCase(java.util.Locale.ROOT);
+        ctx.getSource().sendSuccess(() -> Component.literal("endgame = " + outcome), false);
+        return 1;
+    }
+
+    /** {@code /eh endgame set <none|banished|summoned>}: a testing and repair aid for the fork. */
+    private static int setEndgame(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "outcome");
+        for (EndgameState.Outcome value : EndgameState.Outcome.values()) {
+            if (value.name().equalsIgnoreCase(name)) {
+                EndgameState.of(ctx.getSource().getLevel()).setOutcome(value);
+                ctx.getSource().sendSuccess(() -> Component.literal("endgame set to " + name), true);
+                return 1;
+            }
+        }
+        ctx.getSource().sendFailure(Component.literal(
+                "Unknown outcome: " + name + " (none | banished | summoned)"));
         return 0;
     }
 

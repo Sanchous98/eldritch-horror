@@ -19,10 +19,14 @@ something** (sanity or corruption) — never a silent no-op.
 | `respec` | Rite of Unmaking | 3 | `min_corruption_stage: touched` | 4× `mirror_shard`, 4× `silver_reagent` | `grant_skill` reset, refund 80% points | `sanity −20` |
 | `blight_the_earth` | Blight the Earth | 2 | none | 4× `bone_reagent`, 1× `blood_offering` | `transform` the ground (taint +0.30), `corruption +4`, `reputation` `hollow_choir +5` | `sanity −12` |
 | `take_the_hollow_mark` | Take the Hollow Mark | 2 | none | 2× `blood_offering` | `curse` weakness 60s, `corruption +5`, `reputation` `hollow_choir +10` | `sanity −12` |
+| `awaken_the_horror` | Awaken the Horror | 3 | `min_corruption_stage: claimed`, rift within 8 | 6× `void_reagent`, 4× `blood_offering` | `awaken_horror`, `corruption +10`, `reputation` `hollow_choir +5` | `sanity −25`, `corruption +10` |
+| `banish_the_horror` | Banish the Horror | 3 | `min_corruption_stage: claimed` | 8× `salt_reagent`, 4× `silver_reagent` | endgame path A (world recedes; `banishment_focus`) | `sanity −25` |
+| `summon_the_horror` | Summon the Horror | 3 | `min_corruption_stage: claimed`, Hollow standing Devoted | 8× `star_reagent`, 4× `blood_offering` | endgame path B (world tips; permanent Claimed floor, `hollow_crown`) | `corruption +15` |
 
-The last two are shipped additions: the seed table needed content that exercises the `transform`
-and `curse` outcome types. They are taught by the Hollow Choir (`cult/Cults.java`), like the
-rest of its branch.
+The last five are shipped additions: the seed table needed content that exercises the `transform`
+and `curse` outcome types, and the endgame fork of `11-endgame.md` needed its three rites. All are
+taught by the cults (`cult/Cults.java`): the two Hollow rites and the awaken/summon pair by the
+Hollow Choir, the banishment by the Order of the Unblinking Eye.
 
 ## Conditions vocabulary
 

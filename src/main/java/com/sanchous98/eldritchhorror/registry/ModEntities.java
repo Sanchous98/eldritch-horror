@@ -51,6 +51,7 @@ import com.sanchous98.eldritchhorror.entity.SporeBee;
 import com.sanchous98.eldritchhorror.entity.StarSpawn;
 import com.sanchous98.eldritchhorror.entity.StoneSentinel;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
+import com.sanchous98.eldritchhorror.entity.TheHorror;
 import com.sanchous98.eldritchhorror.entity.TideGrazer;
 import com.sanchous98.eldritchhorror.entity.Tulzscha;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
@@ -756,10 +757,24 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("zstylzhemghi_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ZSTYLZHEMGHI.get())));
 
+    /** The endgame presence ({@code design/11}, {@code design/18}): awakened by rite, resolved by the fork. */
+    public static final DeferredHolder<EntityType<?>, EntityType<TheHorror>> THE_HORROR =
+            ENTITY_TYPES.register("the_horror", () ->
+                    EntityType.Builder.<TheHorror>of(TheHorror::new, MobCategory.MONSTER)
+                            .sized(4.0F, 6.0F)
+                            .clientTrackingRange(16)
+                            .notInPeaceful()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("the_horror"))));
+
+    public static final DeferredItem<SpawnEggItem> THE_HORROR_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("the_horror_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(THE_HORROR.get())));
+
     /**
-     * The 20 Ancient One entity types, for classification where the class hierarchy is not usable
-     * ({@code EntityType.getBaseClass()} is fixed to {@link net.minecraft.world.entity.Entity} in
-     * 26.3, so a boss cannot be told from a monster by reflection).
+     * The Ancient One entity types plus the endgame Horror, for classification where the class
+     * hierarchy is not usable ({@code EntityType.getBaseClass()} is fixed to
+     * {@link net.minecraft.world.entity.Entity} in 26.3, so a boss cannot be told from a monster by
+     * reflection).
      *
      * <p>Resolved lazily: calling {@link DeferredHolder#get()} in a static initialiser runs before
      * the registry is bound and throws "Trying to access unbound value".
@@ -770,7 +785,7 @@ public final class ModEntities {
                 YOG_SOTHOTH.get(), ITHAQUA.get(), YIG.get(), ATLACH_NACHA.get(), NYARLATHOTEP.get(),
                 CTHUGHA.get(), GLAAKI.get(), HYDRA.get(), NYOGTHA.get(), RHAN_TEGOTH.get(),
                 HASTUR.get(), NEPHREN_KA.get(), ABHOTH.get(), CHAUGNAR_FAUGN.get(), TULZSCHA.get(),
-                ZSTYLZHEMGHI.get());
+                ZSTYLZHEMGHI.get(), THE_HORROR.get());
     }
 
     /**
@@ -843,6 +858,7 @@ public final class ModEntities {
             event.accept(CHAUGNAR_FAUGN_SPAWN_EGG.get());
             event.accept(TULZSCHA_SPAWN_EGG.get());
             event.accept(ZSTYLZHEMGHI_SPAWN_EGG.get());
+            event.accept(THE_HORROR_SPAWN_EGG.get());
         }
     }
 
@@ -913,6 +929,7 @@ public final class ModEntities {
         event.put(CHAUGNAR_FAUGN.get(), ChaugnarFaugn.createAttributes().build());
         event.put(TULZSCHA.get(), Tulzscha.createAttributes().build());
         event.put(ZSTYLZHEMGHI.get(), Zstylzhemghi.createAttributes().build());
+        event.put(THE_HORROR.get(), TheHorror.createAttributes().build());
     }
 
     private ModEntities() {

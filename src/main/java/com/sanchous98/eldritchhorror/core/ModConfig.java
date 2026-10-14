@@ -560,6 +560,22 @@ public final class ModConfig {
             BUILDER.comment("Radius (blocks) in which Cthulhu contributes to the sanity drain.")
                     .defineInRange("sanityCthulhuRadius", 32, 1, 96);
 
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_HORROR =
+            BUILDER.comment("Enable The Horror's sanity source (design/18: sanity is its real health bar).")
+                    .define("enableSanityHorror", true);
+
+    public static final ModConfigSpec.DoubleValue SANITY_HORROR_RATE =
+            BUILDER.comment("Sanity change per second near The Horror at full escalation (negative drains).")
+                    .defineInRange("sanityHorrorRate", -1.2, -10.0, 0.0);
+
+    public static final ModConfigSpec.IntValue SANITY_HORROR_RADIUS =
+            BUILDER.comment("Radius (blocks) in which The Horror contributes to the sanity drain.")
+                    .defineInRange("sanityHorrorRadius", 48, 1, 128);
+
+    public static final ModConfigSpec.IntValue HORROR_STAGE_TICKS =
+            BUILDER.comment("Ticks per escalation stage of The Horror (attention, approach, grasp, decision).")
+                    .defineInRange("horrorStageTicks", 600, 20, 24000);
+
     /** The Dunwich Horror: a mobile settlement threat near tainted woods. */
     public static final ModConfigSpec.BooleanValue DUNWICH_HORROR_KILLABLE =
             BUILDER.comment("Allow the Dunwich Horror to be killed. False = invulnerable.")
@@ -1006,6 +1022,11 @@ public final class ModConfig {
     public static final ModConfigSpec.IntValue RITE_SOLVE_RADIUS =
             BUILDER.comment("Radius (blocks) a solve rite searches for its Ancient One.")
                     .defineInRange("riteSolveRadius", 8, 2, 32);
+
+    /** Endgame rites ({@code awaken/banish/summon_the_horror}): how far they search for The Horror. */
+    public static final ModConfigSpec.IntValue RITE_ENDGAME_RADIUS =
+            BUILDER.comment("Radius (blocks) the endgame rites search for The Horror.")
+                    .defineInRange("riteEndgameRadius", 24, 4, 96);
 
     /** How long {@code still_shub_niggurath} stills the biome presence (ticks). */
     public static final ModConfigSpec.IntValue RITE_STILL_SHUB_NIGGURATH_TICKS =

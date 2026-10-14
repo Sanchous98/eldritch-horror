@@ -30,4 +30,20 @@ public final class CorruptionAPI {
     public static double set(ServerPlayer player, double value) {
         return CorruptionSystem.set(player, value);
     }
+
+    /**
+     * The player's corruption floor: the meter never sits below it ({@code 0} unless the endgame
+     * Summon pinned it at the Claimed band). See {@code design/11-endgame.md}.
+     */
+    public static double floor(ServerPlayer player) {
+        return CorruptionSystem.floor(player);
+    }
+
+    /**
+     * Sets the corruption floor (clamped), raising the meter to meet it when it sits below.
+     * Returns the new floor.
+     */
+    public static double setFloor(ServerPlayer player, double value) {
+        return CorruptionSystem.setFloor(player, value);
+    }
 }

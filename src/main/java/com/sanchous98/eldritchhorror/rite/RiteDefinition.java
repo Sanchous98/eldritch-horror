@@ -89,6 +89,15 @@ public record RiteDefinition(
         /** {@code corruption} — a corruption-only resolution (e.g. cleansing). */
         CORRUPTION,
         /**
+         * The endgame awakening (design/11): places {@code The Horror} next to the performer at a
+         * rift. Refuses while one is already awake nearby.
+         */
+        AWAKEN_HORROR,
+        /** Path A of the endgame fork (design/11): banish The Horror — costly, the world recedes. */
+        BANISH_HORROR,
+        /** Path B of the endgame fork (design/11): summon The Horror — the Choir's ending. */
+        SUMMON_HORROR,
+        /**
          * A non-combat solve of an Ancient One present in the world (design/28: "always a non-combat
          * solve"). The rite's {@code grant} names the entity family to find (e.g. {@code cthulhu});
          * {@link RiteEngine} resolves the nearest one within {@code riteSolveRadius} and asks it to

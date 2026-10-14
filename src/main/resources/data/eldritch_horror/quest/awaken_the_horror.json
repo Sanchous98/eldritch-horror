@@ -1,0 +1,8 @@
+{
+  "id": "awaken_the_horror",
+  "target": 1,
+  "stage": 7,
+  "requires": "soothe_a_presence",
+  "reward_item": "void_reagent",
+  "reward_count": 2
+}

@@ -61,6 +61,17 @@ public final class Rites {
                 2, -12, 0, RiteDefinition.Outcome.CURSE, "minecraft:weakness",
                 new RiteDefinition.Gains(0, 5, "hollow_choir", 10)));
 
+        // The endgame fork (design/11-endgame.md). Awaken the Horror at a deep rift, then decide:
+        // banish (the Order's costly path) or summon (the Hollow Choir's). World work lives in
+        // endgame/Endgame; the rites are taught by the cults (cult/Cults.java).
+        register(new RiteDefinition("awaken_the_horror", RiteDefinition.nameOf("awaken_the_horror"),
+                3, -25, 10, RiteDefinition.Outcome.AWAKEN_HORROR, "",
+                new RiteDefinition.Gains(0, 10, "hollow_choir", 5)));
+        register(new RiteDefinition("banish_the_horror", RiteDefinition.nameOf("banish_the_horror"),
+                3, -25, 0, RiteDefinition.Outcome.BANISH_HORROR, ""));
+        register(new RiteDefinition("summon_the_horror", RiteDefinition.nameOf("summon_the_horror"),
+                3, 0, 15, RiteDefinition.Outcome.SUMMON_HORROR, ""));
+
         // Ancient One non-combat solves (design/28-ancient-ones.md). One shared SOOTHE outcome,
         // parameterised by the entity to find in the `grant` field (mirroring how grant/grantSkill
         // already carry their own key). Reagent/gate: the same rite-knowledge gate used by every

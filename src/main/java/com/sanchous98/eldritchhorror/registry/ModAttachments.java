@@ -41,6 +41,19 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /**
+     * Per-player corruption <b>floor</b>, 0..{@code CorruptionSystem.DEFAULT_MAX}: the meter can
+     * never sit below it. Pinned at the Claimed band by the endgame Summon outcome (design/11:
+     * "corruption Claimed becomes permanent") and cleared by Banish. Synced and copied on death like
+     * the meter it guards; written only through {@code CorruptionSystem}.
+     */
+    public static final Supplier<AttachmentType<Double>> CORRUPTION_FLOOR =
+            ATTACHMENT_TYPES.register("corruption_floor", () -> AttachmentType.<Double>builder(() -> 0.0)
+                    .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("value"))
+                    .sync(ByteBufCodecs.DOUBLE)
+                    .copyOnDeath()
+                    .build());
+
     /** Per-chunk taint field, 0..1, shared by all players. Attached to {@code LevelChunk}. */
     public static final Supplier<AttachmentType<Double>> TAINT =
             ATTACHMENT_TYPES.register("taint", () -> AttachmentType.<Double>builder(() -> 0.0)

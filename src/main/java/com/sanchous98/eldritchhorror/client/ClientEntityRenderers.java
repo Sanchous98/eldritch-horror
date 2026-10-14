@@ -85,5 +85,6 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.CHAUGNAR_FAUGN.get(), ChaugnarFaugnRenderer::new);
         event.registerEntityRenderer(ModEntities.TULZSCHA.get(), TulzschaRenderer::new);
         event.registerEntityRenderer(ModEntities.ZSTYLZHEMGHI.get(), ZstylzhemghiRenderer::new);
+        event.registerEntityRenderer(ModEntities.THE_HORROR.get(), TheHorrorRenderer::new);
     }
 }

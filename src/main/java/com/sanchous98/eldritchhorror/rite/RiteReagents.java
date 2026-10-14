@@ -55,7 +55,11 @@ public final class RiteReagents {
             Map.entry("respec", List.of(new Reagent("mirror_shard", 4), new Reagent("silver_reagent", 4))),
             // Hollow Choir additions (design/26): the ground and the mark, priced in bone and blood.
             Map.entry("blight_the_earth", List.of(new Reagent("bone_reagent", 4), new Reagent("blood_offering", 1))),
-            Map.entry("take_the_hollow_mark", List.of(new Reagent("blood_offering", 2))));
+            Map.entry("take_the_hollow_mark", List.of(new Reagent("blood_offering", 2))),
+            // The endgame fork (design/11): the awakening and the two resolutions.
+            Map.entry("awaken_the_horror", List.of(new Reagent("void_reagent", 6), new Reagent("blood_offering", 4))),
+            Map.entry("banish_the_horror", List.of(new Reagent("salt_reagent", 8), new Reagent("silver_reagent", 4))),
+            Map.entry("summon_the_horror", List.of(new Reagent("star_reagent", 8), new Reagent("blood_offering", 4))));
 
     /** The default for every rite without an explicit row: the Ancient One solves. */
     private static final List<Reagent> DEFAULT = List.of(new Reagent("salt_reagent", 2));

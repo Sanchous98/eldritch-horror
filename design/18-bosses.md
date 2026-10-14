@@ -34,6 +34,9 @@ brute force. Each has phases and a documented arena.
   - **Banish:** `rite_of_cleansing` + `close_rift` chain; costs progression and corruption.
   - **Summon:** Hollow Choir rite; ends the run in the cult's favour.
 - **Drops:** none conventional — the outcome *is* the reward.
+- **Implemented:** invulnerable (sanity is its health bar), escalates through the four stages on an
+  age clock, and the fork is the rite chain `awaken_the_horror` → `banish_the_horror` /
+  `summon_the_horror` (`endgame/Endgame`, `design/11`).
 
 ## Design notes
 

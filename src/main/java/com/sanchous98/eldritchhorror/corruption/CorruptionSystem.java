@@ -22,14 +22,14 @@ public final class CorruptionSystem {
     private CorruptionSystem() {
     }
 
-    /** Current player corruption, clamped to {@code [0, DEFAULT_MAX]}. */
+    /** Current player corruption, clamped to {@code [floor, DEFAULT_MAX]}. */
     public static double get(ServerPlayer player) {
         return Math.clamp(player.getData(ModAttachments.CORRUPTION.get()), 0.0, DEFAULT_MAX);
     }
 
-    /** Sets player corruption (clamped). Returns the stored value. */
+    /** Sets player corruption (clamped to the player's floor ceiling). Returns the stored value. */
     public static double set(ServerPlayer player, double value) {
-        double v = Math.clamp(value, 0.0, DEFAULT_MAX);
+        double v = Math.clamp(value, floor(player), DEFAULT_MAX);
         player.setData(ModAttachments.CORRUPTION.get(), v);
         return v;
     }
@@ -37,6 +37,28 @@ public final class CorruptionSystem {
     /** Adds {@code delta} (may be negative). Returns the new value. */
     public static double add(ServerPlayer player, double delta) {
         return set(player, get(player) + delta);
+    }
+
+    /**
+     * The player's corruption floor: the meter is never allowed below it. {@code 0} for everyone
+     * except a player who took the endgame Summon (then the Claimed band, design/11).
+     */
+    public static double floor(ServerPlayer player) {
+        return Math.clamp(player.getData(ModAttachments.CORRUPTION_FLOOR.get()), 0.0, DEFAULT_MAX);
+    }
+
+    /**
+     * Sets the corruption floor (clamped), raising the meter to meet it when it sits below.
+     *
+     * @return the new floor
+     */
+    public static double setFloor(ServerPlayer player, double value) {
+        double v = Math.clamp(value, 0.0, DEFAULT_MAX);
+        player.setData(ModAttachments.CORRUPTION_FLOOR.get(), v);
+        if (get(player) < v) {
+            set(player, v);
+        }
+        return v;
     }
 
     /** The current state band for {@code player}, derived from the meter and the configured cut-offs. */

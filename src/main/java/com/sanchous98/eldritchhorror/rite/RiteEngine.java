@@ -4,7 +4,10 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
+import com.sanchous98.eldritchhorror.cult.CultRank;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
+import com.sanchous98.eldritchhorror.endgame.Endgame;
+import com.sanchous98.eldritchhorror.endgame.EndgameState;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
@@ -171,6 +174,9 @@ public final class RiteEngine {
             case SOOTHE -> soothe(level, player, rite);
             case REPUTATION -> reputation(rite);
             case SANITY -> sanity(rite);
+            case AWAKEN_HORROR -> awakenHorror(level, player);
+            case BANISH_HORROR -> banishHorror(level, player);
+            case SUMMON_HORROR -> summonHorror(level, player);
         };
         if (!result.ok()) {
             // A rite that started and did not resolve is a failure (design/08: "failure always costs
@@ -265,6 +271,59 @@ public final class RiteEngine {
         player.addEffect(new MobEffectInstance(effect.get(), ticks, 0, true, false, true));
         return new Result(true, Component.literal("The mark settles: "
                 + effect.get().value().getDisplayName().getString() + " for " + (ticks / 20) + "s."));
+    }
+
+    /**
+     * {@code awaken_the_horror} (design/11): the Horror arrives at the rift — "wherever the endgame
+     * path opens it, at a deep rift" (design/18). Its own rite, so the presence exists only when a
+     * player calls it; refuses while one is already awake nearby.
+     */
+    private static Result awakenHorror(ServerLevel level, ServerPlayer player) {
+        if (Endgame.horrorNear(level, player, ModConfig.RITE_ENDGAME_RADIUS.get() * 4)) {
+            return new Result(false, Component.literal("The Horror is already awake nearby."));
+        }
+        EntityType<?> type = ModEntities.THE_HORROR.get();
+        BlockPos spot = surfaceSpot(level, player, SPAWN_RADIUS, 0);
+        if (spot == null || type.spawn(level, spot, EntitySpawnReason.MOB_SUMMONED) == null) {
+            return new Result(false, Component.literal("No open ground for it to arrive on."));
+        }
+        double taint = taintPatch(level, spot, TRANSFORM_TAINT * 2, false);
+        QuestJournal.add(player, "awaken_the_horror", 1);
+        return new Result(true, Component.literal("Something vast answers at the rift; the ground taints to "
+                + String.format(java.util.Locale.ROOT, "%.2f", taint) + "."));
+    }
+
+    /** {@code banish_the_horror}: endgame path A (design/11) — see {@link Endgame#banish}. */
+    private static Result banishHorror(ServerLevel level, ServerPlayer player) {
+        if (Endgame.outcome(level) != EndgameState.Outcome.NONE) {
+            return new Result(false, Component.literal("The decision has already been made."));
+        }
+        AncientOne horror = Endgame.nearestHorror(level, player, ModConfig.RITE_ENDGAME_RADIUS.get());
+        if (horror == null) {
+            return new Result(false, Component.literal("The Horror is not here to banish."));
+        }
+        QuestJournal.add(player, "the_decision", 1);
+        return new Result(true, Endgame.banish(level, player, horror));
+    }
+
+    /**
+     * {@code summon_the_horror}: endgame path B (design/11) — see {@link Endgame#summon}. The Choir's
+     * road, so it is rank-gated (design/09: the summon ending needs Hollow standing).
+     */
+    private static Result summonHorror(ServerLevel level, ServerPlayer player) {
+        if (Endgame.outcome(level) != EndgameState.Outcome.NONE) {
+            return new Result(false, Component.literal("The decision has already been made."));
+        }
+        if (!CultSystem.rankOf(player, "hollow_choir").atLeast(CultRank.DEVOTED)) {
+            return new Result(false, Component.literal(
+                    "The Choir does not answer to you yet (Devoted standing required)."));
+        }
+        AncientOne horror = Endgame.nearestHorror(level, player, ModConfig.RITE_ENDGAME_RADIUS.get());
+        if (horror == null) {
+            return new Result(false, Component.literal("The Horror is not here to summon."));
+        }
+        QuestJournal.add(player, "the_decision", 1);
+        return new Result(true, Endgame.summon(level, player, horror));
     }
 
     /** Formats a signed delta ({@code +10} / {@code -3}). */
