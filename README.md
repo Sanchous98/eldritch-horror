@@ -4,10 +4,14 @@ An RPG-flavoured **eldritch horror** mod for **Minecraft 26.3 / NeoForge**. Sani
 cults, forbidden rituals, and things that should not be — built as a progression system rather
 than a monster pack.
 
-> **Status: skeleton.** This repository currently contains the build, mod metadata, package
-> layout, design documents and compiling placeholder registries. No gameplay is implemented yet.
+> **Status: playable alpha (in development).** The three RPG axes, the ritual engine, data-driven
+> quests, the endgame fork, the codex/journal/skill screens and a full bestiary are implemented and
+> play through a complete arc on a dedicated server. Art and audio are **procedurally generated
+> placeholders** ([`tools/`](tools/)); the design bible in [`design/`](design/README.md) remains
+> the source of truth for everything still open. [`docs/STATUS.md`](docs/STATUS.md) is the current
+> handoff snapshot, [`docs/TODO.md`](docs/TODO.md) the backlog.
 
-## Design at a glance
+## What's in the game
 
 The mod is built on three RPG axes and one progression engine:
 
@@ -16,9 +20,23 @@ The mod is built on three RPG axes and one progression engine:
 | **Sanity** | A per-player meter that drains near the eldritch and recovers with rest/light. | The "health" of your mind; at zero, hallucinations and madness. |
 | **Corruption** | A durable exposure value from forbidden knowledge and rituals; barely reversible. | The cost axis: power always leaves a mark. |
 | **Cult reputation** | Faction standing gating rites, reagents and services. | Social progression; cults oppose each other. |
-| **Rituals** | Data-driven altar recipes with a block pattern + offerings + outcomes. | Quest-like advancement and the mod's boss/content unlocks. |
+| **Rituals** | Data-driven altar recipes with a block pattern + offerings + outcomes. | Quest-like advancement and the mod's content unlocks. |
+| **Quests** | A datapack-driven chain (`data/eldritch_horror/quest/*.json`). | The journal (`J`) tracks the chain and your next hint. |
+| **Endgame** | The Horror walks; the world decides — **banish** it or **summon** the corruption floor. | A per-world fork with lasting consequences. |
 
-See [`design/`](design/README.md) for the complete design bible (source of truth), and
+**Keys:** `M` map · `J` journal · `C` codex (learnt lore) · `K` skill tree.
+**First steps:** a new world opens with a short prologue that places you in a curated starting
+city; the journal then tracks the quest chain, and the altar is where power is bought. A rite
+needs a real altar pattern — an `altar_core` **ringed** by rune stones (or ritual chalk) that
+surround it — plus its offerings; the endgame rites also read the world's state.
+
+**Commands:** `/eh` covers `sanity`, `corruption`, `taint`, `rep`, `cult`, `rite(s)`, `codex`,
+`quests`, `skill`, `endgame`, `event(s)`, `learn`, `unlock`, `service`, `purify`, `rift` and
+`prologue` — reads are self-serve, mutations need gamemaster permissions. A headless **bot**
+harness for playtesting lives under `/eh bot …` (spawn a fake player and drive it through the
+game; see [`docs/TESTING.md`](docs/TESTING.md)).
+
+See [`design/`](design/README.md) for the complete design bible, and
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the code is laid out.
 
 ## Requirements
@@ -198,7 +216,7 @@ only for builds.
 ## Project layout
 
 ```
-build.gradle                    ModDevGradle build (NeoForge 2.0.x plugin)
+build.gradle                    ModDevGradle build (NeoForge plugin)
 settings.gradle                 Plugin/toolchain resolution
 gradle.properties               versions + mod metadata (single source of truth)
 src/main/templates/…/neoforge.mods.toml   mod metadata template (${…} from gradle.properties)
@@ -206,10 +224,18 @@ src/main/java/…/eldritchhorror/
     EldritchHorror.java         @Mod entry point (thin: registers + config only)
     core/                       config and shared plumbing
     registry/                   DeferredRegisters (blocks, items, entities, effects, sounds)
-    sanity/  corruption/  cult/  ritual/    one package per RPG system
-    client/                     client-only setup (HUD, overlays, renderers)
-src/main/resources/             assets, lang, pack.mcmeta
-docs/                           design + architecture
+    sanity/  corruption/  cult/  rite/  quest/  endgame/
+                                one package per RPG system
+    world/                       map generation, locations/sites, taint, spawn suppression, the Threshold
+    entity/                      bestiary (mod entities; vanilla mobs are replaced)
+    bot/                         headless server-side test player for playtesting
+    network/                     payloads (server → client sync for the screens)
+    client/                      client-only setup (screens, HUD, overlays, renderers)
+src/main/resources/             assets, lang, datapacks (quests, rites), pack.mcmeta
+tools/gen_assets.py             procedural textures: entity skins, item icons, logo
+tools/gen_sounds.py             procedural ogg sfx: rites, endgame, the Horror
+docs/                           design + architecture + testing + handoff
+design/                         the design bible (source of truth)
 ```
 
 ## Contributing
@@ -219,6 +245,8 @@ The project is early; conventions are deliberately small:
 - Keep the `@Mod` class thin — feature code belongs in its system package.
 - One `DeferredRegister` per registry, in `registry/`, registered from the entry point.
 - Never reference a `client/` class from common code path.
+- Generated assets are **reproducible**: change the recipe in `tools/`, not the PNG/ogg.
+- Workflow rules for agents/subagents live in [`AGENTS.md`](AGENTS.md).
 
 ## Design & content
 
@@ -228,11 +256,13 @@ The project is early; conventions are deliberately small:
   skills, items, mobs, bosses, events, map).
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — code layout, layers and conventions.
 - [`docs/WORLDGEN.md`](docs/WORLDGEN.md) — the Overworld map generator (continents, oceans, vanilla biomes).
+- [`docs/TESTING.md`](docs/TESTING.md) — the manual playbook: commands and a recipe per system.
+- [`docs/MULTIPLAYER.md`](docs/MULTIPLAYER.md) — server-authoritative sessions.
 
 ## Roadmap & progress
 
 The project board (linked below) is the full backlog; `docs/STATUS.md` is the current handoff
-snapshot.
+snapshot and `docs/TODO.md` the tracked backlog debts.
 
 Implementation is tracked as GitHub **issues** (one per story) grouped into
 **milestones** (`M1 Foundations` → `M5 Content & Endgame`, plus `Backlog`), and mirrored
@@ -248,7 +278,6 @@ The seeding is scripted and idempotent, so the roadmap can be re-applied or adap
 python3 scripts/seed_issues.py     # labels, milestones, issues (needs repo scope)
 python3 scripts/setup_project.py   # project board + fields (needs project scope)
 ```
-
 
 ## License
 
