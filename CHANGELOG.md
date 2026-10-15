@@ -58,6 +58,14 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   Horror comes for the decision and every rift it knew is already closed, nothing holds it and the
   world stands **sealed** (no cost, no banishment; the journal's `the_seal` completes).
 - **Russian locale** (`ru_ru`, 797 keys), independently reviewed.
+- **Armour and the last artefacts** (`design/16`, slice 2): the eight worn pieces are real armour
+  (equipment assets, generated worn sheets, per-set stats); the bone charm absorbs one fatal blow;
+  the lantern stills the darkness drain; the mask summons more star-spawn, panics villagers and
+  lowers the sanity ceiling; the chalice echoes the last rite for corruption; the compass reads the
+  safest city; the lens reads the local taint; the maps remember waypoints.
+- **Bots can be hurt again** (26.3): `ServerPlayer#isInvulnerableTo` treats a player without a
+  loaded client — and one mid-dimension-change — as invulnerable, so headless bots were untouchable
+  and every combat probe silently did nothing; the harness now stands in for a player that confirms.
 - **Bot harness**: a headless server-side test player under `/eh bot …` (spawn, perceive,
   travel, craft, mine, place altars, perform rites, fight) — used to prove the arc end to end.
 - **Procedural asset generator** `tools/gen_assets.py`: logo/pack icon, every entity skin,

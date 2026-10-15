@@ -284,6 +284,12 @@ The starter kit seeds ritual reagents (`chalk_reagent`, `salt_reagent`, the rift
 `void_reagent`, `blood_offering`, an `offering_bowl` and stone) so the altar is reachable without
 grinding rare night mobs for `minecraft:bone` — a bone/chalk accessibility gap found while testing.
 
+In 26.3 a bot could not take damage **at all**: `ServerPlayer#isInvulnerableTo` treats an unloaded
+client (a bot has none) and an unconfirmed dimension change (the prologue teleports every new bot)
+as invulnerable, so `/damage` answered "Target is invulnerable…" and every combat probe quietly did
+nothing. `BotPlayer` now reports the client loaded and clears the change flag on the next tick,
+standing in for a player that always confirms — `5d63b47`.
+
 ## RPG layer — current seams (found by playing)
 
 Playtesting the questline surfaced four weak spots; all four are now wired:
@@ -456,10 +462,21 @@ wired where a system exists:
   blocks (`TaintSystem`), `eye_of_the_watcher` sanity −0.1/s + a bearing to the nearest known rift.
 - **Navigation answers in chat** — `city_map`, `cartographers_lens`, `compass_of_longing`,
   `veil_compass`, `sextant`.
-- **Still flavour** (documented in the code, no hook yet): armour (26.3 wants equipment assets),
-  weapon on-hit effects, `prophet_mask`, `mirror_shard`, `compass_of_quiet`, `chalice_of_echoes`,
-  `veil_lens`, `bone_charm`, `lantern_of_steadfast`, `wardstone_pendant`, `marked_map`,
-  `route_ledger`. Tooltips state only what the item really does.
+- **Armour (slice 2)**: the eight worn pieces are real armour — a per-set `ArmorMaterial` (durability,
+  defence, equip sound, repair tag) whose asset resolves under `assets/eldritch_horror/equipment/`
+  (the vanilla `layers.humanoid` / `_baby` / `_leggings` schema), with worn sheets generated under
+  `textures/entity/equipment/…`. 26.3 has no `ArmorItem`: armour is a plain `Item` whose
+  `Properties.humanoidArmor(material, type)` carries durability, the attribute component and the
+  `EQUIPPABLE` component; the values live in the item's LORE tooltip, both locales. Verified live:
+  armour 0 → 6 (warden's plate) → 7 (+ occultist's hat).
+- **The remaining artefacts**: `bone_charm` (one fatal blow drunk — corruption +5, sanity −10 — then
+  it shatters), `lantern_of_steadfast` (no darkness drain while carried), `mirror_shard` (a rare jolt
+  + a bearing to an undiscovered site), `compass_of_quiet` (the safest city; spins near rifts),
+  `prophet_mask` (star-spawn ×1.25, villagers panic, −10 `MAX_SANITY` while carried — the sanity
+  ticker reconciles the transient modifier so it can never stick), `chalice_of_echoes` (echoes the
+  last successful rite for corruption), `veil_lens` (a local taint readout + drain on use),
+  `marked_map`/`route_ledger` (a small per-player waypoint memory). Only the weapon on-hit effects and
+  the client-only overlay/map markers stay commented in place.
 
 ## Where things live
 

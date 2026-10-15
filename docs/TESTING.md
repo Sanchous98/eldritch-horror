@@ -126,6 +126,12 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
   "there is a Horror in play", not as a failure.
 - **A bot join is mandatory** before trusting any per-player ticker: they only run for online players,
   and the first tick gets `null` from `Map.put` (the decay ticker's guard is documented in `AGENTS.md`).
+- **A headless bot was invulnerable to everything in 26.3** — `ServerPlayer#isInvulnerableTo` checks
+  `!connection.hasClientLoaded()` *and* a dimension-change flag that only a real client's teleport
+  confirmation clears, so `/damage` answered "Target is invulnerable to the given damage type" and
+  nothing moved (the prologue teleports every new bot, setting the flag). Fixed in `BotPlayer`
+  (`hasClientLoaded() = true`, the flag cleared on the next tick, `5d63b47`); if a damage probe ever
+  silently does nothing again, check those two clauses first.
 
 ## 5. Dev system properties
 

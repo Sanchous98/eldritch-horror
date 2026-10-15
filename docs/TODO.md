@@ -9,12 +9,20 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
-- [ ] **Items, second slice** — armour wants 26.3 equipment assets; the on-hit weapon effects and the
-  remaining artefacts (`prophet_mask`, `mirror_shard`, `compass_of_quiet`, `chalice_of_echoes`,
-  `veil_lens`, `bone_charm`, `lantern_of_steadfast`, `wardstone_pendant`, `marked_map`,
-  `route_ledger`) wait for the systems they describe.
+- [ ] **Weapon on-hit effects and client-only bits (design/16)** — the recorded kill/water/ward/
+  scaling effects on the weapons, the veil-lens corruption overlay and waypoint markers on the world
+  map stay commented in place.
 
 ## Done
+
+- [x] **Armour and the remaining artefacts (design/16, slice 2)** — the eight worn pieces are real
+  armour (equipment assets + generated worn sheets, per-set stats); the bone charm saves one fatal
+  blow, the lantern stills the darkness drain, the mask summons more star-spawn and lowers the
+  sanity ceiling, the chalice echoes the last rite, the compass reads the safest city, the lens
+  reads the local taint, the maps remember waypoints — `3bbe206`.
+- [x] **Bots can take damage in 26.3** — `ServerPlayer#isInvulnerableTo` treated the bot's unloaded
+  client and its prologue dimension-change flag as invulnerable, so every combat probe silently did
+  nothing; the harness now reports the client loaded and clears the flag — `5d63b47`.
 
 - [x] **The third ending — sealed (design/11)** — a world **rift ledger** (the open rite, the summon
   path, and the anchor block itself breaking tell it; `prune` heals stale entries) and
