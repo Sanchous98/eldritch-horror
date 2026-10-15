@@ -113,6 +113,20 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
 - **Taint world change.** `enableTaintWorld=true`, taint a chunk past `taintWorldThreshold`, watch a
   few natural surface blocks convert; `/eh taint purify` reverts.
 
+### Probe gotchas (learned in the bot runs)
+
+- **Weather needs time to register.** `Level#isThundering()` wants the interpolated thunder level
+  above `0.9`, and the level ramps by `0.01` per tick — a rite gated on `Weather.STORM` started right
+  after `/weather thunder` still sees no storm. Wait ~5 s.
+- **An altar built on a rift closes it.** The pattern's rune/chalk marks *replace* blocks, so a ring
+  mark landing on a `rift_anchor` destroys it. In-game that is now harmless (`RiftAnchorBlock` tells
+  the rift ledger), but a probe that needs the rift alive should raise the altar a few blocks off.
+- **The Horror's `awaken` search radius is wide** (`riteEndgameRadius × 4` = 96 blocks by default), so
+  a presence left in the world blocks a fresh awakening nearby — read "already awake nearby" as
+  "there is a Horror in play", not as a failure.
+- **A bot join is mandatory** before trusting any per-player ticker: they only run for online players,
+  and the first tick gets `null` from `Map.put` (the decay ticker's guard is documented in `AGENTS.md`).
+
 ## 5. Dev system properties
 
 Set on the run (e.g. `JAVA_TOOL_OPTIONS`/`GRADLE_OPTS`, or `programArguments` in `build.gradle`):

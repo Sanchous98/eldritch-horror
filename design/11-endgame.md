@@ -70,10 +70,18 @@ The Horror (`18-bosses.md`) is the stage on which the fork plays out:
 - **Summon**: pins the corruption floor at the Claimed band — a floor on the meter itself, so every
   cleanse path (rite, service, event) is refused by the system — raises Hollow standing, tears open
   rifts, grants `hollow_crown`.
-- **Journal**: `awaken_the_horror` and `the_decision` (data files under
+- **Journal**: `awaken_the_horror`, `the_decision` and `the_seal` (data files under
   `data/eldritch_horror/quest`).
+- **The third outcome — sealed** (the open question below, now implemented): `endgame/RiftLedger`
+  is a world `SavedData` that records every rift anchor placed (the `open_rift` rite, the summon
+  path) and forgets one when it goes: the close rite, a banish, or the anchor block itself breaking —
+  `RiftAnchorBlock` tells the ledger, so an altar ring built over a rift cannot leave a ghost behind —
+  and `prune` drops entries whose loaded chunk says the anchor is gone. When The Horror reaches the
+  decision and the ledger is empty, `Endgame.trySeal` records `Outcome.SEALED`, the presence recedes,
+  the `endgame.seal` sound plays and the journal's `the_seal` completes. Nothing was banished, so no
+  cost is paid; the fork rites then refuse ("the decision has already been made"). A world that never
+  had a rift is never "sealed" (`wasEverOpen`).
 
 ## Open questions
 
-- A possible third outcome: seal every rift without banishing (backlog).
-- Whether the endgame is per-player or per-world in multiplayer.
+- Whether the endgame is per-player or per-world in multiplayer (it is per-world today).

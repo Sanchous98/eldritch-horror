@@ -355,6 +355,13 @@ but could not reach `lorekeeper` 10/10 — which is what carries the Order to In
   every cleanse path is refused by the system, no per-path special case), raises Hollow standing,
   tears open rifts, grants `hollow_crown`.
 - **Journal**: `awaken_the_horror`, `the_decision` (14 quests load now).
+- **The third outcome — sealed** (`endgame/RiftLedger`): the ledger records every rift anchor
+  placed (the rite, the summon path) and forgets it when the anchor goes — the close rite, a banish,
+  or the block itself breaking (`RiftAnchorBlock`), with `prune` as the safety net for entries a
+  loaded chunk says are gone. When the Horror reaches the decision with an empty ledger,
+  `Endgame.trySeal` records `SEALED`, the presence recedes, the `endgame.seal` sound plays and
+  `the_seal` completes — no cost, no banishment. The bot probe (`verify_seal.py`) opens a rift, wakes
+  the Horror, closes that rift and expects `endgame = sealed` at the decision.
 
 Verified in game: the Horror wakes at a rift and drains sanity; its clock runs through attention
 (`NoAI=1b`, age 29) into approach (age 653, AI on); banish closed 5 rifts and set
@@ -362,8 +369,8 @@ Verified in game: the Horror wakes at a rift and drains sanity; its clock runs t
 granted the crown and clamped a `corruption set 5` back to 85 (Claimed); both journal quests
 completed. 0 exceptions, PMD 0 violations.
 
-Still open from design/11: the possible third outcome (seal every rift) and whether the endgame is
-per-player or per-world in multiplayer (it is per-world today).
+Still open from design/11: whether the endgame is per-player or per-world in multiplayer (it is
+per-world today).
 
 ## Quests are data, not code
 
@@ -422,9 +429,9 @@ Programmer art, but a coherent family; hero assets still deserve a human.
 
 Host-side, deterministic, stdlib synthesis (no numpy); encoded to mono ogg with ffmpeg — the host
 binary if present, otherwise the `linuxserver/ffmpeg` container (`DOCKER_HOST` must point at the
-session's docker socket). CLI: `--list`, `--only NAME`, `--force`. **Fourteen** sounds ship
-(~510 KiB): the ritual hum and the two outcome stings, the endgame fork (awaken / banish / summon),
-the Horror's own ambient / hurt / death / stage change, and the whisper/dread ambience. **Wired**
+session's docker socket). CLI: `--list`, `--only NAME`, `--force`. **Thirteen** sounds ship
+(~580 KiB): the ritual hum and the two outcome stings, the endgame fork (awaken / banish / summon /
+seal), the Horror's own ambient / hurt / death / stage change, and the whisper/dread ambience. **Wired**
 through `ModSounds` + `sounds.json` (subtitles in both locales): the outcome stings fire for every
 rite that started (success or a paid failure), the fork sounds in `Endgame`, the Horror's set and
 the awakening horn in `TheHorror`, whisper at the MARKED band and dread when the corruption deepens.

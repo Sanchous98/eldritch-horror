@@ -7,10 +7,6 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Open
 
-- [ ] **Reputation decay & the cultist-kill penalty (design/03c)** — rep decay over time and −40 for
-  killing a cultist of that faction.
-- [ ] **Third ending: seal every rift (design/11)** — the banish path resolves at the finale;
-  consider a "sealed world" outcome when every rift scar is closed.
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
 - [ ] **Items, second slice** — armour wants 26.3 equipment assets; the on-hit weapon effects and the
@@ -20,6 +16,13 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **The third ending — sealed (design/11)** — a world **rift ledger** (the open rite, the summon
+  path, and the anchor block itself breaking tell it; `prune` heals stale entries) and
+  `Endgame.trySeal` at the decision: an empty ledger seals the world, no cost is paid, and
+  `the_seal` completes — `657cdc3`.
+- [x] **Reputation decay & the cultist-kill penalty (design/03c)** — decay config-gated and off by
+  default (one point per period of inactivity per cult, one-way to 0); killing a cultist costs
+  exactly −40 with that cult — `a2523f6`.
 - [x] **Item mechanics (design/16)** — weapon/tool stats, the reagent deltas, the four carried
   artefacts and five navigation items; the rest documented as flavour — `0be6ae6`.
 - [x] **The sound pack is live (design/07)** — 14 mono ogg, `ModSounds` + `sounds.json` +

@@ -51,8 +51,12 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   phases) — each with a loot table and a generated skin.
 - **Items wired** (`design/16`): real weapon/tool stats, the reagent row's deltas, carried-artefact
   passives (rite cooldown, taint suppression, the watcher's drain) and five navigation items.
-- **Audio wired**: fourteen procedural ogg through `ModSounds`/`sounds.json` — the rites, the
-  endgame fork, the Horror's own voice (it no longer sounds like a wither), whispers and dread.
+- **Audio wired**: thirteen procedural ogg through `ModSounds`/`sounds.json` — the rites, the
+  endgame fork (banish/summon/**seal**), the Horror's own voice (it no longer sounds like a wither),
+  whispers and dread.
+- **The third ending** (`design/11`, was an open question): a world-level **rift ledger** — when the
+  Horror comes for the decision and every rift it knew is already closed, nothing holds it and the
+  world stands **sealed** (no cost, no banishment; the journal's `the_seal` completes).
 - **Russian locale** (`ru_ru`, 797 keys), independently reviewed.
 - **Bot harness**: a headless server-side test player under `/eh bot …` (spawn, perceive,
   travel, craft, mine, place altars, perform rites, fight) — used to prove the arc end to end.
