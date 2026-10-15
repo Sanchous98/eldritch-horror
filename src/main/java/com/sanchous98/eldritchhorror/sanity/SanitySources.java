@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
 import com.sanchous98.eldritchhorror.world.BoundaryTravel;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
@@ -119,6 +120,12 @@ public final class SanitySources {
         @Override
         public double deltaPerSecond(ServerPlayer player, SanityContext ctx) {
             if (!ModConfig.ENABLE_SANITY_DARKNESS.get()) {
+                return 0.0;
+            }
+            // The lantern of the steadfast is a light that will not gutter: while it is carried
+            // (CarriedItems, anywhere in the inventory) darkness does not touch the mind at all.
+            // Its one drawback, "its light draws attention", stays flavour (design/16).
+            if (CarriedItems.carries(player, "lantern_of_steadfast")) {
                 return 0.0;
             }
             // A settlement does not merely fail to drain you: its lights are a shelter from the

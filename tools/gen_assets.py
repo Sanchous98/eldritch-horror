@@ -12,6 +12,8 @@ What it writes (paths relative to the repo root):
 - .../textures/entity/<id>.png                   an organic "flesh" skin per entity, in that
                                                  entity's palette, at the size the old file used
 - .../items/<id>.json                            the item model definition a new icon needs
+- .../textures/entity/equipment/<layer>/<id>.png the worn armour sheets of the eight gear sets
+- .../equipment/<id>.json                        the equipment asset each set's assetId points at
 
 The entity skins are deliberately UV-layout agnostic: layered bands, wrapped tendrils and a few
 watching eyes read as an organic mass no matter how the model's islands are mapped. That is a real
@@ -21,6 +23,7 @@ programmer art - a human pass is welcome for hero assets.
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import random
 from pathlib import Path
@@ -32,6 +35,9 @@ ASSETS = ROOT / "src/main/resources/assets/eldritch_horror"
 TEX_ENTITY = ASSETS / "textures/entity"
 TEX_ITEM = ASSETS / "textures/item"
 ITEM_DEFS = ASSETS / "items"
+EQUIPMENT = ASSETS / "equipment"
+TEX_EQUIP_HUMANOID = ASSETS / "textures/entity/equipment/humanoid"
+TEX_EQUIP_LEGGINGS = ASSETS / "textures/entity/equipment/humanoid_leggings"
 
 VOID = (9, 6, 16)
 BONE = (214, 204, 222)
@@ -74,6 +80,26 @@ PALETTES: dict[str, tuple[tuple[int, int, int], tuple[int, int, int], tuple[int,
     "cult_raider": ((20, 16, 10), (92, 72, 40), (220, 190, 120)),
     "rite_binder": ((10, 14, 20), (44, 66, 92), (140, 180, 230)),
     "plague_crone": ((14, 18, 10), (66, 84, 40), (170, 200, 110)),
+}
+
+# --- worn gear palettes (design/16): the eight armour sets, base (darkest), mid, accent ---------
+GEAR_PALETTES: dict[str, tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]] = {
+    # investigator_coat — oilskin brown
+    "investigator_coat": ((28, 22, 18), (92, 72, 52), (196, 170, 130)),
+    # choir_robe — salt and deep water
+    "choir_robe": ((10, 22, 24), (36, 84, 88), (150, 206, 200)),
+    # wardens_plate — cold Order steel
+    "wardens_plate": ((16, 20, 28), (58, 72, 96), (168, 188, 214)),
+    # drowned_wetsuit — rubber and black water
+    "drowned_wetsuit": ((10, 18, 26), (34, 62, 92), (120, 168, 206)),
+    # cultist_habit — grey wool, violet dye
+    "cultist_habit": ((18, 14, 22), (64, 52, 82), (176, 152, 196)),
+    # occultists_hat — ink and violets
+    "occultists_hat": ((14, 10, 20), (52, 38, 74), (162, 132, 198)),
+    # boots_of_silence — soft charcoal hide
+    "boots_of_silence": ((16, 16, 18), (58, 58, 62), (150, 148, 156)),
+    # gloves_of_precision — pale kid leather
+    "gloves_of_precision": ((24, 20, 16), (86, 74, 58), (206, 186, 150)),
 }
 
 
@@ -199,6 +225,50 @@ def mob_skin(name: str, size: tuple[int, int]) -> Image.Image:
     return img
 
 
+# The 64x32 humanoid armour layout: layer 1 (helmet/chestplate/boots) paints the head, the body
+# and the right arm; the leggings layer paints the waist and the right leg. The left limbs mirror
+# the right at render time (vanilla sheets leave them blank), so only the right is painted.
+ARMOR_REGIONS: dict[str, tuple[tuple[int, int, int, int], ...]] = {
+    "humanoid": ((0, 0, 32, 16), (16, 16, 40, 32), (40, 16, 56, 32)),
+    "humanoid_leggings": ((0, 16, 16, 32), (16, 16, 40, 32)),
+}
+
+
+def armor_sheet(name: str, layer: str) -> Image.Image:
+    """The worn sheet for gear set {@code name} on {@code layer}: a deterministic woven texture in
+    the set's palette, with a lit top edge, dark stitching and a couple of studs per piece."""
+    dark, mid, accent = GEAR_PALETTES[name]
+    rng = random.Random(_seed(f"{name}/{layer}"))
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    for x0, y0, x1, y1 in ARMOR_REGIONS[layer]:
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                # A coarse weave: the warp/weft threads sit lighter than the weave gaps.
+                t = 0.62 if (x + y) % 4 == 0 or (x - y) % 3 == 0 else 0.30
+                base = tuple(round(dark[i] + (mid[i] - dark[i]) * t) for i in range(3))
+                jitter = rng.randint(-6, 6)
+                img.putpixel((x, y), tuple(max(0, min(255, base[i] + jitter)) for i in range(3))
+                              + (255,))
+        draw.line([x0, y0, x1 - 1, y0], fill=(*accent, 190))
+        draw.rectangle([x0, y0, x1 - 1, y1 - 1], outline=(*dark, 255))
+        for _ in range(rng.randint(2, 4)):
+            draw.point((rng.randint(x0 + 1, x1 - 2), rng.randint(y0 + 1, y1 - 2)),
+                       fill=(*accent, 230))
+    return img
+
+
+def write_equipment(name: str) -> None:
+    """The equipment asset the item's ArmorMaterial.assetId resolves to: every layer key names the
+    same texture id, which reads as textures/entity/equipment/<layer>/<id>.png (26.3's
+    EquipmentClientInfo.getTextureLocation)."""
+    texture = f"eldritch_horror:{name}"
+    layers = {layer: [{"texture": texture}]
+              for layer in ("humanoid", "humanoid_baby", "humanoid_leggings")}
+    EQUIPMENT.mkdir(parents=True, exist_ok=True)
+    (EQUIPMENT / f"{name}.json").write_text(json.dumps({"layers": layers}, indent=2) + "\n")
+
+
 def spawn_egg_icon(colour: tuple[int, int, int] = PALETTES["the_horror"][2]) -> Image.Image:
     """A 16x16 spawn-egg icon (base + spots), matching the mod's egg look."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -260,7 +330,19 @@ def main() -> None:
             src = folder / "abhoth_spawn_egg.json"
             (folder / f"{item}.json").write_text(src.read_text().replace("abhoth_spawn_egg", item))
 
-    print(f"wrote logo.png, pack.png, {count} entity skins, {len(missing)} item icon(s) + model(s)")
+    # 4. The eight worn gear pieces (registry/items/Weapons): a woven armour sheet per set under
+    #    textures/entity/equipment/<layer>/<id>.png, plus the equipment definition the item's
+    #    ArmorMaterial.assetId names. Layer 1 serves helmet/chest/boots; the leggings sheet is
+    #    written for the standard schema even though no current set uses the LEGS slot.
+    for name in GEAR_PALETTES:
+        for layer, folder in (("humanoid", TEX_EQUIP_HUMANOID),
+                              ("humanoid_leggings", TEX_EQUIP_LEGGINGS)):
+            folder.mkdir(parents=True, exist_ok=True)
+            armor_sheet(name, layer).save(folder / f"{name}.png")
+        write_equipment(name)
+
+    print(f"wrote logo.png, pack.png, {count} entity skins, {len(missing)} item icon(s) + model(s), "
+          f"{len(GEAR_PALETTES)} armour set(s) ({len(GEAR_PALETTES) * 2} sheets + equipment defs)")
 
 
 if __name__ == "__main__":

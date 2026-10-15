@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "eldritch_horror:drowned_wetsuit"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "eldritch_horror:drowned_wetsuit"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "eldritch_horror:drowned_wetsuit"
+      }
+    ]
+  }
+}

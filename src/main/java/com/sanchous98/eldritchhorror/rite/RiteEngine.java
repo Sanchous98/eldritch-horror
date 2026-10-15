@@ -16,6 +16,7 @@ import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
+import com.sanchous98.eldritchhorror.registry.items.RiteEchoes;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
 import net.minecraft.core.BlockPos;
@@ -84,6 +85,8 @@ public final class RiteEngine {
     /** Star-spawn summon: 1 star-spawn, refused past {@value #STAR_CAP} within {@value #SPAWN_CAP_RADIUS} blocks. */
     private static final int STAR_COUNT = 1;
     private static final int STAR_CAP = 4;
+    /** The prophet's mask's "+25% summoning power" (design/16), applied to the star-spawn request. */
+    private static final double PROPHET_SUMMON_BONUS = 1.25;
     private static final int SPAWN_RADIUS = 6;
     private static final int SPAWN_CAP_RADIUS = 16;
 
@@ -116,6 +119,19 @@ public final class RiteEngine {
      * outcome server-side.
      */
     public static Result perform(ServerPlayer player, RiteDefinition rite) {
+        return perform(player, rite, false);
+    }
+
+    /**
+     * Performs {@code rite} as above.
+     *
+     * @param freeOfferings the chalice of echoes' echo (design/16): when {@code true} the offering
+     *                      check and its consumption are skipped, because the echo pays its own
+     *                      price in corruption at the chalice instead of laying the rite's reagents
+     *                      on the altar. Every other precondition (knowledge, altar, conditions,
+     *                      cooldown) still applies.
+     */
+    public static Result perform(ServerPlayer player, RiteDefinition rite, boolean freeOfferings) {
         if (!RiteKnowledge.knows(player, rite.id())) {
             return new Result(false, Component.literal("You do not know the rite: " + rite.id()));
         }
@@ -165,7 +181,7 @@ public final class RiteEngine {
         // Offerings: checked up front (all the listed reagents present), removed only once the rite
         // actually resolves. A rite that never starts (missing offerings) pays nothing at all.
         List<RiteReagents.Reagent> offerings = RiteReagents.offerings(rite);
-        boolean reagentsEnabled = ModConfig.REQUIRE_RITE_REAGENTS.get();
+        boolean reagentsEnabled = ModConfig.REQUIRE_RITE_REAGENTS.get() && !freeOfferings;
         if (reagentsEnabled && !RiteReagents.has(player, offerings)) {
             return new Result(false, Component.literal("The altar lacks the offerings: ")
                     .append(RiteReagents.describe(offerings)).append(Component.literal(".")));
@@ -204,6 +220,9 @@ public final class RiteEngine {
         }
         QuestJournal.add(player, "first_rite", 1);
         QuestJournal.add(player, "ritualist", 1);
+        // A rite that took effect is what the chalice_of_echoes remembers (design/16): the id only,
+        // resolved back through Rites when re-cast. In-memory, see registry/items/RiteEchoes.
+        RiteEchoes.record(player, rite.id());
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 ModSounds.RITUAL_SUCCESS.get(), SoundSource.AMBIENT, 0.8F, 1.0F);
         return result;
@@ -604,7 +623,12 @@ public final class RiteEngine {
         // Resolve lazily: a static DeferredHolder.get() would run before the registry is bound and
         // throw "Trying to access unbound value" (the historical startup crash).
         EntityType<?> type = star ? ModEntities.STAR_SPAWN.get() : ModEntities.LESSER_SWARM.get();
-        int requested = star ? STAR_COUNT : LESSER_COUNT;
+        // The prophet's mask reads as +25% summoning power (design/16): on the one summoning hook
+        // that exists, the star-spawn count, rounded up — 1 becomes 2 — still refused past STAR_CAP.
+        boolean prophet = star && CarriedItems.carries(player, "prophet_mask");
+        int requested = star
+                ? (prophet ? (int) Math.ceil(STAR_COUNT * PROPHET_SUMMON_BONUS) : STAR_COUNT)
+                : LESSER_COUNT;
         int cap = star ? STAR_CAP : LESSER_CAP;
 
         int existing = level.getEntitiesOfClass(Mob.class, capBox(player), mob -> mob.getType() == type).size();

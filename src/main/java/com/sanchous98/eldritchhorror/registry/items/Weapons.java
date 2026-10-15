@@ -1,14 +1,28 @@
 package com.sanchous98.eldritchhorror.registry.items;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.ModItems;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Weapon;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 
 /**
  * Weapons and worn gear (FFG traits: <em>Weapon</em>, <em>Magical Weapon</em>,
@@ -21,10 +35,15 @@ import net.minecraft.world.item.component.Weapon;
  * corruption, underwater damage, ward auras, corrupted scaling, sanity costs) stay flavour: there is
  * no damage hook for them in this pass, and only the four named artefact passives are wired.
  *
- * <p>Worn gear stays plain, stat-less items: real armour in 26.3 needs
- * {@code ArmorMaterial} + {@code humanoidArmor}, whose {@code assetId} points at a client
- * equipment definition ({@code assets/<ns>/equipment/<name>.json} plus worn-layer textures) — none
- * exist for this mod yet, so the gear is flavour until those assets ship.
+ * <p><b>The eight worn pieces are real armour.</b> 26.3 has no {@code ArmorItem}: vanilla registers
+ * armour as a plain {@link Item} whose {@code Item.Properties.humanoidArmor(ArmorMaterial,
+ * ArmorType)} sets durability ({@code type.getDurability(material.durability())}), the armour
+ * attribute modifiers, the enchantability, the repair tag and the {@code EQUIPPABLE} component.
+ * The {@link ArmorMaterial}'s {@code assetId} points at {@code assets/eldritch_horror/equipment/
+ * <id>.json}, which names the worn sheet at {@code textures/entity/equipment/humanoid/<id>.png};
+ * both are written by {@code tools/gen_assets.py}. The recorded flavour stays flavour and is
+ * carried as a {@code LORE} line beside an {@code .armor} line stating the real values (both
+ * locales).
  */
 public final class Weapons {
     private Weapons() {
@@ -75,23 +94,90 @@ public final class Weapons {
         // +damage vs. eldritch and the per-shot sanity cost are not wired.
         ModItems.addItem("veil_bow", p -> new BowItem(p.durability(500).enchantable(1)), 1);
 
-        // Investigator's Coat — chest gear; −sanity drain in darkness.
-        // flavour (design/16): real armour needs an equipment asset + worn textures (see class javadoc).
-        ModItems.add("investigator_coat", 1);
-        // Choir Robe — chest gear; +reputation gain, +corruption gain. flavour (design/16): no equipment asset.
-        ModItems.add("choir_robe", 1);
-        // Warden's Plate — chest gear; heavy armour, resists corruption spread, slows movement. flavour (design/16): no equipment asset.
-        ModItems.add("wardens_plate", 1);
-        // Drowned Wetsuit — chest gear; water breathing and swim speed, +corruption over time. flavour (design/16): no equipment asset.
-        ModItems.add("drowned_wetsuit", 1);
-        // Cultist's Habit — chest gear; blends with cults (+reputation), −sanity in daylight. flavour (design/16): no equipment asset.
-        ModItems.add("cultist_habit", 1);
-        // Occultist's Hat — head gear; −sanity drain while reading tomes, no armour value. flavour (design/16): no equipment asset.
-        ModItems.add("occultists_hat", 1);
-        // Boots of Silence — feet gear; muffles footsteps, reduces pursuit/sanity from noise. flavour (design/16): no equipment asset.
-        ModItems.add("boots_of_silence", 1);
-        // Gloves of Precision — hands gear; +ritual accuracy and lockpicking, no combat bonus. flavour (design/16): no equipment asset.
-        ModItems.add("gloves_of_precision", 1);
+        // Investigator's Coat — chest armour (iron-ish, light): −sanity drain in darkness stays
+        // flavour (design/16; the darkness source answers to lantern_of_steadfast instead).
+        ModItems.addItem("investigator_coat",
+                p -> new Item(armor(p, COAT, ArmorType.CHESTPLATE, "investigator_coat")), 1);
+        // Choir Robe — chest armour (iron-ish): +reputation gain and +corruption gain stay flavour.
+        ModItems.addItem("choir_robe",
+                p -> new Item(armor(p, ROBE, ArmorType.CHESTPLATE, "choir_robe")), 1);
+        // Warden's Plate — chest armour (iron): the warden_sigil's spread suppression is NOT doubled
+        // onto the plate; its slow stays flavour (design/16).
+        ModItems.addItem("wardens_plate",
+                p -> new Item(armor(p, PLATE, ArmorType.CHESTPLATE, "wardens_plate")), 1);
+        // Drowned Wetsuit — chest armour (leather-ish): water breathing / swim speed stay flavour.
+        ModItems.addItem("drowned_wetsuit",
+                p -> new Item(armor(p, WETSUIT, ArmorType.CHESTPLATE, "drowned_wetsuit")), 1);
+        // Cultist's Habit — chest armour (leather-ish): +reputation blending / daylight drain stay
+        // flavour (design/16).
+        ModItems.addItem("cultist_habit",
+                p -> new Item(armor(p, HABIT, ArmorType.CHESTPLATE, "cultist_habit")), 1);
+        // Occultist's Hat — head armour (light): the tome-reading drain stays flavour.
+        ModItems.addItem("occultists_hat",
+                p -> new Item(armor(p, HAT, ArmorType.HELMET, "occultists_hat")), 1);
+        // Boots of Silence — feet armour (light): the muffled footsteps stay flavour.
+        ModItems.addItem("boots_of_silence",
+                p -> new Item(armor(p, BOOTS, ArmorType.BOOTS, "boots_of_silence")), 1);
+        // Gloves of Precision — hands gear; 26.3 has no hand slot, so they are worn in the chest
+        // slot, whose vanilla model also covers the arms (judgement call, noted in the javadoc
+        // above). +ritual accuracy / lockpicking stay flavour (design/16).
+        ModItems.addItem("gloves_of_precision",
+                p -> new Item(armor(p, GLOVES, ArmorType.CHESTPLATE, "gloves_of_precision")), 1);
+    }
+
+    // --- the eight worn sets' materials (design/16) ------------------------------------------------
+    // Durability is the per-slot multiplier (chestplate 16, helmet 11, boots 13); defence is the
+    // armour points that slot gains. Iron-ish: plate/robe/coat. Leather-ish: wetsuit/habit. Light:
+    // hat/boots/gloves. Each set owns its equipment asset, so each look is its own worn sheet.
+
+    /** Iron chestplate-equivalent plate: 6 armour, 240 durability. */
+    private static final ArmorMaterial PLATE = material(15, 6, ArmorType.CHESTPLATE,
+            SoundEvents.ARMOR_EQUIP_IRON, ItemTags.REPAIRS_IRON_ARMOR, "wardens_plate");
+    /** A robe a step under the plate: 5 armour, 160 durability. */
+    private static final ArmorMaterial ROBE = material(10, 5, ArmorType.CHESTPLATE,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "choir_robe");
+    /** A heavy coat: 5 armour, 192 durability. */
+    private static final ArmorMaterial COAT = material(12, 5, ArmorType.CHESTPLATE,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "investigator_coat");
+    /** Diver's gear, leather-ish: 3 armour, 96 durability. */
+    private static final ArmorMaterial WETSUIT = material(6, 3, ArmorType.CHESTPLATE,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "drowned_wetsuit");
+    /** Plain habit, leather-ish: 3 armour, 80 durability. */
+    private static final ArmorMaterial HABIT = material(5, 3, ArmorType.CHESTPLATE,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "cultist_habit");
+    /** Light hat: 1 armour, 55 durability. */
+    private static final ArmorMaterial HAT = material(5, 1, ArmorType.HELMET,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "occultists_hat");
+    /** Light boots: 1 armour, 65 durability. */
+    private static final ArmorMaterial BOOTS = material(5, 1, ArmorType.BOOTS,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "boots_of_silence");
+    /** Light gloves (chest slot): 1 armour, 80 durability. */
+    private static final ArmorMaterial GLOVES = material(5, 1, ArmorType.CHESTPLATE,
+            SoundEvents.ARMOR_EQUIP_LEATHER, ItemTags.REPAIRS_LEATHER_ARMOR, "gloves_of_precision");
+
+    /**
+     * One worn set's {@link ArmorMaterial}: the durability multiplier, its single slot's defence,
+     * the equip sound, the repair tag and the equipment asset key {@code
+     * eldritch_horror:<id>} that resolves under {@code assets/eldritch_horror/equipment/}.
+     */
+    private static ArmorMaterial material(int durability, int defense, ArmorType type,
+                                          Holder<SoundEvent> equipSound, TagKey<Item> repair,
+                                          String asset) {
+        return new ArmorMaterial(durability, Map.of(type, defense), 15, equipSound, 0.0F, 0.0F,
+                repair, ResourceKey.create(EquipmentAssets.ROOT_ID, EldritchHorror.id(asset)));
+    }
+
+    /**
+     * {@code humanoidArmor} plus the two locale tooltip lines: {@code <id>.armor} states the real
+     * armour value and durability, {@code <id>.tooltip} the recorded flavour. Both render through
+     * the {@code LORE} component, so no client class is involved.
+     */
+    private static Item.Properties armor(Item.Properties properties, ArmorMaterial material,
+                                         ArmorType type, String id) {
+        return properties.humanoidArmor(material, type)
+                .component(DataComponents.LORE, new ItemLore(List.of(
+                        Component.translatable("item.eldritch_horror." + id + ".armor"),
+                        Component.translatable("item.eldritch_horror." + id + ".tooltip"))));
     }
 
     /** The vanilla mace's component set (both this mod's maces reuse the class); only durability varies. */

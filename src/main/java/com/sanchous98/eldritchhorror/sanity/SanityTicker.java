@@ -5,6 +5,7 @@ import com.sanchous98.eldritchhorror.investigator.Progression;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import com.sanchous98.eldritchhorror.registry.items.ProphetMaskItem;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,10 +45,17 @@ public final class SanityTicker {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        if (!ModConfig.ENABLE_SANITY.get()) {
+        if (event.getServer().getTickCount() % INTERVAL_TICKS != 0) {
             return;
         }
-        if (event.getServer().getTickCount() % INTERVAL_TICKS != 0) {
+        // The prophet's mask lowers the max_sanity ceiling while carried. Its modifier is transient
+        // (not saved), so the removal pass for a mask that has left the inventory is reconciled
+        // here, once a second, in every dimension — before the sanity gate, so a disabled meter can
+        // never leave a stale modifier behind.
+        for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+            ProphetMaskItem.reconcile(player);
+        }
+        if (!ModConfig.ENABLE_SANITY.get()) {
             return;
         }
         SanitySources.init();

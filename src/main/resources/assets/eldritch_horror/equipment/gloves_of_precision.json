@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "eldritch_horror:gloves_of_precision"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "eldritch_horror:gloves_of_precision"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "eldritch_horror:gloves_of_precision"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "eldritch_horror:boots_of_silence"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "eldritch_horror:boots_of_silence"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "eldritch_horror:boots_of_silence"
+      }
+    ]
+  }
+}

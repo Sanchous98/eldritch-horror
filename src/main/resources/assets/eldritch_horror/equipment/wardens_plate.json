@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "eldritch_horror:wardens_plate"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "eldritch_horror:wardens_plate"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "eldritch_horror:wardens_plate"
+      }
+    ]
+  }
+}

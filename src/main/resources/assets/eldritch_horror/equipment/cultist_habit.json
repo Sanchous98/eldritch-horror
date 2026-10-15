@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "eldritch_horror:cultist_habit"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "eldritch_horror:cultist_habit"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "eldritch_horror:cultist_habit"
+      }
+    ]
+  }
+}
