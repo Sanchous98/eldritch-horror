@@ -41,6 +41,20 @@ public class BotPlayer extends ServerPlayer {
     }
 
     /**
+     * No client acknowledges a respawn, so the flag {@code ServerPlayer#changeDimension} sets — in
+     * the real path cleared by the client's teleport confirmation — would keep a bot invulnerable to
+     * everything for the rest of its life once the prologue teleports it to the Threshold. A bot
+     * stands in for a player that always confirms, so the flag is cleared on the next tick.
+     */
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.isChangingDimension()) {
+            this.hasChangedDimension();
+        }
+    }
+
+    /**
      * The server-side counterpart of a real connection, bound to a {@link BotConnection}. It drops
      * every outgoing packet before NeoForge's payload validation runs (there is no negotiated
      * channel), and tolerates the per-tick flush the server performs for every listed player.
@@ -55,6 +69,14 @@ public class BotPlayer extends ServerPlayer {
         @Override
         public void send(Packet<?> packet) {
             // Discarding connection: no client to receive it.
+        }
+
+        @Override
+        public boolean hasClientLoaded() {
+            // A headless bot has no client to "load", and 26.3's ServerPlayer#isInvulnerableTo
+            // treats an unloaded client as invulnerable — so without this a bot can never take any
+            // damage, which breaks every combat test (and the bone charm's single fatal save).
+            return true;
         }
 
         @Override
