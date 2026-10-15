@@ -14,7 +14,8 @@ import java.util.Map;
  * <p>Values persist and copy on death, expose {@link #rankOf}, and opposed pairs apply a
  * cross-consequence on every change. Reputation is live gameplay: it gates {@code CultService}s
  * (teachings, trades, offerings, cleansing), is paid by signature rites, cult quests and demanded
- * offerings, and a rank reaching {@code INITIATE} emits the {@code sworn_ally} journal quest. See
+ * offerings, and a rank reaching {@code INITIATE} emits the {@code sworn_ally} journal quest. Every
+ * write here also stamps the cult's decay timer (see {@link ReputationDecayTicker}). See
  * {@code design/03c-reputation.md} and {@code design/27-systems-framework.md}.
  */
 public final class CultSystem {
@@ -38,6 +39,7 @@ public final class CultSystem {
         Map<String, Integer> map = new HashMap<>(player.getData(ModAttachments.REPUTATION.get()));
         int v = Math.clamp(value, MIN, MAX);
         map.put(cultId, v);
+        ReputationDecayTicker.stamp(player, cultId);
         player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));
         notifyRank(player, cultId, v);
         return v;
@@ -52,6 +54,7 @@ public final class CultSystem {
         Map<String, Integer> map = new HashMap<>(player.getData(ModAttachments.REPUTATION.get()));
         int v = Math.clamp(map.getOrDefault(cultId, 0) + delta, MIN, MAX);
         map.put(cultId, v);
+        ReputationDecayTicker.stamp(player, cultId);
 
         CultDefinition def = Cults.byId(cultId);
         if (def != null && !def.opposed().isEmpty()) {
@@ -59,6 +62,8 @@ public final class CultSystem {
             for (String other : def.opposed()) {
                 int ov = Math.clamp(map.getOrDefault(other, 0) + spill, MIN, MAX);
                 map.put(other, ov);
+                // A cross-consequence is an involving change for the opposed cult too.
+                ReputationDecayTicker.stamp(player, other);
             }
         }
         player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));

@@ -333,6 +333,8 @@
   "cult.eldritch_horror.drowned_choir": "Утонувший хор",
   "cult.eldritch_horror.unblinking_eye": "Орден Немигающего Ока",
   "cult.eldritch_horror.hollow_choir": "Полый хор",
+  "cult.eldritch_horror.decay": "Ваше положение у фракции %s тускнеет (теперь %s).",
+  "cult.eldritch_horror.kill.penalty": "Вы убили члена культа %s. Положение −%s (теперь %s).",
   "rank.eldritch_horror.outsider": "Чужак",
   "rank.eldritch_horror.neutral": "Нейтральный",
   "rank.eldritch_horror.initiate": "Послушник",

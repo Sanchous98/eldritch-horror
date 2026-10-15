@@ -1734,6 +1734,21 @@ public final class ModConfig {
             BUILDER.comment("Extra health/attack per rank band above Neutral (0.10 = +10% per band).")
                     .defineInRange("cultRankScalePerBand", 0.10, 0.0, 1.0);
 
+    /**
+     * Slow reputation decay ({@code design/03c-reputation.md}: "Slow drift toward 0 for inactive
+     * players (config-gated, off by default on small servers)"): a player who has not changed their
+     * standing with a cult for {@link #REPUTATION_DECAY_PERIOD_SECONDS} loses one point with it.
+     * Off by default so a break from the game does not quietly dissolve a hard-won rank.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_REPUTATION_DECAY =
+            BUILDER.comment("Slowly drift cult standing toward 0 for players inactive with that cult.")
+                    .define("enableReputationDecay", false);
+
+    /** Seconds of no standing change with a cult before decay takes one point from it. */
+    public static final ModConfigSpec.IntValue REPUTATION_DECAY_PERIOD_SECONDS =
+            BUILDER.comment("Seconds without a standing change before a cult loses one decay point.")
+                    .defineInRange("reputationDecayPeriodSeconds", 600, 5, 86400);
+
     /** Radius (blocks) a worshipper keeps to its spawn point (guards a location). */
     public static final ModConfigSpec.IntValue WORSHIPPER_HOME_RADIUS =
             BUILDER.comment("Radius (blocks) a worshipper guards around its spawn point.")

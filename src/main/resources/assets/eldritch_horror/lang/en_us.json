@@ -333,6 +333,8 @@
   "cult.eldritch_horror.drowned_choir": "The Drowned Choir",
   "cult.eldritch_horror.unblinking_eye": "The Order of the Unblinking Eye",
   "cult.eldritch_horror.hollow_choir": "The Hollow Choir",
+  "cult.eldritch_horror.decay": "Your standing with %s fades (now %s).",
+  "cult.eldritch_horror.kill.penalty": "You killed a member of %s. Standing −%s (now %s).",
   "rank.eldritch_horror.outsider": "Outsider",
   "rank.eldritch_horror.neutral": "Neutral",
   "rank.eldritch_horror.initiate": "Initiate",
