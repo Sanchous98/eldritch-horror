@@ -8,6 +8,7 @@ import com.sanchous98.eldritchhorror.cult.CultRank;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.endgame.Endgame;
 import com.sanchous98.eldritchhorror.endgame.EndgameState;
+import com.sanchous98.eldritchhorror.endgame.RiftLedger;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
@@ -637,6 +638,7 @@ public final class RiteEngine {
         }
         BlockState rift = riftBlock.defaultBlockState();
         level.setBlock(anchor, rift, Block.UPDATE_ALL);
+        RiftLedger.of(level).add(anchor);
         RiftKnowledge.discover(player, anchor);
 
         // A small, deterministic sculk cross marks the tear if the ground allows it.
@@ -665,6 +667,7 @@ public final class RiteEngine {
                         BlockPos p = origin.offset(dx, dy, dz);
                         if (level.isLoaded(p) && level.getBlockState(p).is(riftBlock)) {
                             level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                            RiftLedger.of(level).remove(p);
                             RiftKnowledge.forget(player, p);
                             removed++;
                         }

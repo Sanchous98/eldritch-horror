@@ -28,7 +28,13 @@ public final class EndgameState extends SavedData {
         /** Path A: the Horror was banished — costly, the world recedes. */
         BANISHED,
         /** Path B: the Horror was summoned — the Choir's ending, the world tips. */
-        SUMMONED
+        SUMMONED,
+        /**
+         * The third outcome ({@code design/11-endgame.md}, "seal every rift without banishing"): the
+         * Horror came for the decision and found every rift already closed — nothing left to hold it.
+         * Nothing was banished and no cost was paid; the world simply stands sealed.
+         */
+        SEALED
     }
 
     private static final Codec<Outcome> OUTCOME_CODEC = Codec.STRING.xmap(EndgameState::parse, Enum::name);

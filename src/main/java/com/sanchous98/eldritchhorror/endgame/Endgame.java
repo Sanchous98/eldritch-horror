@@ -11,6 +11,7 @@ import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.event.RiftKnowledge;
 import com.sanchous98.eldritchhorror.event.Rifts;
+import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
@@ -122,6 +123,41 @@ public final class Endgame {
                 + " rift(s) tear open, and your corruption will not recede.");
     }
 
+    /**
+     * The third outcome ({@code design/11-endgame.md}): the Horror has reached the decision while
+     * every rift the ledger knows is already closed. Nothing holds it here and nothing was banished —
+     * the world stands sealed. Called from the Horror's escalation clock every second at the decision
+     * stage, so a rift closed <em>during</em> the wait seals too; a no-op once any outcome is
+     * recorded, and on a world that never had a rift.
+     *
+     * @return whether this call sealed the world
+     */
+    public static boolean trySeal(ServerLevel level, AncientOne horror) {
+        if (EndgameState.of(level).outcome() != EndgameState.Outcome.NONE) {
+            return false;
+        }
+        RiftLedger ledger = RiftLedger.of(level);
+        ledger.prune(level); // a stale entry must never block the seal (loaded chunks only)
+        if (!ledger.wasEverOpen() || ledger.openCount() > 0) {
+            return false;
+        }
+        seal(level, horror);
+        return true;
+    }
+
+    /** Records the seal, recedes the Horror and tells everyone the world held. */
+    private static void seal(ServerLevel level, AncientOne horror) {
+        EndgameState.of(level).setOutcome(EndgameState.Outcome.SEALED);
+        horror.solve(AncientOne.Solve.BANISHED, 0); // it recedes: never banished, only left
+        level.playSound(null, horror.getX(), horror.getY(), horror.getZ(),
+                ModSounds.ENDGAME_SEAL.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
+        for (ServerPlayer player : level.players()) {
+            player.sendSystemMessage(Component.literal("The Horror comes for the decision and finds "
+                    + "no rift left open. Nothing holds it here; the world stands sealed."));
+            QuestJournal.add(player, "the_seal", 1);
+        }
+    }
+
     /** Removes up to {@link #RIFT_CAP} rift anchors in the loaded 5×5 chunk patch; returns the count. */
     private static int closeRifts(ServerLevel level, ServerPlayer player) {
         List<BlockPos> rifts = Rifts.near(level, player.blockPosition(), RIFT_SCAN_CHUNKS, RIFT_CAP);
@@ -129,6 +165,7 @@ public final class Endgame {
         for (BlockPos rift : rifts) {
             if (level.setBlock(rift, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL)) {
                 closed++;
+                RiftLedger.of(level).remove(rift);
             }
             lowerTaint(level, ChunkPos.containing(rift));
         }
@@ -148,6 +185,7 @@ public final class Endgame {
                 continue;
             }
             opened++;
+            RiftLedger.of(level).add(spot);
             RiftKnowledge.discover(player, spot);
             ChunkPos chunk = ChunkPos.containing(spot);
             LevelChunk loaded = level.getChunkSource().getChunkNow(chunk.x(), chunk.z());

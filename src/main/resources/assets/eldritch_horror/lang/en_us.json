@@ -797,5 +797,8 @@
   "subtitles.eldritch_horror.entity.the_horror.death": "The Horror goes down",
   "subtitles.eldritch_horror.entity.the_horror.stage": "The Horror changes",
   "subtitles.eldritch_horror.ambient.whisper": "Something whispers",
-  "subtitles.eldritch_horror.ambient.dread": "The corruption deepens"
+  "subtitles.eldritch_horror.ambient.dread": "The corruption deepens",
+  "quest.eldritch_horror.the_seal": "The Seal",
+  "quest.eldritch_horror.the_seal.desc": "Seal every rift before the decision comes.",
+  "subtitles.eldritch_horror.endgame.seal": "The world stands sealed"
 }

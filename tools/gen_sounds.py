@@ -257,6 +257,27 @@ def _endgame_summon():
     return tr.room(0.60, taps=((0.093, 0.65), (0.141, 0.5), (0.207, 0.38), (0.317, 0.26)))
 
 
+@sound("endgame.seal", "endgame/seal", "endgame.seal",
+       "the world seals: a chime that settles under a long airy release")
+def _endgame_seal():
+    dur = 6.0
+    tr = Track(dur)
+    e = env(dur, 0.05, 2.6)
+    # A bell stack that resolves: partials a fifth apart, with long tails.
+    for f0, weight, tau, seed in ((220.0, 0.34, 2.6, 151), (330.0, 0.26, 2.2, 152),
+                                  (440.0, 0.16, 1.8, 153)):
+        tr.osc(lambda t, f=f0: f, lambda t, w=weight, tt=tau: w * strike(t, 0.004, tt), seed=seed)
+    # The sealing impact: a soft sub-thump under a lowpassed hush.
+    tr.osc(lambda t: 52.0, lambda t: 0.40 * strike(t, 0.002, 0.9), harm=((1, 1.0), (2, 0.25)), seed=154)
+    tr.noise(lambda t: 0.18 * strike(t, 0.001, 0.5), lp=800.0, seed=20)
+    # A long airy release, as of something closing and staying closed.
+    tr.noise(lambda t: 0.14 * envelope(t, dur, 0.4, 2.2) if t > 0.2 else 0.0, hp=1600.0, seed=21)
+    # A slow rising fifth that settles into the room.
+    tr.osc(lambda t: 110.0 + 55.0 * min(1.0, t / 2.0), lambda t: 0.16 * e(t),
+           harm=((1, 1.0), (2, 0.3)), drift=0.4, seed=155)
+    return tr.room(0.55, taps=((0.093, 0.65), (0.141, 0.5), (0.207, 0.38), (0.317, 0.26)))
+
+
 @sound("entity.the_horror.ambient", "entity/the_horror_ambient", "entity.the_horror.ambient",
        "the Horror itself: layered breathing over a 38 Hz drone")
 def _horror_ambient():

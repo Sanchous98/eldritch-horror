@@ -343,6 +343,9 @@ public final class ModSounds {
     /** The summoning resolves. */
     public static final DeferredHolder<SoundEvent, SoundEvent> ENDGAME_SUMMON = register("endgame.summon");
 
+    /** The third outcome: every rift closed before the decision; the world stands sealed. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> ENDGAME_SEAL = register("endgame.seal");
+
     /** The Horror itself, breathing. */
     public static final DeferredHolder<SoundEvent, SoundEvent> THE_HORROR_AMBIENT =
             register("entity.the_horror.ambient");

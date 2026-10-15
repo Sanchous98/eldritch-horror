@@ -851,6 +851,10 @@
     "subtitle": "subtitles.eldritch_horror.endgame.summon",
     "sounds": [ { "name": "eldritch_horror:endgame/summon" } ]
   },
+  "endgame.seal": {
+    "subtitle": "subtitles.eldritch_horror.endgame.seal",
+    "sounds": [ { "name": "eldritch_horror:endgame/seal" } ]
+  },
   "entity.the_horror.ambient": {
     "subtitle": "subtitles.eldritch_horror.entity.the_horror.ambient",
     "sounds": [ { "name": "eldritch_horror:entity/the_horror_ambient" } ]

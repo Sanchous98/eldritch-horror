@@ -797,5 +797,8 @@
   "subtitles.eldritch_horror.entity.the_horror.death": "Ужас повержен",
   "subtitles.eldritch_horror.entity.the_horror.stage": "Ужас меняется",
   "subtitles.eldritch_horror.ambient.whisper": "Что-то шепчет",
-  "subtitles.eldritch_horror.ambient.dread": "Порча сгущается"
+  "subtitles.eldritch_horror.ambient.dread": "Порча сгущается",
+  "quest.eldritch_horror.the_seal": "Печать",
+  "quest.eldritch_horror.the_seal.desc": "Запечатайте все рифты до наступления решения.",
+  "subtitles.eldritch_horror.endgame.seal": "Мир запечатан"
 }

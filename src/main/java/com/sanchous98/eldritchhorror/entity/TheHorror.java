@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
+import com.sanchous98.eldritchhorror.endgame.Endgame;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import net.minecraft.core.BlockPos;
@@ -118,6 +119,12 @@ public final class TheHorror extends AncientOne {
         if (next != this.stage) {
             this.stage = next;
             this.playSound(ModSounds.THE_HORROR_STAGE.get(), 3.0F, next == Stage.DECISION ? 0.6F : 0.9F);
+        }
+        // The third outcome (design/11): at the decision an already-empty rift ledger seals the world
+        // instead of opening the fork. Checked every second, so closing the last rift during the wait
+        // seals too.
+        if (this.stage == Stage.DECISION && Endgame.trySeal(level, this)) {
+            return; // sealed: the fork never opens (the solve has already receded it)
         }
         switch (this.stage) {
             case ATTENTION -> {
