@@ -225,13 +225,14 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 ## Known limitations / deferred
 
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
-  screens, armour in-game), open now: the **rift-gate travel branch** and **area wards**
-  (`design/26`), the **client-only item bits** (veil-lens overlay, map waypoint markers,
+  screens, armour in-game), open now: the **rift-gate travel branch** (`design/26`), the
+  **client-only item bits** (veil-lens overlay, map waypoint markers,
   `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), city reclamation
   (`design/21`), GameTest classes, the
   **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
   multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
-  passes, the altar ring, the sound pack, the occultism tree and the Russian locale are done.
+  passes, the altar ring, the sound pack, the occultism tree, the weapon effects, the quest gate,
+  the ward havens and the Russian locale are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
@@ -500,6 +501,20 @@ wired where a system exists:
   −4 sanity/+1 corruption per credited kill, veil bow 1 sanity per shot with +2 vs eldritch and a
   two-body pierce. The arithmetic is in `WeaponMath` with 8 JUnit cases. Only the client-only
   overlay/map markers stay commented in place.
+
+## Wards are a place (design/26, 18)
+
+`ward_of_the_eye` used to give only a personal buff; it now also raises a **haven** at the altar core
+(`0275474`). A per-level `WardLedger` SavedData stores `{x,y,z,radius,expires}` (game-time expiry,
+capped at 64 with oldest eviction, refresh in place), so a ward survives restarts and is shared by
+everyone in the level. Inside the horizontal cylinder: every **negative** sanity source is dropped
+(recovery still applies), a freshly spawned lesser horror (`LesserSwarm`, `Watcher`, `BoneChoir` —
+never an `AncientOne`) is cancelled at join, and a warded player deals **+25%** to a presence, the
+design's damage window (meaningful when a boss is configured killable). Radius 12, ten-minute
+lifetime and the bonus live in a Wards config section; `/eh ward` prints what covers the caller.
+Probed live: sanity held at 50.00 inside over 5.5 s while it fell to 49.56 outside at midnight; a
+`lesser_swarm` summoned inside was refused; Cthulhu took 95.2 → 119.0 damage from a warded attacker.
+The rite's dead `"ward_token"` grant string (GRANT never read it) is gone.
 
 ## Where things live
 

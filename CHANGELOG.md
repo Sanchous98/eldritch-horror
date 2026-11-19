@@ -36,6 +36,9 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   journal screen synced server → client. Prerequisites are enforced server-side, and the design's
   daily/weekly side quests (`star_hunt`, `tide_offering`, `cleansing_contract`) pay again after
   their cooldown.
+- **Wards are places** (`design/26`, `design/18`): the warding rite raises a persisted haven that
+  suppresses sanity drain, keeps freshly spawned lesser horrors out and opens a +25% damage window
+  on the Ancient Ones; `/eh ward` reports it.
 - **Skill tree** (`design/15`): eight nodes with real effects and an optional prerequisite chain —
   the occultism four (`forbidden_lore`, `rite_affinity`, `divination`, `lucid_dreams`) join the
   existing four, and a locked node answers in chat instead of silently refusing.

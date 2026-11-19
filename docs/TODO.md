@@ -14,9 +14,6 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **Area wards (design/26, 18)** — a ward as a *place* (no sanity drain, lesser things kept
-  away, a damage window) rather than the self-buff; `ward_of_the_eye`'s unused `ward_token` goes with
-  it.
 - [ ] **Rift-gate travel (design/26, 23, 20)** — two-way anchors, node linking, paid in corruption
   and sanity, arrival instability; the rules need pinning in `design/26` first.
 - [ ] **Reclaiming a fallen city (design/21)** — an expensive rite/quest that clears the district
@@ -28,6 +25,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **Area wards (design/26, 18)** — `ward_of_the_eye` raises a persisted, capped haven on the altar
+  core: negative sanity sources dropped (recovery kept), fresh lesser horrors refused, +25% to an
+  Ancient One from a warded player; radius/lifetime/bonus in config, `/eh ward` reads it, and the
+  dead `ward_token` grant is gone — `0275474`.
 - [x] **Quest gate + repeatables (design/10)** — `requires` is now enforced server-side (a dangling id
   counts as unmet), quests can be `daily`/`weekly` with the stamp in a synced attachment, and the
   three side quests have real triggers (`star_hunt` kills, `tide_offering` pearl pickups,
