@@ -14,8 +14,6 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **Rift-gate travel (design/26, 23, 20)** — two-way anchors, node linking, paid in corruption
-  and sanity, arrival instability; the rules need pinning in `design/26` first.
 - [ ] **Reclaiming a fallen city (design/21)** — an expensive rite/quest that clears the district
   taint and restores shelter.
 - [ ] **GameTest coverage (design/13)** — the harness exists but no test classes; altar ring, rite
@@ -25,6 +23,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **Rift-gate travel (design/26, 23, 20)** — standing anchors link two-way with no UI (mark, then
+  link; same gate clears), trips cost corruption +3 / sanity −8, arrival nausea plus a 25 %
+  instability that can tear a new gate open; links are per-level SavedData and die with a broken
+  anchor; the rules are pinned in `design/26` — `45ea35d`.
 - [x] **Area wards (design/26, 18)** — `ward_of_the_eye` raises a persisted, capped haven on the altar
   core: negative sanity sources dropped (recovery kept), fresh lesser horrors refused, +25% to an
   Ancient One from a warded player; radius/lifetime/bonus in config, `/eh ward` reads it, and the

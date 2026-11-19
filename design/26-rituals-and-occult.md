@@ -49,7 +49,23 @@ and the **occult branch** is the rift gate.
 - **Instability:** a gate the horror also uses; rifts can open *near where you arrive*
   (map event `rift_opened`), and the route itself drains sanity constantly
   (`20-map.md`). Travel is progression-gated by learning the gate rite, not by gear.
-- Exact node-linking rules remain deferred (`23-boundary-and-travel.md` open questions).
+### Implementation notes (pinned 2026-11, `45ea35d`)
+
+The deferred linking rules, as implemented in `world/rift/RiftGates`:
+
+- A **gate** is a standing `rift_anchor` block; an empty-hand use is the only interaction, and the
+  player must know `open_rift`.
+- **No UI.** The first use of an unlinked gate marks it ("The gate waits for its twin"); the next
+  use of a *different* gate in the same dimension links the pair **two-way** and clears the mark.
+  Using the marked gate again clears the mark. A cross-dimension mark is refused and kept.
+- **Price:** one trip costs corruption +3 and sanity −8 (config), applied only after the teleport
+  succeeds; arriving at a gate whose block is gone drops the link and charges nothing.
+- **Instability:** every arrival applies 6 s of nausea; a 25 % roll (config) may tear a fresh anchor
+  open near the arrival, recorded in the rift ledger and announced. No hostile entity is spawned.
+- **Links are per-level world data** (`GateLinks` `SavedData`), so a link can never cross
+  dimensions; breaking an anchor drops its links.
+
+The map's `rift_opened` event is not wired to this path yet — the announcement is chat only.
 
 ## Summoning
 

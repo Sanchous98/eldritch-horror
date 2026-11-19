@@ -36,6 +36,8 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   journal screen synced server → client. Prerequisites are enforced server-side, and the design's
   daily/weekly side quests (`star_hunt`, `tide_offering`, `cleansing_contract`) pay again after
   their cooldown.
+- **Rift-gate travel** (`design/26`, `design/23`): anchors link two-way with no UI; a trip costs
+  corruption and sanity and can tear a new rift open on arrival.
 - **Wards are places** (`design/26`, `design/18`): the warding rite raises a persisted haven that
   suppresses sanity drain, keeps freshly spawned lesser horrors out and opens a +25% damage window
   on the Ancient Ones; `/eh ward` reports it.

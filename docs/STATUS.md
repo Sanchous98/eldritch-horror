@@ -225,14 +225,14 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 ## Known limitations / deferred
 
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
-  screens, armour in-game), open now: the **rift-gate travel branch** (`design/26`), the
-  **client-only item bits** (veil-lens overlay, map waypoint markers,
+  screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
+  waypoint markers,
   `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), city reclamation
   (`design/21`), GameTest classes, the
   **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
   multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
   passes, the altar ring, the sound pack, the occultism tree, the weapon effects, the quest gate,
-  the ward havens and the Russian locale are done.
+  the ward havens, rift-gate travel and the Russian locale are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
@@ -515,6 +515,20 @@ lifetime and the bonus live in a Wards config section; `/eh ward` prints what co
 Probed live: sanity held at 50.00 inside over 5.5 s while it fell to 49.56 outside at midnight; a
 `lesser_swarm` summoned inside was refused; Cthulhu took 95.2 → 119.0 damage from a warded attacker.
 The rite's dead `"ward_token"` grant string (GRANT never read it) is gone.
+
+## Rift-gate travel (design/26, 23)
+
+The occult fast-travel branch is live (`45ea35d`) and the previously deferred rules are pinned in
+`design/26`. A standing `rift_anchor` is a gate; with `open_rift` known, an empty-hand use marks an
+unlinked gate, the next different same-dimension gate links the pair **two-way**, and using the
+marked gate again clears the mark (no UI). A linked trip pays corruption +3 and sanity −8 (config),
+teleports to a safe free spot beside the twin, applies 6 s nausea and rolls a 25 % instability that
+may tear open a fresh anchor near the arrival (recorded in the `RiftLedger` and announced; no
+hostiles). Links live per level in a `GateLinks` SavedData and are dropped when an anchor breaks;
+a twin whose block is gone costs nothing. `/eh gate` prints the pending mark and the nearest gate's
+twin. Probed live: refusal without the rite, link creation, and a trip moving the bot
+1.6,−62,1.8 → 6.5,−62,0.5 with sanity 80 → 72 and corruption 10 → 13. `GateMath` carries 14 JUnit
+cases.
 
 ## Where things live
 
