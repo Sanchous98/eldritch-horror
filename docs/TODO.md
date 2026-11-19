@@ -14,8 +14,6 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **Reclaiming a fallen city (design/21)** — an expensive rite/quest that clears the district
-  taint and restores shelter.
 - [ ] **GameTest coverage (design/13)** — the harness exists but no test classes; altar ring, rite
   outcome, seal, ward zone and gate travel are the first targets.
 - [ ] **The 3,065 non-curated settlements (design/21)** — `settlements.json` holds 3,089 entries and
@@ -23,6 +21,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **Reclaiming a fallen city (design/21)** — the `reclaim_city` rite (Order, Devoted) only
+  resolves inside a Fallen city: up to 256 loaded district chunks lose 65% of their taint (the state
+  samples are cleaned first), up to 32 Choir worshippers are driven out, and `reclaim_the_city`
+  completes; the refusals pay nothing — `dea8404`.
 - [x] **Rift-gate travel (design/26, 23, 20)** — standing anchors link two-way with no UI (mark, then
   link; same gate clears), trips cost corruption +3 / sanity −8, arrival nausea plus a 25 %
   instability that can tear a new gate open; links are per-level SavedData and die with a broken

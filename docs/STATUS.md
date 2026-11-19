@@ -227,12 +227,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
   waypoint markers,
-  `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), city reclamation
-  (`design/21`), GameTest classes, the
+  `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), GameTest classes, the
   **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
   multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
   passes, the altar ring, the sound pack, the occultism tree, the weapon effects, the quest gate,
-  the ward havens, rift-gate travel and the Russian locale are done.
+  the ward havens, rift-gate travel, city reclamation and the Russian locale are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
@@ -529,6 +528,19 @@ a twin whose block is gone costs nothing. `/eh gate` prints the pending mark and
 twin. Probed live: refusal without the rite, link creation, and a trip moving the bot
 1.6,−62,1.8 → 6.5,−62,0.5 with sanity 80 → 72 and corruption 10 → 13. `GateMath` carries 14 JUnit
 cases.
+
+## A Fallen city can be reclaimed (design/21)
+
+`design/21` left this open; the answer is an **expensive rite** (`dea8404`). `reclaim_city` (tier 3,
+salt ×8 + silver ×4, −20 sanity, +15 Order standing) is taught by the Order of the Unblinking Eye at
+**Devoted**. It refuses — paying nothing — unless the player stands inside a **Fallen** curated city.
+The world work is bounded and loaded-chunks-only: up to 256 district chunks have their taint
+multiplied by `reclaimTaintFactor` (0.35, i.e. −65 %); the nine chunks `CityStates` samples are
+cleaned first, so the derived state really moves; up to 32 loaded Hollow Choir worshippers are
+driven out, so `CityFall` has nothing to top up. `reclaim_the_city` (requires `cleanse_the_land`)
+completes on success, and every message is localised. Probed on London driven to Fallen:
+`fallen → besieged`, six Choir driven out, quest complete, both refusals free. `CityReclaimMath`
+has 8 JUnit cases.
 
 ## Where things live
 
