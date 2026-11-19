@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror;
 
 import com.mojang.logging.LogUtils;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.gametest.GameTests;
 import com.sanchous98.eldritchhorror.loot.LootModifiers;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
@@ -66,6 +67,10 @@ public final class EldritchHorror {
         // Config. Sanity/corruption knobs are gameplay rules, so they live in the SYNCED config
         // (server-owned, synced to clients) rather than LOCAL — see design/27-systems-framework.md.
         modContainer.registerConfig(Type.SYNCED, ModConfig.SPEC);
+
+        // Headless GameTest functions (data/eldritch_horror/test_instance/*.json). Inert during
+        // normal play: the gametest runner is the only thing that reads this registry.
+        GameTests.register(modEventBus);
 
         // Gameplay event listeners (sanity ticking, corruption spread, ritual validation, ...)
         // should be registered here, e.g. NeoForge.EVENT_BUS.register(SomeListener.class).
