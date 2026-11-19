@@ -6,8 +6,8 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The seed skill tree (design/13). Small and data-driven: each node's effect is applied where its
- * system runs, so a node is never a dead entry.
+ * The seed skill tree (design/15-skills.md). Small and data-driven: each node's effect is applied
+ * where its system runs, so a node is never a dead entry.
  */
 public final class Skills {
 
@@ -19,12 +19,24 @@ public final class Skills {
     public static final String IRON_WILL = "iron_will";
     /** Frugal Rites: a quarter of successful rites consume no offerings. */
     public static final String FRUGAL_RITES = "frugal_rites";
+    /** Forbidden Lore: tome sanity cost −20%. */
+    public static final String FORBIDDEN_LORE = "forbidden_lore";
+    /** Rite Affinity: +10% ritual speed. */
+    public static final String RITE_AFFINITY = "rite_affinity";
+    /** Divination: inspecting a living entity reveals its type tags and aura axis. */
+    public static final String DIVINATION = "divination";
+    /** Lucid Dreams: sleeping can teach an unknown rite of tier ≤ 2. */
+    public static final String LUCID_DREAMS = "lucid_dreams";
 
     private static final List<Skill> ALL = List.of(
-            new Skill(LUCID_MIND, 1),
-            new Skill(WARDED_SOUL, 1),
-            new Skill(IRON_WILL, 1),
-            new Skill(FRUGAL_RITES, 2));
+            new Skill(LUCID_MIND, 1, ""),
+            new Skill(WARDED_SOUL, 1, ""),
+            new Skill(IRON_WILL, 1, ""),
+            new Skill(FRUGAL_RITES, 2, ""),
+            new Skill(FORBIDDEN_LORE, 1, ""),
+            new Skill(RITE_AFFINITY, 1, ""),
+            new Skill(DIVINATION, 2, FORBIDDEN_LORE),
+            new Skill(LUCID_DREAMS, 2, FORBIDDEN_LORE));
 
     private static final Map<String, Skill> BY_ID = index(ALL);
 

@@ -955,6 +955,13 @@ public final class ModConfig {
             BUILDER.comment("Minimum ticks between a player's rite performances (0 disables).")
                     .defineInRange("ritualCooldownTicks", 40, 0, 72000);
 
+    // --- Skills (design/15-skills.md) ---------------------------------------------------------
+
+    /** Chance that a natural sleep teaches a rite with the {@code lucid_dreams} skill unlocked. */
+    public static final ModConfigSpec.DoubleValue LUCID_DREAMS_CHANCE =
+            BUILDER.comment("Chance (0..1) that a natural sleep with Lucid Dreams teaches a rite.")
+                    .defineInRange("lucidDreamsChance", 0.25, 0.0, 1.0);
+
     /** Whether performing a rite consumes its listed offerings (design/08). Off = creative testing. */
     public static final ModConfigSpec.BooleanValue REQUIRE_RITE_REAGENTS =
             BUILDER.comment("Require and consume a rite's offerings. Disable for costless testing.")

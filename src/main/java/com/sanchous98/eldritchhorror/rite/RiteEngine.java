@@ -18,7 +18,9 @@ import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
 import com.sanchous98.eldritchhorror.registry.items.RiteEchoes;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.skill.RitualCooldownMath;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
+import com.sanchous98.eldritchhorror.skill.Skills;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -138,11 +140,12 @@ public final class RiteEngine {
         // Per-player cooldown (design/05): a rejected attempt changes nothing and pays no cost.
         int cooldown = ModConfig.RITUAL_COOLDOWN_TICKS.get();
         if (cooldown > 0) {
-            // A carried ring_of_focus speeds the casting along 20% (design/16, "-20% ritual casting
-            // time"): the wait is shortened, but never below one tick.
-            if (CarriedItems.carries(player, "ring_of_focus")) {
-                cooldown = Math.max(1, cooldown * 4 / 5);
-            }
+            // Rite Affinity shortens the wait 10% (design/15); a carried ring_of_focus another 20%
+            // (design/16). The two reductions stack multiplicatively — see RitualCooldownMath — and
+            // the wait is never shortened below one tick.
+            cooldown = RitualCooldownMath.cooldownTicks(cooldown,
+                    SkillTree.has(player, Skills.RITE_AFFINITY),
+                    CarriedItems.carries(player, "ring_of_focus"));
             long now = player.level().getGameTime();
             long ready = RITE_READY.getOrDefault(player.getUUID(), 0L);
             if (now < ready) {

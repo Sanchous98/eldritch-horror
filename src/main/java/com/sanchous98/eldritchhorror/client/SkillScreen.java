@@ -64,7 +64,10 @@ public final class SkillScreen extends Screen {
             Set<String> unlocked = player.getData(ModAttachments.SKILLS.get());
             int y = TOP;
             for (Skill skill : Skills.all()) {
-                if (inRow(event.x(), event.y(), y) && canUnlock(skill, unlocked, points)) {
+                // A row locked by its prerequisite still sends: the server answers with a clear
+                // "requires X first" line instead of the click doing nothing.
+                if (inRow(event.x(), event.y(), y)
+                        && !unlocked.contains(skill.id()) && points >= skill.cost()) {
                     ClientPacketDistributor.sendToServer(new SkillUnlockPayload(skill.id()));
                     return true;
                 }
@@ -117,7 +120,13 @@ public final class SkillScreen extends Screen {
 
     /** @return whether a click may spend points on {@code skill} right now. */
     private static boolean canUnlock(Skill skill, Set<String> unlocked, int points) {
-        return !unlocked.contains(skill.id()) && points >= skill.cost();
+        return !unlocked.contains(skill.id()) && points >= skill.cost()
+                && prerequisiteMet(skill, unlocked);
+    }
+
+    /** @return whether {@code skill}'s prerequisite (if any) is already unlocked. */
+    private static boolean prerequisiteMet(Skill skill, Set<String> unlocked) {
+        return !skill.hasPrerequisite() || unlocked.contains(skill.requires());
     }
 
     private boolean inRow(double mouseX, double mouseY, int rowY) {

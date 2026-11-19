@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.skill;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -23,6 +24,8 @@ public final class SkillTree {
     private static final double WARDED_SOUL_CORRUPTION = 0.90;
     /** Chance that {@link Skills#FRUGAL_RITES} saves a successful rite's offerings. */
     private static final double FRUGAL_RITES_REFUND = 0.25;
+    /** Tome sanity-cost multiplier from {@link Skills#FORBIDDEN_LORE} (−20%). */
+    private static final double FORBIDDEN_LORE_TOME_COST = 0.80;
     /** Fraction of spent points returned by the {@code respec} rite (design/08: refund 80%). */
     private static final double RESPEC_REFUND = 0.80;
 
@@ -72,14 +75,21 @@ public final class SkillTree {
     }
 
     /**
-     * Unlocks {@code skillId} for {@code player} if it is known, not already unlocked, and there are
-     * enough points. Spends the cost and applies the effect (re-applying the max-sanity attribute).
+     * Unlocks {@code skillId} for {@code player} if it is known, not already unlocked, its
+     * prerequisite is unlocked, and there are enough points. Spends the cost and applies the effect
+     * (re-applying the max-sanity attribute). A missing prerequisite is reported to the player in
+     * chat, so a click on a locked row is never silently ignored.
      *
      * @return {@code true} if this call unlocked it
      */
     public static boolean unlock(ServerPlayer player, String skillId) {
         Skill skill = Skills.byId(skillId);
         if (skill == null || has(player, skillId) || points(player) < skill.cost()) {
+            return false;
+        }
+        if (skill.hasPrerequisite() && !has(player, skill.requires())) {
+            player.sendSystemMessage(Component.translatable(
+                    "skill.eldritch_horror.prerequisite", skill.name(), skill.prerequisiteName()));
             return false;
         }
         Set<String> current = player.getData(ModAttachments.SKILLS);
@@ -112,5 +122,13 @@ public final class SkillTree {
     /** @return the player's corruption-gain multiplier from skills ({@code 1.0} = none). */
     public static double corruptionGainMultiplier(ServerPlayer player) {
         return has(player, Skills.WARDED_SOUL) ? WARDED_SOUL_CORRUPTION : 1.0;
+    }
+
+    /**
+     * @return the multiplier applied to a tome's sanity cost ({@value #FORBIDDEN_LORE_TOME_COST}
+     *     with {@link Skills#FORBIDDEN_LORE}, otherwise {@code 1.0}); corruption is never touched.
+     */
+    public static double tomeSanityMultiplier(ServerPlayer player) {
+        return has(player, Skills.FORBIDDEN_LORE) ? FORBIDDEN_LORE_TOME_COST : 1.0;
     }
 }

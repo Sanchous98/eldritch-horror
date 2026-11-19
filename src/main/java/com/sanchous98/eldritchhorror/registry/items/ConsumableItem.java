@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.registry.items;
 
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.skill.SkillTree;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -76,8 +77,14 @@ public class ConsumableItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        SanityAPI.add((ServerPlayer) player, this.sanity);
-        CorruptionAPI.add((ServerPlayer) player, this.corruption);
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        // Knowledge items (tomes) are the non-consumed entries: Forbidden Lore shaves 20% off their
+        // sanity cost, while corruption is charged in full (design/15-skills.md).
+        double sanityCost = this.consumed
+                ? this.sanity
+                : this.sanity * SkillTree.tomeSanityMultiplier(serverPlayer);
+        SanityAPI.add(serverPlayer, sanityCost);
+        CorruptionAPI.add(serverPlayer, this.corruption);
 
         // Consume one unless the player has infinite materials (creative) or the item persists.
         if (this.consumed && !player.hasInfiniteMaterials()) {
