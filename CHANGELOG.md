@@ -34,6 +34,9 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   as finding a codex entry — so the lorekeeper path is reachable on a fresh world.
 - **Quests** as datapack content (`data/eldritch_horror/quest/*.json`), a 14-quest chain and a
   journal screen synced server → client.
+- **Skill tree** (`design/15`): eight nodes with real effects and an optional prerequisite chain —
+  the occultism four (`forbidden_lore`, `rite_affinity`, `divination`, `lucid_dreams`) join the
+  existing four, and a locked node answers in chat instead of silently refusing.
 - **Endgame** (per world, `SavedData`): the Horror awakens, walks through four timed stages,
   and the world **banishes** it (rift sealing, corruption collapse) or **summons** it
   (a corruption floor on the world, the "hollow crown" path) — plus `/eh endgame` for state.

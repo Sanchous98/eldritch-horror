@@ -225,12 +225,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 ## Known limitations / deferred
 
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
-  screens, armour in-game), open now: the **occultism skill tree** (`design/15`), the **rift-gate
-  travel branch** and **area wards** (`design/26`), the remaining **weapon on-hit effects**
-  (`design/16`), quest `requires` as a real gate plus repeatables (`design/10`), city reclamation
-  (`design/21`), the **3,065 non-curated settlements** (`design/21`: generic towns, ruins or
-  nothing) and the multiplayer session rules (`design/12`). Reputation decay/penalty, the third
-  ending, both item passes, the altar ring, the sound pack and the Russian locale are done.
+  screens, armour in-game), open now: the **rift-gate travel branch** and **area wards**
+  (`design/26`), the remaining **weapon on-hit effects** (`design/16`), quest `requires` as a real
+  gate plus repeatables (`design/10`), city reclamation (`design/21`), GameTest classes, the
+  **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
+  multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
+  passes, the altar ring, the sound pack, the occultism tree and the Russian locale are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
@@ -304,6 +304,11 @@ Playtesting the questline surfaced four weak spots; all four are now wired:
   own drops.
 - **Two more skills with real effects:** `iron_will` (+15% max sanity, stacks with `lucid_mind`) and
   `frugal_rites` (25% of successful rites consume no offerings — hooked in `RiteEngine`).
+- **The occultism tree (design/15) is live (`a504d65`):** `forbidden_lore` (tome sanity −20%),
+  `rite_affinity` (cooldown ×0.9, multiplicative with the focus ring), `divination` (empty-hand
+  inspection of tags and aura axis) and `lucid_dreams` (a natural sleep may teach an unknown tier
+  ≤ 2 rite, never the endgame fork). Skills gained an optional prerequisite, enforced server-side
+  and shown by the screen.
 - **Quests paid only a point.** Completion now also pays an item (obols / relic coin / order scrip /
   mark of favour) with its own message.
 

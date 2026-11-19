@@ -12,9 +12,28 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - [ ] **Weapon on-hit effects and client-only bits (design/16)** — the recorded kill/water/ward/
   scaling effects on the weapons, the veil-lens corruption overlay and waypoint markers on the world
   map stay commented in place.
+- [ ] **Quest `requires` as a server gate + repeatables (design/10)** — the prerequisite is shown in
+  the journal only; nothing refuses a quest or its rewards server-side, and quests are one-shot.
+- [ ] **Area wards (design/26, 18)** — a ward as a *place* (no sanity drain, lesser things kept
+  away, a damage window) rather than the self-buff; `ward_of_the_eye`'s unused `ward_token` goes with
+  it.
+- [ ] **Rift-gate travel (design/26, 23, 20)** — two-way anchors, node linking, paid in corruption
+  and sanity, arrival instability; the rules need pinning in `design/26` first.
+- [ ] **Reclaiming a fallen city (design/21)** — an expensive rite/quest that clears the district
+  taint and restores shelter.
+- [ ] **GameTest coverage (design/13)** — the harness exists but no test classes; altar ring, rite
+  outcome, seal, ward zone and gate travel are the first targets.
+- [ ] **The 3,065 non-curated settlements (design/21)** — `settlements.json` holds 3,089 entries and
+  only the 24 curated ones are used; generic ruins/towns/nothing is undecided.
 
 ## Done
 
+- [x] **The occultism skill tree (design/15)** — four real nodes with prerequisites:
+  `forbidden_lore` (tome sanity −20%), `rite_affinity` (+10% ritual speed, multiplicative with the
+  focus ring), `divination` (empty-hand inspection reports tags and, for a presence, its aura axis),
+  `lucid_dreams` (a natural sleep can teach an unknown tier ≤ 2 rite; endgame fork excluded); the
+  unlock gate and both new math helpers are unit-tested and the gate/tome were bot-probed —
+  `a504d65`.
 - [x] **Armour and the remaining artefacts (design/16, slice 2)** — the eight worn pieces are real
   armour (equipment assets + generated worn sheets, per-set stats); the bone charm saves one fatal
   blow, the lantern stills the darkness drain, the mask summons more star-spawn and lowers the
