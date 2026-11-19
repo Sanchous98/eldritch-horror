@@ -79,8 +79,13 @@ public final class RitualAltar {
         return ringed(level, altarCore, radius, minMarks);
     }
 
-    /** The nearest {@code altar_core} to {@code center} inside the scan box, or {@code null}. */
-    private static @Nullable BlockPos nearestCore(ServerLevel level, BlockPos center, int radius) {
+    /**
+     * The nearest {@code altar_core} to {@code center} inside the scan box, or {@code null}.
+     *
+     * <p>Exposed so a rite that must place something at the altar (the ward, design/26) reuses the
+     * same lookup the validity check uses, instead of duplicating the scan.
+     */
+    public static @Nullable BlockPos nearestCore(ServerLevel level, BlockPos center, int radius) {
         BlockPos best = null;
         double bestDistance = Double.MAX_VALUE;
         for (int dx = -radius; dx <= radius; dx++) {

@@ -36,6 +36,8 @@ import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.city.CityState;
 import com.sanchous98.eldritchhorror.world.city.CityStates;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
+import com.sanchous98.eldritchhorror.world.ward.WardMath;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -224,6 +226,8 @@ public final class EldritchCommands {
                 .then(Commands.literal("set")
                         .then(Commands.argument("outcome", StringArgumentType.word())
                                 .executes(EldritchCommands::setEndgame))));
+        // Wards (design/26): what haven currently covers the caller, with radius and seconds left.
+        eh.then(Commands.literal("ward").executes(EldritchCommands::listWards));
         // Server-side bot players for automated playtesting (dev-mode gated inside the handlers).
         eh.then(com.sanchous98.eldritchhorror.bot.BotCommands.node());
         dispatcher.register(eh);
@@ -258,6 +262,36 @@ public final class EldritchCommands {
         ctx.getSource().sendFailure(Component.literal(
                 "Cannot unlock " + id + " (already known, or not enough points)."));
         return 0;
+    }
+
+    /** {@code /eh ward}: the wards covering the caller, with radius and whole seconds left (design/26). */
+    private static int listWards(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        if (!ModConfig.ENABLE_WARDS.get()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("none (wards disabled)"), false);
+            return 1;
+        }
+        ServerLevel level = player.level();
+        WardLedger ledger = WardLedger.of(level);
+        long now = level.getGameTime();
+        ledger.prune(now);
+        int shown = 0;
+        for (WardLedger.Ward ward : ledger.wards()) {
+            double dx = player.getX() - ward.x();
+            double dz = player.getZ() - ward.z();
+            if (!WardMath.covers(dx, dz, ward.radius())) {
+                continue;
+            }
+            long seconds = WardMath.remainingTicks(now, ward.expiresAtGameTime()) / 20L;
+            ctx.getSource().sendSuccess(() -> Component.literal("ward at " + ward.x() + ","
+                    + ward.y() + "," + ward.z() + " r=" + ward.radius() + " " + seconds
+                    + "s left"), false);
+            shown++;
+        }
+        if (shown == 0) {
+            ctx.getSource().sendSuccess(() -> Component.literal("none"), false);
+        }
+        return 1;
     }
 
     /** {@code /eh endgame}: the world's decision so far (design/11). */

@@ -6,6 +6,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.registry.items.ProphetMaskItem;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,10 +86,17 @@ public final class SanityTicker {
     /** One player, one second's worth of sanity. */
     private static void tick(ServerPlayer player) {
         SanityContext ctx = SanityContext.of(player);
+        // A haven is a place (design/26): inside an unexpired ward every negative source is
+        // dropped, while recovery still applies. One lookup, then the sources are left untouched.
+        boolean warded = ModConfig.ENABLE_WARDS.get()
+                && WardLedger.of(player.level()).wardAt(player.level(), player.blockPosition()) != null;
 
         double delta = 0.0;
         for (SanitySource source : SanitySources.all()) {
             double sourceDelta = source.deltaPerSecond(player, ctx);
+            if (warded && sourceDelta < 0.0) {
+                continue;
+            }
             // Dr. Amos recovers faster in cities: scale the city source's recovery at the source.
             if (sourceDelta > 0.0 && "city".equals(source.id())) {
                 sourceDelta *= Progression.cityRecoveryMultiplier(player);

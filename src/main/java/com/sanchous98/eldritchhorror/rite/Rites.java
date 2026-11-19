@@ -28,8 +28,11 @@ public final class Rites {
     static {
         // Tier / outcomes are from design/08-rituals.md; the sanity/corruption fields are that
         // table's COST column (the price paid on success), not its Outcome column.
+        // GRANT has no parameter: ward_of_the_eye's haven is raised by RiteEngine from the altar
+        // core (design/26), not from an item token. The grant string is empty deliberately; the old
+        // dead "ward_token" value named nothing and is gone.
         register(new RiteDefinition("ward_of_the_eye", RiteDefinition.nameOf("ward_of_the_eye"),
-                1, -8, 0, RiteDefinition.Outcome.GRANT, "ward_token",
+                1, -8, 0, RiteDefinition.Outcome.GRANT, "",
                 new RiteDefinition.Gains(0, -3, "unblinking_eye", 10)));
         register(new RiteDefinition("drowned_blessing", RiteDefinition.nameOf("drowned_blessing"),
                 1, -10, 0, RiteDefinition.Outcome.GRANT_SKILL, "water_breathing",

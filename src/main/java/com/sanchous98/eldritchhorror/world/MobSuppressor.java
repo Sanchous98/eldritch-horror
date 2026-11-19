@@ -2,8 +2,14 @@ package com.sanchous98.eldritchhorror.world;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.AncientOne;
+import com.sanchous98.eldritchhorror.entity.BoneChoir;
+import com.sanchous98.eldritchhorror.entity.LesserSwarm;
+import com.sanchous98.eldritchhorror.entity.Watcher;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -38,6 +44,11 @@ import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
  * nothing to untrack and the call would be redundant. The stale record remains in the chunk's NBT
  * and is re-cancelled on every load; that is harmless and the simplest correct behaviour (a true
  * purge would mean rewriting chunk data, which this class intentionally avoids).
+ *
+ * <p><b>Wards (design/26):</b> a <em>freshly spawned</em> lesser horror — {@link LesserSwarm},
+ * {@link Watcher} or {@link BoneChoir}, never an {@link AncientOne} — inside an unexpired ward is
+ * cancelled here too. Chunk-load re-adds are exempt: they are existing creatures, not spawns, and
+ * walking into a haven is not the same as one opening inside it.
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class MobSuppressor {
@@ -50,7 +61,14 @@ public final class MobSuppressor {
 
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide() || !ModConfig.SUPPRESS_VANILLA_MOBS.get()) {
+        if (event.getLevel().isClientSide()) {
+            return;
+        }
+        if (!event.loadedFromDisk() && isWardedLesserSpawn(event.getEntity())) {
+            event.setCanceled(true);
+            return;
+        }
+        if (!ModConfig.SUPPRESS_VANILLA_MOBS.get()) {
             return;
         }
         if (isVanillaMob(event.getEntity())) {
@@ -60,12 +78,35 @@ public final class MobSuppressor {
 
     @SubscribeEvent
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
+        if (isWardedLesserSpawn(event.getEntity())) {
+            event.setSpawnCancelled(true);
+            return;
+        }
         if (!ModConfig.SUPPRESS_VANILLA_MOBS.get()) {
             return;
         }
         if (isVanillaMob(event.getEntity())) {
             event.setSpawnCancelled(true);
         }
+    }
+
+    /**
+     * Whether {@code entity} is a lesser horror spawning inside an unexpired ward. The three
+     * families the bestiary calls "lesser horror" are listed explicitly, so a boss, a cultist or a
+     * mundane animal is never repelled by a haven.
+     */
+    private static boolean isWardedLesserSpawn(Entity entity) {
+        if (!ModConfig.ENABLE_WARDS.get() || entity instanceof AncientOne) {
+            return false;
+        }
+        if (!(entity instanceof LesserSwarm) && !(entity instanceof Watcher)
+                && !(entity instanceof BoneChoir)) {
+            return false;
+        }
+        if (!(entity.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        return WardLedger.of(level).wardAt(level, entity.blockPosition()) != null;
     }
 
     /**

@@ -207,6 +207,31 @@ public final class ModConfig {
                     .defineListAllowEmpty("suppressedMobAllowlist", List.of("minecraft:villager"),
                             () -> "minecraft:villager", String.class::isInstance);
 
+    // --- Wards (design/26) -------------------------------------------------------------------
+    // A ward is a place, not a potion: the ward_of_the_eye rite raises a haven at the altar core,
+    // which suppresses sanity drain, repels fresh lesser spawns and opens a boss damage window.
+    // Server-side world data lives in world/ward/WardLedger.
+
+    /** Master switch for raising, storing and applying wards. */
+    public static final ModConfigSpec.BooleanValue ENABLE_WARDS =
+            BUILDER.comment("Enable wards: the rite raises a haven that suppresses drain and repels spawns.")
+                    .define("enableWards", true);
+
+    /** Radius (blocks) of a newly raised ward, measured horizontally from the altar core. */
+    public static final ModConfigSpec.IntValue WARD_RADIUS =
+            BUILDER.comment("Radius (blocks) of a ward raised by ward_of_the_eye.")
+                    .defineInRange("wardRadius", 12, 1, 64);
+
+    /** Lifetime (ticks) of a newly raised ward; 12000 = ten minutes. */
+    public static final ModConfigSpec.IntValue WARD_DURATION_TICKS =
+            BUILDER.comment("Ward lifetime in ticks (12000 = 10 minutes).")
+                    .defineInRange("wardDurationTicks", 12000, 20, 240000);
+
+    /** Bonus damage (fraction) a warded player deals to an Ancient One; 0.25 = +25%. */
+    public static final ModConfigSpec.DoubleValue WARD_BOSS_DAMAGE_BONUS =
+            BUILDER.comment("Damage bonus (fraction) a warded player deals to an Ancient One.")
+                    .defineInRange("wardBossDamageBonus", 0.25, 0.0, 1.0);
+
     // --- City population --------------------------------------------------------------------
 
     /**

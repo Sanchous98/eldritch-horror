@@ -19,6 +19,7 @@ import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
 import com.sanchous98.eldritchhorror.registry.items.RiteEchoes;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.skill.RitualCooldownMath;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
 import com.sanchous98.eldritchhorror.skill.Skills;
 import net.minecraft.core.BlockPos;
@@ -601,11 +602,28 @@ public final class RiteEngine {
         };
     }
 
-    /** {@code ward_of_the_eye}: a tier-scaled resistance + regeneration ward. */
+    /**
+     * {@code ward_of_the_eye}: a tier-scaled resistance + regeneration self-buff, plus a lasting
+     * haven centred on the altar core (design/26). Other GRANT rites stay self-buffs only.
+     */
     private static Result grant(ServerPlayer player, RiteDefinition rite) {
         int ticks = WARD_TICKS_PER_TIER * Math.clamp(rite.tier(), 1, 3);
         player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, ticks, 0, true, false, false));
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, ticks, 0, true, false, false));
+        // ward_of_the_eye alone makes the ground a haven (design/26). Other GRANT rites stay
+        // self-buffs; drowned_blessing is GRANT_SKILL and is untouched.
+        if ("ward_of_the_eye".equals(rite.id())) {
+            BlockPos core = RitualAltar.nearestCore(player.level(), player.blockPosition(),
+                    ModConfig.RITE_ALTAR_RADIUS.get());
+            BlockPos center = core == null ? player.blockPosition() : core;
+            WardLedger.Ward ward = WardLedger.of(player.level()).raise(player.level(), center,
+                    ModConfig.WARD_RADIUS.get(), ModConfig.WARD_DURATION_TICKS.get());
+            if (ward != null) {
+                long seconds = (ward.expiresAtGameTime() - player.level().getGameTime()) / 20L;
+                return new Result(true, Component.literal("A ward settles over you ("
+                        + (ticks / 20) + "s) and the ground is warded for " + seconds + "s."));
+            }
+        }
         return new Result(true, Component.literal("A ward settles over you ("
                 + (ticks / 20) + "s)."));
     }
