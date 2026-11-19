@@ -248,6 +248,34 @@ public final class ModAttachments {
                             .build());
 
     /**
+     * Per-player last completion of each repeatable quest, {@code questId -> epoch seconds}, synced
+     * to the owner and copied on death (design/13, the repeatable quests of
+     * {@code design/10-quests.md}). Written only through
+     * {@link com.sanchous98.eldritchhorror.quest.QuestJournal}.
+     *
+     * <p>Stored as wall-clock epoch seconds rather than ticks so a cooldown keeps running while the
+     * server is stopped. An absent entry means "never completed", which is also what an existing
+     * save reads, so no old quest starts on cooldown. Synced because the journal resets a
+     * repeatable's progress to 0 on completion; without the timestamp the entry would render as
+     * ready while it is still cooling down (see {@code client.JournalScreen}).
+     */
+    public static final Supplier<AttachmentType<Map<String, Long>>> QUEST_COMPLETIONS =
+            ATTACHMENT_TYPES.register("quest_completions",
+                    () -> AttachmentType.<Map<String, Long>>builder(Map::of)
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.LONG)
+                                    .fieldOf("completed"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.<RegistryFriendlyByteBuf, String, Long,
+                                                    Map<String, Long>>map(
+                                                    java.util.HashMap::new,
+                                                    ByteBufCodecs.STRING_UTF8,
+                                                    ByteBufCodecs.VAR_LONG))
+                            .copyOnDeath()
+                            .build());
+
+    /**
      * Per-player set of unlocked skill ids, synced to the owner (design/13, skill tree). Written only
      * through {@link com.sanchous98.eldritchhorror.skill.SkillTree}.
      */

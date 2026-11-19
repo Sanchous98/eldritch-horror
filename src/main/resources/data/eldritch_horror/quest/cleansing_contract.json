@@ -1,0 +1,11 @@
+{
+  "id": "cleansing_contract",
+  "target": 1,
+  "stage": 4,
+  "requires": "first_rite",
+  "repeat": "weekly",
+  "reward_item": "order_scrip",
+  "reward_count": 2,
+  "reward_rep_cult": "unblinking_eye",
+  "reward_rep_amount": 5
+}

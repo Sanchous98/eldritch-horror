@@ -1,0 +1,11 @@
+{
+  "id": "star_hunt",
+  "target": 3,
+  "stage": 4,
+  "requires": "first_rite",
+  "repeat": "daily",
+  "reward_item": "relic_coin",
+  "reward_count": 2,
+  "reward_rep_cult": "unblinking_eye",
+  "reward_rep_amount": 5
+}

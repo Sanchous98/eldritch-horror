@@ -1,0 +1,11 @@
+{
+  "id": "tide_offering",
+  "target": 8,
+  "stage": 4,
+  "requires": "first_rite",
+  "repeat": "daily",
+  "reward_item": "pearl_reagent",
+  "reward_count": 2,
+  "reward_rep_cult": "drowned_choir",
+  "reward_rep_amount": 5
+}

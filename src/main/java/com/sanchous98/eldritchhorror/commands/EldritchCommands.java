@@ -297,8 +297,19 @@ public final class EldritchCommands {
             int progress = com.sanchous98.eldritchhorror.quest.QuestJournal.progress(player, quest.id());
             int target = quest.target();
             boolean done = progress >= target;
+            // Repeatables report their cadence and time left, so a debug session can see the
+            // cooldown without touching the saved attachment.
+            String cadence = "";
+            if (quest.repeat().periodSeconds() > 0L) {
+                long remaining = com.sanchous98.eldritchhorror.quest.QuestJournal
+                        .cooldownSeconds(player, quest);
+                cadence = remaining > 0L
+                        ? " [" + quest.repeat().key() + ", " + remaining + "s]"
+                        : " [" + quest.repeat().key() + ", ready]";
+            }
+            String suffix = cadence;
             ctx.getSource().sendSuccess(() -> Component.literal((done ? "[x] " : "[ ] ")
-                    + quest.id() + " " + Math.min(progress, target) + "/" + target + " — ")
+                    + quest.id() + " " + Math.min(progress, target) + "/" + target + suffix + " — ")
                     .append(quest.description()), false);
             if (!done && next == null) {
                 next = quest;

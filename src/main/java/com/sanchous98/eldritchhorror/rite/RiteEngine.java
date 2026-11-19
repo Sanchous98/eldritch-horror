@@ -223,6 +223,9 @@ public final class RiteEngine {
         }
         QuestJournal.add(player, "first_rite", 1);
         QuestJournal.add(player, "ritualist", 1);
+        if ("rite_of_cleansing".equals(rite.id())) {
+            QuestJournal.add(player, "cleansing_contract", 1);
+        }
         // A rite that took effect is what the chalice_of_echoes remembers (design/16): the id only,
         // resolved back through Rites when re-cast. In-memory, see registry/items/RiteEchoes.
         RiteEchoes.record(player, rite.id());

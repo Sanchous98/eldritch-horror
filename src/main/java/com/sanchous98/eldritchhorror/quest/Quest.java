@@ -22,9 +22,10 @@ import net.minecraft.network.chat.Component;
  * @param rewardCount     how many of {@link #rewardItem()} are paid
  * @param rewardRepCult   cult id that gains standing on completion ({@code ""} for none)
  * @param rewardRepAmount how much standing {@link #rewardRepCult()} gains
+ * @param repeat          how often the quest reopens ({@link Repeat#ONCE} when the field is absent)
  */
 public record Quest(String id, int target, int stage, String requires, String rewardItem,
-                    int rewardCount, String rewardRepCult, int rewardRepAmount) {
+                    int rewardCount, String rewardRepCult, int rewardRepAmount, Repeat repeat) {
 
     /** Datapack codec: the schema of one {@code quest/*.json} file. */
     public static final Codec<Quest> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -35,7 +36,8 @@ public record Quest(String id, int target, int stage, String requires, String re
             Codec.STRING.optionalFieldOf("reward_item", "").forGetter(Quest::rewardItem),
             Codec.INT.optionalFieldOf("reward_count", 0).forGetter(Quest::rewardCount),
             Codec.STRING.optionalFieldOf("reward_rep_cult", "").forGetter(Quest::rewardRepCult),
-            Codec.INT.optionalFieldOf("reward_rep_amount", 0).forGetter(Quest::rewardRepAmount)
+            Codec.INT.optionalFieldOf("reward_rep_amount", 0).forGetter(Quest::rewardRepAmount),
+            Repeat.codec().optionalFieldOf("repeat", Repeat.ONCE).forGetter(Quest::repeat)
     ).apply(instance, Quest::new));
 
     /** @return whether finishing this quest pays an item. */

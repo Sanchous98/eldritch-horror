@@ -19,7 +19,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Client-only and read-only. Definitions come from the server-synced {@link ClientQuests}
  * mirror; progress is read each frame from the owner-synced {@code QUESTS} attachment, so a quest
- * that completes while the journal is open updates immediately. Closed with Esc or the journal key.
+ * that completes while the journal is open updates immediately. A repeatable also reads the
+ * owner-synced {@code QUEST_COMPLETIONS} timestamp and appends its cadence ("daily — ready" /
+ * "daily — again in 12m") to the description. Closed with Esc or the journal key.
  */
 public final class JournalScreen extends Screen {
 
@@ -73,6 +75,9 @@ public final class JournalScreen extends Screen {
         Map<String, Integer> progress = player == null
                 ? Map.of()
                 : player.getData(ModAttachments.QUESTS.get());
+        Map<String, Long> completions = player == null
+                ? Map.of()
+                : player.getData(ModAttachments.QUEST_COMPLETIONS.get());
         List<Quest> quests = ClientQuests.all();
 
         g.centeredText(this.font, this.title, this.width / 2, 12, TITLE_COLOUR);
@@ -88,13 +93,14 @@ public final class JournalScreen extends Screen {
 
         g.enableScissor(x, TOP, x + w, bottom);
         int y = TOP - (int) this.scroll;
+        long now = System.currentTimeMillis() / 1000L;
         Quest next = null;
         for (Quest quest : quests) {
             boolean done = completed(quest, progress);
-            if (!done && next == null) {
+            if (!done && next == null && !coolingDown(quest, completions, now)) {
                 next = quest;
             }
-            drawQuest(g, quest, progress, x, w, y, done);
+            drawQuest(g, quest, progress, completions, now, x, w, y, done);
             y += ROW_HEIGHT;
         }
         g.disableScissor();
@@ -107,7 +113,8 @@ public final class JournalScreen extends Screen {
 
     /** One journal entry: the marked name line with its counter, plus the description below. */
     private void drawQuest(GuiGraphicsExtractor g, Quest quest, Map<String, Integer> progress,
-                           int x, int w, int y, boolean done) {
+                           Map<String, Long> completions, long now, int x, int w, int y,
+                           boolean done) {
         int colour = done ? DONE_COLOUR : TODO_COLOUR;
         g.text(this.font, Component.literal(done ? "[x] " : "[ ] ").append(quest.name()), x, y, colour);
 
@@ -120,12 +127,58 @@ public final class JournalScreen extends Screen {
         if (after != null) {
             line.append(" (").append(after).append(")");
         }
+        Component repeat = repeatHint(quest, completions, now);
+        if (repeat != null) {
+            line.append(" (").append(repeat).append(")");
+        }
         g.text(this.font, line, x + 14, y + 11, DESC_COLOUR);
     }
 
     /** @return whether {@code quest} has reached its target in the synced progress map. */
     private static boolean completed(Quest quest, Map<String, Integer> progress) {
         return progress.getOrDefault(quest.id(), 0) >= quest.target();
+    }
+
+    /** @return whether a repeatable quest is between completions and cannot advance yet. */
+    private static boolean coolingDown(Quest quest, Map<String, Long> completions, long now) {
+        long period = quest.repeat().periodSeconds();
+        Long last = completions.get(quest.id());
+        return period > 0L && last != null && now - last < period;
+    }
+
+    /**
+     * The cadence suffix for a repeatable quest — "daily — ready" or "daily — again in 12m" — or
+     * {@code null} for a once-only quest. The timestamp is the owner-synced
+     * {@code QUEST_COMPLETIONS} entry, compared with the client's wall clock; it is only a hint, the
+     * server re-checks the cooldown on every advance.
+     */
+    private static @Nullable Component repeatHint(Quest quest, Map<String, Long> completions,
+                                                  long now) {
+        long period = quest.repeat().periodSeconds();
+        if (period <= 0L) {
+            return null;
+        }
+        Component cadence = Component.translatable("quest.eldritch_horror.repeat."
+                + quest.repeat().key());
+        Long last = completions.get(quest.id());
+        long remaining = last == null ? 0L : Math.max(0L, period - (now - last));
+        if (remaining <= 0L) {
+            return Component.translatable("journal.eldritch_horror.repeat.ready", cadence);
+        }
+        return Component.translatable("journal.eldritch_horror.repeat.cooldown", cadence,
+                shortDuration(remaining));
+    }
+
+    /** @return a compact "45s" / "12m" / "2h 20m" label for a cooldown hint. */
+    private static Component shortDuration(long seconds) {
+        long minutes = seconds / 60L;
+        if (minutes >= 60L) {
+            return Component.literal(minutes / 60L + "h " + minutes % 60L + "m");
+        }
+        if (minutes >= 1L) {
+            return Component.literal(minutes + "m");
+        }
+        return Component.literal(seconds + "s");
     }
 
     /**
