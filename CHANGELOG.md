@@ -55,6 +55,11 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 - Map, quest **journal** (`J`), **codex** (`C`) and **skill tree** (`K`) screens with their own
   keybinds; HUD readouts and tooltips. Server-authoritative state, client-side rendering only.
 
+### Added — tests
+
+- **Headless GameTest suite** (`design/13`): the altar ring, ward ledger, gate links and the seal,
+  run with `./gradlew runGameTestServer` (26.3's data-driven test instances).
+
 ### Added — content & tools
 
 - Bestiary sounds, item/reagent catalogue, tomes and class/skill unlocks.

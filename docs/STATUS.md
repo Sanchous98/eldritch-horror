@@ -227,7 +227,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
   waypoint markers,
-  `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), GameTest classes, the
+  `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), the
   **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
   multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
   passes, the altar ring, the sound pack, the occultism tree, the weapon effects, the quest gate,
@@ -541,6 +541,20 @@ driven out, so `CityFall` has nothing to top up. `reclaim_the_city` (requires `c
 completes on success, and every message is localised. Probed on London driven to Fallen:
 `fallen → besieged`, six Choir driven out, quest complete, both refusals free. `CityReclaimMath`
 has 8 JUnit cases.
+
+## GameTests are real now (design/13)
+
+26.3's test framework is data-driven: `data/eldritch_horror/test_instance/*.json` names a
+`TEST_FUNCTION` registry entry, so `gametest/GameTests` registers four functions through a
+`DeferredRegister` (the vanilla `TestFunctionLoader` list drains before mod constructors, so a loader
+registered from the constructor never runs — documented in the class). A hand-built 12×6×12 clean
+room (`data/eldritch_horror/structure/gametest_platform.nbt`) replaces the 1×1×1 `minecraft:empty`.
+The suite (`2eca24d`) covers the altar ring (ring valid, heap refused), the ward ledger (coverage,
+expiry pruning, a longer ward survives), gate links (symmetric, canonical, relink replaces, removal
+clears both sides) and the seal (open rift refuses; an emptied-but-used ledger seals and records
+SEALED; a decided world refuses again). `./gradlew runGameTestServer` reports
+**all 5 required tests passed in ~2.4 s**; a deliberately broken assertion fails the run with exit 1.
+JUnit (71 cases) and PMD 0 run as before in `./gradlew build`.
 
 ## Where things live
 

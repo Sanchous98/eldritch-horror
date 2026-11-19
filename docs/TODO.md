@@ -14,13 +14,15 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **GameTest coverage (design/13)** — the harness exists but no test classes; altar ring, rite
-  outcome, seal, ward zone and gate travel are the first targets.
 - [ ] **The 3,065 non-curated settlements (design/21)** — `settlements.json` holds 3,089 entries and
   only the 24 curated ones are used; generic ruins/towns/nothing is undecided.
 
 ## Done
 
+- [x] **GameTest coverage (design/13)** — the new 26.3 data-driven suite (`test_instance/*.json` +
+  `TEST_FUNCTION` registry entries) covers the altar ring, the ward ledger's coverage/expiry, gate-link
+  symmetry/cleanup and the seal on an empty vs open ledger; `runGameTestServer` is 5/5 green and a
+  broken assertion fails the build — `2eca24d`.
 - [x] **Reclaiming a fallen city (design/21)** — the `reclaim_city` rite (Order, Devoted) only
   resolves inside a Fallen city: up to 256 loaded district chunks lose 65% of their taint (the state
   samples are cleaned first), up to 32 Choir worshippers are driven out, and `reclaim_the_city`

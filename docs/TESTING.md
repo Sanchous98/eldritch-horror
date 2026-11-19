@@ -1,8 +1,8 @@
 # Testing the mod in-game
 
-There are **no automated gameplay tests** — the mod has no GameTest suite, and the container has no
-display, so client-side behaviour (HUD, map, tooltips) can only be checked by a human in a real
-client. This doc is the manual playbook: how to launch, what commands exist, and a recipe per system.
+Gameplay now has a **headless GameTest suite** (see §8), and the container has no display, so
+client-side behaviour (HUD, map, tooltips) can still only be checked by a human in a real client.
+This doc is the manual playbook: how to launch, what commands exist, and a recipe per system.
 
 > After any code change, the dev image bakes the source — run `docker compose build dev` first, or
 > the container runs the previous build (see `AGENTS.md`, "Build discipline").
@@ -158,4 +158,26 @@ Config is the **`SYNCED`** type. It defaults to `config/eldritch_horror-synced.t
 
 - **Client rendering** (HUD, map layout, tooltips, hub geometry): only via `runClient`; the container
   has no display. Compile + dedicated-server smoke is the ceiling in CI.
-- **Automated regression**: none. GameTest is configured (`gameTestServer`) but no test class exists.
+- **Automated regression**: the GameTest suite below covers server-side invariants only. Rendering,
+  input and the screens remain a human check.
+
+## 8. Automated gameplay tests (GameTest)
+
+26.3's framework is data-driven: `data/eldritch_horror/test_instance/*.json` names a function from the
+`TEST_FUNCTION` registry, and `gametest/GameTests` registers four of them (through a `DeferredRegister`;
+the vanilla `TestFunctionLoader` list drains before mod constructors, so a constructor-time loader
+never runs). The tests build on a 12x6x12 clean room
+(`data/eldritch_horror/structure/gametest_platform.nbt`).
+
+```sh
+docker run --rm -e GRADLE_USER_HOME=/home/dev/.gradle \
+  -v eldritch-horror-dev_gradle-cache:/home/dev/.gradle \
+  -v eldritch-horror-dev_build-out:/workspace/build \
+  eldritch-horror-dev:latest ./gradlew runGameTestServer --no-daemon --console=plain
+```
+
+Pass = `All 5 required tests passed :)` and `BUILD SUCCESSFUL`; a failed assertion fails the build.
+Covered now: the altar ring (ring valid, heap refused), the ward ledger (coverage, expiry pruning,
+long ward survives), gate links (symmetric, canonical, relink replaces, removal clears both sides)
+and the seal (open rift refuses; an emptied-but-used ledger seals and records SEALED; a decided
+world refuses again). Unit-level arithmetic stays in `src/test/java` (run by `./gradlew build`).
