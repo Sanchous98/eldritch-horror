@@ -9,9 +9,9 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
-- [ ] **Weapon on-hit effects and client-only bits (design/16)** — the recorded kill/water/ward/
-  scaling effects on the weapons, the veil-lens corruption overlay and waypoint markers on the world
-  map stay commented in place.
+- [ ] **Client-only item bits (design/16)** — the veil-lens corruption overlay and the waypoint
+  markers on the world map stay commented in place; both are client rendering and need a human
+  visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **Quest `requires` as a server gate + repeatables (design/10)** — the prerequisite is shown in
   the journal only; nothing refuses a quest or its rewards server-side, and quests are one-shot.
 - [ ] **Area wards (design/26, 18)** — a ward as a *place* (no sanity drain, lesser things kept
@@ -28,6 +28,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **Weapon on-hit effects (design/16)** — `WeaponEffects` + `WeaponMath`: silver blade and
+  star-iron sword target bonuses (data tags `#eldritch`, `#star_spawn`), the dagger's corruption
+  scaling, the trident's underwater cut, the censer's paid ward, the pact blade's kill price and the
+  veil bow's shot cost, eldritch bonus and piercing; lore lines updated in both locales — `73cdfc3`.
 - [x] **The occultism skill tree (design/15)** — four real nodes with prerequisites:
   `forbidden_lore` (tome sanity −20%), `rite_affinity` (+10% ritual speed, multiplicative with the
   focus ring), `divination` (empty-hand inspection reports tags and, for a presence, its aura axis),

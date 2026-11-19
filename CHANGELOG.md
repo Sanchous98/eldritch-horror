@@ -54,6 +54,10 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   phases) — each with a loot table and a generated skin.
 - **Items wired** (`design/16`): real weapon/tool stats, the reagent row's deltas, carried-artefact
   passives (rite cooldown, taint suppression, the watcher's drain) and five navigation items.
+- **Weapons bite** (`design/16`): the recorded on-hit effects are real — target bonuses from data
+  tags (`#eldritch`, `#star_spawn`), corruption-scaled dagger damage, the trident's underwater cut,
+  the censer's paid ward, the pact blade's kill price and the veil bow's cost, eldritch bonus and
+  pierce.
 - **Audio wired**: thirteen procedural ogg through `ModSounds`/`sounds.json` — the rites, the
   endgame fork (banish/summon/**seal**), the Horror's own voice (it no longer sounds like a wither),
   whispers and dread.

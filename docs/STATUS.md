@@ -226,8 +226,9 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **rift-gate travel branch** and **area wards**
-  (`design/26`), the remaining **weapon on-hit effects** (`design/16`), quest `requires` as a real
-  gate plus repeatables (`design/10`), city reclamation (`design/21`), GameTest classes, the
+  (`design/26`), the **client-only item bits** (veil-lens overlay, map waypoint markers,
+  `design/16`), quest `requires` as a real gate plus repeatables (`design/10`), city reclamation
+  (`design/21`), GameTest classes, the
   **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
   multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
   passes, the altar ring, the sound pack, the occultism tree and the Russian locale are done.
@@ -482,8 +483,13 @@ wired where a system exists:
   `prophet_mask` (star-spawn ×1.25, villagers panic, −10 `MAX_SANITY` while carried — the sanity
   ticker reconciles the transient modifier so it can never stick), `chalice_of_echoes` (echoes the
   last successful rite for corruption), `veil_lens` (a local taint readout + drain on use),
-  `marked_map`/`route_ledger` (a small per-player waypoint memory). Only the weapon on-hit effects and
-  the client-only overlay/map markers stay commented in place.
+  `marked_map`/`route_ledger` (a small per-player waypoint memory).
+- **The weapon on-hit effects are live (`73cdfc3`)**: `WeaponEffects` on the damage/death/arrow-loose
+  events — silver blade +2 vs `#eldritch`, star-iron sword +2 vs `#star_spawn`, dagger up to +50%
+  with corruption, trident +25% melee underwater, censer 1 sanity for a 3 s resistance, pact blade
+  −4 sanity/+1 corruption per credited kill, veil bow 1 sanity per shot with +2 vs eldritch and a
+  two-body pierce. The arithmetic is in `WeaponMath` with 8 JUnit cases. Only the client-only
+  overlay/map markers stay commented in place.
 
 ## Where things live
 
