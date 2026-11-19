@@ -224,11 +224,13 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Known limitations / deferred
 
-- See **`docs/TODO.md`** for the ordered backlog. Open now: reputation decay / the cultist-kill
-  penalty (`design/03c`), the third ending ("seal every rift", `design/11`), armour equipment
-  assets and the remaining flavour items, and a **human visual pass on the `J`/`C`/`K` screens**
-  (API-verified only). The item pass, the altar ring pattern, sound wiring and the Russian locale
-  are done.
+- See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
+  screens, armour in-game), open now: the **occultism skill tree** (`design/15`), the **rift-gate
+  travel branch** and **area wards** (`design/26`), the remaining **weapon on-hit effects**
+  (`design/16`), quest `requires` as a real gate plus repeatables (`design/10`), city reclamation
+  (`design/21`), the **3,065 non-curated settlements** (`design/21`: generic towns, ruins or
+  nothing) and the multiplayer session rules (`design/12`). Reputation decay/penalty, the third
+  ending, both item passes, the altar ring, the sound pack and the Russian locale are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
   services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
   backlog.
