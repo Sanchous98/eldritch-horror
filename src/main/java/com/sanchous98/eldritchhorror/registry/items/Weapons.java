@@ -28,12 +28,14 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
  * Weapons and worn gear (FFG traits: <em>Weapon</em>, <em>Magical Weapon</em>,
  * <em>Relic Weapon</em>).
  *
- * <p>The weapons now carry real 26.3 stats through the same shapes vanilla registers: a sword is a
+ * <p>The weapons carry real 26.3 stats through the same shapes vanilla registers: a sword is a
  * plain {@link Item} whose {@code Properties.sword} supplies its attribute component and durability,
- * a mace uses {@link MaceItem}, a trident {@link TridentItem}, a bow {@link BowItem} and a tool the
- * generic {@code Properties.tool}. Per-hit/while-held effects recorded per item (on-kill sanity and
- * corruption, underwater damage, ward auras, corrupted scaling, sanity costs) stay flavour: there is
- * no damage hook for them in this pass, and only the four named artefact passives are wired.
+ * a mace uses {@link MaceItem}, a trident {@link TridentItem}, a bow {@link BowItem} (the veil bow
+ * its own {@link VeilBowItem}) and a tool the generic {@code Properties.tool}. The recorded on-hit
+ * effects (silver/star-iron target bonuses, the dagger's corruption scaling, the trident's
+ * underwater cut, the censer's paid ward, the pact blade's kill price and the veil bow's shot cost,
+ * eldritch bonus and piercing) are wired in {@link WeaponEffects}; every weapon's lore line is
+ * added here as a {@code LORE} component, matching the worn gear below.
  *
  * <p><b>The eight worn pieces are real armour.</b> 26.3 has no {@code ArmorItem}: vanilla registers
  * armour as a plain {@link Item} whose {@code Item.Properties.humanoidArmor(ArmorMaterial,
@@ -53,46 +55,55 @@ public final class Weapons {
         // Occultist's Implement — mainhand ritual focus. Iron tool (250 durability, weak melee).
         // flavour (design/16): "+ritual speed" is not wired here — the one ritual-speed hook belongs
         // to ring_of_focus (rite/RiteEngine).
-        ModItems.addItem("occult_tool", p -> new Item(p.tool(ToolMaterial.IRON,
-                BlockTags.MINEABLE_WITH_HOE, 0.0F, -2.0F, 0.0F)), 1);
-        // Silver Blade — consecrated silver. Iron sword: 6 attack damage, 250 durability.
-        // flavour (design/16): "+damage vs. eldritch entities" needs a per-victim damage hook.
-        ModItems.addItem("silver_blade", p -> new Item(p.sword(ToolMaterial.IRON, 3.0F, -2.4F)), 1);
+        ModItems.addItem("occult_tool", p -> new Item(lore(p.tool(ToolMaterial.IRON,
+                BlockTags.MINEABLE_WITH_HOE, 0.0F, -2.0F, 0.0F), "occult_tool")), 1);
+        // Silver Blade — consecrated silver. Iron sword: 6 attack damage, 250 durability, +2 vs
+        // eldritch (WeaponEffects, #eldritch_horror:eldritch).
+        ModItems.addItem("silver_blade",
+                p -> new Item(lore(p.sword(ToolMaterial.IRON, 3.0F, -2.4F), "silver_blade")), 1);
         // Hollow Pact Blade — relic weapon. Netherite sword: 8 attack damage, 2031 durability,
-        // fire-resistant. flavour (design/16): sanity drain on kill and +1 corruption/kill are not wired.
+        // fire-resistant; a credited kill costs 4 sanity and grants +1 corruption (WeaponEffects).
         ModItems.addItem("hollow_pact_blade",
-                p -> new Item(p.sword(ToolMaterial.NETHERITE, 3.0F, -2.4F).fireResistant()), 1);
+                p -> new Item(lore(p.sword(ToolMaterial.NETHERITE, 3.0F, -2.4F).fireResistant(),
+                        "hollow_pact_blade")), 1);
         // Ritual Knife — cheap magical weapon. Wooden sword: 4 attack damage, 59 durability.
         // flavour (design/16): "enables blood rites when held" is not wired.
-        ModItems.addItem("ritual_knife", p -> new Item(p.sword(ToolMaterial.WOOD, 3.0F, -2.4F)), 1);
+        ModItems.addItem("ritual_knife",
+                p -> new Item(lore(p.sword(ToolMaterial.WOOD, 3.0F, -2.4F), "ritual_knife")), 1);
         // Warden's Maul — heavy Order weapon. Mace: 5 attack damage + smash, 500 durability,
         // slow swing (-3.4). flavour (design/16): the while-equipped movement slow is not wired.
-        ModItems.addItem("wardens_maul", p -> new MaceItem(mace(p, 500)), 1);
+        ModItems.addItem("wardens_maul", p -> new MaceItem(lore(mace(p, 500), "wardens_maul")), 1);
         // Bone Club — crude grave-bone weapon. Stone sword: 5 attack damage, 131 durability.
-        ModItems.addItem("bone_club", p -> new Item(p.sword(ToolMaterial.STONE, 3.0F, -2.4F)), 1);
-        // Star-Iron Sword — meteoric weapon. Already wounds star-spawn through the ward_breakers
-        // item tag; stats were left out of this pass (the brief listed no melee numbers for it).
-        ModItems.add("star_iron_sword", 1);
-        // Tidal Trident — Choir weapon. Trident: 8 attack damage, 250 durability.
-        // flavour (design/16): underwater bonus damage and corrosion on hit are not wired.
-        ModItems.addItem("tidal_trident", p -> new TridentItem(p.durability(250)
+        ModItems.addItem("bone_club",
+                p -> new Item(lore(p.sword(ToolMaterial.STONE, 3.0F, -2.4F), "bone_club")), 1);
+        // Star-Iron Sword — meteoric weapon, an iron sword (6 attack damage, 250 durability) with a
+        // +2 bonus vs. star-spawn (WeaponEffects, #eldritch_horror:star_spawn). It also already
+        // carries the ward_breakers item tag, which pierces the star-spawn's mundane resistance.
+        ModItems.addItem("star_iron_sword",
+                p -> new Item(lore(p.sword(ToolMaterial.IRON, 3.0F, -2.4F), "star_iron_sword")), 1);
+        // Tidal Trident — Choir weapon. Trident: 8 attack damage, 250 durability, +25% melee damage
+        // while the wielder is underwater (WeaponEffects). Corrosion on hit stays flavour.
+        ModItems.addItem("tidal_trident", p -> new TridentItem(lore(p.durability(250)
                 .attributes(TridentItem.createAttributes())
                 .component(DataComponents.TOOL, TridentItem.createToolProperties())
                 .enchantable(1)
-                .component(DataComponents.WEAPON, new Weapon(1))), 1);
+                .component(DataComponents.WEAPON, new Weapon(1)), "tidal_trident")), 1);
         // Sacrificial Dagger — magical weapon. Iron dagger: 5 attack damage at 2.0 swings/s,
-        // 250 durability. flavour (design/16): "damage scales with corruption" is not wired.
-        ModItems.addItem("sacrificial_dagger", p -> new Item(p.sword(ToolMaterial.IRON, 2.0F, -2.0F)), 1);
-        // Censer Mace — burning incense head. Mace: 5 attack damage + smash, 300 durability.
-        // flavour (design/16): the ward aura and sanity cost per swing are not wired.
-        ModItems.addItem("censer_mace", p -> new MaceItem(mace(p, 300)), 1);
+        // 250 durability; damage scales up to +50% with the wielder's corruption (WeaponEffects).
+        ModItems.addItem("sacrificial_dagger",
+                p -> new Item(lore(p.sword(ToolMaterial.IRON, 2.0F, -2.0F), "sacrificial_dagger")), 1);
+        // Censer Mace — burning incense head. Mace: 5 attack damage + smash, 300 durability; each
+        // landing swing pays 1 sanity for a 3s ward (WeaponEffects).
+        ModItems.addItem("censer_mace", p -> new MaceItem(lore(mace(p, 300), "censer_mace")), 1);
         // Eye Scepter — relic weapon. Gold sword: 3 attack damage (weak melee), 32 durability.
         // flavour (design/16): rift reveal and while-held sanity drain are not wired (that passive
         // belongs to eye_of_the_watcher).
-        ModItems.addItem("eye_scepter", p -> new Item(p.sword(ToolMaterial.GOLD, 2.0F, -2.4F)), 1);
-        // Veil Bow — relic weapon. Bow: 500 durability. flavour (design/16): piercing arrows,
-        // +damage vs. eldritch and the per-shot sanity cost are not wired.
-        ModItems.addItem("veil_bow", p -> new BowItem(p.durability(500).enchantable(1)), 1);
+        ModItems.addItem("eye_scepter",
+                p -> new Item(lore(p.sword(ToolMaterial.GOLD, 2.0F, -2.4F), "eye_scepter")), 1);
+        // Veil Bow — relic weapon. Bow: 500 durability; each loosed arrow costs 1 sanity, pierces
+        // two extra bodies and deals +2 vs. eldritch targets (VeilBowItem, WeaponEffects).
+        ModItems.addItem("veil_bow",
+                p -> new VeilBowItem(lore(p.durability(500).enchantable(1), "veil_bow")), 1);
 
         // Investigator's Coat — chest armour (iron-ish, light): −sanity drain in darkness stays
         // flavour (design/16; the darkness source answers to lantern_of_steadfast instead).
@@ -165,6 +176,16 @@ public final class Weapons {
                                           String asset) {
         return new ArmorMaterial(durability, Map.of(type, defense), 15, equipSound, 0.0F, 0.0F,
                 repair, ResourceKey.create(EquipmentAssets.ROOT_ID, EldritchHorror.id(asset)));
+    }
+
+    /**
+     * Appends the weapon's single locale lore line (both locales) through the {@code LORE}
+     * component, the same presentation path as the worn gear: no client class, and the line states
+     * what the weapon really does after {@link WeaponEffects}.
+     */
+    private static Item.Properties lore(Item.Properties properties, String id) {
+        return properties.component(DataComponents.LORE, new ItemLore(List.of(
+                Component.translatable("item.eldritch_horror." + id + ".tooltip"))));
     }
 
     /**
