@@ -1,0 +1,10 @@
+{
+  "id": "reclaim_the_city",
+  "target": 1,
+  "stage": 4,
+  "requires": "cleanse_the_land",
+  "reward_item": "order_scrip",
+  "reward_count": 3,
+  "reward_rep_cult": "unblinking_eye",
+  "reward_rep_amount": 10
+}

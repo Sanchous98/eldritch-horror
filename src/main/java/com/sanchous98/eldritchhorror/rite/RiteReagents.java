@@ -52,6 +52,7 @@ public final class RiteReagents {
             Map.entry("open_rift", List.of(new Reagent("void_reagent", 6), new Reagent("blood_offering", 4))),
             Map.entry("close_rift", List.of(new Reagent("salt_reagent", 8), new Reagent("chalk_reagent", 2))),
             Map.entry("rite_of_cleansing", List.of(new Reagent("silver_reagent", 4))),
+            Map.entry("reclaim_city", List.of(new Reagent("salt_reagent", 8), new Reagent("silver_reagent", 4))),
             Map.entry("respec", List.of(new Reagent("mirror_shard", 4), new Reagent("silver_reagent", 4))),
             // Hollow Choir additions (design/26): the ground and the mark, priced in bone and blood.
             Map.entry("blight_the_earth", List.of(new Reagent("bone_reagent", 4), new Reagent("blood_offering", 1))),

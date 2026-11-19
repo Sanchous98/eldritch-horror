@@ -51,6 +51,13 @@ public final class Rites {
         register(new RiteDefinition("rite_of_cleansing", RiteDefinition.nameOf("rite_of_cleansing"),
                 3, -15, 5, RiteDefinition.Outcome.CORRUPTION, "",
                 new RiteDefinition.Gains(0, -20, "", 0)));
+        // design/21's open question: a Fallen city can be reclaimed by an expensive Order rite. The
+        // gate is the Fallen city itself (RiteEngine refuses, at no cost, outside one); on success the
+        // taint recedes across the loaded district and the Choir's presence is purged. The -20 sanity
+        // is the price either way — this is a heavy rite, taught only to the Devoted (cult/Cults.java).
+        register(new RiteDefinition("reclaim_city", RiteDefinition.nameOf("reclaim_city"),
+                3, -20, 0, RiteDefinition.Outcome.RECLAIM_CITY, "",
+                new RiteDefinition.Gains(-20, 0, "unblinking_eye", 15)));
         register(new RiteDefinition("respec", RiteDefinition.nameOf("respec"),
                 3, -20, 0, RiteDefinition.Outcome.GRANT_SKILL, "respec"));
 

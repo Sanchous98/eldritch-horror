@@ -55,6 +55,8 @@ public final class Cults {
                                 CultService.Kind.CLEANSE, ""),
                         new CultService("teach_still_the_shade", CultRank.DEVOTED,
                                 CultService.Kind.TEACH, "still_the_shade"),
+                        new CultService("teach_reclaim_city", CultRank.DEVOTED,
+                                CultService.Kind.TEACH, "reclaim_city"),
                         new CultService("teach_banish_the_horror", CultRank.INNER_CIRCLE,
                                 CultService.Kind.TEACH, "banish_the_horror"),
                         CultService.trade("buy_chalk", CultRank.INITIATE,

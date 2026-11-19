@@ -19,6 +19,10 @@ import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
 import com.sanchous98.eldritchhorror.registry.items.RiteEchoes;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.skill.RitualCooldownMath;
+import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.CityReclaim;
+import com.sanchous98.eldritchhorror.world.city.CityState;
+import com.sanchous98.eldritchhorror.world.city.CityStates;
 import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import com.sanchous98.eldritchhorror.skill.SkillTree;
 import com.sanchous98.eldritchhorror.skill.Skills;
@@ -168,6 +172,27 @@ public final class RiteEngine {
                     "You must perform the rite at an altar (a core marked with rune stones or chalk)."));
         }
 
+        // The Fallen-city gate for the reclaim rite (design/21). Like the altar it refuses before the
+        // cost and before the outcome, so standing outside a city or in one that still stands pays
+        // nothing — the world is not "wrong", the rite simply has no subject here.
+        if (rite.outcome() == RiteDefinition.Outcome.RECLAIM_CITY) {
+            if (!ModConfig.ENABLE_CITY_RECLAIM.get()) {
+                return new Result(false,
+                        Component.translatable("rite.eldritch_horror.reclaim_city.disabled"));
+            }
+            City city = CityStates.nearestCity(level, player.blockPosition());
+            if (city == null) {
+                return new Result(false,
+                        Component.translatable("rite.eldritch_horror.reclaim_city.no_city"));
+            }
+            CityState state = CityStates.stateOf(level, city);
+            if (state != CityState.FALLEN) {
+                return new Result(false, Component.translatable(
+                        "rite.eldritch_horror.reclaim_city.still_stands",
+                        city.name(), state.displayName()));
+            }
+        }
+
         // Conditions (design/08): the world must look right before the rite resolves. Like a missing
         // offering this refuses before the outcome, but unlike an offering it is not something the
         // player can simply carry — so the meter cost below is still paid (design/08: "failure always
@@ -206,6 +231,7 @@ public final class RiteEngine {
             case AWAKEN_HORROR -> awakenHorror(level, player);
             case BANISH_HORROR -> banishHorror(level, player);
             case SUMMON_HORROR -> summonHorror(level, player);
+            case RECLAIM_CITY -> reclaimCity(level, player);
         };
         if (!result.ok()) {
             // A rite that started and did not resolve is a failure (design/08: "failure always costs
@@ -226,6 +252,9 @@ public final class RiteEngine {
         QuestJournal.add(player, "ritualist", 1);
         if ("rite_of_cleansing".equals(rite.id())) {
             QuestJournal.add(player, "cleansing_contract", 1);
+        }
+        if ("reclaim_city".equals(rite.id())) {
+            QuestJournal.add(player, "reclaim_the_city", 1);
         }
         // A rite that took effect is what the chalice_of_echoes remembers (design/16): the id only,
         // resolved back through Rites when re-cast. In-memory, see registry/items/RiteEchoes.
@@ -734,6 +763,23 @@ public final class RiteEngine {
         }
         return new Result(true, Component.literal("The Way is sealed; " + removed
                 + " rift marker(s) removed and the rift's influence recedes."));
+    }
+
+    /**
+     * {@code reclaim_city}: the world effect of the Fallen-city gate passed in {@link #perform}. The
+     * district's loaded chunks lose taint ({@link CityReclaim}) and the Hollow Choir's foothold is
+     * purged; {@link CityStates} recomputes the state afterwards, so the report shows before → after
+     * from the same derived rule the map and the cleanse use.
+     */
+    private static Result reclaimCity(ServerLevel level, ServerPlayer player) {
+        City city = CityStates.nearestCity(level, player.blockPosition());
+        if (city == null) {
+            // perform() gates this already; keep the outcome honest if it is ever reached directly.
+            return new Result(false,
+                    Component.translatable("rite.eldritch_horror.reclaim_city.no_city"));
+        }
+        CityReclaim.Report report = CityReclaim.reclaim(level, city);
+        return new Result(true, report.message());
     }
 
     /** {@code rite_of_cleansing}: lower the player's corruption AND the local taint. */

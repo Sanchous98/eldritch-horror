@@ -76,6 +76,26 @@ public final class ModConfig {
             BUILDER.comment("District taint at which a city becomes Fallen (no shelter).")
                     .defineInRange("cityStateFallenTaint", 0.55, 0.0, 1.0);
 
+    // --- City reclaim (design/21) -----------------------------------------------------------
+    // The reclaim_city rite (rite/Rites.java, rite/RiteEngine.java) is the "expensive rite" that
+    // answers design/21's open question. It only resolves inside a Fallen curated city, and one cast
+    // multiplies the taint of up to 256 loaded district chunks by reclaimTaintFactor. At the default
+    // 0.35 that removes ~65%: a district at the Fallen cut-off (0.55) comes back to ~0.19 (Uneasy),
+    // and even a fully tainted district (1.0) returns to 0.35 (Besieged). See world/city/CityReclaim.
+
+    /** Master switch for the {@code reclaim_city} rite's world effect. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_RECLAIM =
+            BUILDER.comment("Allow the reclaim_city rite to bring a Fallen curated city back.")
+                    .define("enableCityReclaim", true);
+
+    /**
+     * Multiplier applied to each touched district chunk's taint on a reclaim (0 clears, 1 is a
+     * no-op). The default 0.35 removes ~65% and lifts a Fallen district back to Besieged or better.
+     */
+    public static final ModConfigSpec.DoubleValue RECLAIM_TAINT_FACTOR =
+            BUILDER.comment("Taint multiplier per reclaim chunk (0 clears, 1 does nothing; default 0.35).")
+                    .defineInRange("reclaimTaintFactor", 0.35, 0.0, 1.0);
+
     /** Source: the lethal polar end of the world (Morok) drains sanity with depth. */
     public static final ModConfigSpec.BooleanValue ENABLE_SANITY_MOROK =
             BUILDER.comment("Enable the 'morok' sanity source (polar drain past the charted edge).")

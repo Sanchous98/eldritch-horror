@@ -103,7 +103,13 @@ public record RiteDefinition(
          * {@link RiteEngine} resolves the nearest one within {@code riteSolveRadius} and asks it to
          * solve. Added additively — no existing outcome changes.
          */
-        SOOTHE
+        SOOTHE,
+        /**
+         * Reclaim a Fallen curated city (design/21's "expensive rite / quest"): the district's taint
+         * recedes and the Hollow Choir's foothold is purged. Gated to a Fallen city, loaded chunks
+         * only; see {@code world/city/CityReclaim}. Added additively.
+         */
+        RECLAIM_CITY
     }
 
     /** Builds the translatable name for a rite id. */
