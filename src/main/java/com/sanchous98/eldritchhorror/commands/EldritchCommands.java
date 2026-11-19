@@ -25,6 +25,7 @@ import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.event.EldritchEvent;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.Events;
+import com.sanchous98.eldritchhorror.event.Rifts;
 import com.sanchous98.eldritchhorror.investigator.Investigator;
 import com.sanchous98.eldritchhorror.investigator.InvestigatorAPI;
 import com.sanchous98.eldritchhorror.investigator.Prologue;
@@ -38,9 +39,12 @@ import com.sanchous98.eldritchhorror.world.city.CityState;
 import com.sanchous98.eldritchhorror.world.city.CityStates;
 import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import com.sanchous98.eldritchhorror.world.ward.WardMath;
+import com.sanchous98.eldritchhorror.world.rift.GateLinks;
+import com.sanchous98.eldritchhorror.world.rift.RiftGates;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -228,6 +232,8 @@ public final class EldritchCommands {
                                 .executes(EldritchCommands::setEndgame))));
         // Wards (design/26): what haven currently covers the caller, with radius and seconds left.
         eh.then(Commands.literal("ward").executes(EldritchCommands::listWards));
+        // Rift gates (design/26): the caller's pending mark and the nearest gate's link state.
+        eh.then(Commands.literal("gate").executes(EldritchCommands::gateInfo));
         // Server-side bot players for automated playtesting (dev-mode gated inside the handlers).
         eh.then(com.sanchous98.eldritchhorror.bot.BotCommands.node());
         dispatcher.register(eh);
@@ -291,6 +297,53 @@ public final class EldritchCommands {
         if (shown == 0) {
             ctx.getSource().sendSuccess(() -> Component.literal("none"), false);
         }
+        return 1;
+    }
+
+    /**
+     * {@code /eh gate}: the caller's pending mark (if any) and the link state of the nearest gate
+     * within 16 blocks. A probe command: it reads only loaded chunks and never links or travels.
+     */
+    private static int gateInfo(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        RiftGates.Mark mark = RiftGates.pending(player.getUUID());
+        if (mark == null) {
+            ctx.getSource().sendSuccess(() -> Component.literal("mark: none"), false);
+        } else {
+            ctx.getSource().sendSuccess(() -> Component.literal("mark: "
+                    + mark.dimension().identifier() + " " + mark.pos().getX() + ","
+                    + mark.pos().getY() + "," + mark.pos().getZ()), false);
+        }
+        if (!ModConfig.ENABLE_RIFT_GATES.get()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("gates: disabled"), false);
+        }
+        ServerLevel level = player.level();
+        GateLinks links = GateLinks.of(level);
+        BlockPos here = player.blockPosition();
+        BlockPos nearest = null;
+        double best = 16.0 * 16.0;
+        for (BlockPos gate : Rifts.near(level, here, 1, 64)) {
+            double dx = gate.getX() - here.getX();
+            double dy = gate.getY() - here.getY();
+            double dz = gate.getZ() - here.getZ();
+            double distance = dx * dx + dy * dy + dz * dz;
+            if (distance <= best) {
+                best = distance;
+                nearest = gate;
+            }
+        }
+        if (nearest == null) {
+            ctx.getSource().sendSuccess(() -> Component.literal("gate within 16: none"), false);
+            return 1;
+        }
+        BlockPos twin = links.linked(nearest);
+        Component line = twin == null
+                ? Component.literal("gate " + nearest.getX() + "," + nearest.getY() + ","
+                        + nearest.getZ() + " -> unlinked")
+                : Component.literal("gate " + nearest.getX() + "," + nearest.getY() + ","
+                        + nearest.getZ() + " -> " + twin.getX() + "," + twin.getY() + ","
+                        + twin.getZ());
+        ctx.getSource().sendSuccess(() -> line, false);
         return 1;
     }
 

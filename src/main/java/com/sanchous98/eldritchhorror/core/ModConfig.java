@@ -232,6 +232,31 @@ public final class ModConfig {
             BUILDER.comment("Damage bonus (fraction) a warded player deals to an Ancient One.")
                     .defineInRange("wardBossDamageBonus", 0.25, 0.0, 1.0);
 
+    // --- Rift gates (design/26) --------------------------------------------------------------
+    // A gate is a standing rift_anchor block. Knowing open_rift lets a player link two gates by
+    // using them in turn, then travel between them for a corruption + sanity price (design/23:
+    // the fast route is the tainted route). Links are per-level world data (world/rift/GateLinks).
+
+    /** Master switch for linking and travelling through rift gates. */
+    public static final ModConfigSpec.BooleanValue ENABLE_RIFT_GATES =
+            BUILDER.comment("Enable rift gates: link two anchors with open_rift, then travel between them.")
+                    .define("enableRiftGates", true);
+
+    /** Corruption added by one gate trip (design/26: occult travel pays in corruption). */
+    public static final ModConfigSpec.DoubleValue RIFT_GATE_CORRUPTION =
+            BUILDER.comment("Corruption added by one rift-gate trip.")
+                    .defineInRange("riftGateCorruption", 3.0, 0.0, 100.0);
+
+    /** Sanity drained by one gate trip (a positive magnitude; applied as a negative delta). */
+    public static final ModConfigSpec.DoubleValue RIFT_GATE_SANITY =
+            BUILDER.comment("Sanity drained by one rift-gate trip (positive amount).")
+                    .defineInRange("riftGateSanity", 8.0, 0.0, 100.0);
+
+    /** Chance (0..1) that an arrival tears open a fresh gate nearby (design/26: instability). */
+    public static final ModConfigSpec.DoubleValue RIFT_GATE_INSTABILITY_CHANCE =
+            BUILDER.comment("Chance (0..1) that an arrival tears open a fresh gate nearby.")
+                    .defineInRange("riftGateInstabilityChance", 0.25, 0.0, 1.0);
+
     // --- City population --------------------------------------------------------------------
 
     /**

@@ -832,5 +832,16 @@
   "subtitles.eldritch_horror.ambient.dread": "The corruption deepens",
   "quest.eldritch_horror.the_seal": "The Seal",
   "quest.eldritch_horror.the_seal.desc": "Seal every rift before the decision comes.",
-  "subtitles.eldritch_horror.endgame.seal": "The world stands sealed"
+  "subtitles.eldritch_horror.endgame.seal": "The world stands sealed",
+  "rift.eldritch_horror.disabled": "Rift gates are closed to you.",
+  "rift.eldritch_horror.unknown_rite": "The gate does not answer: you know no rite to command it.",
+  "rift.eldritch_horror.marked": "The gate waits for its twin.",
+  "rift.eldritch_horror.unmarked": "The gate lets go; no twin is chosen.",
+  "rift.eldritch_horror.cross_dimension": "The mark lies in another world; a gate cannot reach across the worlds.",
+  "rift.eldritch_horror.twin_gone": "The old mark is cold — its gate is gone. This gate now waits for its twin.",
+  "rift.eldritch_horror.linked": "The gates are one; the way opens between them.",
+  "rift.eldritch_horror.dead_link": "The far gate is gone; the link dies with it.",
+  "rift.eldritch_horror.no_arrival": "No safe ground at the far gate; the Way refuses.",
+  "rift.eldritch_horror.travelled": "The Way takes its price: corruption +%s, sanity −%s.",
+  "rift.eldritch_horror.unstable": "Something else came through: a new rift tears open at %s, %s, %s."
 }

@@ -832,5 +832,16 @@
   "subtitles.eldritch_horror.ambient.dread": "Порча сгущается",
   "quest.eldritch_horror.the_seal": "Печать",
   "quest.eldritch_horror.the_seal.desc": "Запечатайте все рифты до наступления решения.",
-  "subtitles.eldritch_horror.endgame.seal": "Мир запечатан"
+  "subtitles.eldritch_horror.endgame.seal": "Мир запечатан",
+  "rift.eldritch_horror.disabled": "Врата рифтов закрыты для вас.",
+  "rift.eldritch_horror.unknown_rite": "Врата не отвечают: вы не знаете обряда, чтобы повелевать ими.",
+  "rift.eldritch_horror.marked": "Врата ждут своей пары.",
+  "rift.eldritch_horror.unmarked": "Врата отпускают; пара не выбрана.",
+  "rift.eldritch_horror.cross_dimension": "Метка лежит в другом мире; врата не достигают иных миров.",
+  "rift.eldritch_horror.twin_gone": "Старая метка остыла — её врата исчезли. Эти врата теперь ждут своей пары.",
+  "rift.eldritch_horror.linked": "Врата едины; путь между ними открыт.",
+  "rift.eldritch_horror.dead_link": "Дальние врата исчезли; связь умирает вместе с ними.",
+  "rift.eldritch_horror.no_arrival": "У дальних врат нет безопасной земли; Путь отказывает.",
+  "rift.eldritch_horror.travelled": "Путь берёт свою цену: порча +%s, рассудок −%s.",
+  "rift.eldritch_horror.unstable": "Сквозь прошло нечто иное: рядом разверзается новый рифт в %s, %s, %s."
 }
