@@ -227,7 +227,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **rift-gate travel branch** and **area wards**
   (`design/26`), the **client-only item bits** (veil-lens overlay, map waypoint markers,
-  `design/16`), quest `requires` as a real gate plus repeatables (`design/10`), city reclamation
+  `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), city reclamation
   (`design/21`), GameTest classes, the
   **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
   multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
@@ -393,15 +393,25 @@ The journal lives in `data/eldritch_horror/quest/*.json`, scanned on every serve
 NeoForged's `AddServerReloadListenersEvent`. Schema:
 
 ```json
-{ "id": "ritualist", "target": 10, "stage": 3, "requires": "first_rite",
-  "reward_item": "black_obol", "reward_count": 3 }
+{ "id": "cleansing_contract", "target": 1, "stage": 4, "requires": "first_rite",
+  "repeat": "weekly", "reward_item": "order_scrip", "reward_count": 2 }
 ```
 
-`id`/`target`/`stage` are required; `requires` and the reward pair are optional. Name and description
-stay lang keys (`quest.eldritch_horror.<id>` / `.desc`). Adding a quest = one JSON file plus its two
-lang keys; if it watches a system with no emission point yet, add one `QuestJournal.add` call there.
-`/eh quests` lists the acts in stage order and names the next objective. Twelve quests ship across
-seven acts.
+`id`/`target`/`stage` are required; `requires`, `repeat` and the reward pair are optional. Name and
+description stay lang keys (`quest.eldritch_horror.<id>` / `.desc`). Adding a quest = one JSON file
+plus its two lang keys; if it watches a system with no emission point yet, add one
+`QuestJournal.add` call there.
+
+**`requires` is a hard server gate (`02915ac`)**: `QuestJournal.add` refuses silently while the
+prerequisite is unfinished (a dangling id is unmet), so a watched system firing early changes
+nothing — the fresh-bot probe that used to see `lorekeeper` count before the first rite now stays at
+0 until `first_rite` completes. **Repeatables** use `"repeat": "daily"` (1 200 s) or `"weekly"`
+(8 400 s) counted from the last completion, stored in the synced `QUEST_COMPLETIONS` attachment; a
+completion pays again and restarts the counter at 0, and the journal shows the cadence and time left.
+Three side quests ship with triggers: `star_hunt` (`#star_spawn` kills), `tide_offering` (pearl
+pickups) and `cleansing_contract` (`rite_of_cleansing`); `rift_scout` still needs a per-rift axis.
+`/eh quests` lists the acts in stage order and names the next objective; 18 quests ship across nine
+acts.
 
 ## Client screens (design/13)
 

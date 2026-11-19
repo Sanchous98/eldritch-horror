@@ -32,8 +32,10 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   `banish_the_horror`, `summon_the_horror`).
 - **Codex**: learning lore (tomes, cult scripture, the prophet, the starting rite) is the same
   as finding a codex entry — so the lorekeeper path is reachable on a fresh world.
-- **Quests** as datapack content (`data/eldritch_horror/quest/*.json`), a 14-quest chain and a
-  journal screen synced server → client.
+- **Quests** as datapack content (`data/eldritch_horror/quest/*.json`), an 18-quest chain and a
+  journal screen synced server → client. Prerequisites are enforced server-side, and the design's
+  daily/weekly side quests (`star_hunt`, `tide_offering`, `cleansing_contract`) pay again after
+  their cooldown.
 - **Skill tree** (`design/15`): eight nodes with real effects and an optional prerequisite chain —
   the occultism four (`forbidden_lore`, `rite_affinity`, `divination`, `lucid_dreams`) join the
   existing four, and a locked node answers in chat instead of silently refusing.

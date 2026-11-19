@@ -12,8 +12,8 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - [ ] **Client-only item bits (design/16)** — the veil-lens corruption overlay and the waypoint
   markers on the world map stay commented in place; both are client rendering and need a human
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
-- [ ] **Quest `requires` as a server gate + repeatables (design/10)** — the prerequisite is shown in
-  the journal only; nothing refuses a quest or its rewards server-side, and quests are one-shot.
+- [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
+  was scouted); daily/weekly repeatables and the hard `requires` gate are done.
 - [ ] **Area wards (design/26, 18)** — a ward as a *place* (no sanity drain, lesser things kept
   away, a damage window) rather than the self-buff; `ward_of_the_eye`'s unused `ward_token` goes with
   it.
@@ -28,6 +28,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **Quest gate + repeatables (design/10)** — `requires` is now enforced server-side (a dangling id
+  counts as unmet), quests can be `daily`/`weekly` with the stamp in a synced attachment, and the
+  three side quests have real triggers (`star_hunt` kills, `tide_offering` pearl pickups,
+  `cleansing_contract` rites) — `02915ac`.
 - [x] **Weapon on-hit effects (design/16)** — `WeaponEffects` + `WeaponMath`: silver blade and
   star-iron sword target bonuses (data tags `#eldritch`, `#star_spawn`), the dagger's corruption
   scaling, the trident's underwater cut, the censer's paid ward, the pact blade's kill price and the
