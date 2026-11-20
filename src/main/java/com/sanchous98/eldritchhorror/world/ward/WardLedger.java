@@ -108,6 +108,22 @@ public final class WardLedger extends SavedData {
     }
 
     /**
+     * Whether {@code player} stands inside an unexpired ward. The single guard for every
+     * <em>ambient</em> sanity drain that does not run through {@code SanitySources} (presence auras,
+     * a husk crowd, Shub-Niggurath's stillness): the haven is a place, so it must shelter from those
+     * too. Rite and item costs are deliberately <b>not</b> routed through this.
+     *
+     * @return whether the player is sheltered by a ward right now
+     */
+    public static boolean shelters(net.minecraft.server.level.ServerPlayer player) {
+        if (!ModConfig.ENABLE_WARDS.get()
+                || !(player.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        return of(level).wardAt(level, player.blockPosition()) != null;
+    }
+
+    /**
      * The nearest unexpired ward covering {@code pos}, or {@code null}. Horizontal distance only;
      * expired entries are pruned on the way past.
      */

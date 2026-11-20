@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -321,7 +322,13 @@ public final class BestiarySupport {
             return;
         }
         switch (auras.getFirst().auraAxis()) {
-            case SANITY -> SanityAPI.add(player, total);
+            // A ward is a haven: it suppresses ambient sanity drains, including a presence's aura.
+            // Corruption still seeps — the haven protects the mind, not the soul.
+            case SANITY -> {
+                if (!WardLedger.shelters(player)) {
+                    SanityAPI.add(player, total);
+                }
+            }
             case CORRUPTION -> CorruptionAPI.add(player, total);
         }
     }

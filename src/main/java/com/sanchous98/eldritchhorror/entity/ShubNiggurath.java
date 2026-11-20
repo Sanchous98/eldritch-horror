@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -115,7 +116,7 @@ public final class ShubNiggurath extends AncientOne {
                         + (player.isSprinting() ? ModConfig.CORRUPTION_SHUB_NIGGURATH_SPRINT_RATE.get() : 0.0);
                 CorruptionAPI.add(player, rate);
             }
-            if (sanityOn && !moving) {
+            if (sanityOn && !moving && !WardLedger.shelters(player)) {
                 SanityAPI.add(player, ModConfig.SANITY_SHUB_NIGGURATH_STILL_RATE.get());
             }
         }

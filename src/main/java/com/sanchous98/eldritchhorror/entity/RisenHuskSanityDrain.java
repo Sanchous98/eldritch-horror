@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.entity;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import java.util.List;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -54,6 +55,9 @@ public final class RisenHuskSanityDrain {
 
     /** Drains {@code rate * min(count, max)} for one player, counted in loaded chunks only. */
     private static void drain(ServerPlayer player) {
+        if (WardLedger.shelters(player)) {
+            return; // a haven holds the husks' hunger at bay
+        }
         double radius = ModConfig.SANITY_RISEN_HUSK_RADIUS.get();
         int max = ModConfig.SANITY_RISEN_HUSK_MAX.get();
         AABB box = player.getBoundingBox().inflate(radius);
