@@ -16,6 +16,7 @@ bin/
 # Minecraft dev run directories (worlds, logs, options)
 run/
 run-data/
+gametestserver/
 
 # Generated data (datagen output is committed; the cache is not)
 src/generated/**/.cache/

@@ -30,11 +30,11 @@ city; the journal then tracks the quest chain, and the altar is where power is b
 needs a real altar pattern — an `altar_core` **ringed** by rune stones (or ritual chalk) that
 surround it — plus its offerings; the endgame rites also read the world's state.
 
-**Commands:** `/eh` covers `sanity`, `corruption`, `taint`, `rep`, `cult`, `rite(s)`, `codex`,
-`quests`, `skill`, `endgame`, `event(s)`, `learn`, `unlock`, `service`, `purify`, `rift` and
-`prologue` — reads are self-serve, mutations need gamemaster permissions. A headless **bot**
-harness for playtesting lives under `/eh bot …` (spawn a fake player and drive it through the
-game; see [`docs/TESTING.md`](docs/TESTING.md)).
+**Commands:** `/eh` covers `sanity`, `corruption`, `taint`, `rep`, `cult`, `service`, `rite(s)`,
+`codex`, `event(s)`, `quests`, `skill`, `endgame`, `ward`, `gate`, `home`, `city` and `prologue` —
+reads are self-serve, mutations need gamemaster permissions. A headless **bot** harness for
+playtesting lives under `/eh bot …` (spawn a fake player and drive it through the game, including
+`rift`; see [`docs/TESTING.md`](docs/TESTING.md)).
 
 See [`design/`](design/README.md) for the complete design bible, and
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the code is laid out.
@@ -231,7 +231,7 @@ src/main/java/…/eldritchhorror/
     bot/                         headless server-side test player for playtesting
     network/                     payloads (server → client sync for the screens)
     client/                      client-only setup (screens, HUD, overlays, renderers)
-src/main/resources/             assets, lang, datapacks (quests, rites), pack.mcmeta
+src/main/resources/             assets, lang, datapacks (quests, rites), mixin config, icon
 tools/gen_assets.py             procedural textures: entity skins, item icons, logo
 tools/gen_sounds.py             procedural ogg sfx: rites, endgame, the Horror
 docs/                           design + architecture + testing + handoff

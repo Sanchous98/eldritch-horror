@@ -15,7 +15,8 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
 - [ ] **The 3,065 non-curated settlements (design/21)** — `settlements.json` holds 3,089 entries and
-  only the 24 curated ones are used; generic ruins/towns/nothing is undecided.
+  only the 24 curated ones are used; the rest are now **decided as generic towns** (not ruins or
+  nothing), still unimplemented.
 
 ## Done
 
@@ -67,14 +68,14 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   exactly −40 with that cult — `a2523f6`.
 - [x] **Item mechanics (design/16)** — weapon/tool stats, the reagent deltas, the four carried
   artefacts and five navigation items; the rest documented as flavour — `0be6ae6`.
-- [x] **The sound pack is live (design/07)** — 14 mono ogg, `ModSounds` + `sounds.json` +
+- [x] **The sound pack is live (design/07)** — 13 mono ogg, `ModSounds` + `sounds.json` +
   subtitles; rite outcomes, the endgame fork, the Horror's own voice, whisper/dread — `7a70d48`.
 - [x] **The altar pattern is a ring (design/05)** — the core's marks must stand off it and surround
   it (max angular gap ≤ 180°); a pile is refused; bot-verified — `0a28711`.
 - [x] **Bestiary additions (design/25, 18)** — the five replacements, the Ithaqual Shade and the
   Choir Leviathan — `80d4fdc`.
-- [x] **Russian locale** — `ru_ru` (785 keys + subtitles), independently reviewed — `a4c3dbc`,
-  `92c3983`.
+- [x] **Russian locale** — `ru_ru` (853 keys incl. subtitles), independently reviewed — `a4c3dbc`,
+  `92c3983`; parity is now gated by `LangParityTest` on every `./gradlew test`.
 - [x] **Altar block-pattern gate (design/05)** — rite needs an `altar_core` marked with runes/chalk;
   the ritual site now builds a real altar — `10e0abb`.
 - [x] **Fallen-city Hollow Choir takeover (design/21)** — bounded, capped, loaded-chunks only —

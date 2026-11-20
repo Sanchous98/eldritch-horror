@@ -77,11 +77,13 @@ integration build green.
   `docker compose run --rm dev bash -lc 'rm -rf /workspace/run/world'` and re-run.
 - One Gradle build at a time; they share `build/` and Windows locks files exclusively.
 - Verify with `./gradlew compileJava` (fast, warm cache) before claiming done.
-- **Run the static analyzer before claiming done:** `./gradlew pmdMain` (PMD 7, ruleset
-  `config/pmd/ruleset.xml`). It is not part of `build` and never fails the build; read
-  `build/reports/pmd/main.html`. Keep it at **0 violations** — it catches dead private members,
-  unused imports, always-true conditions, unnecessary returns/casts/parentheses and empty
-  statements. Mixins are excluded (their `eldritchhorror$…` methods are framework-invoked).
+- **Static analysis is a build gate:** `./gradlew build` runs `pmdMain` and `pmdTest` through
+  `check` (PMD 7, ruleset `config/pmd/ruleset.xml`) and fails on any violation; read
+  `build/reports/pmd/main.html` / `test.html`. Keep both at **0 violations** — it catches dead
+  private members, unused imports, always-true conditions, unnecessary returns/casts/parentheses
+  and empty statements. Mixins are excluded (their `eldritchhorror$…` methods are
+  framework-invoked). Quality gates: `./gradlew build` = compile + JUnit + PMD;
+  `./gradlew runGameTestServer` = the gameplay suite.
 - **Nullness: every package is `@NullMarked`** via a `package-info.java` (org.jspecify). All
   references in our source are non-null by default; annotate `@Nullable` on any method that can
   legitimately return null (e.g. registry `getValue`, `server.getLevel`, `getChunkNow`,

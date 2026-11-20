@@ -126,9 +126,9 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 // Static analysis (PMD 7): catches the dead/redundant code an IDE flags — unused private
-// members, always-true/false conditions, useless parentheses/returns, unused imports. It runs
-// as its own task (`./gradlew pmdMain`), never as part of `build`, and does not fail the build:
-// read the report at build/reports/pmd/main.html and act on it deliberately.
+// members, always-true/false conditions, useless parentheses/returns, unused imports. The `pmd`
+// plugin wires `pmdMain` and `pmdTest` into `check`, so `./gradlew build` runs both and fails on
+// any violation; the HTML reports are at build/reports/pmd/main.html and test.html.
 pmd {
     toolVersion = '7.28.0'
     ruleSets = [] // no default rulesets; use only the explicit ruleset below
@@ -138,9 +138,14 @@ pmd {
 tasks.named('pmdMain') {
     // Our own sources only; the Minecraft/NeoForge jars are not analysed. Mixins are excluded:
     // their `eldritchhorror$…` methods are invoked by the mixin framework, not from Java, so PMD
-    // reports them as unused (a false positive).
+    // reports them as unused (a false positive). Every other package (including gametest/) is
+    // analysed.
     source = fileTree('src/main/java') { exclude '**/mixin/**' }
-    ignoreFailures = true
+    consoleOutput = true
+}
+
+tasks.named('pmdTest') {
+    // The tests are our code too: the parity/pure-logic suites are linted with the same ruleset.
     consoleOutput = true
 }
 

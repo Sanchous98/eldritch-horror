@@ -32,7 +32,7 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   `banish_the_horror`, `summon_the_horror`).
 - **Codex**: learning lore (tomes, cult scripture, the prophet, the starting rite) is the same
   as finding a codex entry — so the lorekeeper path is reachable on a fresh world.
-- **Quests** as datapack content (`data/eldritch_horror/quest/*.json`), an 18-quest chain and a
+- **Quests** as datapack content (`data/eldritch_horror/quest/*.json`), a 19-quest chain and a
   journal screen synced server → client. Prerequisites are enforced server-side, and the design's
   daily/weekly side quests (`star_hunt`, `tide_offering`, `cleansing_contract`) pay again after
   their cooldown.
@@ -59,6 +59,12 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 
 - **Headless GameTest suite** (`design/13`): the altar ring, ward ledger, gate links and the seal,
   run with `./gradlew runGameTestServer` (26.3's data-driven test instances).
+- **JUnit coverage for the pure logic** (weapon, gate, ward, city-reclaim, cooldown, reputation
+  decay, quest rules, lucid-dream pool, the elevation curve and biome table) plus a
+  **`LangParityTest`** that fails the build on a missing key, a duplicate key or a placeholder
+  mismatch between `en_us.json` and `ru_ru.json`.
+- **PMD is a build gate**: `pmdMain` and `pmdTest` run from `check`, and a violation fails
+  `./gradlew build`.
 
 ### Added — content & tools
 
@@ -78,7 +84,8 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 - **The third ending** (`design/11`, was an open question): a world-level **rift ledger** — when the
   Horror comes for the decision and every rift it knew is already closed, nothing holds it and the
   world stands **sealed** (no cost, no banishment; the journal's `the_seal` completes).
-- **Russian locale** (`ru_ru`, 797 keys), independently reviewed.
+- **Russian locale** (`ru_ru`, 853 keys incl. subtitles), independently reviewed; parity is now
+  enforced by `LangParityTest` in the JUnit suite.
 - **Armour and the last artefacts** (`design/16`, slice 2): the eight worn pieces are real armour
   (equipment assets, generated worn sheets, per-set stats); the bone charm absorbs one fatal blow;
   the lantern stills the darkness drain; the mask summons more star-spawn, panics villagers and

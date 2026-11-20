@@ -41,6 +41,11 @@ depends on a loader class that would break the dedicated-server side.
 
 ## Per-system plan
 
+> The sections below are the original plan; all four systems are implemented. The concrete
+> classes, registries and the current behaviour are in `docs/STATUS.md`. Note in particular that
+> the ritual engine landed as `rite/RiteEngine` + `Rites` (a Java registry) rather than a datapack
+> registry named `RitualDefinition`.
+
 ### `sanity/`
 - Register a `max_sanity` **Attribute** (via `DeferredRegister` on the attribute registry) so other
   mods and equipment can modify it; keep the *current* sanity as a synced per-player value
@@ -81,7 +86,12 @@ depends on a loader class that would break the dedicated-server side.
   `COMMON`, once multiplayer balance matters.
 - **Data over code**: cults and rituals are datapack-defined; new content should be JSON first.
 
-## Open questions (decide before the vertical slice)
+## Open questions (resolved)
+
+The four questions below were decided during the vertical slice and are kept only as the
+decision record: sanity is an attachment + sync packet, corruption uses a per-chunk saved-data
+taint field, ritual matching is a purpose-built altar-ring matcher, and client rendering uses
+vanilla `GuiGraphics` overlays. Live behaviour is in `docs/STATUS.md`.
 
 1. **Sanity storage**: attachment + packet, or a capability? (NeoForge attachments are the modern
    path; confirm sync ergonomics.)

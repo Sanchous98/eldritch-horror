@@ -240,12 +240,13 @@ Earth geography with continents at their true relative scale. A **sensible start
 | `EarthBiomeSource`, `EarthChunkGenerator` | ✅ done |
 | Overworld dimension override | ✅ done (`data/minecraft/dimension/overworld.json`) |
 | Runs on a dedicated server | ✅ verified (`Done (…)`, single `minecraft:overworld`) |
-| **Surface decoration** (trees, grass, flowers, flora) | ❌ **deferred** — see the *Surface decoration* story |
-| Pinned coastal spawn | ❌ deferred (vanilla spawn search currently finds land) |
-| Structures (altar sites, temples, vaults) | ❌ later (`design/20-map.md`) |
+| **Surface decoration** (trees, grass, flowers, flora) | ✅ done (`world/SurfaceDecorator`, Köppen-driven) |
+| Pinned coastal spawn | ✅ done via the prologue's city gate (vanilla spawn search is the fallback) |
+| Structures (altar sites, temples, vaults) | ✅ done (`world/loc/`, 29 registered locations) |
 
-Because a custom generator **replaces** vanilla biome decoration, the surface is currently
-bare (stone/surface block, no trees or grass). That is expected and tracked separately.
+Because a custom generator **replaces** vanilla biome decoration, `SurfaceDecorator` places our
+deterministic grass/flowers/trees/cactus/bamboo from the Köppen layer, chunk-clipped and skipping
+city footprints.
 
 
 
@@ -257,7 +258,12 @@ bare (stone/surface block, no trees or grass). That is expected and tracked sepa
 5. Wire the Overworld dimension/noise settings to it; set the 2:1 world border + spawn.
 6. Structures/content from `design/20-map.md` layered on afterwards.
 
-## Open questions
+## Open questions (resolved)
+
+The original questions below were settled by the implementation: elevation is the real ETOPO
+bake, spawn is the prologue city gate, the baked dataset is world-seed-independent, and the
+landmask is packed 1-bit (the honest-coastline pass removed the shelf artefacts). Rivers were
+never given a dedicated generator — they remain an unimplemented idea. Kept as a decision record.
 
 - **Elevation: real (bake ETOPO) or procedural shaped by the landmask?** Real gives Earth's
   mountains; procedural is a smaller asset.

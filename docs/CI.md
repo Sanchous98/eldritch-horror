@@ -11,8 +11,9 @@ uploaded as the `eldritch-horror-jar` workflow artifact.
    Java 25).
 3. `gradle/actions/setup-gradle@v4` — caches `~/.gradle`, including the NeoForge/Minecraft
    decompile cache, so subsequent runs are fast.
-4. `./gradlew build --no-daemon --console=plain` — Gradle **9.2.1** from the wrapper. This
-   includes `compileJava` and `test` (JUnit 5, `useJUnitPlatform()`).
+4. `./gradlew build --no-daemon --console=plain` — Gradle **9.8.0** from the wrapper. This
+   includes `compileJava`, `test` (JUnit 5, `useJUnitPlatform()`) and `pmdMain`/`pmdTest`;
+   a PMD violation fails the run.
 
 A `concurrency` group cancels superseded runs, and `timeout-minutes: 60` gives the first
 run room to decompile Minecraft (~5 min, ~4 GB). No secrets, publishing, or release steps.

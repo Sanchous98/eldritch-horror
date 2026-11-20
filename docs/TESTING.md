@@ -36,8 +36,8 @@ World + `server.properties` persist in the `run-data` volume (`/workspace/run`).
 /eh investigator set eleanor_vance            # pick one; signature items need it
 /give @s eldritch_horror:seers_lens           # Eleanor's signature item (right-click = active)
 ```
-The mod's **creative tab** holds all ~220 items, the 12 signature items, and 22 spawn eggs (all 20
-Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
+The mod's **creative tab** holds all ~212 items, the 12 signature items, and 68 spawn eggs (all 20
+Ancient Ones plus the lesser/mundane families). Spawn eggs are the main tool for the bestiary.
 
 ## 3. `/eh` command reference (exact ids)
 
@@ -57,16 +57,21 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
 | `/eh prologue reset` | clear `PROLOGUE_DONE` and teleport back to the Threshold (retest the prologue) |
 | `/eh quests` | quest journal: each quest's progress/target |
 | `/eh skill` · `/eh skill unlock <id>` | skill points and nodes |
-| `/eh rite <id>` | perform a rite (now needs an altar: `altar_core` + 4 `rune_stone`/`ritual_chalk` within 6 blocks, unless `requireRiteAltar=false`) |
+| `/eh endgame` · `/eh endgame set <none\|banished\|summoned>` | read / repair the per-world endgame |
+| `/eh ward` | the ward covering the caller (radius, time left) |
+| `/eh gate` | the pending rift-gate mark and the nearest gate's twin |
+| `/eh rite <id>` | perform a rite (needs a real altar ring: `altar_core` with at least `riteAltarMarks` rune/chalk marks standing ≥2 blocks off it and surrounding it, unless `requireRiteAltar=false`) |
 
-### Rite ids (28)
+### Rite ids (36)
 `ward_of_the_eye`, `drowned_blessing`, `call_the_lesser`, `summon_star_spawn`, `open_rift`,
-`close_rift`, `rite_of_cleansing`, `respec` — plus the Ancient One solves (one per presence):
+`close_rift`, `rite_of_cleansing`, `reclaim_city`, `respec`, `blight_the_earth`,
+`take_the_hollow_mark`, `awaken_the_horror`, `banish_the_horror`, `summon_the_horror` — plus the
+Ancient One solves (one per presence):
 `soothe_cthulhu`, `draw_away_dunwich`, `still_shub_niggurath`, `still_azathoth`, `seal_the_gate`,
 `ward_ithaqua`, `appease_yig`, `bind_atlach_nacha`, `deny_nyarlathotep`, `quench_cthugha`,
 `still_glaaki`, `sever_hydra`, `bar_nyogtha`, `topple_idol`, `silence_hastur`,
 `unmake_nephren_ka`, `seal_abhoth`, `starve_chaugnar_faugn`, `quench_tulzscha`,
-`erase_zstylzhemghi`.
+`erase_zstylzhemghi`, `still_the_shade`, `still_the_leviathan`.
 
 ### Investigator ids (12) → signature item
 `eleanor_vance`→`seers_lens`, `jack_corrigan`→`investigators_badge`, `tom_mallory`→`dog_tags`,
@@ -89,7 +94,7 @@ Ancient Ones + 2 others). Spawn eggs are the main tool for the bestiary.
 - **Prologue / hub.** Only a first-time player (no `PROLOGUE_DONE`) enters the Threshold. Use
   `/eh prologue reset` to return to the Threshold and retest, or set `enablePrologue=false` and use
   `/eh investigator set` directly.
-- **Rites + offerings.** Rites now **consume reagents** (all-or-nothing). For a fast sweep of all 28,
+- **Rites + offerings.** Rites now **consume reagents** (all-or-nothing). For a fast sweep of all 36,
   set `requireRiteReagents=false` in the config (see §6) and use `/eh rite <id>`. With it on, put the
   listed reagents in your inventory; the altar lists each known rite's offerings on right-click.
 - **Sanity / corruption.** `/eh sanity add -40` and watch the HUD stage + the `madness`/`marked`
@@ -181,3 +186,12 @@ Covered now: the altar ring (ring valid, heap refused), the ward ledger (coverag
 long ward survives), gate links (symmetric, canonical, relink replaces, removal clears both sides)
 and the seal (open rift refuses; an emptied-but-used ledger seals and records SEALED; a decided
 world refuses again). Unit-level arithmetic stays in `src/test/java` (run by `./gradlew build`).
+
+## 9. Quality gates
+
+- `./gradlew build` — compile + JUnit (pure logic, `src/test/java`) + **PMD** on both source sets;
+  `check` depends on `test`, `pmdMain` and `pmdTest`, and any PMD violation fails the build.
+  The HTML reports are `build/reports/pmd/main.html` / `test.html` and `build/reports/tests/test/`.
+- `./gradlew runGameTestServer` — the in-game gameplay suite (the five required tests above).
+- The locale gate is `i18n/LangParityTest`: equal key sets both ways, no duplicate keys, and the
+  same placeholders per key between `en_us.json` and `ru_ru.json`.

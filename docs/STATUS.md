@@ -1,6 +1,8 @@
 # Status & handoff
 
 Read this together with `AGENTS.md` after any context compaction. It is the short, current
+snapshot of what is built, what was verified, and what is still open; the durable detail lives in
+the linked design and docs files.
 
 ## How to resume after compaction
 
@@ -68,8 +70,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   surface as land in shallow water (fixed the Rio de la Plata estuary).
 - **Second-echelon sites** (`world/loc/site/`): `cult_stronghold`, `order_vault`, `drowned_temple`,
   `ritual_altar_site`, `rift_scar` — 5 `Location`s registered as fixed coordinates (29 locations).
-- **Tests**: JUnit via `./gradlew test` — `EarthMapCylinderTest` (2 tests) guards the longitude
-  wrap and the ocean seam, loading the real baked layers.
+- **Tests**: JUnit via `./gradlew test` on the pure logic — `EarthMapCylinderTest` guards the
+  longitude wrap and the ocean seam against the real baked layers; the rest cover the arithmetic
+  helpers (weapon, gate, ward, city-reclaim, cooldown, reputation decay, quest rules, lucid-dream
+  pool) plus locale parity and the elevation/biome tables. Twelve suites, 77 cases.
 - **RPG systems** (`design/27-systems-framework.md`): Sanity = per-player value
   (replaces **hunger**), Corruption = per-player value + per-chunk **taint** (replaces
   **experience**), Reputation = per-cult integer. Mixins disable hunger (`FoodData.tick`) and
@@ -86,11 +90,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   (Dormant…Claimed), `CorruptionTicker`, the `corrupted` effect, and `TaintSystem` (per-chunk taint
   diffuses once a second across the loaded chunks around players; player corruption rises in a
   tainted chunk). Config moved to `Type.SERVER`. Commands `/eh sanity|corruption|rep|taint`.
-- **Rite framework** (`rite/`): `RiteDefinition` + `Rites` (the 8 rites from `design/08-rituals.md`
-  with their exact tiers and **cost**), a per-player `RITE_KNOWLEDGE` attachment (synced, copyOnDeath),
-  `/eh rite <id>` and `/eh rites`, and tome-reading grants knowledge of the rite (main-hand only).
-  Performing a rite charges its cost and reports the outcome as **not yet implemented** — the
-  resolution engine (wards, spawns, rifts, reputation) is the next layer.
+- **Rite framework** (`rite/`): `RiteDefinition` + `Rites` (36 rites: the seed table from
+  `design/08-rituals.md` with exact tiers and **cost**, the two Hollow Choir transform/curse rites,
+  the three endgame rites, `reclaim_city`, and the Ancient One solves), a per-player
+  `RITE_KNOWLEDGE` attachment (synced, copyOnDeath), `/eh rite <id>` and `/eh rites`, and tome-reading
+  grants knowledge of the rite (main-hand only). Performing a rite charges its cost and resolves the
+  outcome in `RiteEngine` (below).
 - **Rite resolution** (`rite/RiteEngine`): performing a known rite charges its cost then resolves the
   outcome server-side - wards, water blessing, a skill reset, a capped hostile summon, rift
   opening/closing (rift_anchor + chunk taint), and cleansing (lowers the player's corruption and
@@ -173,7 +178,8 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 - **Public APIs** (`SanityAPI`/`CorruptionAPI`/`TaintAPI`): the single entry point content uses;
   they delegate to the systems. **Items are functional**: all 15 consumables move sanity/corruption
   by their documented deltas and show a colour-coded tooltip; the 10 tomes charge their rite cost
-  (the grant is deferred until a rite-knowledge system exists). Cult `REPUTATION` is synced to the
+  and teach the matching rite through `CodexAPI.learn` (the rite-knowledge system landed with
+  `rite/RiteKnowledge`). Cult `REPUTATION` is synced to the
   owner and ranks are localised (`rank.eldritch_horror.*`).
 - **City polish**: varied street paving, a soft rim that fades into the wild (no hard circular
   cut), generic street dressing (stalls/crates/wells) placed before buildings and occupancy-gated.
@@ -188,9 +194,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   walk-in landmark has a ground-level door.
 - **Site renderer**: `CityRenderer` can render the second-echelon `Location`s (`-Deh.renderCities=sites`),
   with each site's true radius.
-- **Item registry**: **128 content-stub items** across 11 category files
-  (`registry/items/*.java`) through one frozen `ModItems.add(id, stack)` surface, with a single
-  creative tab, `en_us.json` names + 128 tooltips. Effects are recorded in comments/design only.
+- **Item registry**: **144 items** across the category files
+  (`registry/items/*.java`) through one frozen `ModItems.add(id, stack)` surface, plus **68 spawn
+  eggs** in `ModEntities`, with a single creative tab, `en_us.json` names and tooltips. Items with a
+  live system are wired (weapons, reagents, consumables, tomes, carried artefacts, navigation,
+  armour — see *The item pass* below); only the client-rendered bits remain flavour.
 - **Design docs**: `design/24-sanity-and-corruption.md`, `25-bestiary-and-entities.md`,
   `26-rituals-and-occult.md`, `27-systems-framework.md` (+ README index).
 - **Design**: `design/23-boundary-and-travel.md` (cylinder + Morok);
@@ -218,7 +226,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 - **Deprecated `appendHoverText` removed.** Consumable tooltips now go through NeoForge's
   `RegisterTooltipAppendersEvent` (mod bus) → one `TooltipAppenders` appender at
   `TooltipLocation.POST_CUSTOM`, matching the old lines. No vanilla `@Deprecated` hook remains.
-- **Nullness: all 24 packages are `@NullMarked`** via `package-info.java`. Legal null returns are
+- **Nullness: all 32 packages are `@NullMarked`** via `package-info.java`. Legal null returns are
   annotated `@Nullable` (registry lookups, `server.getLevel`, `getChunkNow`, `getAttribute`); the
   mixin package stays unmarked.
 
@@ -226,22 +234,21 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
-  waypoint markers,
-  `design/16`), `rift_scout` (`design/10`, needs a per-rift axis), the
-  **3,065 non-curated settlements** (`design/21`: generic towns, ruins or nothing) and the
-  multiplayer session rules (`design/12`). Reputation decay/penalty, the third ending, both item
-  passes, the altar ring, the sound pack, the occultism tree, the weapon effects, the quest gate,
-  the ward havens, rift-gate travel, city reclamation and the Russian locale are done.
+  waypoint markers, `design/16`), `rift_scout` (`design/10`, needs a per-rift axis) and the
+  **3,065 non-curated settlements** (`design/21`: now decided as generic **towns**, not yet
+  generated). Reputation decay/penalty, the third ending, both item passes, the altar ring, the
+  sound pack, the occultism tree, the weapon effects, the quest gate, the ward havens, rift-gate
+  travel, city reclamation and the Russian locale are done.
 - Cities now have a derived **state** (Thriving→Fallen from district taint) that scales shelter;
-  services remain vanilla villager trades, and city-state depth (fall visual/takeover) is on the
-  backlog.
+  services remain vanilla villager trades, and the Fallen takeover/reclamation branch is live
+  (`CityFall`, `reclaim_city`). City-state depth beyond that is on the backlog.
 - **Implemented and playable:** bestiary (Ancient Ones + lesser/mundane/ambient), cults (definitions
   + synced reputation + ranks), rites (`RiteEngine` resolves wards/summons/rifts/cleansing), taint
   world-conversion, world events, codex and the recipe economy. Sanity and corruption have real
   tickers, states, effects, config and item interaction. Morok is implemented on both axes (mob
   effects + a sanity source).
-- **Still deferred:** chest/site loot tables (Antiquarian currently improves mob drops only);
-  a few unused public-API nits from review.
+- **Site chests and loot tables are live** (`a6daaad`, `b8b773e`): the `chests/*` tables ship, and
+  the Antiquarian passive applies to them through a global loot modifier (not only mob drops).
 - Some city **palettes remain close** (Paris/Buenos Aires, Jakarta/Los Angeles, London/Moscow);
   now largely distinguished by their differing landmarks, but colour separation is still loose.
 - Terrain decoration is **light** (1% trees) and sub-pixel on the 8 blocks/px review renders,
@@ -368,7 +375,7 @@ but could not reach `lorekeeper` 10/10 — which is what carries the Order to In
 - **Summon** — pins the corruption **floor** at the Claimed band (a floor on the meter itself, so
   every cleanse path is refused by the system, no per-path special case), raises Hollow standing,
   tears open rifts, grants `hollow_crown`.
-- **Journal**: `awaken_the_horror`, `the_decision` (14 quests load now).
+- **Journal**: `awaken_the_horror`, `the_decision` (19 quests load now).
 - **The third outcome — sealed** (`endgame/RiftLedger`): the ledger records every rift anchor
   placed (the rite, the summon path) and forgets it when the anchor goes — the close rite, a banish,
   or the block itself breaking (`RiftAnchorBlock`), with `prune` as the safety net for entries a
@@ -410,7 +417,7 @@ nothing — the fresh-bot probe that used to see `lorekeeper` count before the f
 completion pays again and restarts the counter at 0, and the journal shows the cadence and time left.
 Three side quests ship with triggers: `star_hunt` (`#star_spawn` kills), `tide_offering` (pearl
 pickups) and `cleansing_contract` (`rite_of_cleansing`); `rift_scout` still needs a per-rift axis.
-`/eh quests` lists the acts in stage order and names the next objective; 18 quests ship across nine
+`/eh quests` lists the acts in stage order and names the next objective; 19 quests ship across nine
 acts.
 
 ## Client screens (design/13)
@@ -554,7 +561,7 @@ expiry pruning, a longer ward survives), gate links (symmetric, canonical, relin
 clears both sides) and the seal (open rift refuses; an emptied-but-used ledger seals and records
 SEALED; a decided world refuses again). `./gradlew runGameTestServer` reports
 **all 5 required tests passed in ~2.4 s**; a deliberately broken assertion fails the run with exit 1.
-JUnit (71 cases) and PMD 0 run as before in `./gradlew build`.
+JUnit (77 cases) and PMD 0 run as before in `./gradlew build`.
 
 ## Where things live
 
