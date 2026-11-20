@@ -4,6 +4,6 @@
   "stage": -2,
   "investigator": "nikolai_volkov",
   "trigger": "pickup",
-  "param": "minecraft:book",
+  "param": "minecraft:leather",
   "reward_kit": "nikolai_volkov"
 }

@@ -4,6 +4,6 @@
   "stage": -2,
   "investigator": "aldous_pemberton",
   "trigger": "pickup",
-  "param": "minecraft:paper",
+  "param": "minecraft:clay_ball",
   "reward_kit": "aldous_pemberton"
 }

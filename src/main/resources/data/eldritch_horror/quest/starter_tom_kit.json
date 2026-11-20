@@ -4,6 +4,6 @@
   "stage": -2,
   "investigator": "tom_mallory",
   "trigger": "pickup",
-  "param": "minecraft:iron_ingot",
+  "param": "minecraft:raw_iron",
   "reward_kit": "tom_mallory"
 }

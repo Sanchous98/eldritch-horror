@@ -51,21 +51,22 @@ signature item. The second is gated on the first; the first can be worked on as 
 
 | Investigator | First task (gear) | Second task (calling) |
 |---|---|---|
-| `eleanor_vance` | pick up 6 paper | discover 2 codex entries |
-| `jack_corrigan` | pick up 5 paper | kill 3 zombies |
-| `tom_mallory` | pick up 6 iron ingots | kill 5 zombies |
+| `eleanor_vance` | pick up 4 ink sacs | discover 2 codex entries |
+| `jack_corrigan` | pick up 4 ink sacs | kill 3 zombies |
+| `tom_mallory` | pick up 6 raw iron | kill 5 zombies |
 | `cormac_blackwood` | pick up 6 string | kill 3 spiders |
 | `sister_agatha` | pick up 4 bone | discover 1 codex entry |
 | `marion_delacroix` | pick up 4 white wool | discover 2 codex entries |
 | `vera_nightingale` | craft 6 ritual chalk | perform `ward_of_the_eye` |
-| `nikolai_volkov` | pick up 3 books | discover 2 codex entries |
+| `nikolai_volkov` | pick up 3 leather | discover 2 codex entries |
 | `dr_amos_hartley` | pick up 6 wheat | kill 2 zombies |
-| `evelyn_ashcombe` | pick up 2 gold ingots | discover 1 codex entry |
-| `aldous_pemberton` | pick up 6 paper | discover 2 codex entries |
+| `evelyn_ashcombe` | pick up 2 raw gold | discover 1 codex entry |
+| `aldous_pemberton` | pick up 6 clay balls | discover 2 codex entries |
 | `hazel_quinn` | pick up 4 feathers | discover 1 codex entry |
 
-The materials are deliberately ordinary (no kit required); the codex steps accept any new entry,
-including a bestiary kill or a site seen by proximity. The occultist's rite step is reachable because
+The materials are deliberately ordinary drops rather than crafted results, so a pickup counts
+without asking the player to throw the item away (no kit is required); the codex steps accept any
+new entry, including a bestiary kill or a site seen by proximity. The occultist's rite step is reachable because
 her gear grants chalk and salt comes from smelting sugar — the first lesson of the ritual loop.
 
 ### Schema additions

@@ -4,6 +4,6 @@
   "stage": -2,
   "investigator": "evelyn_ashcombe",
   "trigger": "pickup",
-  "param": "minecraft:gold_ingot",
+  "param": "minecraft:raw_gold",
   "reward_kit": "evelyn_ashcombe"
 }

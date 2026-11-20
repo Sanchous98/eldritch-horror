@@ -614,6 +614,10 @@ public final class BotCommands {
             }
             inv.add(result.copy());
             ItemStack made = result;
+            // Fire the same hook a crafting table fires, so quests (and any other listener) see it.
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                    new PlayerEvent.ItemCraftedEvent(bot, made.copy(),
+                            new net.minecraft.world.SimpleContainer(9)));
             ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                     + " crafted " + made.getCount() + "x "
                     + made.getHoverName().getString()), true);
@@ -628,11 +632,9 @@ public final class BotCommands {
     private static void vacuum(BotPlayer bot) {
         for (ItemEntity ie : bot.level().getEntitiesOfClass(ItemEntity.class,
                 bot.getBoundingBox().inflate(8.0))) {
-            ItemStack st = ie.getItem();
-            if (!st.isEmpty()) {
-                bot.getInventory().add(st.copy());
-                ie.discard();
-            }
+            // The vanilla touch path, not a direct inventory insert: it fires the pickup events the
+            // quests watch and respects a full inventory.
+            ie.playerTouch(bot);
         }
     }
 
