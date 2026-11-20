@@ -11,8 +11,10 @@ import net.minecraft.server.level.ServerPlayer;
  * @param gameTime  the level game time
  * @param night     whether it is dark outside at the player's position
  * @param nearCity  whether the player stands inside a curated city's footprint
+ * @param nearTown  whether the player stands inside a generic town's footprint
  */
-public record SanityContext(ServerLevel level, long gameTime, boolean night, boolean nearCity) {
+public record SanityContext(ServerLevel level, long gameTime, boolean night, boolean nearCity,
+                            boolean nearTown) {
 
     /** Snapshot the context for one player. Cheap: one brightness/clock read, no chunk access. */
     public static SanityContext of(ServerPlayer player) {
@@ -21,6 +23,7 @@ public record SanityContext(ServerLevel level, long gameTime, boolean night, boo
                 level,
                 level.getGameTime(),
                 level.isDarkOutside(),
-                SanitySources.nearCity(player));
+                SanitySources.nearCity(player),
+                SanitySources.nearTown(player));
     }
 }

@@ -7,6 +7,9 @@ import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.city.CityStates;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
+import com.sanchous98.eldritchhorror.world.town.Town;
+import com.sanchous98.eldritchhorror.world.town.TownLocation;
+import com.sanchous98.eldritchhorror.world.town.Towns;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,6 +56,7 @@ public final class SanitySources {
             }
             register(new DarknessSource());
             register(new CitySource());
+            register(new TownSource());
             register(new MorokSource());
             initialised = true;
         }
@@ -107,6 +111,30 @@ public final class SanitySources {
     }
 
     /**
+     * Cheap test against the sealed town index: true when the player stands inside any generic
+     * town's footprint. The index is static, so this needs no loaded chunks; only the handful of
+     * towns near the player are checked, never all ~3,000.
+     */
+    static boolean nearTown(ServerPlayer player) {
+        if (!player.level().dimension().equals(Level.OVERWORLD)) {
+            return false;
+        }
+        double x = player.getX();
+        double z = player.getZ();
+        int bx = (int) Math.floor(x);
+        int bz = (int) Math.floor(z);
+        for (Town town : Towns.index().near(bx, bz, TownLocation.MAX_CULL_RADIUS)) {
+            long dx = bx - (long) town.x();
+            long dz = bz - (long) town.z();
+            long radius = new TownLocation(town).radius();
+            if (dx * dx + dz * dz <= radius * radius) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Demo: <b>darkness</b>. Drains while the player stands somewhere dark — either the overworld
      * night, or a spot whose combined light is low (caves, unlit interiors). One gentle drain,
      * not two stacked ones.
@@ -132,7 +160,9 @@ public final class SanitySources {
             // night. This must be checked first — at midnight `getMaxLocalRawBrightness` reads 0
             // everywhere (skyDarken subtracts the sky), so the low-light test below cannot tell
             // a lit city street from open wilderness and would otherwise drain inside the city.
-            if (ctx.night() && ctx.nearCity()) {
+            // Generic towns get the same night shelter (their lamps are small, but they are
+            // homes); the recovery itself is the separate "town" source below.
+            if (ctx.night() && (ctx.nearCity() || (ctx.nearTown() && ModConfig.ENABLE_TOWN_SHELTER.get()))) {
                 return 0.0;
             }
             boolean lowLight = ctx.level().getMaxLocalRawBrightness(player.blockPosition()) < 6;
@@ -170,6 +200,30 @@ public final class SanitySources {
             City city = CityStates.nearestCity(ctx.level(), player.blockPosition());
             double shelter = city == null ? 1.0 : CityStates.stateOf(ctx.level(), city).recoveryMultiplier();
             return ModConfig.SANITY_CITY_RATE.get() * shelter;
+        }
+    }
+
+    /**
+     * <b>Town</b>: a small recovery inside a generic town's footprint, a fraction of the curated
+     * city rate (design/21). Overworld only; gated by {@code enableTownShelter}. The town index is
+     * static, so the check needs no loaded chunks. Towns are only sited outside curated cities, so
+     * this never stacks with {@link CitySource}.
+     */
+    private static final class TownSource implements SanitySource {
+        @Override
+        public String id() {
+            return "town";
+        }
+
+        @Override
+        public double deltaPerSecond(ServerPlayer player, SanityContext ctx) {
+            if (!ModConfig.ENABLE_TOWN_SHELTER.get()) {
+                return 0.0;
+            }
+            if (!ctx.nearTown()) {
+                return 0.0;
+            }
+            return ModConfig.TOWN_SHELTER_RECOVERY.get();
         }
     }
 

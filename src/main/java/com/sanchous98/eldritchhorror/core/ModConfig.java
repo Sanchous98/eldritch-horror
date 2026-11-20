@@ -2858,6 +2858,45 @@ public final class ModConfig {
             BUILDER.comment("Scale generic town footprints (1.0 = 40–64 blocks, clamped to 96).")
                     .defineInRange("townRadiusScale", 1.0, 0.5, 1.5);
 
+    // --- Town population (world/town/TownPopulation) ----------------------------------------
+    // Vanilla villagers with vanilla trades, placed around each town's plaza and houses. Bounded
+    // exactly like the curated-city population: near-player, loaded chunks only, small cap.
+
+    /** Master switch for topping generic towns up with villagers. */
+    public static final ModConfigSpec.BooleanValue ENABLE_TOWN_POPULATION =
+            BUILDER.comment("Populate generic towns with villagers (vanilla trades) near players.")
+                    .define("enableTownPopulation", true);
+
+    /** Villagers a town is topped up towards (counted within 48 blocks of its centre). */
+    public static final ModConfigSpec.IntValue TOWN_VILLAGER_CAP =
+            BUILDER.comment("Maximum villagers a generic town is topped up towards.")
+                    .defineInRange("townVillagerCap", 5, 0, 64);
+
+    /** Population pass cadence in ticks; each pass adds at most two villagers per town. */
+    public static final ModConfigSpec.IntValue TOWN_POPULATION_INTERVAL_TICKS =
+            BUILDER.comment("Ticks between generic-town population passes (20 = 1 s).")
+                    .defineInRange("townPopulationIntervalTicks", 200, 20, 24000);
+
+    /**
+     * Centre-chunk taint at/above which a town reads as abandoned and stops receiving villagers.
+     * {@code 0} disables the gate.
+     */
+    public static final ModConfigSpec.DoubleValue TOWN_ABANDON_TAINT =
+            BUILDER.comment("Centre-chunk taint at which a town is abandoned (no new villagers); 0 = off.")
+                    .defineInRange("townAbandonTaint", 0.5, 0.0, 1.0);
+
+    // --- Town shelter (sanity sources) -------------------------------------------------------
+
+    /** Master switch: a town footprint shelters from the night darkness and recovers sanity. */
+    public static final ModConfigSpec.BooleanValue ENABLE_TOWN_SHELTER =
+            BUILDER.comment("Generic town footprints suppress night darkness and recover sanity.")
+                    .define("enableTownShelter", true);
+
+    /** Sanity recovered per second inside a town footprint (the city rate stays separate). */
+    public static final ModConfigSpec.DoubleValue TOWN_SHELTER_RECOVERY =
+            BUILDER.comment("Sanity change per second inside a generic town (positive recovers).")
+                    .defineInRange("townShelterRecovery", 0.15, 0.0, 10.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {
