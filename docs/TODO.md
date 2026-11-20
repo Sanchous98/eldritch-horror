@@ -17,6 +17,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **NPC cult ritual cells + the doom clock (design/06, 11)** — the Hollow Choir gathers at an
+  altar, chants and summons (star-spawn + taint) on its own; interrupting pays Order standing and
+  buys time. The world's doom meter rises passively (~150 min), accelerates with open rifts, and
+  ends in the summon at 100 % after the Horror awakens at 70 %; `/eh doom` reads it — `5492903`.
 - [x] **Towns have people and shelter (design/21)** — each loaded near-player town tops up to five
   persistent villagers with vanilla trades, deterministic placement, a taint-abandon gate, and the
   footprint shelters at night with a small sanity recovery — `6ede27c`.

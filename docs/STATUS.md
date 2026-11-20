@@ -585,6 +585,31 @@ at Noyabrsk: a fisherman spawns, and at midnight sanity goes 50 → 50.90 inside
 versus 50 → 49.75 just outside. Still out of scope: codex/map discovery for towns and persistent
 town state.
 
+## The world can lose (design/06, design/11 — `5492903`)
+
+The Hollow Choir acts without a player choosing it. `world/cult/CultRituals` finds a **cell** of at
+least three same-cult cultists near a real altar (only loaded chunks, a bounded `findBlocks` scan and
+the shared ring check), then runs **GATHER** (20 s, `RiteBinder` leads, navigation not teleport) into
+**CHANT** (30 s, hum and soul particles, sanity −0.2 per nearby player). Interruptions checked first:
+the leader dies, the core/ring breaks, a player stands within four blocks, or too few remain. A
+completed Hollow Choir rite summons 2–3 star-spawn, taints the loaded ground, announces itself and
+pushes doom **+6**; other cults get a lesser rite (taint, no doom). Interrupting pays the breaker
+**+10 Order standing** and takes **−6** off the clock. `CultStronghold` now holds a real altar; the
+`/eh cultist <cult> <n>` probe spawns a cell on demand.
+
+`endgame/DoomClock` is a per-overworld `SavedData`, **0–100**: passive `100 / doomMinutesToLoss`
+(150 min) while a player is in the overworld, ×`1 + 0.15·min(rifts, 8)` capped at ×2, pushed +6 per
+ritual completion and back −6 per interrupted ritual / −2 per closed rift. It persists with a
+once-only warning mask (50/70/85/95). At **70 %** the Choir awakens the Horror at the deepest loaded
+rift (unless `npcCultRitualsCanAwaken` is off); at **100 %** the world resolves to the summon ending
+through `Endgame.summon`. Banish/seal still win, and the clock stops once the outcome is decided.
+`/eh doom` reports the meter, per-minute rate, open rifts, awakened flag and outcome.
+
+Probed live: GATHER → CHANT → COMPLETE in ~31 s (doom 7.24 → 13.36, three star-spawn); a player
+inside the ring interrupts (Order standing 10 → 20); the passive rate reads 0.67/min. An accelerated
+run showed 51 → 76 (awakened) → 100 (summoned) with all four warnings. PMD 0, 113 JUnit tests, 0
+exceptions.
+
 ## Where things live
 
 | Concern | File |

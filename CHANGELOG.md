@@ -66,6 +66,15 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 - **PMD is a build gate**: `pmdMain` and `pmdTest` run from `check`, and a violation fails
   `./gradlew build`.
 
+### Added — the cult's own clock
+
+- **NPC cult rituals**: a cell of cultists gathers at an altar, chants and summons star-spawn on its
+  own; breaking the circle — kill the leader, break the altar, stand in the ring — pays Order
+  standing and buys the world time.
+- **The doom clock** (`design/11`): a soft 0–100 world meter that ends in the Choir's summon after
+  ~150 unopposed minutes (faster with open rifts). At 70 % the Horror awakens; banish or seal still
+  wins. `/eh doom` reads it.
+
 ### Added — towns
 
 - **Generic towns** (`design/21`): the 3,065 non-curated settlements now generate as small
