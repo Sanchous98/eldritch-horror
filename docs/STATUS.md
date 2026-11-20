@@ -638,6 +638,27 @@ seal log: `1 player(s), quest for <bot> -> true`. Bot player data is still sessi
 `spawnjoin` creates a fresh profile); a real player persists normally. The run scripts live in the
 dev-only `/home/dev/mcbot` harness, not the mod.
 
+## Scheduled ships (design/30 stage 1, `90bc0a2`)
+
+The mundane fast route is now a **real voyage**, not a teleport. 17 of the 24 curated cities have a
+harbour (a ring scan over the baked landmask); ports are joined by **A\* sea lanes** on a 64-block
+grid (longitude wraps, a one-cell land margin, polylines block-sampled against the mask, cached per
+pair). Four lines exist today: Cape Town–Rio, Sydney–Jakarta, Los Angeles–Lima, Bangkok–Jakarta;
+London–New York is refused because the Thames estuary is not resolved at that grid size.
+
+The **CoastalPacket** is a large `AbstractBoat` (3×1.5, eight deck seats, no item drop, never saved)
+that the server sails along the lane at `shipSpeed`; it holds one registered entity-ticking chunk
+ticket around the hull and moves it as it goes, so the ocean ahead loads and the ocean behind
+unloads. Timetable: departures at 24-hour clock hours (0 = 06:00, 6000 = 12:00, 12000 = 18:00),
+boarding opens `shipBoardingMinutes` before; the hull spawns only after the port chunk is loaded (the
+stuck-hull bug — an async ticket plus an early `addFreshEntity` left a non-ticking hull forever), a
+watchdog reasserts the ticket and forces a due hull to sail, empty services despawn, and window
+leftovers are discarded. Boarding costs two `black_obol`; arrival puts riders ashore at the
+destination harbour, lingers, then despawns; a mid-voyage logout is resolved at the destination.
+Verified: a full Bangkok → Jakarta ride (board, 06:00 departure, positions across the Gulf, ashore at
+Jakarta), empty services left zero hulls, a no-player docked hull counted down, 0 exceptions; PMD 0,
+130 JUnit tests. Placeholder look is a 3.2× vanilla boat — the hull art is the human's.
+
 ## Where things live
 
 | Concern | File |

@@ -14,9 +14,16 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
+- [ ] **Trains: stations, rail lines, the consist (design/30 stage 2)** — a rail-line generator over
+  the landmask, real track blocks (bridges/tunnels), and a locomotive with coupled wagons sharing
+  the ship's timetable/boarding/fare stack.
 
 ## Done
 
+- [x] **Scheduled sea transport (design/30 stage 1)** — 17 harbour cities, A* sea lanes over the
+  baked landmask, a large multi-seat packet that really sails on a daily in-game timetable, chunk
+  tickets that follow the hull, fares, boarding windows, an empty-service despawn, and a full
+  Bangkok→Jakarta ride verified — `90bc0a2`.
 - [x] **NPC cult ritual cells + the doom clock (design/06, 11)** — the Hollow Choir gathers at an
   altar, chants and summons (star-spawn + taint) on its own; interrupting pays Order standing and
   buys time. The world's doom meter rises passively (~150 min), accelerates with open rifts, and

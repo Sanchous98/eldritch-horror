@@ -77,6 +77,13 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   ~150 unopposed minutes (faster with open rifts). At 70 % the Horror awakens; banish or seal still
   wins. `/eh doom` reads it.
 
+### Added — scheduled transport
+
+- **Ships on a timetable** (`design/30`): real multi-seat packets sail cached sea lanes between
+  harbour cities, depart on the in-game clock, charge a fare, stream only the water around the hull
+  and leave empty services at the dock. A full voyage is verified; the hull model is a placeholder
+  until the art pass.
+
 ### Added — towns
 
 - **Generic towns** (`design/21`): the 3,065 non-curated settlements now generate as small
