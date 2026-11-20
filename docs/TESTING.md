@@ -205,5 +205,10 @@ seal. Expect `endgame = sealed`, `the_seal 1/1`, and the server log line
 `seal: 1 player(s), quest for <bot> -> true` before the debug line was removed. Use `/save-all flush`
 and then `/stop` (not a hard container kill) if the world state should survive a restart.
 
+The two chosen endings use the same altar: awaken at a rift, then `banish_the_horror` or (with
+Hollow Devoted standing) `summon_the_horror`; both completed and recorded `the_decision 1/1` in the
+verification run. Watch the rite cooldown (2 s) and bring the offerings (`banish`: 8 salt + 4
+silver; `summon`: 8 star + 4 blood).
+
 Caveat: a bot's **player data** is session-scoped (a new `spawnjoin` starts a fresh profile even with
 the same name); the world SavedData (endgame, ledgers, cities) does persist.

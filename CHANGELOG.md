@@ -87,6 +87,8 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 
 ### Tooling & CI
 
+- **All three endings bot-verified live**: banish, summon and the seal each resolved through the
+  real rites and recorded their journal outcome.
 - **Bots join the level's player list**: world-wide events (endgame quests/broadcasts, doom warnings,
   boss bars) now reach the headless test players, and a full bot run can finish the game (`the_seal`).
 

@@ -625,6 +625,11 @@ gameplay (prologue/class, walking, placing, rites; `/give`/`/summon`/`/setblock`
   sealed the world: `endgame = sealed`, `the_seal 1/1` (90 s after the awakening).
 - 0 exceptions; the world state survives `save-all` + `/stop` + restart (`sealed`).
 
+The other two forks were driven by the bot as well: **banish** (`The Horror is drawn off; 5 rift(s)
+close, the taint recedes`) → `endgame = banished`, and **summon** (`2 rift(s) tear open`) →
+`endgame = summoned`; both recorded `the_decision 1/1`. So all three endings — banish, summon and
+seal — are bot-verified live, not just in GameTest.
+
 The run exposed and fixed a harness gap: `ServerLevel#addPlayer` inserts a bot into the entity
 manager but **not** into `ServerLevel.players()`, so world-wide loops (endgame broadcasts/quests,
 doom warnings, boss bars) skipped bots. `Bots` now registers the bot in its level's player list,
