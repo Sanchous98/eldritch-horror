@@ -93,5 +93,9 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.CHOIR_LEVIATHAN.get(), ChoirLeviathanRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_HORROR.get(), TheHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.COASTAL_PACKET.get(), CoastalPacketRenderer::new);
+        event.registerEntityRenderer(ModEntities.TRAIN_LOCOMOTIVE.get(),
+                context -> new TrainCarRenderer<>(context, 2.3F));
+        event.registerEntityRenderer(ModEntities.TRAIN_WAGON.get(),
+                context -> new TrainCarRenderer<>(context, 2.0F));
     }
 }

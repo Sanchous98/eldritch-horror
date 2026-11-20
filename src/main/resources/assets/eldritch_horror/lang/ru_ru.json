@@ -875,5 +875,20 @@
   "message.eldritch_horror.ship.full": "На прибрежном пакетботе нет свободных мест.",
   "message.eldritch_horror.ship.no_fare": "Проезд стоит %s чёрных оболов.",
   "message.eldritch_horror.ship.boarded": "Проезд оплачен (%s чёрных оболов). Найдите место.",
-  "message.eldritch_horror.ship.landed_ashore": "Вы сходите на берег там, куда шёл пакетбот."
+  "message.eldritch_horror.ship.landed_ashore": "Вы сходите на берег там, куда шёл пакетбот.",
+  "entity.eldritch_horror.train_locomotive": "Локомотив",
+  "entity.eldritch_horror.train_wagon": "Пассажирский вагон",
+  "message.eldritch_horror.train.boarding": "Поезд берёт пассажиров до %s; отправление в %s.",
+  "message.eldritch_horror.train.departing": "Поезд отправляется к %s.",
+  "message.eldritch_horror.train.arrived": "Поезд прибыл в %s.",
+  "message.eldritch_horror.train.not_boarding": "Поезд не берёт пассажиров.",
+  "message.eldritch_horror.train.not_ready": "Поезд ещё готовят к отправлению; попробуйте через мгновение.",
+  "message.eldritch_horror.train.full": "В этом вагоне нет свободных мест.",
+  "message.eldritch_horror.train.no_fare": "Проезд стоит %s чёрных оболов.",
+  "message.eldritch_horror.train.boarded": "Проезд оплачен (%s чёрных оболов). Найдите место.",
+  "message.eldritch_horror.train.disembarked": "Вы сходите в %s.",
+  "message.eldritch_horror.train.stopped": "Поезд останавливается: путь впереди занят. Вы можете сойти.",
+  "message.eldritch_horror.train.resumed": "Путь свободен; поезд продолжает движение.",
+  "message.eldritch_horror.train.landed": "Вы прибываете на станцию, куда шёл поезд.",
+  "message.eldritch_horror.train.stranded": "Рейс сорвался; вы возвращаетесь на станцию %s."
 }

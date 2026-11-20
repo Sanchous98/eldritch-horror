@@ -247,6 +247,11 @@ public final class EldritchCommands {
         eh.then(Commands.literal("ship")
                 .executes(EldritchCommands::shipInfo)
                 .then(Commands.literal("board").executes(EldritchCommands::boardShip)));
+        // Scheduled trains (design/30, stage 2): nearest station, line/timetable state, consist
+        // positions, the rail under the locomotive, and the same fare path as right-click.
+        eh.then(Commands.literal("train")
+                .executes(EldritchCommands::trainInfo)
+                .then(Commands.literal("board").executes(EldritchCommands::boardTrain)));
         // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
         eh.then(Commands.literal("cultist")
                 .then(Commands.argument("cult", StringArgumentType.word())
@@ -426,6 +431,56 @@ public final class EldritchCommands {
             return 0;
         }
         String key = best.serviceKey();
+        ctx.getSource().sendSuccess(() -> Component.literal("Boarded " + key), false);
+        return 1;
+    }
+
+    /** {@code /eh train}: nearest station, line/timetable state and live consist positions. */
+    private static int trainInfo(CommandContext<CommandSourceStack> ctx) {
+        ServerLevel overworld = ctx.getSource().getServer().overworld();
+        net.minecraft.world.phys.Vec3 at = ctx.getSource().getPosition();
+        for (String line : com.sanchous98.eldritchhorror.world.rail.TrainService.describe(
+                overworld, at.x, at.z)) {
+            ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        }
+        return 1;
+    }
+
+    /**
+     * {@code /eh train board}: debug ride hook. Finds the nearest train car within 16 blocks and
+     * calls the same {@code tryBoard} used by right-click, so the window/fare/seat refusals are
+     * exercised by the probe rather than bypassed.
+     */
+    private static int boardTrain(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!ModConfig.ENABLE_TRAINS.get()) {
+            ctx.getSource().sendFailure(Component.literal("Trains are disabled (enableTrains=false)."));
+            return 0;
+        }
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        com.sanchous98.eldritchhorror.entity.TrainCar best = null;
+        double bestDistance = 16.0 * 16.0;
+        net.minecraft.world.phys.AABB search = new net.minecraft.world.phys.AABB(
+                player.position(), player.position()).inflate(16.0);
+        for (com.sanchous98.eldritchhorror.entity.TrainCar car
+                : player.level().getEntitiesOfClass(
+                        com.sanchous98.eldritchhorror.entity.TrainCar.class, search)) {
+            double distance = car.distanceToSqr(player);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = car;
+            }
+        }
+        if (best == null) {
+            ctx.getSource().sendFailure(Component.literal("No train car within 16 blocks."));
+            return 0;
+        }
+        boolean boarded = best.tryBoard(player);
+        if (!boarded) {
+            ctx.getSource().sendFailure(Component.literal("Boarding refused."));
+            return 0;
+        }
+        com.sanchous98.eldritchhorror.entity.TrainLocomotive lead = best.locomotive();
+        String key = lead == null ? "train" : lead.serviceKey();
         ctx.getSource().sendSuccess(() -> Component.literal("Boarded " + key), false);
         return 1;
     }

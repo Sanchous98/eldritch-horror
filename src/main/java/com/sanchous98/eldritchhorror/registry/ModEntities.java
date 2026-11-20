@@ -58,6 +58,8 @@ import com.sanchous98.eldritchhorror.entity.StoneSentinel;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.entity.TheHorror;
 import com.sanchous98.eldritchhorror.entity.TideGrazer;
+import com.sanchous98.eldritchhorror.entity.TrainLocomotive;
+import com.sanchous98.eldritchhorror.entity.TrainWagon;
 import com.sanchous98.eldritchhorror.entity.Tulzscha;
 import com.sanchous98.eldritchhorror.entity.VeilSwine;
 import com.sanchous98.eldritchhorror.entity.VeilStalker;
@@ -869,6 +871,33 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(ResourceKey.create(Registries.ENTITY_TYPE,
                                     EldritchHorror.id("coastal_packet"))));
+
+    /**
+     * The scheduled train's locomotive ({@code design/30-transport.md}, stage 2). No spawn egg: it
+     * is spawned by {@code world/rail/TrainService} at a station, and boarding happens only through
+     * the fare interaction.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<TrainLocomotive>> TRAIN_LOCOMOTIVE =
+            ENTITY_TYPES.register("train_locomotive", () ->
+                    EntityType.Builder.<TrainLocomotive>of(TrainLocomotive::new, MobCategory.MISC)
+                            .sized(1.8F, 1.5F)
+                            .eyeHeight(1.0F)
+                            .clientTrackingRange(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                                    EldritchHorror.id("train_locomotive"))));
+
+    /**
+     * A coupled passenger wagon ({@code design/30-transport.md}, stage 2). It is spawned and
+     * attached by {@code TrainService}; no spawn egg and no independent path.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<TrainWagon>> TRAIN_WAGON =
+            ENTITY_TYPES.register("train_wagon", () ->
+                    EntityType.Builder.<TrainWagon>of(TrainWagon::new, MobCategory.MISC)
+                            .sized(1.8F, 1.5F)
+                            .eyeHeight(1.0F)
+                            .clientTrackingRange(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                                    EldritchHorror.id("train_wagon"))));
 
     /**
      * The Ancient One entity types plus the endgame Horror, for classification where the class

@@ -875,5 +875,20 @@
   "message.eldritch_horror.ship.full": "The coastal packet has no free seats.",
   "message.eldritch_horror.ship.no_fare": "The passage costs %s black obols.",
   "message.eldritch_horror.ship.boarded": "Passage paid (%s black obols). Find a seat.",
-  "message.eldritch_horror.ship.landed_ashore": "You come ashore where the packet was bound."
+  "message.eldritch_horror.ship.landed_ashore": "You come ashore where the packet was bound.",
+  "entity.eldritch_horror.train_locomotive": "Locomotive",
+  "entity.eldritch_horror.train_wagon": "Passenger Wagon",
+  "message.eldritch_horror.train.boarding": "The train is taking passengers for %s; it departs at %s.",
+  "message.eldritch_horror.train.departing": "The train pulls out for %s.",
+  "message.eldritch_horror.train.arrived": "The train has arrived at %s.",
+  "message.eldritch_horror.train.not_boarding": "The train is not boarding.",
+  "message.eldritch_horror.train.not_ready": "The train is still being prepared; try again in a moment.",
+  "message.eldritch_horror.train.full": "This carriage has no free seats.",
+  "message.eldritch_horror.train.no_fare": "The fare costs %s black obols.",
+  "message.eldritch_horror.train.boarded": "Fare paid (%s black obols). Find a seat.",
+  "message.eldritch_horror.train.disembarked": "You step down at %s.",
+  "message.eldritch_horror.train.stopped": "The train stops: the line ahead is not clear. You may get off.",
+  "message.eldritch_horror.train.resumed": "The line is clear again; the train moves on.",
+  "message.eldritch_horror.train.landed": "You arrive at the station where the train was bound.",
+  "message.eldritch_horror.train.stranded": "The service failed; you are back at %s."
 }

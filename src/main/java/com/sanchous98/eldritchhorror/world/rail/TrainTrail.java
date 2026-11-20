@@ -1,0 +1,100 @@
+package com.sanchous98.eldritchhorror.world.rail;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * The locomotive's recent trail, sampled by the wagons so the consist bends around curves.
+ *
+ * <p>The locomotive appends its position (with the distance travelled) as it moves; a wagon asks
+ * for the point a fixed spacing behind, and gets a linearly interpolated position and a shortest-arc
+ * yaw. Because samples are keyed by distance rather than by tick, a stopped train keeps its spacing
+ * and a fast train cannot overtake its own trail. Pure and unit-tested.
+ */
+public final class TrainTrail {
+    /** Enough history for the longest consist at the slowest configured speed. */
+    private static final int CAPACITY = 512;
+
+    /** One recorded position. */
+    public record TrailPoint(double x, double y, double z, float yaw, double distance) {
+    }
+
+    private final List<TrailPoint> points = new ArrayList<>();
+
+    /** Forgets all history (a fresh service). */
+    public void clear() {
+        this.points.clear();
+    }
+
+    /**
+     * Records a position. Distances must be non-decreasing; a duplicate is ignored.
+     *
+     * @param x        world X
+     * @param y        world Y
+     * @param z        world Z
+     * @param yaw      entity yaw in degrees
+     * @param distance distance travelled when the position was recorded
+     */
+    public void append(double x, double y, double z, float yaw, double distance) {
+        if (!this.points.isEmpty()) {
+            double last = this.points.get(this.points.size() - 1).distance();
+            if (distance <= last + 1.0E-6) {
+                return;
+            }
+        }
+        this.points.add(new TrailPoint(x, y, z, yaw, distance));
+        while (this.points.size() > CAPACITY) {
+            this.points.remove(0);
+        }
+    }
+
+    /** @return how many positions are retained (diagnostics/tests). */
+    public int size() {
+        return this.points.size();
+    }
+
+    /**
+     * Samples the point {@code behind} blocks behind the newest recorded position.
+     *
+     * @param behind distance behind the locomotive, in blocks (non-negative)
+     * @return the interpolated sample, or {@code null} when the trail is empty
+     */
+    public @Nullable RailSample sampleBehind(double behind) {
+        int size = this.points.size();
+        if (size == 0) {
+            return null;
+        }
+        TrailPoint newest = this.points.get(size - 1);
+        double target = newest.distance() - Math.max(0.0, behind);
+        if (target <= this.points.get(0).distance()) {
+            TrailPoint oldest = this.points.get(0);
+            return new RailSample(oldest.x(), oldest.y(), oldest.z(), oldest.yaw());
+        }
+        for (int i = size - 1; i > 0; i--) {
+            TrailPoint later = this.points.get(i);
+            TrailPoint earlier = this.points.get(i - 1);
+            if (target >= earlier.distance() && target <= later.distance()) {
+                double span = later.distance() - earlier.distance();
+                double t = span <= 0.0 ? 0.0 : (target - earlier.distance()) / span;
+                return new RailSample(
+                        earlier.x() + (later.x() - earlier.x()) * t,
+                        earlier.y() + (later.y() - earlier.y()) * t,
+                        earlier.z() + (later.z() - earlier.z()) * t,
+                        lerpYaw(earlier.yaw(), later.yaw(), t));
+            }
+        }
+        TrailPoint oldest = this.points.get(0);
+        return new RailSample(oldest.x(), oldest.y(), oldest.z(), oldest.yaw());
+    }
+
+    private static float lerpYaw(float from, float to, double t) {
+        float delta = (to - from) % 360.0F;
+        if (delta > 180.0F) {
+            delta -= 360.0F;
+        } else if (delta < -180.0F) {
+            delta += 360.0F;
+        }
+        return from + delta * (float) t;
+    }
+}

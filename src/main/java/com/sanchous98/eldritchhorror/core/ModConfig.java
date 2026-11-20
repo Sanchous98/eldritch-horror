@@ -3028,6 +3028,67 @@ public final class ModConfig {
             BUILDER.comment("Maximum simultaneously active packets.")
                     .defineInRange("maxShips", 8, 1, 16);
 
+    // --- Trains (design/30, stage 2) ----------------------------------------------------------
+    // A line is two curated stations, a cached A* route over the landmask and a real block-level
+    // track. Boarding opens trainBoardingMinutes before departure, the consist runs at trainSpeed
+    // blocks/tick, riders pay trainFare black obols, and an empty service despawns at departure.
+    // The default hours run the A->B leg at 06:00 and the B->A leg at 18:00, like the ships.
+
+    /** Master switch for scheduled trains. */
+    public static final ModConfigSpec.BooleanValue ENABLE_TRAINS =
+            BUILDER.comment("Enable scheduled trains (design/30, stage 2).")
+                    .define("enableTrains", true);
+
+    /** Train speed in blocks per tick (1.2 = 24 blocks/second). */
+    public static final ModConfigSpec.DoubleValue TRAIN_SPEED =
+            BUILDER.comment("Train speed in blocks per tick (1.2 = 24 blocks/second).")
+                    .defineInRange("trainSpeed", 1.2, 0.1, 20.0);
+
+    /** Number of wagons behind the locomotive (the design allows 2-4). */
+    public static final ModConfigSpec.IntValue TRAIN_CARS =
+            BUILDER.comment("Wagons behind the locomotive (2-4).")
+                    .defineInRange("trainCars", 3, 2, 4);
+
+    /** Seats in one car (the locomotive and each wagon). */
+    public static final ModConfigSpec.IntValue TRAIN_SEATS =
+            BUILDER.comment("Seats in one car (the locomotive and each wagon).")
+                    .defineInRange("trainSeats", 4, 1, 4);
+
+    /** Fare in black obols, charged once on boarding. */
+    public static final ModConfigSpec.IntValue TRAIN_FARE =
+            BUILDER.comment("Fare in black obols per leg (0 = free passage).")
+                    .defineInRange("trainFare", 2, 0, 64);
+
+    /** Days between service days (1 = daily). */
+    public static final ModConfigSpec.IntValue TRAIN_PERIOD_DAYS =
+            BUILDER.comment("Days between service days (1 = every day).")
+                    .defineInRange("trainPeriodDays", 1, 1, 30);
+
+    /** First departure hour (in-game clock). */
+    public static final ModConfigSpec.IntValue TRAIN_DEPARTURE_HOUR_A =
+            BUILDER.comment("First daily departure hour, in-game clock (0-23).")
+                    .defineInRange("trainDepartureHourA", 6, 0, 23);
+
+    /** Second departure hour (in-game clock). */
+    public static final ModConfigSpec.IntValue TRAIN_DEPARTURE_HOUR_B =
+            BUILDER.comment("Second daily departure hour, in-game clock (0-23).")
+                    .defineInRange("trainDepartureHourB", 18, 0, 23);
+
+    /** How long before departure boarding opens, in in-game minutes (60 = one in-game hour). */
+    public static final ModConfigSpec.IntValue TRAIN_BOARDING_MINUTES =
+            BUILDER.comment("Boarding window before departure, in in-game minutes (60 = 1 hour).")
+                    .defineInRange("trainBoardingMinutes", 60, 1, 720);
+
+    /** Longest generated rail line, in blocks (also the nearest-partner search bound). */
+    public static final ModConfigSpec.IntValue TRAIN_MAX_LINE_BLOCKS =
+            BUILDER.comment("Longest generated rail line, in blocks (also the partner search bound).")
+                    .defineInRange("trainMaxLineBlocks", 8000, 500, 60000);
+
+    /** Hard cap on simultaneously live consists. */
+    public static final ModConfigSpec.IntValue MAX_TRAINS =
+            BUILDER.comment("Maximum simultaneously active consists.")
+                    .defineInRange("maxTrains", 8, 1, 16);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {
