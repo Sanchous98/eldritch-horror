@@ -82,8 +82,8 @@ The map's `rift_opened` event is not wired to this path yet — the announcement
 The counter-branch: **ward** (prevent) and **seal** (undo).
 
 - **Wards** (`ward_of_the_eye`, ward tokens) create safe rooms/havens: they suppress sanity
-  drain, repel lesser spawns, and create a **damage window** in boss fights
-  (`18-bosses.md`).
+  drain — both the ambient sources and direct aura drains — repel lesser spawns, and create a
+  **damage window** in boss fights (`18-bosses.md`).
 - **Sealing** closes rifts (`close_rift`), recedes the corruption field
   (`19-events.md` `cleansing_dawn`), and lowers the world's danger. It is the Order's path.
 - Warding/sealing are deliberately weaker than summoning *per action* but are the only way

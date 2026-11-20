@@ -40,6 +40,8 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   district's taint and drives out the Hollow Choir, but only where a city has actually Fallen.
 - **Rift-gate travel** (`design/26`, `design/23`): anchors link two-way with no UI; a trip costs
   corruption and sanity and can tear a new rift open on arrival.
+- **Wards shelter from auras too** (`design/26`): a presence's sanity aura and the husk crowd no
+  longer drain a player standing in a haven.
 - **Wards are places** (`design/26`, `design/18`): the warding rite raises a persisted haven that
   suppresses sanity drain, keeps freshly spawned lesser horrors out and opens a +25% damage window
   on the Ancient Ones; `/eh ward` reports it.

@@ -514,7 +514,9 @@ wired where a system exists:
 (`0275474`). A per-level `WardLedger` SavedData stores `{x,y,z,radius,expires}` (game-time expiry,
 capped at 64 with oldest eviction, refresh in place), so a ward survives restarts and is shared by
 everyone in the level. Inside the horizontal cylinder: every **negative** sanity source is dropped
-(recovery still applies), a freshly spawned lesser horror (`LesserSwarm`, `Watcher`, `BoneChoir` —
+(recovery still applies) **and ambient aura drains are held off too** — a Blight Pod at the core no
+longer drains a warded player (`WardLedger.shelters`, also used by the husk crowd and
+Shub-Niggurath's stillness; corruption still seeps) — a freshly spawned lesser horror (`LesserSwarm`, `Watcher`, `BoneChoir` —
 never an `AncientOne`) is cancelled at join, and a warded player deals **+25%** to a presence, the
 design's damage window (meaningful when a boss is configured killable). Radius 12, ten-minute
 lifetime and the bonus live in a Wards config section; `/eh ward` prints what covers the caller.
