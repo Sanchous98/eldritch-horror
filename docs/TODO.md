@@ -14,12 +14,12 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **Towns need people and shelter (design/21)** — generation is done (`e0d37fb`); the 2,896
-  buildable towns still have no villager population, no shelter/sanity benefit, no codex/map
-  discovery and no interaction with corruption or the cults.
 
 ## Done
 
+- [x] **Towns have people and shelter (design/21)** — each loaded near-player town tops up to five
+  persistent villagers with vanilla trades, deterministic placement, a taint-abandon gate, and the
+  footprint shelters at night with a small sanity recovery — `6ede27c`.
 - [x] **Generic towns from the 3,065 non-curated settlements (design/21)** — `world/town` loads and
   filters them (96 overlap curated, 73 water), indexes 2,896 by 512-block cells and builds one
   deterministic 40–64-block town per chunk: plaza/well, 5–8 houses, lamps, farm, paths — `e0d37fb`.

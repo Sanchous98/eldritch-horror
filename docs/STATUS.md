@@ -575,8 +575,15 @@ using only `Palette` blocks through the clipped `Builder`. `enableTowns`/`townRa
 config. Probed at Noyabrsk (well, soul lantern, spruce doors) with curated Moscow unaffected. The
 tests are pure: `TownIndexTest` (7) and `TownSitingTest` (3).
 
-**Still structural only:** no villagers/trades, no shelter or sanity benefit, no codex/map
-discovery, no state interaction with corruption or the cults — that is the next half.
+**People and shelter (`6ede27c`).** `TownPopulation` tops a loaded, near-player town up to five
+persistent vanilla villagers (two per 10 s pass) on deterministic open-ground spots, with a stable
+trade mix — farmer, librarian, cleric, fisherman, shepherd — and vanilla trades. A centre chunk at or
+above `townAbandonTaint` (0.5) gets nobody, so a tainted town reads as abandoned. A town footprint
+also shelters like a small city: the night darkness source stands down and a `TownSource` recovers
+0.15/s; the check uses the sealed index, never a scan. Config keys are grouped under Towns. Probed
+at Noyabrsk: a fisherman spawns, and at midnight sanity goes 50 → 50.90 inside the town over 5.5 s
+versus 50 → 49.75 just outside. Still out of scope: codex/map discovery for towns and persistent
+town state.
 
 ## Where things live
 

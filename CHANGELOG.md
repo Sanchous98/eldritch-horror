@@ -71,6 +71,8 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 - **Generic towns** (`design/21`): the 3,065 non-curated settlements now generate as small
   deterministic places — plaza and well, houses, lamps, a farm and paths — with a bucketed spatial
   index so worldgen never scans the whole settlement list.
+- **Towns are inhabited**: villagers with vanilla trades, a taint-abandon gate, and a small night
+  shelter/sanity recovery inside the footprint.
 
 ### Tooling & CI
 
