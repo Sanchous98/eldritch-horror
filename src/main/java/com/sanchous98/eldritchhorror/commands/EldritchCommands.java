@@ -21,7 +21,11 @@ import com.sanchous98.eldritchhorror.cult.CultServices;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.endgame.Endgame;
 import com.sanchous98.eldritchhorror.endgame.EndgameState;
+import com.sanchous98.eldritchhorror.endgame.DoomClock;
+import com.sanchous98.eldritchhorror.endgame.RiftLedger;
 import com.sanchous98.eldritchhorror.cult.Cults;
+import com.sanchous98.eldritchhorror.entity.BestiarySupport;
+import com.sanchous98.eldritchhorror.entity.Worshipper;
 import com.sanchous98.eldritchhorror.event.EldritchEvent;
 import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.event.Events;
@@ -29,6 +33,7 @@ import com.sanchous98.eldritchhorror.event.Rifts;
 import com.sanchous98.eldritchhorror.investigator.Investigator;
 import com.sanchous98.eldritchhorror.investigator.InvestigatorAPI;
 import com.sanchous98.eldritchhorror.investigator.Prologue;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
@@ -49,6 +54,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -234,6 +240,13 @@ public final class EldritchCommands {
         eh.then(Commands.literal("ward").executes(EldritchCommands::listWards));
         // Rift gates (design/26): the caller's pending mark and the nearest gate's link state.
         eh.then(Commands.literal("gate").executes(EldritchCommands::gateInfo));
+        // The doom clock (design/11): meter, passive rate, open rifts, awakening and outcome.
+        eh.then(Commands.literal("doom").executes(EldritchCommands::doomInfo));
+        // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
+        eh.then(Commands.literal("cultist")
+                .then(Commands.argument("cult", StringArgumentType.word())
+                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 32))
+                                .executes(EldritchCommands::spawnCultists))));
         // Server-side bot players for automated playtesting (dev-mode gated inside the handlers).
         eh.then(com.sanchous98.eldritchhorror.bot.BotCommands.node());
         dispatcher.register(eh);
@@ -345,6 +358,69 @@ public final class EldritchCommands {
                         + twin.getZ());
         ctx.getSource().sendSuccess(() -> line, false);
         return 1;
+    }
+
+    /**
+     * {@code /eh doom}: the overworld meter, its passive rate per minute, the tracked open rifts,
+     * whether the 70% awakening has fired and the endgame outcome. A read-only probe.
+     */
+    private static int doomInfo(CommandContext<CommandSourceStack> ctx) {
+        ServerLevel overworld = ctx.getSource().getServer().overworld();
+        DoomClock clock = DoomClock.of(overworld);
+        int rifts = RiftLedger.of(overworld).openCount();
+        double rate = DoomClock.ratePerMinute(overworld);
+        String outcome = Endgame.outcome(overworld).name().toLowerCase(java.util.Locale.ROOT);
+        String line = String.format(java.util.Locale.ROOT,
+                "doom = %.2f/100 (%.2f/min), open rifts %d, awakened %s, outcome %s",
+                clock.doom(), rate, rifts, clock.awakened(), outcome);
+        ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        return 1;
+    }
+
+    /**
+     * {@code /eh cultist <cult> <count>}: the ritual-cell probe. Spawns persistent worshippers of one
+     * cult around the caller, so a cell can form without depending on a site's random population.
+     * Gamemaster-gated like the other mutation commands.
+     */
+    private static int spawnCultists(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("Requires gamemaster permissions."));
+            return 0;
+        }
+        String cultId = StringArgumentType.getString(ctx, "cult");
+        if (unknownCult(ctx, cultId)) {
+            return 0;
+        }
+        int count = IntegerArgumentType.getInteger(ctx, "count");
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ServerLevel level = player.level();
+        BlockPos centre = player.blockPosition();
+        int spawned = 0;
+        for (int i = 0; i < count; i++) {
+            int angle = i * 360 / count;
+            int x = centre.getX() + (int) Math.round(Math.cos(Math.toRadians(angle)) * 3.0);
+            int z = centre.getZ() + (int) Math.round(Math.sin(Math.toRadians(angle)) * 3.0);
+            BlockPos spot = BestiarySupport.surfaceSpot(level, x, z, true);
+            if (spot == null) {
+                spot = BestiarySupport.surfaceSpot(level, centre.getX(), centre.getZ(), true);
+            }
+            if (spot == null) {
+                continue;
+            }
+            Worshipper worshipper = ModEntities.WORSHIPPER.get().spawn(level, spot,
+                    EntitySpawnReason.COMMAND);
+            if (worshipper == null) {
+                continue;
+            }
+            worshipper.setCult(cultId, CultRank.MEMBER);
+            worshipper.setPersistenceRequired();
+            spawned++;
+        }
+        int total = spawned;
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "spawned " + total + " " + cultId + " cultist(s)"), true);
+        return spawned > 0 ? 1 : 0;
     }
 
     /** {@code /eh endgame}: the world's decision so far (design/11). */

@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.registry.blocks;
 
+import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.endgame.DoomClock;
 import com.sanchous98.eldritchhorror.endgame.RiftLedger;
 import com.sanchous98.eldritchhorror.world.rift.RiftGates;
 import net.minecraft.core.BlockPos;
@@ -55,6 +57,10 @@ public final class RiftAnchorBlock extends Block {
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos,
                                                boolean movedByPiston) {
         RiftLedger.of(level).remove(pos);
+        // A closed rift buys the world time (design/11, "Relief"): the doom clock for the overworld
+        // — the only clock there is — takes the configured step back. addDoom/relieve clamp and
+        // stop themselves once the endgame is decided.
+        DoomClock.relieve(level, ModConfig.DOOM_RIFT_RELIEF.get());
         RiftGates.breakLinks(level, pos);
         super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }

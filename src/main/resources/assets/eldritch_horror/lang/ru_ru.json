@@ -851,5 +851,20 @@
   "rift.eldritch_horror.dead_link": "Дальние врата исчезли; связь умирает вместе с ними.",
   "rift.eldritch_horror.no_arrival": "У дальних врат нет безопасной земли; Путь отказывает.",
   "rift.eldritch_horror.travelled": "Путь берёт свою цену: порча +%s, рассудок −%s.",
-  "rift.eldritch_horror.unstable": "Сквозь прошло нечто иное: рядом разверзается новый рифт в %s, %s, %s."
+  "rift.eldritch_horror.unstable": "Сквозь прошло нечто иное: рядом разверзается новый рифт в %s, %s, %s.",
+  "npcritual.eldritch_horror.gather": "Круг культистов собирается у алтаря неподалёку.",
+  "npcritual.eldritch_horror.chant": "У алтаря неподалёку поднимается пение.",
+  "npcritual.eldritch_horror.complete.choir": "Круг замыкается: у алтаря отвечают звёздные отродья.",
+  "npcritual.eldritch_horror.complete.other": "Обряд культа свершается; земля темнеет.",
+  "npcritual.eldritch_horror.interrupted.leader": "Круг разорван: его предводитель мёртв.",
+  "npcritual.eldritch_horror.interrupted.core": "Круг разорван: алтарь разрушен.",
+  "npcritual.eldritch_horror.interrupted.player": "Круг разорван: %s стоит внутри кольца.",
+  "npcritual.eldritch_horror.interrupted.too_few": "Круг разорван: культистов осталось слишком мало.",
+  "npcritual.eldritch_horror.reward": "Орден отметил ваш поступок: расположение Недреманного Ока +%s.",
+  "doom.eldritch_horror.warning.50": "На мир ложится тяжесть: труд Хора продвигается (рок 50%).",
+  "doom.eldritch_horror.warning.70": "Алтари гудят в унисон; нечто огромное обращает взор (рок 70%).",
+  "doom.eldritch_horror.warning.85": "Небо истончается. Труд Хора близится к концу (рок 85%).",
+  "doom.eldritch_horror.warning.95": "Мир затаил дыхание; конец близок (рок 95%).",
+  "doom.eldritch_horror.awaken": "Труд Хора свершён. Нечто огромное поднимается у рифта.",
+  "doom.eldritch_horror.loss": "Часы рока полны. Хор победил; мир отдан."
 }

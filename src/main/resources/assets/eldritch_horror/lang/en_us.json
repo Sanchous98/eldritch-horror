@@ -851,5 +851,20 @@
   "rift.eldritch_horror.dead_link": "The far gate is gone; the link dies with it.",
   "rift.eldritch_horror.no_arrival": "No safe ground at the far gate; the Way refuses.",
   "rift.eldritch_horror.travelled": "The Way takes its price: corruption +%s, sanity −%s.",
-  "rift.eldritch_horror.unstable": "Something else came through: a new rift tears open at %s, %s, %s."
+  "rift.eldritch_horror.unstable": "Something else came through: a new rift tears open at %s, %s, %s.",
+  "npcritual.eldritch_horror.gather": "A circle of cultists gathers at an altar nearby.",
+  "npcritual.eldritch_horror.chant": "Chanting rises from an altar nearby.",
+  "npcritual.eldritch_horror.complete.choir": "The circle closes: star-spawn answer at the altar.",
+  "npcritual.eldritch_horror.complete.other": "A cult's rite resolves; the ground darkens.",
+  "npcritual.eldritch_horror.interrupted.leader": "The circle breaks: its leader is dead.",
+  "npcritual.eldritch_horror.interrupted.core": "The circle breaks: the altar is broken.",
+  "npcritual.eldritch_horror.interrupted.player": "The circle breaks: %s stands inside the ring.",
+  "npcritual.eldritch_horror.interrupted.too_few": "The circle breaks: too few cultists remain.",
+  "npcritual.eldritch_horror.reward": "The Order marks your deed: standing with the Unblinking Eye +%s.",
+  "doom.eldritch_horror.warning.50": "A weight settles on the world: the Choir's work advances (doom 50%).",
+  "doom.eldritch_horror.warning.70": "The altars hum in unison; something vast turns its attention (doom 70%).",
+  "doom.eldritch_horror.warning.85": "The sky thins. The Choir's work nears its end (doom 85%).",
+  "doom.eldritch_horror.warning.95": "The world holds its breath; the end is at hand (doom 95%).",
+  "doom.eldritch_horror.awaken": "The Choir's work is done. Something vast rises at the rift.",
+  "doom.eldritch_horror.loss": "The doom clock is full. The Choir has won; the world is given over."
 }

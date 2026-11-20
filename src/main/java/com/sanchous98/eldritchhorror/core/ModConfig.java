@@ -2897,6 +2897,86 @@ public final class ModConfig {
             BUILDER.comment("Sanity change per second inside a generic town (positive recovers).")
                     .defineInRange("townShelterRecovery", 0.15, 0.0, 10.0);
 
+    // --- NPC cult ritual cells (design/06, "Ritual cells", pinned 2026-11) --------------------
+    // A cell of cultists left alone at a real altar advances its cult's goal without a player
+    // choosing that path. Everything is loaded-chunks-only, one ritual per altar, a capped number
+    // of active cells and a per-altar cooldown; see world/cult/CultRituals.
+
+    /** Master switch for NPC cult ritual cells. */
+    public static final ModConfigSpec.BooleanValue ENABLE_NPC_CULT_RITUALS =
+            BUILDER.comment("Let NPC cult cells gather and chant at altars on their own.")
+                    .define("enableNpcCultRituals", true);
+
+    /** Whether a completed Hollow Choir cell may be the one that awakens the Horror (doom 70%). */
+    public static final ModConfigSpec.BooleanValue NPC_CULT_RITUALS_CAN_AWAKEN =
+            BUILDER.comment("Allow the doom clock's 70% awakening (the Choir acting without a player).")
+                    .define("npcCultRitualsCanAwaken", true);
+
+    /** GATHER phase length: cultists walk to the ring (20 s by default). */
+    public static final ModConfigSpec.IntValue NPC_RITUAL_GATHER_TICKS =
+            BUILDER.comment("Ticks a ritual cell spends gathering at the ring (400 = 20 s).")
+                    .defineInRange("npcRitualGatherTicks", 400, 20, 24000);
+
+    /** CHANT phase length: particles, hum and whispers at the core (30 s by default). */
+    public static final ModConfigSpec.IntValue NPC_RITUAL_CHANT_TICKS =
+            BUILDER.comment("Ticks a ritual cell spends chanting (600 = 30 s).")
+                    .defineInRange("npcRitualChantTicks", 600, 20, 24000);
+
+    /** Per-altar cooldown after a completed ritual (10 min by default). */
+    public static final ModConfigSpec.IntValue NPC_RITUAL_COOLDOWN_TICKS =
+            BUILDER.comment("Ticks before the same altar may host another NPC ritual (12000 = 10 min).")
+                    .defineInRange("npcRitualCooldownTicks", 12000, 200, 240000);
+
+    /** Search radius for a cell's altar and participants. */
+    public static final ModConfigSpec.IntValue NPC_RITUAL_RADIUS =
+            BUILDER.comment("Radius (blocks) searched for an altar and its cultists.")
+                    .defineInRange("npcRitualRadius", 24, 8, 64);
+
+    /** Star-spawn a completed Hollow Choir ritual calls (2..this). */
+    public static final ModConfigSpec.IntValue NPC_RITUAL_SUMMON_COUNT =
+            BUILDER.comment("Star-spawn a completed Hollow Choir ritual may call (2 to this many).")
+                    .defineInRange("npcRitualSummonCount", 3, 2, 8);
+
+    // --- The doom clock (design/11, "The doom clock", pinned 2026-11) -------------------------
+    // A per-overworld 0-100 meter, pushed by ritual completions and open rifts, pushed back by
+    // interrupting cells and closing rifts. At 70% the Choir awakens the Horror; at 100% the world
+    // resolves to the summon ending. See endgame/DoomClock and endgame/DoomMath.
+
+    /** Master switch for the doom clock. */
+    public static final ModConfigSpec.BooleanValue ENABLE_DOOM_CLOCK =
+            BUILDER.comment("Enable the per-world doom clock.")
+                    .define("enableDoomClock", true);
+
+    /** Minutes of unopposed passive rise from 0 to the loss (design/11: ~150). */
+    public static final ModConfigSpec.DoubleValue DOOM_MINUTES_TO_LOSS =
+            BUILDER.comment("Minutes an unopposed world takes to reach doom 100.")
+                    .defineInRange("doomMinutesToLoss", 150.0, 1.0, 10000.0);
+
+    /** Doom fraction (0..1) at which the Choir awakens the Horror. */
+    public static final ModConfigSpec.DoubleValue DOOM_AWAKEN_AT =
+            BUILDER.comment("Doom fraction at which the Horror is awakened (0.70 = 70%).")
+                    .defineInRange("doomAwakenAt", 0.70, 0.0, 1.0);
+
+    /** Doom added by a completed Hollow Choir ritual. */
+    public static final ModConfigSpec.DoubleValue DOOM_RITUAL_PUSH =
+            BUILDER.comment("Doom added by a completed Hollow Choir ritual.")
+                    .defineInRange("doomRitualPush", 6.0, 0.0, 100.0);
+
+    /** Doom removed by interrupting a cult ritual. */
+    public static final ModConfigSpec.DoubleValue DOOM_INTERRUPT_RELIEF =
+            BUILDER.comment("Doom removed when a cult ritual is interrupted.")
+                    .defineInRange("doomInterruptRelief", 6.0, 0.0, 100.0);
+
+    /** Doom removed when a rift closes. */
+    public static final ModConfigSpec.DoubleValue DOOM_RIFT_RELIEF =
+            BUILDER.comment("Doom removed when a rift anchor is destroyed or closed.")
+                    .defineInRange("doomRiftRelief", 2.0, 0.0, 100.0);
+
+    /** Extra passive rate per open rift (fraction of the base rate). */
+    public static final ModConfigSpec.DoubleValue DOOM_RIFT_ACCELERATION =
+            BUILDER.comment("Extra doom rate per open tracked rift (0.15 = +15% each).")
+                    .defineInRange("doomRiftAcceleration", 0.15, 0.0, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

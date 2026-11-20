@@ -11,12 +11,19 @@ import com.sanchous98.eldritchhorror.world.loc.Tier;
 import com.sanchous98.eldritchhorror.world.loc.style.StyleKit;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A walled stronghold of a nameless cult: a crenellated curtain wall around a paved courtyard,
  * a gatehouse that only opens inward, squat side chapels and a spire-crowned central keep whose
  * altar is lit by a single guttering flame. The masonry is already failing — the north-east
  * corner has collapsed and cobwebs hang over the pews.
+ *
+ * <p>The keep now carries a real, small working altar — an {@code altar_core} ringed by eight
+ * {@code rune_stone} marks on the chapel floor — so a stronghold population has somewhere to
+ * worship. The NPC ritual cell pass ({@code world/cult/CultRituals}) recognises any valid
+ * {@link com.sanchous98.eldritchhorror.rite.RitualAltar} ring, and this is the one the stronghold's
+ * worshippers, zealots and rite binders gather at when no player has built one nearby.
  */
 public final class CultStronghold implements Location {
 
@@ -83,6 +90,8 @@ public final class CultStronghold implements Location {
 
         // The keep-chapel at the heart of the courtyard.
         keep(b, p, cx, cz, ground);
+        // A real working altar on the chapel floor, so the population can hold a ritual cell here.
+        altar(b, p, cx, cz, y0);
 
         // Two squat side chapels against the north curtain.
         sideChapel(b, p, cx - 20, cz - WALL + 8, ground);
@@ -148,6 +157,31 @@ public final class CultStronghold implements Location {
         b.spire(cx, cz, y0 + h + 9, 18);
         StyleKit.twoHighDoor(b, p, cx, cz + half, y0 + 1, Direction.SOUTH);
         b.put(cx, y0 + h - 3, cz, p.light());
+    }
+
+    /**
+     * The keep's working altar: an {@code altar_core} on the chapel floor with eight
+     * {@code rune_stone} marks on a two-block ring around it. That is exactly the shape the shared
+     * {@link com.sanchous98.eldritchhorror.rite.RitualAltar} gate accepts (marks stand off the core
+     * and surround it), so a cell can start here.
+     */
+    private static void altar(StructureBuilder b, Palette p, int cx, int cz, int floorY) {
+        BlockState core = block("altar_core", p.frame());
+        BlockState rune = block("rune_stone", p.accent());
+        for (int i = 0; i < 8; i++) {
+            double a = i * Math.PI / 4.0;
+            int dx = (int) Math.round(Math.cos(a) * 2.0);
+            int dz = (int) Math.round(Math.sin(a) * 2.0);
+            b.put(cx + dx, floorY + 1, cz + dz, rune);
+        }
+        b.put(cx, floorY + 1, cz, core);
+    }
+
+    /** Resolves a mod block by id for worldgen, falling back to {@code fallback} if unregistered. */
+    private static BlockState block(String id, BlockState fallback) {
+        BlockState resolved = net.minecraft.core.registries.BuiltInRegistries.BLOCK
+                .getValue(com.sanchous98.eldritchhorror.EldritchHorror.id(id)).defaultBlockState();
+        return resolved.isAir() ? fallback : resolved;
     }
 
     private static void sideChapel(StructureBuilder b, Palette p, int cx, int cz, int ground) {
