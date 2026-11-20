@@ -612,6 +612,27 @@ inside the ring interrupts (Order standing 10 → 20); the passive rate reads 0.
 run showed 51 → 76 (awakened) → 100 (summoned) with all four warnings. PMD 0, 113 JUnit tests, 0
 exceptions.
 
+## A bot completed the game (`61b1066`)
+
+A full **start-to-finish** bot run on a fresh world, using only the bot's own actions for the
+gameplay (prologue/class, walking, placing, rites; `/give`/`/summon`/`/setblock` are test scaffolding):
+
+- prologue → investigator → city gate → `first_steps`;
+- altar, tomes, `first_rite`;
+- storm + `open_rift` → `open_the_way`, `close_rift` → `seal_the_way`;
+- `soothe_cthulhu` → `soothe_a_presence`;
+- second rift, `awaken_the_horror`, close it, and at the Horror's **DECISION** the empty rift ledger
+  sealed the world: `endgame = sealed`, `the_seal 1/1` (90 s after the awakening).
+- 0 exceptions; the world state survives `save-all` + `/stop` + restart (`sealed`).
+
+The run exposed and fixed a harness gap: `ServerLevel#addPlayer` inserts a bot into the entity
+manager but **not** into `ServerLevel.players()`, so world-wide loops (endgame broadcasts/quests,
+doom warnings, boss bars) skipped bots. `Bots` now registers the bot in its level's player list,
+drops it on removal, and reconciles the list after any teleport/dimension change. Verified by the
+seal log: `1 player(s), quest for <bot> -> true`. Bot player data is still session-scoped (a new
+`spawnjoin` creates a fresh profile); a real player persists normally. The run scripts live in the
+dev-only `/home/dev/mcbot` harness, not the mod.
+
 ## Where things live
 
 | Concern | File |

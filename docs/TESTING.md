@@ -195,3 +195,15 @@ world refuses again). Unit-level arithmetic stays in `src/test/java` (run by `./
 - `./gradlew runGameTestServer` — the in-game gameplay suite (the five required tests above).
 - The locale gate is `i18n/LangParityTest`: equal key sets both ways, no duplicate keys, and the
   same placeholders per key between `en_us.json` and `ru_ru.json`.
+
+## 10. Full bot run (dev harness)
+
+The `mcbot` harness can play the game end to end. The canonical script chain used for the verified
+run (`full_run_final3.py`) does: prologue/class/gate → altar + tomes → ward → storm/open_rift ×2 →
+close both rifts → soothe Cthulhu → awaken the Horror → close the last rift → wait for DECISION →
+seal. Expect `endgame = sealed`, `the_seal 1/1`, and the server log line
+`seal: 1 player(s), quest for <bot> -> true` before the debug line was removed. Use `/save-all flush`
+and then `/stop` (not a hard container kill) if the world state should survive a restart.
+
+Caveat: a bot's **player data** is session-scoped (a new `spawnjoin` starts a fresh profile even with
+the same name); the world SavedData (endgame, ledgers, cities) does persist.

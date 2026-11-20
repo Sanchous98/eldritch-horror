@@ -87,6 +87,9 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 
 ### Tooling & CI
 
+- **Bots join the level's player list**: world-wide events (endgame quests/broadcasts, doom warnings,
+  boss bars) now reach the headless test players, and a full bot run can finish the game (`the_seal`).
+
 - **GitHub Actions**: CI builds + runs JUnit, PMD and the GameTest server on every push/PR;
   tagged `v*` releases publish the jar with a SHA-256 checksum. `docs/CI.md` documents both
   workflows.
