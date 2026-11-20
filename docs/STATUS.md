@@ -659,6 +659,45 @@ Verified: a full Bangkok → Jakarta ride (board, 06:00 departure, positions acr
 Jakarta), empty services left zero hulls, a no-player docked hull counted down, 0 exceptions; PMD 0,
 130 JUnit tests. Placeholder look is a 3.2× vanilla boat — the hull art is the human's.
 
+## Scheduled trains (design/30 stage 2)
+
+The rail counterpart of the packet: **24 stations** at the curated cities and **5 lines** built once
+at server start (Beijing–Shanghai 4206, Delhi–Mumbai 4150, London–Paris 1168, Paris–Rome 6296,
+Seoul–Tokyo 7556 blocks; longer nearest-neighbour pairs are honestly rejected over
+`trainMaxLineBlocks`, default 8000). The routes come from an A* over a 64-block landmask grid
+(water costs 18 a cell with at most six consecutive cells, elevation change is penalised, then the
+path is smoothed on land only), and the block path is an orthogonal staircase so vanilla rails
+connect.
+
+World generation hooks `applyBiomeDecoration` after the towns: ballast and sleepers with a real
+`minecraft:rail`, cleared headroom, a dark-oak **bridge** deck with fences at a fixed sea+3 height
+and a stone-brick **tunnel** corridor through ridges. Every stamp is pre-bucketed by `ChunkPos` and
+chunk-clipped, so crossing a line never force-loads anything; rails are walkable and can be blocked.
+
+The consist is a **locomotive plus 2–4 wagons** (config `trainCars`, four seats each) as separate
+coupled entities: the locomotive owns the line distance at `trainSpeed`, and each wagon samples the
+locomotive's recent trail at a fixed spacing, so the train bends around curves. Only the locomotive
+holds an entity-ticking ticket around the hull and moves it as it goes. Timetable, fare and boarding
+are the shared `TransportMath` stack: 06:00 out, 18:00 back, `trainBoardingMinutes` of boarding,
+`black_obol` fare, empty services despawn at departure, riders are put on the destination platform,
+and a mid-voyage logout is resolved at the next station.
+
+**Physical failure:** before every step the locomotive checks the rail under it and three blocks
+ahead. A missing rail or a placed solid block stops the train once (riders may get off); restoring
+the rail resumes it. Foliage is cleared by the crew, a player-placed stone is not.
+
+The service uses a **two-phase spawn** (ticket the station chunk, spawn on the next service check)
+because an entity added to a chunk that is loaded but not yet entity-ticking never enters the tick
+list. As a safety net, a consist that has not ticked since spawning refuses boarding ("still being
+prepared"), and a stuck consist with riders evacuates them to its boarding station and refunds the
+fare instead of deleting them. On a freshly restarted server the first consist of the window already
+open at boot may need a few retries before it becomes boardable; later windows are unaffected.
+
+Verified on a fresh world: track/station/bridge/tunnel blocks at several points; Beijing→Shanghai
+board, 06:00 departure, ride, arrival and disembark; an empty window left zero consists; a stone on
+the next rail stopped the train at `travelled 0` and restoring the rail resumed it; 0 exceptions.
+PMD 0, 146 JUnit tests, 5/5 GameTests.
+
 ## Where things live
 
 | Concern | File |

@@ -14,12 +14,13 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **Trains: stations, rail lines, the consist (design/30 stage 2)** — a rail-line generator over
-  the landmask, real track blocks (bridges/tunnels), and a locomotive with coupled wagons sharing
-  the ship's timetable/boarding/fare stack.
 
 ## Done
 
+- [x] **Scheduled rail transport (design/30 stage 2)** — five A*-routed lines between 24 stations,
+  real ballast/sleepers/rails with bridges and tunnels, a locomotive plus coupled wagons, the ship's
+  timetable/boarding/fare model, and a physical stop on a missing rail or a placed block; a full
+  Beijing→Shanghai ride and the stopped/resumed cases are verified.
 - [x] **Scheduled sea transport (design/30 stage 1)** — 17 harbour cities, A* sea lanes over the
   baked landmask, a large multi-seat packet that really sails on a daily in-game timetable, chunk
   tickets that follow the hull, fares, boarding windows, an empty-service despawn, and a full

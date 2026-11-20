@@ -83,6 +83,11 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   harbour cities, depart on the in-game clock, charge a fare, stream only the water around the hull
   and leave empty services at the dock. A full voyage is verified; the hull model is a placeholder
   until the art pass.
+- **Trains on a timetable** (`design/30`): five A* rail lines join 24 stations through generated
+  ballast, sleepers, bridges and tunnels; a locomotive pulls coupled wagons on the same clock,
+  boarding window and fare as the ships. A missing rail or a placed block physically stops the
+  train; a full ride and the stopped/resumed cases are verified. The stock look is a scaled
+  minecart until the art pass.
 
 ### Added — towns
 
