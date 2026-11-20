@@ -641,7 +641,7 @@ dev-only `/home/dev/mcbot` harness, not the mod.
 ## Scheduled ships (design/30 stage 1, `90bc0a2`)
 
 The mundane fast route is now a **real voyage**, not a teleport. 17 of the 24 curated cities have a
-harbour (a ring scan over the baked landmask); ports are joined by **A\* sea lanes** on a 64-block
+harbour (a ring scan over the baked landmask); ports are joined by **A* sea lanes** on a 64-block
 grid (longitude wraps, a one-cell land margin, polylines block-sampled against the mask, cached per
 pair). Four lines exist today: Cape Town–Rio, Sydney–Jakarta, Los Angeles–Lima, Bangkok–Jakarta;
 London–New York is refused because the Thames estuary is not resolved at that grid size.
