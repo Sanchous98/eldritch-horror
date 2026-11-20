@@ -50,8 +50,8 @@ public final class CodexDiscovery {
             return;
         }
         String id = entityId(event.getEntity());
-        if (id != null) {
-            CodexAPI.learn(player, id);
+        if (id != null && CodexAPI.learn(player, id)) {
+            com.sanchous98.eldritchhorror.quest.QuestTriggers.onDiscovery(player, id);
         }
     }
 
@@ -84,8 +84,8 @@ public final class CodexDiscovery {
         for (Location site : Locations.all()) {
             long dx = px - (long) Locations.xOf(site);
             long dz = pz - (long) Locations.zOf(site);
-            if (dx * dx + dz * dz <= r2) {
-                CodexAPI.learn(player, site.id());
+            if (dx * dx + dz * dz <= r2 && CodexAPI.learn(player, site.id())) {
+                com.sanchous98.eldritchhorror.quest.QuestTriggers.onDiscovery(player, site.id());
             }
         }
     }
@@ -101,8 +101,8 @@ public final class CodexDiscovery {
                 LivingEntity.class, bossBox, e -> e.isAlive() && e instanceof AncientOne);
         for (LivingEntity boss : bosses) {
             String id = entityId(boss);
-            if (id != null) {
-                CodexAPI.learn(player, id);
+            if (id != null && CodexAPI.learn(player, id)) {
+                com.sanchous98.eldritchhorror.quest.QuestTriggers.onDiscovery(player, id);
             }
         }
     }
@@ -110,7 +110,9 @@ public final class CodexDiscovery {
     /** Running events for this player are discovered once started (they are already per-player). */
     private static void discoverEvents(ServerPlayer player) {
         for (String id : EventTicker.activeIds(player)) {
-            CodexAPI.learn(player, id);
+            if (CodexAPI.learn(player, id)) {
+                com.sanchous98.eldritchhorror.quest.QuestTriggers.onDiscovery(player, id);
+            }
         }
     }
 

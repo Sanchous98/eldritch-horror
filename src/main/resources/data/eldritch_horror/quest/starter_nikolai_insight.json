@@ -1,0 +1,10 @@
+{
+  "id": "starter_nikolai_insight",
+  "target": 2,
+  "stage": -1,
+  "requires": "starter_nikolai_books",
+  "investigator": "nikolai_volkov",
+  "trigger": "codex",
+  "param": "",
+  "reward_signature": true
+}

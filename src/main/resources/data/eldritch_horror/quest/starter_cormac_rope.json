@@ -1,0 +1,9 @@
+{
+  "id": "starter_cormac_rope",
+  "target": 6,
+  "stage": -2,
+  "investigator": "cormac_blackwood",
+  "trigger": "pickup",
+  "param": "minecraft:string",
+  "reward_kit": "cormac_blackwood"
+}

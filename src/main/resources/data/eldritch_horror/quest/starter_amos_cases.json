@@ -1,0 +1,10 @@
+{
+  "id": "starter_amos_cases",
+  "target": 2,
+  "stage": -1,
+  "requires": "starter_amos_tonics",
+  "investigator": "dr_amos_hartley",
+  "trigger": "kill",
+  "param": "minecraft:zombie",
+  "reward_signature": true
+}

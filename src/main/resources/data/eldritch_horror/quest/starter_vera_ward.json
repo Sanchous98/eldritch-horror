@@ -1,0 +1,10 @@
+{
+  "id": "starter_vera_ward",
+  "target": 1,
+  "stage": -1,
+  "requires": "starter_vera_chalk",
+  "investigator": "vera_nightingale",
+  "trigger": "rite",
+  "param": "ward_of_the_eye",
+  "reward_signature": true
+}

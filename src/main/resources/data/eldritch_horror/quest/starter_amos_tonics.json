@@ -1,0 +1,9 @@
+{
+  "id": "starter_amos_tonics",
+  "target": 6,
+  "stage": -2,
+  "investigator": "dr_amos_hartley",
+  "trigger": "pickup",
+  "param": "minecraft:wheat",
+  "reward_kit": "dr_amos_hartley"
+}

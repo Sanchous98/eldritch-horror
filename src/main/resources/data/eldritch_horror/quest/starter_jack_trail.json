@@ -1,0 +1,9 @@
+{
+  "id": "starter_jack_trail",
+  "target": 5,
+  "stage": -2,
+  "investigator": "jack_corrigan",
+  "trigger": "pickup",
+  "param": "minecraft:paper",
+  "reward_kit": "jack_corrigan"
+}

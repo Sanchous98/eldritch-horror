@@ -1,0 +1,10 @@
+{
+  "id": "starter_jack_stakeout",
+  "target": 3,
+  "stage": -1,
+  "requires": "starter_jack_trail",
+  "investigator": "jack_corrigan",
+  "trigger": "kill",
+  "param": "minecraft:zombie",
+  "reward_signature": true
+}

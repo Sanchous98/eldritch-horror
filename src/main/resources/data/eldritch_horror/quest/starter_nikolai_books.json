@@ -1,0 +1,9 @@
+{
+  "id": "starter_nikolai_books",
+  "target": 3,
+  "stage": -2,
+  "investigator": "nikolai_volkov",
+  "trigger": "pickup",
+  "param": "minecraft:book",
+  "reward_kit": "nikolai_volkov"
+}

@@ -77,6 +77,14 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   ~150 unopposed minutes (faster with open rifts). At 70 % the Horror awakens; banish or seal still
   wins. `/eh doom` reads it.
 
+### Added — investigator field tasks
+
+- **Starting kits are earned** (`design/10`, `design/14`): each of the twelve investigators gets two
+  unique field tasks — a first job in the city (gather, forage or craft) that pays the kit minus the
+  signature item, and a second that pays the signature item (a hunt, a codex discovery, or the
+  occultist's first rite). The journal shows only your investigator's tasks; quest data gained
+  generic pickup/kill/craft/rite/codex triggers and a `reward_kit` field tied to the roster.
+
 ### Added — scheduled transport
 
 - **Ships on a timetable** (`design/30`): real multi-seat packets sail cached sea lanes between

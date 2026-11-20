@@ -250,6 +250,7 @@ public final class RiteEngine {
         }
         QuestJournal.add(player, "first_rite", 1);
         QuestJournal.add(player, "ritualist", 1);
+        com.sanchous98.eldritchhorror.quest.QuestTriggers.onRite(player, rite.id());
         if ("rite_of_cleansing".equals(rite.id())) {
             QuestJournal.add(player, "cleansing_contract", 1);
         }

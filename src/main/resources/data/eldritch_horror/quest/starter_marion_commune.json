@@ -1,0 +1,10 @@
+{
+  "id": "starter_marion_commune",
+  "target": 2,
+  "stage": -1,
+  "requires": "starter_marion_circle",
+  "investigator": "marion_delacroix",
+  "trigger": "codex",
+  "param": "",
+  "reward_signature": true
+}

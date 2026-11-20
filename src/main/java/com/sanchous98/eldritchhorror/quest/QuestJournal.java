@@ -4,7 +4,11 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.cult.CultDefinition;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
+import com.sanchous98.eldritchhorror.investigator.Investigator;
+import com.sanchous98.eldritchhorror.investigator.InvestigatorAPI;
+import com.sanchous98.eldritchhorror.investigator.Investigators;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import com.sanchous98.eldritchhorror.registry.items.SignatureItems;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -84,6 +88,12 @@ public final class QuestJournal {
         if (quest == null || delta <= 0) {
             return false;
         }
+        // Investigator chains only advance for their owner: everyone sees the journal, but another
+        // investigator's field-kit tasks are not theirs to earn.
+        Investigator chosen = InvestigatorAPI.get(player);
+        if (!quest.forInvestigator(chosen == null ? "" : chosen.id())) {
+            return false;
+        }
         // Hard prerequisite gate: an id missing from the loaded data is unmet, so a dangling
         // `requires` can never quietly open the quest.
         if (!QuestRules.prerequisiteMet(quest.requires(), prerequisite -> complete(player, prerequisite))) {
@@ -139,11 +149,52 @@ public final class QuestJournal {
     }
 
     /**
+     * Pays an investigator's field kit after a starter task. The kit comes from the single
+     * {@link Investigators} table, so a quest cannot drift from the roster: {@code kit} pays every
+     * piece except the signature item, {@code signature} pays only the signature item.
+     */
+    private static void grantFieldKit(ServerPlayer player, String investigatorId, boolean signature) {
+        Investigator owner = Investigator.byId(investigatorId);
+        if (owner == null) {
+            return;
+        }
+        String signatureId = SignatureItems.signatureId(owner);
+        int paid = 0;
+        for (ItemStack stack : Investigators.starterKit(owner)) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            if (key == null) {
+                continue;
+            }
+            boolean isSignature = key.getPath().equals(signatureId);
+            if (signature ? !isSignature : isSignature) {
+                continue;
+            }
+            ItemStack copy = stack.copy();
+            if (!player.getInventory().add(copy)) {
+                player.drop(copy, false, Prediction.SERVER_ONLY);
+            }
+            paid += copy.getCount();
+        }
+        if (paid > 0) {
+            player.sendSystemMessage(Component.translatable(signature
+                    ? "quest.eldritch_horror.reward.signature"
+                    : "quest.eldritch_horror.reward.kit", owner.displayName()));
+        }
+    }
+
+    /**
      * Hands over a quest's completion gifts, each only if its data defines one: the item (currency
      * that makes the cult trades, and so the ritual reagents, reachable by play) and the reputation
      * (design/03c: "complete a cult quest" is a gain source; the opposed pairs still cost).
      */
     private static void grantReward(ServerPlayer player, Quest quest) {
+        if (!quest.rewardKit().isEmpty() || quest.rewardSignature()) {
+            String owner = quest.rewardKit().isEmpty() ? quest.investigator() : quest.rewardKit();
+            grantFieldKit(player, owner, quest.rewardSignature());
+        }
         if (quest.paysItem()) {
             String path = quest.rewardItem();
             Identifier id = path.contains(":")

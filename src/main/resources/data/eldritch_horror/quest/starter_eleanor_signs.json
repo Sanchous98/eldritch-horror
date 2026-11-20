@@ -1,0 +1,10 @@
+{
+  "id": "starter_eleanor_signs",
+  "target": 2,
+  "stage": -1,
+  "requires": "starter_eleanor_notes",
+  "investigator": "eleanor_vance",
+  "trigger": "codex",
+  "param": "",
+  "reward_signature": true
+}

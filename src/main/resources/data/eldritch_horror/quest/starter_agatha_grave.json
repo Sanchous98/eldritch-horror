@@ -1,0 +1,9 @@
+{
+  "id": "starter_agatha_grave",
+  "target": 4,
+  "stage": -2,
+  "investigator": "sister_agatha",
+  "trigger": "pickup",
+  "param": "minecraft:bone",
+  "reward_kit": "sister_agatha"
+}

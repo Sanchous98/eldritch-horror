@@ -638,6 +638,29 @@ seal log: `1 player(s), quest for <bot> -> true`. Bot player data is still sessi
 `spawnjoin` creates a fresh profile); a real player persists normally. The run scripts live in the
 dev-only `/home/dev/mcbot` harness, not the mod.
 
+## Investigator field kits are earned (design/10, 14)
+
+A fresh investigator is no longer handed a kit at the pedestal. Choosing one grants the starting
+rites and the `max_sanity` bonus; the **gear is earned through two data-driven field tasks** that are
+unique to the investigator. The first task uses ordinary world materials (paper, iron, string, bone,
+wool, wheat, feathers, books, gold, or crafting ritual chalk) and pays the kit minus the signature
+item; the second uses the gear and pays the signature item — a hunt (the restless dead, spiders), a
+codex discovery, or the occultist's first rite. The journal (`J`) shows only the chosen
+investigator's two tasks, and `/eh quests` filters the same way; other investigators' chains never
+advance.
+
+Quest data gained `investigator`, `trigger`/`param`, `reward_kit` and `reward_signature`.
+`quest/QuestTriggers` matches these on every item pickup, player kill, craft, ritual completion and
+codex discovery (discoveries only — a rite learned at the pedestal does not count), then routes them
+through `QuestJournal.add`, so prerequisites, cooldowns, the investigator gate and rewards stay in
+one place. `reward_kit` reads the single `Investigators` table, so a quest cannot drift from the
+roster; a stripped datapack with no tasks falls back to the old hand-over. The admin reset
+(`/eh investigator set` on an already-chosen player) still hands the kit over for testing.
+
+Verified live: Eleanor chosen with an empty issued kit; six picked-up paper completed the first task
+and paid the diary, pendant, torches and bread; two codex discoveries paid `seers_lens`. Tested
+also on a fresh bot before the prologue gate. 0 exceptions; PMD 0, 147 JUnit tests.
+
 ## Scheduled ships (design/30 stage 1, `90bc0a2`)
 
 The mundane fast route is now a **real voyage**, not a teleport. 17 of the 24 curated cities have a

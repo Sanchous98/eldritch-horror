@@ -1,0 +1,10 @@
+{
+  "id": "starter_evelyn_patron",
+  "target": 1,
+  "stage": -1,
+  "requires": "starter_evelyn_credit",
+  "investigator": "evelyn_ashcombe",
+  "trigger": "codex",
+  "param": "",
+  "reward_signature": true
+}

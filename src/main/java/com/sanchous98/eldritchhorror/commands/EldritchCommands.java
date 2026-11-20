@@ -563,8 +563,14 @@ public final class EldritchCommands {
             ctx.getSource().sendSuccess(() -> Component.literal("No quests are loaded."), false);
             return 1;
         }
+        com.sanchous98.eldritchhorror.investigator.Investigator chosen =
+                com.sanchous98.eldritchhorror.investigator.InvestigatorAPI.get(player);
+        String chosenId = chosen == null ? "" : chosen.id();
         com.sanchous98.eldritchhorror.quest.Quest next = null;
         for (com.sanchous98.eldritchhorror.quest.Quest quest : quests) {
+            if (!quest.forInvestigator(chosenId)) {
+                continue; // another investigator's field-kit tasks
+            }
             int progress = com.sanchous98.eldritchhorror.quest.QuestJournal.progress(player, quest.id());
             int target = quest.target();
             boolean done = progress >= target;
@@ -774,7 +780,13 @@ public final class EldritchCommands {
             return 0;
         }
         ServerPlayer p = ctx.getSource().getPlayerOrException();
-        InvestigatorAPI.forceSet(p, target);
+        // A fresh player follows the normal path (the field kit is earned through the two tasks);
+        // a gamemaster switching an already-chosen investigator is a reset and keeps the debug kit.
+        if (InvestigatorAPI.hasChosen(p)) {
+            InvestigatorAPI.forceSet(p, target);
+        } else {
+            InvestigatorAPI.set(p, target);
+        }
         ctx.getSource().sendSuccess(() -> Component.literal("investigator set to " + target.id()), true);
         return 1;
     }

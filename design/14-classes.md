@@ -39,10 +39,24 @@ stat block, card or art — same rule as the Ancient Ones (`28-ancient-ones.md`)
 - **Choice is permanent** except the debug reset, exactly as before: a preview-then-confirm
   interaction, now on a pedestal per investigator.
 
-## Starting kits
+## Starting kits — earned, not issued
 
-Each investigator starts with a small thematic kit plus the signature item; the Magic investigators
-also start with a tome/reagents. Exact item lists live in the registry data table (one place).
+Each investigator has a small thematic kit plus the signature item; the Magic investigators also get
+a tome/reagents. Exact item lists live in the registry data table (`Investigators`, one place), but
+**a fresh player is issued nothing at the pedestal**. The kit is earned through two data-driven field
+tasks (journal, `J`) that are unique to the investigator:
+
+1. **The gear** — a first task using the investigator's trade and ordinary world materials (paper,
+   iron, string, bone, wool, wheat, feathers, books, gold, or crafting chalk). It pays the kit minus
+   the signature item.
+2. **The calling** — a second task that uses the gear: a hunt (the restless dead, spiders), a codex
+   discovery, or — for an occultist — the first rite. It pays the signature item.
+
+The tasks are definitions in `data/eldritch_horror/quest/` with `investigator`, `trigger`/`param`,
+`reward_kit` and `reward_signature`; the effects and thresholds are content, not code. The journal
+shows only the chosen investigator's two tasks. A stripped datapack that defines none of them falls
+back to the old hand-over, so nobody can start empty-handed. The admin reset
+(`/eh investigator set`) still grants the kit directly for testing.
 
 ## How the roster is presented
 

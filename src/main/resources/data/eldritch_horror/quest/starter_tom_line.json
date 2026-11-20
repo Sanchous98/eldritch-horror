@@ -1,0 +1,10 @@
+{
+  "id": "starter_tom_line",
+  "target": 5,
+  "stage": -1,
+  "requires": "starter_tom_kit",
+  "investigator": "tom_mallory",
+  "trigger": "kill",
+  "param": "minecraft:zombie",
+  "reward_signature": true
+}

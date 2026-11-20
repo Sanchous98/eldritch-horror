@@ -1,0 +1,9 @@
+{
+  "id": "starter_eleanor_notes",
+  "target": 6,
+  "stage": -2,
+  "investigator": "eleanor_vance",
+  "trigger": "pickup",
+  "param": "minecraft:paper",
+  "reward_kit": "eleanor_vance"
+}

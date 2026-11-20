@@ -1,0 +1,9 @@
+{
+  "id": "starter_vera_chalk",
+  "target": 6,
+  "stage": -2,
+  "investigator": "vera_nightingale",
+  "trigger": "craft",
+  "param": "eldritch_horror:chalk_reagent",
+  "reward_kit": "vera_nightingale"
+}

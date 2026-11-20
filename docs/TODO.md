@@ -17,6 +17,10 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Done
 
+- [x] **Investigator field kits are earned (design/10, 14)** — two unique data-driven tasks per
+  investigator: the first pays the kit minus the signature item, the second the signature item;
+  interruption-free journal/sidebar gating, generic pickup/kill/craft/rite/codex triggers, and the
+  `reward_kit` table that keeps quests in sync with the roster.
 - [x] **Scheduled rail transport (design/30 stage 2)** — five A*-routed lines between 24 stations,
   real ballast/sleepers/rails with bridges and tunnels, a locomotive plus coupled wagons, the ship's
   timetable/boarding/fare model, and a physical stop on a missing rail or a placed block; a full

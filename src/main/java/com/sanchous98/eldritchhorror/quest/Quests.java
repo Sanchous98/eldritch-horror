@@ -46,4 +46,18 @@ public final class Quests {
     public static @Nullable Quest byId(@Nullable String id) {
         return id == null ? null : byId.get(id);
     }
+
+    /**
+     * @return whether any data-driven quest belongs to {@code investigatorId} (a field-kit task).
+     *     When none does (a stripped datapack), the investigator grant hands the kit over directly
+     *     rather than leaving the player with nothing.
+     */
+    public static boolean hasStarterFor(String investigatorId) {
+        for (Quest quest : all) {
+            if (!quest.trigger().isEmpty() && quest.investigator().equals(investigatorId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

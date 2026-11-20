@@ -1,0 +1,10 @@
+{
+  "id": "starter_aldous_survey",
+  "target": 2,
+  "stage": -1,
+  "requires": "starter_aldous_notes",
+  "investigator": "aldous_pemberton",
+  "trigger": "codex",
+  "param": "",
+  "reward_signature": true
+}

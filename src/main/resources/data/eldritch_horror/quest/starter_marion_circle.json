@@ -1,0 +1,9 @@
+{
+  "id": "starter_marion_circle",
+  "target": 4,
+  "stage": -2,
+  "investigator": "marion_delacroix",
+  "trigger": "pickup",
+  "param": "minecraft:white_wool",
+  "reward_kit": "marion_delacroix"
+}

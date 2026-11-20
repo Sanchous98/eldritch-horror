@@ -43,6 +43,45 @@ Quest chains tie the factions, rites and map together. Objectives are typed
 | `star_hunt` | Star Hunt | `unblinking_eye` | `kill` star-spawn | daily |
 | `rift_scout` | Rift Scout | any | `reach` a `rift_scar` and return | once per rift |
 
+## Investigator field-kit chains
+
+Every investigator earns their starting kit instead of receiving it at the pedestal (design/14).
+Two tasks per investigator: the first pays the kit **minus** the signature item, the second pays the
+signature item. The second is gated on the first; the first can be worked on as soon as the investigator is chosen. Only the chosen investigator's chain appears in the journal and advances.
+
+| Investigator | First task (gear) | Second task (calling) |
+|---|---|---|
+| `eleanor_vance` | pick up 6 paper | discover 2 codex entries |
+| `jack_corrigan` | pick up 5 paper | kill 3 zombies |
+| `tom_mallory` | pick up 6 iron ingots | kill 5 zombies |
+| `cormac_blackwood` | pick up 6 string | kill 3 spiders |
+| `sister_agatha` | pick up 4 bone | discover 1 codex entry |
+| `marion_delacroix` | pick up 4 white wool | discover 2 codex entries |
+| `vera_nightingale` | craft 6 ritual chalk | perform `ward_of_the_eye` |
+| `nikolai_volkov` | pick up 3 books | discover 2 codex entries |
+| `dr_amos_hartley` | pick up 6 wheat | kill 2 zombies |
+| `evelyn_ashcombe` | pick up 2 gold ingots | discover 1 codex entry |
+| `aldous_pemberton` | pick up 6 paper | discover 2 codex entries |
+| `hazel_quinn` | pick up 4 feathers | discover 1 codex entry |
+
+The materials are deliberately ordinary (no kit required); the codex steps accept any new entry,
+including a bestiary kill or a site seen by proximity. The occultist's rite step is reachable because
+her gear grants chalk and salt comes from smelting sugar — the first lesson of the ritual loop.
+
+### Schema additions
+
+A quest file may now carry, besides the original fields:
+
+- `investigator` — restrict the quest to one investigator (empty = everyone).
+- `trigger` — `pickup`, `kill`, `craft`, `rite` or `codex`; empty means the code advances it by id.
+- `param` — the item / entity / rite id the event must carry; `""` for any codex entry.
+- `reward_kit` — investigator id: pays that kit from the `Investigators` table minus the signature.
+- `reward_signature` — pays the investigator's signature item (its owner is `investigator`).
+
+`quest/QuestTriggers` matches data-driven quests on every pickup, player kill, craft, rite and codex
+discovery and routes them through `QuestJournal.add`, so prerequisites, cooldowns, the investigator
+gate and rewards stay in one place.
+
 ## Design notes
 
 - Quest definitions are data (see the *Quest data format* story); objectives register by type.

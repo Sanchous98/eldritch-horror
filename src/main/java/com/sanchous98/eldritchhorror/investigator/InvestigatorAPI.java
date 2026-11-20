@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.investigator;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.codex.CodexAPI;
+import com.sanchous98.eldritchhorror.quest.Quests;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
 import net.minecraft.network.chat.Component;
@@ -21,8 +22,9 @@ import org.jspecify.annotations.Nullable;
  * <p>Choosing an investigator is permanent: {@link #set} is idempotent for the same one (it grants
  * once and a repeat call is a no-op, so a pedestal cannot be farmed) and <b>refuses</b> to change an
  * already-chosen different one. The gamemaster {@code /eh investigator set <id>} is intended for a
- * player who has not chosen yet (e.g. with the prologue disabled). A successful grant applies the
- * investigator's kit, starting rites and the {@code max_sanity} attribute bonus.
+ * player who has not chosen yet (e.g. with the prologue disabled). A fresh grant applies the
+ * starting rites and the {@code max_sanity} attribute bonus; the field kit is earned through the
+ * investigator's two data-driven tasks (design/14), and only an admin reset hands it over directly.
  * See {@code design/14-classes.md} and {@code design/29-prologue.md}.
  */
 public final class InvestigatorAPI {
@@ -74,6 +76,8 @@ public final class InvestigatorAPI {
      */
     public static void forceSet(ServerPlayer player, Investigator id) {
         grant(player, id);
+        // Debug reset: hand over the kit even though a fresh player is meant to earn it.
+        grantKit(player, id);
     }
 
     /** Re-applies the stored investigator's attribute bonus; call after respawn, which drops it. */
@@ -92,7 +96,7 @@ public final class InvestigatorAPI {
                 .append(Component.literal(" · ")).append(id.role().displayName()));
         player.sendSystemMessage(Investigators.description(id));
         player.sendSystemMessage(Component.translatableWithFallback(
-                "investigator.eldritch_horror.preview_kit", "Starts with:"));
+                "investigator.eldritch_horror.preview_kit", "Field kit (earned):"));
         for (ItemStack stack : Investigators.starterKit(id)) {
             if (!stack.isEmpty()) {
                 player.sendSystemMessage(Component.literal("  • ").append(stack.getHoverName()));
@@ -103,13 +107,25 @@ public final class InvestigatorAPI {
                     .append(Component.translatable("rite.eldritch_horror." + riteId)));
         }
         player.sendSystemMessage(Component.translatableWithFallback(
+                "investigator.eldritch_horror.preview_tasks",
+                "The kit is not issued up front: complete this investigator's field tasks "
+                        + "(journal, J) to earn it."));
+        player.sendSystemMessage(Component.translatableWithFallback(
                 "investigator.eldritch_horror.preview_confirm",
                 "Right-click the same pedestal again to choose this investigator."));
     }
 
     private static void grant(ServerPlayer player, Investigator id) {
         player.setData(ModAttachments.INVESTIGATOR.get(), id.id());
-        grantKit(player, id);
+        // The field kit is earned through the investigator's two data-driven tasks. If the data
+        // pack does not define them, fall back to the old hand-over so nobody starts empty-handed.
+        if (Quests.hasStarterFor(id.id())) {
+            player.sendSystemMessage(Component.translatableWithFallback(
+                    "investigator.eldritch_horror.kit_earned",
+                    "Your field kit is not issued yet: two tasks await in your journal (J)."));
+        } else {
+            grantKit(player, id);
+        }
         for (String riteId : Investigators.startingRites(id)) {
             CodexAPI.learn(player, riteId);
         }

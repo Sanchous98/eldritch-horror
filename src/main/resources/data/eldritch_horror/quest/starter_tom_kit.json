@@ -1,0 +1,9 @@
+{
+  "id": "starter_tom_kit",
+  "target": 6,
+  "stage": -2,
+  "investigator": "tom_mallory",
+  "trigger": "pickup",
+  "param": "minecraft:iron_ingot",
+  "reward_kit": "tom_mallory"
+}

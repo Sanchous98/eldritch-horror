@@ -1,0 +1,9 @@
+{
+  "id": "starter_hazel_quill",
+  "target": 4,
+  "stage": -2,
+  "investigator": "hazel_quinn",
+  "trigger": "pickup",
+  "param": "minecraft:feather",
+  "reward_kit": "hazel_quinn"
+}

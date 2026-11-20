@@ -1,0 +1,10 @@
+{
+  "id": "starter_cormac_trap",
+  "target": 3,
+  "stage": -1,
+  "requires": "starter_cormac_rope",
+  "investigator": "cormac_blackwood",
+  "trigger": "kill",
+  "param": "minecraft:spider",
+  "reward_signature": true
+}

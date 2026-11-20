@@ -1,0 +1,10 @@
+{
+  "id": "starter_hazel_story",
+  "target": 1,
+  "stage": -1,
+  "requires": "starter_hazel_quill",
+  "investigator": "hazel_quinn",
+  "trigger": "codex",
+  "param": "",
+  "reward_signature": true
+}

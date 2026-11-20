@@ -1,0 +1,9 @@
+{
+  "id": "starter_aldous_notes",
+  "target": 6,
+  "stage": -2,
+  "investigator": "aldous_pemberton",
+  "trigger": "pickup",
+  "param": "minecraft:paper",
+  "reward_kit": "aldous_pemberton"
+}

@@ -78,7 +78,7 @@ public final class JournalScreen extends Screen {
         Map<String, Long> completions = player == null
                 ? Map.of()
                 : player.getData(ModAttachments.QUEST_COMPLETIONS.get());
-        List<Quest> quests = ClientQuests.all();
+        List<Quest> quests = visibleQuests(player);
 
         g.centeredText(this.font, this.title, this.width / 2, 12, TITLE_COLOUR);
         if (quests.isEmpty()) {
@@ -200,8 +200,19 @@ public final class JournalScreen extends Screen {
         return Component.translatable("journal.eldritch_horror.after", name);
     }
 
+    /**
+     * The journal shows the common chain plus only the chosen investigator's field-kit tasks:
+     * the other eleven kits are not the player's to earn (design/14).
+     */
+    private static List<Quest> visibleQuests(@Nullable LocalPlayer player) {
+        String chosen = player == null ? "" : player.getData(ModAttachments.INVESTIGATOR.get());
+        return ClientQuests.all().stream()
+                .filter(quest -> quest.forInvestigator(chosen))
+                .toList();
+    }
+
     private double maxScroll() {
-        double content = ClientQuests.all().size() * (double) ROW_HEIGHT;
+        double content = visibleQuests(this.minecraft.player).size() * (double) ROW_HEIGHT;
         double visible = this.height - BOTTOM_MARGIN - TOP;
         return Math.max(0.0, content - visible);
     }

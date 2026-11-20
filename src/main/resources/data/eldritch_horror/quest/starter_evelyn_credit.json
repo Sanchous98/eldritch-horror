@@ -1,0 +1,9 @@
+{
+  "id": "starter_evelyn_credit",
+  "target": 2,
+  "stage": -2,
+  "investigator": "evelyn_ashcombe",
+  "trigger": "pickup",
+  "param": "minecraft:gold_ingot",
+  "reward_kit": "evelyn_ashcombe"
+}
