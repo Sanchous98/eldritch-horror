@@ -24,6 +24,7 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import com.sanchous98.eldritchhorror.world.loc.Locations;
+import com.sanchous98.eldritchhorror.world.town.Towns;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -180,6 +181,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
         super.applyBiomeDecoration(level, chunk, structureManager);
         SurfaceDecorator.decorate(level, chunk);
         Locations.place(level, chunk);
+        Towns.place(level, chunk);
     }
 
     @Override

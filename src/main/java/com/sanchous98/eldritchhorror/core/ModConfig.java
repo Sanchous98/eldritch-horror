@@ -2844,6 +2844,20 @@ public final class ModConfig {
             BUILDER.comment("Blocks from an Ancient One at which its boss entry is discovered.")
                     .defineInRange("codexBossRadius", 48, 8, 256);
 
+    // --- Towns (design/21) ------------------------------------------------------------------
+    // The ~3,000 non-curated settlements are generic towns, not curated cities: small deterministic
+    // places (plaza, houses, farm, lamps) built by world/town/Towns during chunk generation.
+
+    /** Master switch for generic towns at the non-curated settlement coordinates. */
+    public static final ModConfigSpec.BooleanValue ENABLE_TOWNS =
+            BUILDER.comment("Build generic towns at the non-curated settlement coordinates (design/21).")
+                    .define("enableTowns", true);
+
+    /** Scales a town's population-derived footprint; 1.0 keeps the 40–64 block default. */
+    public static final ModConfigSpec.DoubleValue TOWN_RADIUS_SCALE =
+            BUILDER.comment("Scale generic town footprints (1.0 = 40–64 blocks, clamped to 96).")
+                    .defineInRange("townRadiusScale", 1.0, 0.5, 1.5);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {
