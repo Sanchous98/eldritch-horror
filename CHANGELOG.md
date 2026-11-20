@@ -66,6 +66,12 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 - **PMD is a build gate**: `pmdMain` and `pmdTest` run from `check`, and a violation fails
   `./gradlew build`.
 
+### Added — towns
+
+- **Generic towns** (`design/21`): the 3,065 non-curated settlements now generate as small
+  deterministic places — plaza and well, houses, lamps, a farm and paths — with a bucketed spatial
+  index so worldgen never scans the whole settlement list.
+
 ### Tooling & CI
 
 - **GitHub Actions**: CI builds + runs JUnit, PMD and the GameTest server on every push/PR;

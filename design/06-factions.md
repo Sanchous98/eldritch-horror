@@ -43,6 +43,28 @@ and oppose one another. Content lives in [`09-cults.md`](09-cults.md); this is t
 - Sacrifice and processions are events (`19-events.md`) that adjust standing.
 - Inter-cult conflict triggers on reputation thresholds.
 
+### Ritual cells (pinned 2026-11)
+
+Worship is not scenery: a cell that is left alone advances the cult's goal without a player
+choosing that path. This is the Hollow Choir's agency — the endgame can come to you.
+
+- **Where.** A cell gathers at a real altar (the `ritual_altar_site`, a cult stronghold, or a
+  player-built `altar_core` ring) inside loaded chunks, with at least **3 cultists** of one cult and
+  a player within ~64 blocks. Nothing is force-loaded and no ritual starts out of sight.
+- **The ritual.** `GATHER` (the cultists walk to the ring, ~20 s) → `CHANT` (~30 s, particles and
+  the rite hum at the core) → completion. A `RiteBinder` leads when one is present; otherwise the
+  senior cultist present does.
+- **Interruption is the counter-play.** Killing the leader, breaking the altar core, or standing
+  inside the ring stops it. An interrupted ritual pays the interrupter (Order standing and a small
+  relic), resets the cell's cooldown and makes the leader's death matter.
+- **Escalation.** A completed ritual summons the cult's lesser things (star-spawn for the Hollow
+  Choir) and taints the ground. Each completion also raises the world's **dread** counter; at the
+  configured threshold the Hollow Choir performs the awakening itself (`awaken_the_horror` path,
+  `11-endgame.md`), with a global warning — unless the endgame has already been decided.
+- **Bounds.** Loaded chunks only, one ritual per site, a cooldown per site, a capped number of
+  active cells, and a config master switch (`enableNpcCultRituals`); the awakening itself can be
+  disabled separately (`npcCultRitualsCanAwaken`).
+
 ## Multiplayer
 
 - Reputation is individual; cults can hold different views of different players.

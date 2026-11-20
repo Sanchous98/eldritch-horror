@@ -44,6 +44,30 @@ The Horror (`18-bosses.md`) is the stage on which the fork plays out:
 - Its "phases" are really *escalations*; sanity is the real health bar.
 - The final phase **is** the decision — banish or summon.
 
+## The doom clock (soft session bound, pinned 2026-11)
+
+The world must be able to end **without** a player choosing the Hollow Choir path, and a
+multiplayer session needs a legible natural length. The answer is a **doom clock**, not a wall-clock
+kick: a world meter that the cult and the world itself push forward, and that players can push back.
+
+- **Meter.** `Doom` 0–100, per world (SavedData), ticking only while at least one player is in the
+  overworld. Passive rise is tuned so **an unopposed world reaches the loss at ~150 minutes**
+  (default: +1 per 90 s). Open rifts and high corruption accelerate it slightly.
+- **The cult pushes.** Each NPC cult ritual completion (see `06-factions.md`, "Ritual cells") adds a
+  step (+6). Interrupting the ritual before it completes removes one (−6). This is the players'
+  main lever: raid the strongholds, break the circles, delay the end.
+- **Thresholds.** At **70** the Hollow Choir awakens The Horror itself (a global warning, the
+  presence surfaces at the deepest open rift); at **100** the world resolves to the **summon**
+  ending — the Choir wins (a loss, `EndgameState.Outcome.SUMMONED`). Between awakening and loss
+  there is still a real window (~30–45 min) to reach the Horror and **banish** or **seal** it.
+- **Relief.** Closing a rift (−2), a successful banish/seal (the clock stops), and interrupting a
+  ritual (−6) all buy time. A `cleansing_dawn` event (−1) also helps.
+- **Bounds / config.** `enableDoomClock` (default true), `doomMinutesToLoss` (150),
+  `doomAwakenAt` (0.70), `doomRitualPush` (6), `doomInterruptRelief` (6), `doomRiftRelief` (2);
+  warnings at 50 / 70 / 85 / 95. `/eh doom` reports the meter and the passive rate for debugging.
+- **Fairness.** Warnings are explicit and escalating (chat + the existing ambient cues), the
+  counter-play is visible on the map (cult sites), and nothing is lost to a hidden timer.
+
 ## World state after
 
 | | Banish | Summon |

@@ -14,12 +14,15 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   visual pass. (`ritual_knife` blood rites and `eye_scepter` rift reveal also remain flavour.)
 - [ ] **`rift_scout` (design/10)** — the "once per rift" side quest needs a per-rift axis (which rift
   was scouted); daily/weekly repeatables and the hard `requires` gate are done.
-- [ ] **The 3,065 non-curated settlements (design/21)** — `settlements.json` holds 3,089 entries and
-  only the 24 curated ones are used; the rest are now **decided as generic towns** (not ruins or
-  nothing), still unimplemented.
+- [ ] **Towns need people and shelter (design/21)** — generation is done (`e0d37fb`); the 2,896
+  buildable towns still have no villager population, no shelter/sanity benefit, no codex/map
+  discovery and no interaction with corruption or the cults.
 
 ## Done
 
+- [x] **Generic towns from the 3,065 non-curated settlements (design/21)** — `world/town` loads and
+  filters them (96 overlap curated, 73 water), indexes 2,896 by 512-block cells and builds one
+  deterministic 40–64-block town per chunk: plaza/well, 5–8 houses, lamps, farm, paths — `e0d37fb`.
 - [x] **GameTest coverage (design/13)** — the new 26.3 data-driven suite (`test_instance/*.json` +
   `TEST_FUNCTION` registry entries) covers the altar ring, the ward ledger's coverage/expiry, gate-link
   symmetry/cleanup and the seal on an empty vs open ledger; `runGameTestServer` is 5/5 green and a

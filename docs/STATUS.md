@@ -563,6 +563,21 @@ SEALED; a decided world refuses again). `./gradlew runGameTestServer` reports
 **all 5 required tests passed in ~2.4 s**; a deliberately broken assertion fails the run with exit 1.
 JUnit (77 cases) and PMD 0 run as before in `./gradlew build`.
 
+## Generic towns (design/21)
+
+The non-curated half of `settlements.json` is no longer empty (`e0d37fb`). `world/town/Towns` loads
+all 3,065 entries once, rejects 169 unsittable ones (96 overlap a curated district, 73 are ocean)
+and indexes the 2,896 survivors into 512-block buckets, so a chunk looks at a 3x3 bucket window and
+builds **at most one town**, chosen deterministically by id. `TownLocation` derives everything from
+the settlement id: a 40–64 block footprint (config scale caps at 96), 5–8 varied houses on a ring, a
+paved plaza with a well and monument, four lamps, a rail-fenced farm and terrain-following paths,
+using only `Palette` blocks through the clipped `Builder`. `enableTowns`/`townRadiusScale` are in
+config. Probed at Noyabrsk (well, soul lantern, spruce doors) with curated Moscow unaffected. The
+tests are pure: `TownIndexTest` (7) and `TownSitingTest` (3).
+
+**Still structural only:** no villagers/trades, no shelter or sanity benefit, no codex/map
+discovery, no state interaction with corruption or the cults — that is the next half.
+
 ## Where things live
 
 | Concern | File |
