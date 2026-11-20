@@ -109,6 +109,10 @@ public final class BotCommands {
                 .then(Commands.literal("sense")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::sense)))
+                .then(Commands.literal("invulnerable")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("value", BoolArgumentType.bool())
+                                        .executes(BotCommands::invulnerable))))
                 .then(Commands.literal("god")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("value", BoolArgumentType.bool())
@@ -850,6 +854,32 @@ public final class BotCommands {
     }
 
     /** {@code /eh bot god <name> <value>}: toggle a bot's invulnerability (for boss-fight testing). */
+    /**
+     * {@code /eh bot invulnerable <name> <value>}: survival game mode with damage switched off. The
+     * run harness needs a player that mobs still notice and site spawners still count (creative is
+     * skipped everywhere) but that cannot die to them.
+     */
+    private static int invulnerable(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        boolean value = BoolArgumentType.getBool(ctx, "value");
+        if (value) {
+            bot.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        }
+        bot.setPermanentlyInvulnerable(value);
+        if (value) {
+            bot.setHealth(bot.getMaxHealth());
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " invulnerable=" + value), true);
+        return 1;
+    }
+
     private static int god(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
