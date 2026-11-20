@@ -75,6 +75,12 @@ public final class Bots {
         playerList.getPlayersByUUID().put(uuid, bot);
         addToPlayersList(playerList, bot);
         level.addNewPlayer(bot);
+        // ServerLevel#addPlayer (called above) inserts into the entity manager but not into the
+        // level's own player list, so features that iterate level.players() (endgame broadcasts,
+        // doom warnings, boss bars) would skip a bot. Register it like a connected player.
+        if (!level.players().contains(bot)) {
+            level.players().add(bot);
+        }
         giveStarterKit(bot);
         BOTS.put(uuid, bot);
         EldritchHorror.LOGGER.info("bot: spawned {} ({}) at {}, {}, {} in {}",
@@ -90,6 +96,7 @@ public final class Bots {
         }
         // Fires PlayerLoggedOutEvent and removes the bot from the list, uuid map and level.
         server.getPlayerList().remove(bot);
+        bot.level().players().remove(bot);
         EldritchHorror.LOGGER.info("bot: removed {}", name);
         return true;
     }
@@ -111,6 +118,20 @@ public final class Bots {
             return;
         }
         for (BotPlayer bot : BOTS.values()) {
+            // Keep the level's own player list in step with the bot's dimension. A teleport (ours
+            // or a command) can move the entity without touching ServerLevel#players, and features
+            // that iterate it (endgame broadcasts, doom warnings, boss bars) would then skip the
+            // bot as if nobody were online.
+            if (bot.level() instanceof ServerLevel level) {
+                if (!level.players().contains(bot)) {
+                    level.players().add(bot);
+                }
+                for (ServerLevel other : event.getServer().getAllLevels()) {
+                    if (other != level) {
+                        other.players().remove(bot);
+                    }
+                }
+            }
             bot.tick();
             bot.doTick();
         }
