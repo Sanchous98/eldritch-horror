@@ -8,7 +8,7 @@ retuned in one place and regenerated with one command:
 
 What it writes (paths relative to the repo root):
 - src/main/resources/logo.png / pack.png        128x128 mod logo and pack icon
-- .../textures/item/<id>.png                     16x16 icons for content missing one
+- .../textures/item/<id>.png                     16x16 pixel-art icon for every registered item
 - .../textures/entity/<id>.png                   an organic "flesh" skin per entity, in that
                                                  entity's palette, at the size the old file used
 - .../items/<id>.json                            the item model definition a new icon needs
@@ -26,6 +26,7 @@ import hashlib
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
@@ -329,6 +330,15 @@ def main() -> None:
         for folder in (ASSETS / "items", ASSETS / "models/item"):
             src = folder / "abhoth_spawn_egg.json"
             (folder / f"{item}.json").write_text(src.read_text().replace("abhoth_spawn_egg", item))
+
+    # 3b. Full 16x16 item-icon set: one distinct pixel-art silhouette per registered item
+    #     (tools/gen_item_icons.py, also runnable standalone).
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import gen_item_icons
+    item_report = gen_item_icons.build()
+    print(f"item icons: {len(item_report)} (16x16, {len({s for _, s, _ in item_report})} shapes)")
+    if "--sheet" in sys.argv:
+        gen_item_icons.contact_sheet(item_report)
 
     # 4. The eight worn gear pieces (registry/items/Weapons): a woven armour sheet per set under
     #    textures/entity/equipment/<layer>/<id>.png, plus the equipment definition the item's
