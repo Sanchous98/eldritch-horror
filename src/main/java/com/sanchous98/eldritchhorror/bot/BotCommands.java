@@ -162,6 +162,9 @@ public final class BotCommands {
                 .then(Commands.literal("spawnjoin")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::spawnjoin)))
+                .then(Commands.literal("spawnjoinbare")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::spawnjoinBare)))
                 .then(Commands.literal("walk")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("x", DoubleArgumentType.doubleArg())
@@ -801,6 +804,18 @@ public final class BotCommands {
 
     /** {@code /eh bot spawnjoin <name>}: spawn a bot and fire login so the prologue routes it. */
     private static int spawnjoin(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return join(ctx, false);
+    }
+
+    /**
+     * {@code /eh bot spawnjoinbare <name>}: the same join without the debug field kit. Use this for
+     * a playthrough that must earn every item, including the investigator's own starter gear.
+     */
+    private static int spawnjoinBare(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return join(ctx, true);
+    }
+
+    private static int join(CommandContext<CommandSourceStack> ctx, boolean bare) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
         }
@@ -811,9 +826,12 @@ public final class BotCommands {
         }
         ServerLevel level = ctx.getSource().getLevel();
         BotPlayer bot = Bots.spawn(level, name);
+        if (bare) {
+            bot.getInventory().clearContent();
+        }
         NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(bot));
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "bot " + name + " joined (prologue applies if enabled)"), true);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + name
+                + " joined (prologue applies if enabled" + (bare ? ", empty inventory" : "") + ")"), true);
         return 1;
     }
 
@@ -853,7 +871,6 @@ public final class BotCommands {
         return 1;
     }
 
-    /** {@code /eh bot god <name> <value>}: toggle a bot's invulnerability (for boss-fight testing). */
     /**
      * {@code /eh bot invulnerable <name> <value>}: survival game mode with damage switched off. The
      * run harness needs a player that mobs still notice and site spawners still count (creative is
@@ -880,6 +897,7 @@ public final class BotCommands {
         return 1;
     }
 
+    /** {@code /eh bot god <name> <value>}: creative mode and flight for probes (not for play). */
     private static int god(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
