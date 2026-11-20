@@ -92,5 +92,6 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.ITHAQUAL_SHADE.get(), IthaqualShadeRenderer::new);
         event.registerEntityRenderer(ModEntities.CHOIR_LEVIATHAN.get(), ChoirLeviathanRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_HORROR.get(), TheHorrorRenderer::new);
+        event.registerEntityRenderer(ModEntities.COASTAL_PACKET.get(), CoastalPacketRenderer::new);
     }
 }

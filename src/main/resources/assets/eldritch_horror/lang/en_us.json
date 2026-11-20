@@ -866,5 +866,14 @@
   "doom.eldritch_horror.warning.85": "The sky thins. The Choir's work nears its end (doom 85%).",
   "doom.eldritch_horror.warning.95": "The world holds its breath; the end is at hand (doom 95%).",
   "doom.eldritch_horror.awaken": "The Choir's work is done. Something vast rises at the rift.",
-  "doom.eldritch_horror.loss": "The doom clock is full. The Choir has won; the world is given over."
+  "doom.eldritch_horror.loss": "The doom clock is full. The Choir has won; the world is given over.",
+  "entity.eldritch_horror.coastal_packet": "Coastal Packet",
+  "message.eldritch_horror.ship.boarding": "The coastal packet is taking passengers for %s; it sails at %s.",
+  "message.eldritch_horror.ship.departing": "The coastal packet casts off for %s.",
+  "message.eldritch_horror.ship.arrived": "The coastal packet has arrived at %s.",
+  "message.eldritch_horror.ship.not_boarding": "The coastal packet is not boarding.",
+  "message.eldritch_horror.ship.full": "The coastal packet has no free seats.",
+  "message.eldritch_horror.ship.no_fare": "The passage costs %s black obols.",
+  "message.eldritch_horror.ship.boarded": "Passage paid (%s black obols). Find a seat.",
+  "message.eldritch_horror.ship.landed_ashore": "You come ashore where the packet was bound."
 }

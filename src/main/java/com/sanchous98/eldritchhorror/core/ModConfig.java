@@ -2977,6 +2977,57 @@ public final class ModConfig {
             BUILDER.comment("Extra doom rate per open tracked rift (0.15 = +15% each).")
                     .defineInRange("doomRiftAcceleration", 0.15, 0.0, 1.0);
 
+    // --- Scheduled transport (design/30, stage 1: ships) --------------------------------------
+    // A line is two coastal ports, a cached A* sea lane and a timetable. Boarding opens
+    // shipBoardingMinutes before departure, the packet sails at shipSpeed blocks/tick, riders pay
+    // shipFare black obols, and an empty service despawns at departure. The default hours run the
+    // A->B leg at 06:00 and the B->A leg at 18:00.
+
+    /** Master switch for scheduled ships. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SHIPS =
+            BUILDER.comment("Enable the scheduled coastal packet (design/30).")
+                    .define("enableShips", true);
+
+    /** Hull speed in blocks per tick (1.5 ~= 30 blocks/second). */
+    public static final ModConfigSpec.DoubleValue SHIP_SPEED =
+            BUILDER.comment("Packet speed in blocks per tick (1.5 = 30 blocks/second).")
+                    .defineInRange("shipSpeed", 1.5, 0.1, 20.0);
+
+    /** Number of deck seats. */
+    public static final ModConfigSpec.IntValue SHIP_SEATS =
+            BUILDER.comment("Passenger seats on a packet (the hull has 8).")
+                    .defineInRange("shipSeats", 8, 1, 8);
+
+    /** Fare in black obols, charged once on boarding. */
+    public static final ModConfigSpec.IntValue SHIP_FARE =
+            BUILDER.comment("Fare in black obols per leg (0 = free passage).")
+                    .defineInRange("shipFare", 2, 0, 64);
+
+    /** Days between service days (1 = daily). */
+    public static final ModConfigSpec.IntValue SHIP_PERIOD_DAYS =
+            BUILDER.comment("Days between service days (1 = every day).")
+                    .defineInRange("shipPeriodDays", 1, 1, 30);
+
+    /** First departure hour (in-game clock). */
+    public static final ModConfigSpec.IntValue SHIP_DEPARTURE_HOUR_A =
+            BUILDER.comment("First daily departure hour, in-game clock (0-23).")
+                    .defineInRange("shipDepartureHourA", 6, 0, 23);
+
+    /** Second departure hour (in-game clock). */
+    public static final ModConfigSpec.IntValue SHIP_DEPARTURE_HOUR_B =
+            BUILDER.comment("Second daily departure hour, in-game clock (0-23).")
+                    .defineInRange("shipDepartureHourB", 18, 0, 23);
+
+    /** How long before departure the gangway opens, in in-game minutes (60 = one in-game hour). */
+    public static final ModConfigSpec.IntValue SHIP_BOARDING_MINUTES =
+            BUILDER.comment("Boarding window before departure, in in-game minutes (60 = 1 hour).")
+                    .defineInRange("shipBoardingMinutes", 60, 0, 720);
+
+    /** Hard cap on simultaneously live packets. */
+    public static final ModConfigSpec.IntValue MAX_SHIPS =
+            BUILDER.comment("Maximum simultaneously active packets.")
+                    .defineInRange("maxShips", 8, 1, 16);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

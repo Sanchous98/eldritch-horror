@@ -242,6 +242,11 @@ public final class EldritchCommands {
         eh.then(Commands.literal("gate").executes(EldritchCommands::gateInfo));
         // The doom clock (design/11): meter, passive rate, open rifts, awakening and outcome.
         eh.then(Commands.literal("doom").executes(EldritchCommands::doomInfo));
+        // Scheduled ships (design/30): nearest port, line state, next departure, hull positions.
+        // "board" is a debug ride hook: it calls the same fare interaction right-click uses.
+        eh.then(Commands.literal("ship")
+                .executes(EldritchCommands::shipInfo)
+                .then(Commands.literal("board").executes(EldritchCommands::boardShip)));
         // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
         eh.then(Commands.literal("cultist")
                 .then(Commands.argument("cult", StringArgumentType.word())
@@ -374,6 +379,54 @@ public final class EldritchCommands {
                 "doom = %.2f/100 (%.2f/min), open rifts %d, awakened %s, outcome %s",
                 clock.doom(), rate, rifts, clock.awakened(), outcome);
         ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        return 1;
+    }
+
+    /** {@code /eh ship}: nearest port, line state, next departure and live hull positions. */
+    private static int shipInfo(CommandContext<CommandSourceStack> ctx) {
+        ServerLevel overworld = ctx.getSource().getServer().overworld();
+        net.minecraft.world.phys.Vec3 at = ctx.getSource().getPosition();
+        for (String line : com.sanchous98.eldritchhorror.world.transport.ShipService.describe(
+                overworld, at.x, at.z)) {
+            ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        }
+        return 1;
+    }
+
+    /**
+     * {@code /eh ship board}: debug ride hook. Finds the nearest packet within 16 blocks and calls
+     * the same {@code tryBoard} used by right-click, so the window/fare/seat refusals are exercised
+     * by the probe rather than bypassed.
+     */
+    private static int boardShip(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!ModConfig.ENABLE_SHIPS.get()) {
+            ctx.getSource().sendFailure(Component.literal("Ships are disabled (enableShips=false)."));
+            return 0;
+        }
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        com.sanchous98.eldritchhorror.entity.CoastalPacket best = null;
+        double bestDistance = 16.0 * 16.0;
+        for (com.sanchous98.eldritchhorror.entity.CoastalPacket ship
+                : player.level().getEntitiesOfClass(
+                        com.sanchous98.eldritchhorror.entity.CoastalPacket.class,
+                        player.getBoundingBox().inflate(16.0))) {
+            double distance = ship.distanceToSqr(player);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = ship;
+            }
+        }
+        if (best == null) {
+            ctx.getSource().sendFailure(Component.literal("No packet within 16 blocks."));
+            return 0;
+        }
+        boolean boarded = best.tryBoard(player);
+        if (!boarded) {
+            ctx.getSource().sendFailure(Component.literal("Boarding refused."));
+            return 0;
+        }
+        String key = best.serviceKey();
+        ctx.getSource().sendSuccess(() -> Component.literal("Boarded " + key), false);
         return 1;
     }
 

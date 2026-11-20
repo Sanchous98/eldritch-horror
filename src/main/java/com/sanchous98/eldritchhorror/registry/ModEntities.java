@@ -16,6 +16,7 @@ import com.sanchous98.eldritchhorror.entity.CaveDrifter;
 import com.sanchous98.eldritchhorror.entity.ChaugnarFaugn;
 import com.sanchous98.eldritchhorror.entity.ChoirLeviathan;
 import com.sanchous98.eldritchhorror.entity.ChoirSpite;
+import com.sanchous98.eldritchhorror.entity.CoastalPacket;
 import com.sanchous98.eldritchhorror.entity.Cthugha;
 import com.sanchous98.eldritchhorror.entity.Cthulhu;
 import com.sanchous98.eldritchhorror.entity.CultRaider;
@@ -854,6 +855,20 @@ public final class ModEntities {
     public static final DeferredItem<SpawnEggItem> THE_HORROR_SPAWN_EGG =
             ModItems.ITEMS.registerItem("the_horror_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(THE_HORROR.get())));
+
+    /**
+     * The coastal packet ({@code design/30-transport.md}, stage 1): a large scheduled passenger hull.
+     * No spawn egg: it is spawned by {@code world/transport/ShipService} at its harbour, and boarding
+     * happens only through the fare interaction.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<CoastalPacket>> COASTAL_PACKET =
+            ENTITY_TYPES.register("coastal_packet", () ->
+                    EntityType.Builder.<CoastalPacket>of(CoastalPacket::new, MobCategory.MISC)
+                            .sized(3.0F, 1.5F)
+                            .eyeHeight(0.8F)
+                            .clientTrackingRange(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                                    EldritchHorror.id("coastal_packet"))));
 
     /**
      * The Ancient One entity types plus the endgame Horror, for classification where the class

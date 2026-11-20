@@ -866,5 +866,14 @@
   "doom.eldritch_horror.warning.85": "Небо истончается. Труд Хора близится к концу (рок 85%).",
   "doom.eldritch_horror.warning.95": "Мир затаил дыхание; конец близок (рок 95%).",
   "doom.eldritch_horror.awaken": "Труд Хора свершён. Нечто огромное поднимается у рифта.",
-  "doom.eldritch_horror.loss": "Часы рока полны. Хор победил; мир отдан."
+  "doom.eldritch_horror.loss": "Часы рока полны. Хор победил; мир отдан.",
+  "entity.eldritch_horror.coastal_packet": "Прибрежный пакетбот",
+  "message.eldritch_horror.ship.boarding": "Прибрежный пакетбот берёт пассажиров до %s; отход в %s.",
+  "message.eldritch_horror.ship.departing": "Прибрежный пакетбот отходит к %s.",
+  "message.eldritch_horror.ship.arrived": "Прибрежный пакетбот прибыл в %s.",
+  "message.eldritch_horror.ship.not_boarding": "Прибрежный пакетбот не берёт пассажиров.",
+  "message.eldritch_horror.ship.full": "На прибрежном пакетботе нет свободных мест.",
+  "message.eldritch_horror.ship.no_fare": "Проезд стоит %s чёрных оболов.",
+  "message.eldritch_horror.ship.boarded": "Проезд оплачен (%s чёрных оболов). Найдите место.",
+  "message.eldritch_horror.ship.landed_ashore": "Вы сходите на берег там, куда шёл пакетбот."
 }
