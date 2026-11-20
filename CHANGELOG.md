@@ -66,6 +66,12 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
 - **PMD is a build gate**: `pmdMain` and `pmdTest` run from `check`, and a violation fails
   `./gradlew build`.
 
+### Tooling & CI
+
+- **GitHub Actions**: CI builds + runs JUnit, PMD and the GameTest server on every push/PR;
+  tagged `v*` releases publish the jar with a SHA-256 checksum. `docs/CI.md` documents both
+  workflows.
+
 ### Added — content & tools
 
 - Bestiary sounds, item/reagent catalogue, tomes and class/skill unlocks.

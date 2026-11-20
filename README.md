@@ -1,5 +1,8 @@
 # Eldritch Horror
 
+[![build](https://github.com/Sanchous98/eldritch-horror/actions/workflows/build.yml/badge.svg)](https://github.com/Sanchous98/eldritch-horror/actions/workflows/build.yml)
+[![release](https://github.com/Sanchous98/eldritch-horror/actions/workflows/release.yml/badge.svg)](https://github.com/Sanchous98/eldritch-horror/actions/workflows/release.yml)
+
 An RPG-flavoured **eldritch horror** mod for **Minecraft 26.3 / NeoForge**. Sanity, corruption,
 cults, forbidden rituals, and things that should not be — built as a progression system rather
 than a monster pack.

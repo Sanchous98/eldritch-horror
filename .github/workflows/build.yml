@@ -17,8 +17,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # First run decompiles Minecraft (~5 min, ~4 GB); allow plenty of headroom.
-    timeout-minutes: 60
+    # First run decompiles Minecraft (~5 min, ~4 GB); the GameTest server boots a
+    # second time in the same cache. Allow plenty of headroom.
+    timeout-minutes: 75
 
     steps:
       - name: Checkout
@@ -31,15 +32,21 @@ jobs:
           java-version: '25'
 
       # Manages ~/.gradle caching (dependencies, wrapper, NeoForge/Minecraft
-      # decompile cache) and injects the Gradle Enterprise build scan/daemon config.
+      # decompile cache) and the Gradle build-scan/daemon config.
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Build (compile + test)
+      # `build` = compile + JUnit + PMD (pmdMain and pmdTest are build gates).
+      - name: Build (compile + JUnit + PMD)
         run: ./gradlew build --no-daemon --console=plain
+
+      # 26.3's data-driven GameTest suite: data/eldritch_horror/test_instance/*.
+      # Runs headless; a failed assertion fails the build.
+      - name: GameTest server
+        run: ./gradlew runGameTestServer --no-daemon --console=plain
 
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
@@ -47,3 +54,16 @@ jobs:
           name: eldritch-horror-jar
           path: build/libs/*.jar
           if-no-files-found: error
+
+      # Keep the reports even when a gate fails: PMD HTML, JUnit XML/HTML and
+      # the GameTest log are what a red run needs.
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            build/reports/pmd/
+            build/reports/tests/
+            build/test-results/
+          if-no-files-found: ignore
