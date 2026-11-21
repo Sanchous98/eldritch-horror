@@ -7,13 +7,11 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Open
 
-- [ ] **Hollow Choir Inner Circle is a blood wall (playtest)** — `awaken_the_horror` needs INNER_CIRCLE
-  (80) and the cult accepts only `blood_offering` (5 rep each), i.e. 16 blood before the endgame
-  rites that need 4 more. The bare night run reached 25/80 with every reachable source and stopped.
-  Either accept a second offering (pages/bones) or lower the rank / raise the blood's rep.
-- [ ] **Check `rite_of_cleansing` refusal at CLAIMED corruption (playtest)** — the condition table
-  says min MARKED with no maximum, but the night run's cast was refused while the bot stood at
-  corruption 88.34 (CLAIMED); reproduce and fix either the table or the message.
+- [ ] **Hollow Choir Inner Circle is a long blood farm (playtest)** — `awaken_the_horror` needs
+  INNER_CIRCLE (80) and the cult accepts only `blood_offering` (5 rep each): 16 blood before the
+  endgame rites that need 4 more. Chaugnar Faugn drops a guaranteed 2–4 per kill, so it is farmable,
+  but the first bare runs stopped before doing it. Decide whether the intended pace is hours of
+  Chaugnar farming or whether a second offering (pages/bones) should be accepted.
 - [ ] **Dev-server OOM under a long bot run** — two playtests were cut by cgroup OOM kills (8 GiB
   cgroup, 5 GiB container cap, `-Xmx3g`); the server restarts itself and bots are session-scoped.
   Bound worldgen/forceload churn for long runs or raise the container budget.
