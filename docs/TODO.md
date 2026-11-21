@@ -8,13 +8,21 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 ## Open
 
 - [ ] **Hollow Choir Inner Circle is a long blood farm (playtest)** — `awaken_the_horror` needs
-  INNER_CIRCLE (80) and the cult accepts only `blood_offering` (5 rep each): 16 blood before the
-  endgame rites that need 4 more. Chaugnar Faugn drops a guaranteed 2–4 per kill, so it is farmable,
-  but the first bare runs stopped before doing it. Decide whether the intended pace is hours of
-  Chaugnar farming or whether a second offering (pages/bones) should be accepted.
+  INNER_CIRCLE (80) and the cult accepts only `blood_offering` (5 rep each): 16 blood for the rank
+  plus 4 + 4 for `open_rift`/`awaken_the_horror`, 28 in total. Chaugnar Faugn is the only renewable
+  source, and its loot pool rolls **one of** blood 2–4 / bone 1–3 / grave dust, so the expectation
+  is ~1 blood per kill, not 2–4 per kill (~28 kills). That is farmable but long; decide whether the
+  intended pace is a multi-hour Chaugnar grind or whether a second offering (e.g. `fragment_page`
+  for the Order's Inner Circle, or a tome that teaches `awaken_the_horror`) should exist.
 - [ ] **Dev-server OOM under a long bot run** — two playtests were cut by cgroup OOM kills (8 GiB
   cgroup, 5 GiB container cap, `-Xmx3g`); the server restarts itself and bots are session-scoped.
   Bound worldgen/forceload churn for long runs or raise the container budget.
+- [ ] **Headless-bot playtests must force-load the target's chunk** — a bot never sends move
+  packets, so it gets no vanilla player chunk ticket. A chunk that is loaded but not *simulating*
+  freezes its mobs: AI, position and `HurtTime` stop, the mob takes the first point of damage and
+  then ignores every later hit (this is what stalled the night-3 bone-choir kills at 9/10 HP).
+  The night-3 driver now keeps at most two small `forceload` windows and re-centres one on every
+  teleport destination before a swing; combat and boss farms work with that in place.
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
 - [ ] **Client-only item bits (design/16)** — the veil-lens corruption overlay and the waypoint
