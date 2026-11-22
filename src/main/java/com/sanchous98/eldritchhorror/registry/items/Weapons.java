@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
@@ -197,7 +198,18 @@ public final class Weapons {
         return properties.rarity(rarity(grade))
                 .component(DataComponents.LORE, new ItemLore(List.of(
                         Component.translatable("item.eldritch_horror." + id + ".tooltip"),
-                        Component.translatable(grade.lineKey()))));
+                        Component.translatable(grade.lineKey()).withStyle(format(grade)))));
+    }
+
+    /** Grade → the tooltip line's own colour, so Crude (grey) reads apart from Common (white). */
+    private static ChatFormatting format(WeaponGrade grade) {
+        return switch (grade) {
+            case CRUDE -> ChatFormatting.GRAY;
+            case COMMON -> ChatFormatting.WHITE;
+            case QUALITY -> ChatFormatting.YELLOW;
+            case FINE -> ChatFormatting.AQUA;
+            case RELIC -> ChatFormatting.LIGHT_PURPLE;
+        };
     }
 
     /** Grade → the vanilla name colour ({@code design/16}: crude/common white … relic epic). */
