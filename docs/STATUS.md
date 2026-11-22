@@ -102,7 +102,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 - **Tests**: JUnit via `./gradlew test` on the pure logic — `EarthMapCylinderTest` guards the
   longitude wrap and the ocean seam against the real baked layers; the rest cover the arithmetic
   helpers (weapon, gate, ward, city-reclaim, cooldown, reputation decay, quest rules, lucid-dream
-  pool) plus locale parity and the elevation/biome tables. Twelve suites, 77 cases.
+  pool) plus locale parity and the elevation/biome tables. Twenty-nine suites, 168 cases.
 - **RPG systems** (`design/27-systems-framework.md`): Sanity = per-player value
   (replaces **hunger**), Corruption = per-player value + per-chunk **taint** (replaces
   **experience**), Reputation = per-cult integer. Mixins disable hunger (`FoodData.tick`) and
@@ -597,7 +597,7 @@ expiry pruning, a longer ward survives), gate links (symmetric, canonical, relin
 clears both sides) and the seal (open rift refuses; an emptied-but-used ledger seals and records
 SEALED; a decided world refuses again). `./gradlew runGameTestServer` reports
 **all 5 required tests passed in ~2.4 s**; a deliberately broken assertion fails the run with exit 1.
-JUnit (77 cases) and PMD 0 run as before in `./gradlew build`.
+JUnit (168 cases) and PMD 0 run as before in `./gradlew build`.
 
 ## Generic towns (design/21)
 
@@ -643,7 +643,7 @@ through `Endgame.summon`. Banish/seal still win, and the clock stops once the ou
 
 Probed live: GATHER → CHANT → COMPLETE in ~31 s (doom 7.24 → 13.36, three star-spawn); a player
 inside the ring interrupts (Order standing 10 → 20); the passive rate reads 0.67/min. An accelerated
-run showed 51 → 76 (awakened) → 100 (summoned) with all four warnings. PMD 0, 113 JUnit tests, 0
+run showed 51 → 76 (awakened) → 100 (summoned) with all four warnings. PMD 0, 168 JUnit tests, 0
 exceptions.
 
 ## A bot completed the game (`61b1066`)

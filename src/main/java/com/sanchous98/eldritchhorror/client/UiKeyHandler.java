@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -22,15 +23,18 @@ public final class UiKeyHandler {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
+        KeyMapping journal = MapKeyMappings.openJournal;
+        KeyMapping codex = MapKeyMappings.openCodex;
+        KeyMapping skills = MapKeyMappings.openSkills;
         if (minecraft.player == null || minecraft.gui.screen() != null
-                || MapKeyMappings.openJournal == null) {
+                || journal == null || codex == null || skills == null) {
             return;
         }
-        if (MapKeyMappings.openJournal.consumeClick()) {
+        if (journal.consumeClick()) {
             minecraft.gui.setScreen(new JournalScreen());
-        } else if (MapKeyMappings.openCodex.consumeClick()) {
+        } else if (codex.consumeClick()) {
             minecraft.gui.setScreen(new CodexScreen());
-        } else if (MapKeyMappings.openSkills.consumeClick()) {
+        } else if (skills.consumeClick()) {
             minecraft.gui.setScreen(new SkillScreen());
         }
     }

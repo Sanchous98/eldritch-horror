@@ -213,7 +213,9 @@ effects (Dynamite, Tear Gas) become throwables.
 
 ### Weapon grades
 
-Every weapon and combat throwable carries one **grade** and one **quality**.
+Every weapon and combat throwable carries one **grade**; the damageable weapons also carry one
+**quality**. The throwables — Dynamite and Tear Gas — keep the grade tooltip but are never
+temperable and have no quality line, because quality rescales max durability and a stack has none.
 
 **Grade** is fixed by the item and guaranteed: it says what the thing is and where it comes from,
 and it never changes. It is shown as a neutral grey tooltip line (`grade.eldritch_horror.<grade>`),

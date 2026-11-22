@@ -3,17 +3,17 @@ package com.sanchous98.eldritchhorror.registry.items;
 import java.util.Map;
 
 /**
- * The quality ladder of every weapon ({@code design/16-items.md}).
+ * The grade ladder of every weapon and combat throwable ({@code design/16-items.md}).
  *
  * <p>A grade is <b>presentation and provenance</b>, not a second balance axis: damage, durability
- * and on-hit effects stay the numbers each item registers. The grade sets the item name's colour
- * (vanilla rarity) and adds one tooltip line, and it mirrors where the item comes from - crude
- * improvised gear, the mundane field kit, crafted/issued quality, rare-material fine work, or a
- * unique relic.
+ * and on-hit effects stay the numbers each item registers. The grade adds one neutral grey tooltip
+ * line and is colour-neutral — the item name's colour (vanilla rarity) belongs to the per-stack
+ * quality. It mirrors where the item comes from - crude improvised gear, the mundane field kit,
+ * crafted/issued quality, rare-material fine work, or a unique relic.
  *
  * <p>Deliberately Minecraft-free: {@code WeaponGradeTest} checks that every combat item is graded
  * and that the lookup defaults sensibly without bootstrapping the game registries. {@code Weapons}
- * maps the grade to {@code Rarity}.
+ * renders the grade as a grey {@code LORE} line; {@code WeaponQualityStacks} owns the name colour.
  */
 public enum WeaponGrade {
 
