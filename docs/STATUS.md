@@ -18,6 +18,12 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Done (verified)
 
+- **Full code review pass** — `docs/CODE-REVIEW.md` (27 findings) is resolved except the one
+  false positive (#22, `getMaxY()` is inclusive). Highlights: tempering no longer hijacks
+  right-click (off-hand whetstone only), no over-stacked unstackable kit items, all mutating
+  `/eh` commands are gamemaster-gated, cylinder seam math is wrapped, endgame/rite state is
+  normalised and reset across worlds, and the throwables lost their bogus quality path.
+  Verified with a green `./gradlew build` and a clean `Done (…)` server boot.
 - **Field gear and firearms (design/16)** — the board game's mundane weapon tier is in: Axe,
   Bull Whip, Dynamite, Tear Gas and the .38 Revolver / .45 Automatic / Double-barreled Shotgun /
   Carbine Rifle, with Brass Cartridge ammo, a shared bullet projectile, recipes, chest loot and
