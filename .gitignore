@@ -34,3 +34,7 @@ Thumbs.db
 
 # built mod jar output
 /dist/
+
+# python bytecode (tools/)
+__pycache__/
+*.pyc
