@@ -20,7 +20,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 - **Three full code review passes** — the first audit (27) was resolved at `ebd394a..f190219`
   (its #22 was a false positive: `getMaxY()` is inclusive); the second (32) at
-  `b26a045..797e9dd`; the third (14, done directly) at `d3dde42..d08247b`. Highlights: tempering
+  `b26a045..797e9dd`; the third (14, done directly) at `d3dde42..60e831c`. Highlights: tempering
   no longer hijacks right-click (off-hand whetstone only), no over-stacked unstackable kit items,
   all mutating `/eh` commands are gamemaster-gated, cylinder seam math is wrapped end to end
   (router and runtime, including the last ship/train/sampler consumers), Hydra/Yig escalation
@@ -265,7 +265,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 ## Known limitations / deferred
 
 - **Code review clean:** `docs/CODE-REVIEW.md` has no open findings. The third audit (14 items:
-  2 Medium, 6 Low, 6 Nit, done directly at `c27107a`) is fixed in `d3dde42..d08247b`; the first
+  2 Medium, 6 Low, 6 Nit, done directly at `c27107a`) is fixed in `d3dde42..60e831c`; the first
   two audits were resolved at `ebd394a..f190219` and `b26a045..797e9dd`. Final tree verified
   with `./gradlew build` and a clean server boot.
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`

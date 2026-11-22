@@ -10,7 +10,7 @@ cylinder-seam queries, per-world statics). Minecraft API claims were verified ag
 decompiled 26.3 sources (`build/moddev/artifacts/minecraft-patched-*-sources.jar`).
 
 **Open: none.** The third audit found 14 items (2 Medium, 6 Low, 6 Nit); all are fixed in
-`d3dde42..d08247b`:
+`d3dde42..60e831c`:
 
 - **bots** — `attack` and `placeat` now enforce vanilla reach, `blockTarget` uses 4.5 blocks,
   `smelt` charges a fuel item from the bot's inventory, and a full inventory drops the
@@ -23,7 +23,7 @@ decompiled 26.3 sources (`build/moddev/artifacts/minecraft-patched-*-sources.jar
   `RailSampler`/`TrainTrail` and the `TownIndex` bucket wrap.
 
 Verified green on the final tree: `./gradlew build` (`compileJava`, `test`, `pmdMain`,
-`pmdTest`, `check`) and a clean server boot (`Done (4.006s)`).
+`pmdTest`, `check`) and a clean server boot (`Done (4.146s)`).
 
 ---
 
