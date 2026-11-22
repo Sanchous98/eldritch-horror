@@ -67,6 +67,15 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 @EventBusSubscriber(modid = com.sanchous98.eldritchhorror.EldritchHorror.MODID)
 public final class EldritchCommands {
 
+    /**
+     * Gamemaster gate for a state-mutating subcommand, matching the in-handler check used by
+     * {@code investigator set}, {@code prologue reset}, {@code home}, {@code codex learn} and
+     * {@code cultist}. Read-only subcommands are left ungated.
+     */
+    private static final java.util.function.Predicate<CommandSourceStack> GAMEMASTER =
+            source -> source.permissions().hasPermission(
+                    net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER);
+
     private EldritchCommands() {
     }
 
@@ -97,6 +106,7 @@ public final class EldritchCommands {
                                     return 1;
                                 }))
                                 .then(Commands.literal("set")
+                                        .requires(GAMEMASTER)
                                         .then(Commands.argument("value", DoubleArgumentType.doubleArg())
                                                 .executes(ctx -> {
                                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
@@ -112,6 +122,7 @@ public final class EldritchCommands {
                                                     return 1;
                                                 })))
                                 .then(Commands.literal("add")
+                                        .requires(GAMEMASTER)
                                         .then(Commands.argument("delta", DoubleArgumentType.doubleArg())
                                                 .executes(ctx -> {
                                                     ServerPlayer p = ctx.getSource().getPlayerOrException();
@@ -126,7 +137,9 @@ public final class EldritchCommands {
                                                             () -> Component.literal("taint = " + fmt(now)), true);
                                                     return 1;
                                                 })))
-                                .then(Commands.literal("purify").executes(EldritchCommands::purifyTaint)))
+                                .then(Commands.literal("purify")
+                                        .requires(GAMEMASTER)
+                                        .executes(EldritchCommands::purifyTaint)))
                         .then(Commands.literal("rep")
                                 .then(Commands.literal("get")
                                         .then(Commands.argument("cult", StringArgumentType.word())
@@ -143,6 +156,7 @@ public final class EldritchCommands {
                                                     return 1;
                                                 })))
                                 .then(Commands.literal("set")
+                                        .requires(GAMEMASTER)
                                         .then(Commands.argument("cult", StringArgumentType.word())
                                                 .then(Commands.argument("value", IntegerArgumentType.integer(-100, 100))
                                                         .executes(ctx -> {
@@ -158,6 +172,7 @@ public final class EldritchCommands {
                                                             return 1;
                                                         }))))
                                 .then(Commands.literal("add")
+                                        .requires(GAMEMASTER)
                                         .then(Commands.argument("cult", StringArgumentType.word())
                                                 .then(Commands.argument("delta", IntegerArgumentType.integer(-100, 100))
                                                         .executes(ctx -> {
@@ -212,6 +227,7 @@ public final class EldritchCommands {
                                         .executes(EldritchCommands::learnCodex))))
                 .then(Commands.literal("codexentries").executes(EldritchCommands::listCodexEntries));
         eh.then(Commands.literal("event")
+                        .requires(GAMEMASTER)
                         .then(Commands.argument("id", StringArgumentType.word())
                                 .executes(EldritchCommands::forceEvent)))
                 .then(Commands.literal("events").executes(EldritchCommands::listEvents));
@@ -234,6 +250,7 @@ public final class EldritchCommands {
         eh.then(Commands.literal("endgame")
                 .executes(EldritchCommands::getEndgame)
                 .then(Commands.literal("set")
+                        .requires(GAMEMASTER)
                         .then(Commands.argument("outcome", StringArgumentType.word())
                                 .executes(EldritchCommands::setEndgame))));
         // Wards (design/26): what haven currently covers the caller, with radius and seconds left.
@@ -993,6 +1010,7 @@ public final class EldritchCommands {
 
     private static LiteralArgumentBuilder<CommandSourceStack> setNode(String label, Setter setter) {
         return Commands.literal("set")
+                .requires(GAMEMASTER)
                 .then(Commands.argument("value", DoubleArgumentType.doubleArg())
                         .executes(ctx -> {
                             ServerPlayer p = ctx.getSource().getPlayerOrException();
@@ -1006,6 +1024,7 @@ public final class EldritchCommands {
 
     private static LiteralArgumentBuilder<CommandSourceStack> addNode(String label, Adder adder) {
         return Commands.literal("add")
+                .requires(GAMEMASTER)
                 .then(Commands.argument("delta", DoubleArgumentType.doubleArg())
                         .executes(ctx -> {
                             ServerPlayer p = ctx.getSource().getPlayerOrException();

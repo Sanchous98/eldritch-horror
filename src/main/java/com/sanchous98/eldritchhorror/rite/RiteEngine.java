@@ -114,6 +114,14 @@ public final class RiteEngine {
     }
 
     /**
+     * Drops every in-memory rite cooldown. Called when the server stops, so a fresh world with a
+     * lower game time cannot inherit a stale "not ready yet" stamp (the map is never persisted).
+     */
+    public static void clear() {
+        RITE_READY.clear();
+    }
+
+    /**
      * What actually happened. {@code ok=false} means the rite did not take effect: its on_failure
      * meter price is applied (a rite that never started — altar, cooldown, missing offerings — pays
      * nothing); {@code message} is always safe to show the performer.
@@ -142,8 +150,11 @@ public final class RiteEngine {
         if (!RiteKnowledge.knows(player, rite.id())) {
             return new Result(false, Component.literal("You do not know the rite: " + rite.id()));
         }
-        // Per-player cooldown (design/05): a rejected attempt changes nothing and pays no cost.
+        // Per-player cooldown (design/05): a rejected attempt changes nothing and pays no cost. The
+        // stamp is written only once every pre-check below has passed and the rite actually starts,
+        // so a missing altar, a wrong city or missing offerings never consumes the wait.
         int cooldown = ModConfig.RITUAL_COOLDOWN_TICKS.get();
+        long now = player.level().getGameTime();
         if (cooldown > 0) {
             // Rite Affinity shortens the wait 10% (design/15); a carried ring_of_focus another 20%
             // (design/16). The two reductions stack multiplicatively — see RitualCooldownMath — and
@@ -151,14 +162,12 @@ public final class RiteEngine {
             cooldown = RitualCooldownMath.cooldownTicks(cooldown,
                     SkillTree.has(player, Skills.RITE_AFFINITY),
                     CarriedItems.carries(player, "ring_of_focus"));
-            long now = player.level().getGameTime();
             long ready = RITE_READY.getOrDefault(player.getUUID(), 0L);
             if (now < ready) {
                 long left = (ready - now + 19L) / 20L;
                 return new Result(false, Component.literal(
                         "The ritual must settle: " + left + "s before the next rite."));
             }
-            RITE_READY.put(player.getUUID(), now + cooldown);
         }
         ServerLevel level = player.level();
 
@@ -214,6 +223,11 @@ public final class RiteEngine {
         if (reagentsEnabled && !RiteReagents.has(player, offerings)) {
             return new Result(false, Component.literal("The altar lacks the offerings: ")
                     .append(RiteReagents.describe(offerings)).append(Component.literal(".")));
+        }
+
+        // Every pre-check passed, so the rite starts here: the attempt now consumes the cooldown.
+        if (cooldown > 0) {
+            RITE_READY.put(player.getUUID(), now + cooldown);
         }
 
         Result result = switch (rite.outcome()) {
@@ -733,7 +747,11 @@ public final class RiteEngine {
                 + String.format(java.util.Locale.ROOT, "%.2f", taint) + "."));
     }
 
-    /** {@code close_rift}: remove nearby markers and recede the loaded patch's taint. */
+    /**
+     * {@code close_rift}: remove nearby markers and recede the loaded patch's taint. When no marker
+     * is close enough it returns a failure Result, so no offerings are spent and no seal reward is
+     * granted (the rite's on_failure cost still applies) and it is not a free area-cleanser.
+     */
     private static Result closeRift(ServerLevel level, ServerPlayer player) {
         Block riftBlock = BuiltInRegistries.BLOCK.getValue(EldritchHorror.id(RIFT_ANCHOR_ID));
         int removed = 0;
@@ -754,14 +772,16 @@ public final class RiteEngine {
             }
         }
         // Only cleanse when a rift was actually sealed here, so the rite is not a free area-cleanser.
-        if (removed > 0) {
-            taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
-            QuestJournal.add(player, "seal_the_way", 1);
-            // design/08: sealing grants sanity +10 as its OUTCOME — applied with the other gains by
-            // perform() (the corruption +5 is its on_failure cost).
-            // design/19: sealing a rift is the trigger for the cleansing dawn.
-            EventTicker.forceStart(player, "cleansing_dawn", level.getServer().getTickCount());
+        if (removed == 0) {
+            return new Result(false, Component.literal(
+                    "No rift marker is close enough to seal; the Way remains open."));
         }
+        taintPatch(level, player.blockPosition(), CLEANSE_TAINT, true);
+        QuestJournal.add(player, "seal_the_way", 1);
+        // design/08: sealing grants sanity +10 as its OUTCOME — applied with the other gains by
+        // perform() (the corruption +5 is its on_failure cost).
+        // design/19: sealing a rift is the trigger for the cleansing dawn.
+        EventTicker.forceStart(player, "cleansing_dawn", level.getServer().getTickCount());
         return new Result(true, Component.literal("The Way is sealed; " + removed
                 + " rift marker(s) removed and the rift's influence recedes."));
     }

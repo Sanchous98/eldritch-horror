@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 
@@ -121,6 +122,7 @@ public final class CultServices {
         if (!player.getInventory().add(reward)) {
             player.drop(reward, false, Prediction.SERVER_ONLY);
         }
+        player.containerMenu.broadcastChanges();
         return new Outcome(true, Component.translatable("service.eldritch_horror.trade.success",
                 service.name(), granted.getCount(), granted.getHoverName(),
                 service.costCount(), new ItemStack(cost).getHoverName()));
@@ -156,7 +158,7 @@ public final class CultServices {
     }
 
     /** @return the registered item for a mod path, or {@code null} when unregistered. */
-    private static Item item(String path) {
+    private static @Nullable Item item(String path) {
         if (path == null || path.isEmpty()) {
             return null;
         }

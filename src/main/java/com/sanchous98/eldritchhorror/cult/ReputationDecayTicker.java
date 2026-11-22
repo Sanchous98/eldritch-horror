@@ -39,6 +39,14 @@ public final class ReputationDecayTicker {
     private ReputationDecayTicker() {
     }
 
+    /**
+     * Drops every in-memory decay timer. Called when the server stops, so a fresh world with a lower
+     * game time cannot inherit a stale stamp that would lock a cult's drift out.
+     */
+    public static void clear() {
+        LAST_CHANGE.clear();
+    }
+
     /** Records that the player's standing with {@code cultId} just changed, resetting its timer. */
     static void stamp(ServerPlayer player, String cultId) {
         LAST_CHANGE.computeIfAbsent(player.getUUID(), id -> new ConcurrentHashMap<>())

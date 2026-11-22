@@ -10,9 +10,11 @@ import com.sanchous98.eldritchhorror.rite.RiteDefinition;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import com.sanchous98.eldritchhorror.rite.Rites;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.skill.LucidDreamPool;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Locations;
 import java.util.List;
+import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -25,6 +27,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The 12 investigator <b>active</b> abilities (see {@code docs/INVESTIGATORS-CONTRACT.md}). One
@@ -160,13 +163,23 @@ public final class SignatureAbilities {
         message(player, "Commune: a presence " + bearing(player, nearest.blockPosition()) + ".");
     }
 
-    /** Nikolai Volkov — teach one random rite the player does not already know. */
+    /**
+     * Nikolai Volkov — teach one random rite the player does not already know, drawn from the same
+     * pool as {@link LucidDreamPool}: tier ≤ 2 and never the endgame fork, so the ability cannot
+     * shortcut the deliberate path to {@code awaken/banish/summon_the_horror}.
+     */
     private static void forbiddenInsight(ServerPlayer player) {
-        List<RiteDefinition> unknown = Rites.all().stream()
-                .filter(rite -> !RiteKnowledge.knows(player, rite.id()))
+        List<RiteDefinition> unknown = LucidDreamPool.eligible(
+                        Rites.all().stream()
+                                .map(rite -> new LucidDreamPool.Entry(rite.id(), rite.tier()))
+                                .toList(),
+                        RiteKnowledge.known(player))
+                .stream()
+                .map(Rites::byId)
+                .filter(Objects::nonNull)
                 .toList();
         if (unknown.isEmpty()) {
-            message(player, "Forbidden Insight: you already know every rite.");
+            message(player, "Forbidden Insight: you already know every rite it can reveal.");
             return;
         }
         RandomSource random = player.getRandom();
@@ -197,7 +210,7 @@ public final class SignatureAbilities {
     }
 
     /** The nearest rift anchor within the scan radius, or {@code null} when none is loaded. */
-    private static BlockPos nearestRift(ServerPlayer player, ServerLevel level) {
+    private static @Nullable BlockPos nearestRift(ServerPlayer player, ServerLevel level) {
         List<BlockPos> rifts = Rifts.near(level, player.blockPosition(), RIFT_CHUNK_RADIUS, RIFT_MAX);
         BlockPos nearest = null;
         double best = Double.MAX_VALUE;

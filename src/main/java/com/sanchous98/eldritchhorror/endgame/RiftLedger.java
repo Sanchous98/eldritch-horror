@@ -48,9 +48,11 @@ public final class RiftLedger extends SavedData {
         this.opened = opened;
     }
 
-    /** @return the overworld's ledger (created on first read). */
+    /** @return the overworld's ledger (created on first read); safe from any dimension. */
     public static RiftLedger of(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(TYPE);
+        // Normalised like DoomClock.of: the ledger is a world fact, so a call from another
+        // dimension must not read a separate, empty copy of the save entry.
+        return level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
     }
 
     /** Records a newly placed anchor. */

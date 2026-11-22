@@ -23,7 +23,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * Drives the sanity meter once a second: sums the enabled {@link SanitySource}s, applies the
- * result, and fires the threshold effects <b>on state transitions only</b>.
+ * result, and fires the threshold effects <b>on state transitions</b>, re-asserting a band's effect
+ * if it has gone missing while the band stayed the same.
  *
  * <p>Server-authoritative and overworld-only — the client never computes a drain. The previous
  * state is held in a small server-side map keyed by player id (dropped on logout, so rejoining
@@ -111,7 +112,10 @@ public final class SanityTicker {
 
         SanityState after = SanitySystem.state(player);
         SanityState before = PREVIOUS.put(player.getUUID(), after);
-        if (before != after) {
+        // Re-assert a band whose infinite effect has gone missing even when the band itself did not
+        // change (Sedate removes MADNESS/MARKED inside the same band; a dimension change can drop
+        // the effect). The check is read-only, so a present effect is never re-applied every tick.
+        if (before != after || !thresholdHeld(player, after)) {
             applyState(player, after);
         }
         // At the deep end the mind supplies its own company — rarely.
@@ -135,6 +139,24 @@ public final class SanityTicker {
                 effect(player, ModEffects.MARKED, 0);
             }
         }
+    }
+
+    /** @return whether {@code state}'s expected infinite threshold effects are all present. */
+    private static boolean thresholdHeld(ServerPlayer player, SanityState state) {
+        return switch (state) {
+            case COMPOSED, UNEASY -> true;
+            case FRAYING -> holds(player, ModEffects.MADNESS, 0);
+            case BREAKING -> holds(player, ModEffects.MADNESS, 1);
+            case MARKED -> holds(player, ModEffects.MADNESS, 2)
+                    && holds(player, ModEffects.MARKED, 0);
+        };
+    }
+
+    /** @return whether {@code effect} is present at {@code amplifier} and infinite. */
+    private static boolean holds(ServerPlayer player, Holder<MobEffect> effect, int amplifier) {
+        MobEffectInstance instance = player.getEffect(effect);
+        return instance != null && instance.getAmplifier() == amplifier
+                && instance.isInfiniteDuration();
     }
 
     private static void effect(ServerPlayer player, Holder<MobEffect> effect, int amplifier) {

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Central registry of {@link SanitySource}s, mirroring the {@code Locations} pattern: register
@@ -69,25 +70,26 @@ public final class SanitySources {
      * {@link City#radius()} (10–44), so the recovery zone matches the district that actually
      * renders. Cached so the once-a-second per-player check allocates nothing.
      */
-    private static volatile long[][] cityFootprints;
+    private static volatile @Nullable long[][] cityFootprints;
 
     private static long[][] cityFootprints() {
-        long[][] cached = cityFootprints;
+        @Nullable long[][] cached = cityFootprints;
         if (cached != null) {
             return cached;
         }
         synchronized (SanitySources.class) {
-            if (cityFootprints == null) {
+            long[][] built = cityFootprints;
+            if (built == null) {
                 List<City> cities = Cities.all();
-                long[][] out = new long[cities.size()][];
+                built = new long[cities.size()][];
                 for (int i = 0; i < cities.size(); i++) {
                     City city = cities.get(i);
                     long r = new CityLocation(city).radius();
-                    out[i] = new long[] { city.x(), city.z(), r * r };
+                    built[i] = new long[] { city.x(), city.z(), r * r };
                 }
-                cityFootprints = out;
+                cityFootprints = built;
             }
-            return cityFootprints;
+            return built;
         }
     }
 

@@ -188,10 +188,12 @@ public final class DoomClock extends SavedData {
             warning = DoomMath.nextWarning(clock.doom, clock.warningMask);
         }
         if (!clock.awakened && DoomMath.awakened(clock.doom, ModConfig.DOOM_AWAKEN_AT.get())) {
-            clock.awakened = true;
-            clock.setDirty();
-            if (ModConfig.NPC_CULT_RITUALS_CAN_AWAKEN.get()) {
-                awaken(level);
+            // With the ritual awakening disabled the threshold is a one-shot marker; otherwise it
+            // latches only once the presence is actually on the ground, so a failed placement is
+            // retried on the next pass instead of silently swallowing the 70% event.
+            if (!ModConfig.NPC_CULT_RITUALS_CAN_AWAKEN.get() || awaken(level)) {
+                clock.awakened = true;
+                clock.setDirty();
             }
         }
         if (DoomMath.lost(clock.doom)) {
@@ -216,25 +218,28 @@ public final class DoomClock extends SavedData {
      * most-corrupted player when no loaded rift can be found. Plays the awakening sound and warns
      * every player. If it cannot place the presence this pass, nothing is announced and the next
      * tick is free to try again.
+     *
+     * @return {@code true} when a presence was placed or one is already nearby, {@code false} when
+     *         this pass could not place one (the caller must then leave the awakening unlatched)
      */
-    private static void awaken(ServerLevel level) {
+    private static boolean awaken(ServerLevel level) {
         ServerPlayer anchor = mostCorrupted(level);
         if (anchor == null) {
-            return;
+            return false;
         }
         if (Endgame.horrorNear(level, anchor, AWAKEN_NEAR_RADIUS)) {
-            return;
+            return true;
         }
         BlockPos spot = deepestRiftSpot(level);
         if (spot == null) {
             spot = openGroundNear(level, anchor);
         }
         if (spot == null) {
-            return;
+            return false;
         }
         AncientOne horror = ModEntities.THE_HORROR.get().spawn(level, spot, EntitySpawnReason.EVENT);
         if (horror == null) {
-            return;
+            return false;
         }
         level.playSound(null, horror.getX(), horror.getY(), horror.getZ(),
                 ModSounds.ENDGAME_AWAKEN.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
@@ -242,6 +247,7 @@ public final class DoomClock extends SavedData {
                 Component.translatable("doom.eldritch_horror.awaken"), false);
         EldritchHorror.LOGGER.info("doom awakening: the Horror rose at {} {} {}",
                 spot.getX(), spot.getY(), spot.getZ());
+        return true;
     }
 
     /**

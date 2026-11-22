@@ -23,7 +23,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 /**
  * Drives the corruption meter once a second: diffs the per-chunk taint around each player, sums the
  * enabled {@link CorruptionSource}s, applies the result, and fires the threshold effects
- * <b>on state transitions only</b>.
+ * <b>on state transitions</b>, re-asserting a band's effect if it has gone missing while the band
+ * stayed the same.
  *
  * <p>Server-authoritative and overworld-only — the client never computes a drain. The previous
  * state is held in a small server-side map keyed by player id (dropped on logout, so rejoining
@@ -100,7 +101,10 @@ public final class CorruptionTicker {
 
         CorruptionState after = CorruptionSystem.state(player);
         CorruptionState before = PREVIOUS.put(player.getUUID(), after);
-        if (before != after) {
+        // Re-assert a band whose infinite effect has gone missing even when the band itself did not
+        // change (e.g. a dimension change dropped it). The check is read-only, so a present effect
+        // is never re-applied every tick.
+        if (before != after || !thresholdHeld(player, after)) {
             applyState(player, after);
             // First tick for this player: there is no previous band, so nothing has "deepened" yet.
             if (before != null && after.ordinal() > before.ordinal()) {
@@ -120,6 +124,22 @@ public final class CorruptionTicker {
             case MARKED -> effect(player, 0);
             case CLAIMED -> effect(player, 1);
         }
+    }
+
+    /** @return whether {@code state}'s expected infinite threshold effect is present. */
+    private static boolean thresholdHeld(ServerPlayer player, CorruptionState state) {
+        return switch (state) {
+            case DORMANT, TOUCHED -> true;
+            case MARKED -> holds(player, 0);
+            case CLAIMED -> holds(player, 1);
+        };
+    }
+
+    /** @return whether {@link ModEffects#CORRUPTED} is present at {@code amplifier} and infinite. */
+    private static boolean holds(ServerPlayer player, int amplifier) {
+        MobEffectInstance instance = player.getEffect(ModEffects.CORRUPTED);
+        return instance != null && instance.getAmplifier() == amplifier
+                && instance.isInfiniteDuration();
     }
 
     /** Apply the single corruption-band effect (always {@link ModEffects#CORRUPTED}). */

@@ -60,10 +60,15 @@ public final class CultSystem {
         if (def != null && !def.opposed().isEmpty()) {
             int spill = (int) Math.round(Math.abs(delta) * OPPOSED_FACTOR) * (delta >= 0 ? -1 : 1);
             for (String other : def.opposed()) {
-                int ov = Math.clamp(map.getOrDefault(other, 0) + spill, MIN, MAX);
+                int previous = map.getOrDefault(other, 0);
+                int ov = Math.clamp(previous + spill, MIN, MAX);
                 map.put(other, ov);
                 // A cross-consequence is an involving change for the opposed cult too.
                 ReputationDecayTicker.stamp(player, other);
+                // A negative delta raises an opposed cult, so its rank change must notify as well.
+                if (ov != previous) {
+                    notifyRank(player, other, ov);
+                }
             }
         }
         player.setData(ModAttachments.REPUTATION.get(), Map.copyOf(map));
