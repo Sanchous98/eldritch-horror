@@ -1,358 +1,316 @@
-# Code Review Report (`b1d7e61`)
+# Code Review — open findings (`f190219`)
 
-Full codebase audit across all 485 Java source files, 29 JUnit test suites, JSON data/assets, and
-Python tooling. Organized by severity (`High` → `Medium` → `Low / Nit`), with exact file paths,
-line numbers, root cause analysis, and recommended fixes.
+Single live review of the project. The first audit (27 findings) was fully resolved at
+`ebd394a..f190219` and re-verified with no regressions; the per-item resolution notes
+stay in git history (`847be76`). Completed findings are removed from this file — it
+tracks **open work only**, struck out as fixes land.
 
-## Resolution (2026-11-22)
+Method: five area reviewers (items/combat, RPG/commands/bots, world/transport,
+entities/city worldgen, client/data/tests/docs) re-read the whole tree with two rules —
+do not re-report resolved findings, and hunt regressions from their fixes. Minecraft API
+claims were checked against the decompiled 26.3 sources
+(`build/moddev/artifacts/*-sources.jar`); the lead re-verified every High/Medium finding
+against the source before it entered this list.
 
-Every finding was re-checked against the source and fixed in one pass, except #22, which is
-invalid (see below). Verification: `./gradlew build` green (compile + JUnit + PMD, 0 violations)
-and a bounded server boot reached `Done (3.983s)` with no datapack/initialiser errors.
-
-- **1** Tempering now reads the whetstone from the **off hand only**; max-quality weapons keep
-  their normal use; `BotCommands.useitem` honours a cancelled `RightClickItem`.
-- **2** `WeaponQualityStacks.isGradedWeapon` requires `isDamageableItem()`, so throwables are no
-  longer temperable; `dynamite`/`tear_gas` now carry the grade lore line.
-- **3** Starter kits split every `count = 2` on a `maxStack = 1` item into two single stacks;
-  `order.json`/`relic.json` no longer over-stack `holy_water`/`mirror_shard`.
-- **4** All mutating `/eh` subcommands (sanity, corruption, taint, rep, endgame, event) are
-  gamemaster-gated.
-- **5** Cylinder-wrapped deltas in `SeaPoint`, `ShippingLines`, `CoastalPacket`,
-  `RailPathMath`, `BoundaryTravel`; `RailRouteFinder.pathLength` uses real step distance;
-  `EarthMap.sample` uses `Math.floorDiv`.
-- **6** `Bullet.onHitEntity` is server-side only; `EldritchWarded` only borrows the held weapon
-  for direct melee hits.
-- **7** `DoomClock.awaken` returns success and `awakened` latches only after placement.
-- **8** `RITE_READY` is stamped after all pre-checks; `closeRift` fails when it removed nothing.
-- **9** `EndgameState.of` / `RiftLedger.of` normalise to `server.overworld()`.
-- **10** New `core/ServerStateReset` clears every static cache on server start/stop; each owner
-  exposes `clear()`.
-- **11** `CityPopulation.style` sets `setVillagerXp(1)` for real professions.
-- **12** `forbiddenInsight` draws from `LucidDreamPool.eligible` (tier ≤ 2, no endgame forks).
-- **13** Sanity/corruption tickers re-assert a band's missing infinite effect.
-- **14** Flat melee bonuses require a full-charge swing; the pact blade keys off the killing
-  weapon.
-- **15** Ward/sentinel lists now cover the whole mod bestiary (mod namespace only, no vanilla
-  monsters, no Ancient Ones, no cultists).
-- **16** `CityLocation` caches city geometry per location and skips landmark writes outside its
-  reach while replaying RNG; `SurfaceDecorator` caches keep-out circles; `WailHusk` overrides
-  `auraRequiresLineOfSight`.
-- **17** Eye/mirror/lens passives act once per player per tick (first carried copy, all slots).
-- **18** Tomes teach on both hands, at `LOWEST` priority and only when the use is not cancelled.
-- **19** Projectile entity lang keys fixed in both locales.
-- **20** Tokyo/Rome trees use the levelled city datum.
-- **21** `OrderVault` portal jambs written once; Beijing gate doorway centred.
-- **22** **Invalid.** `Builder.maxY` is `level.getMaxY()`, which is inclusive (319) in 26.3, so
-  `y > maxY` is correct; no change made.
-- **23** `getBaseHeight` returns `surfaceY + 1` and reports the water surface for surface/motion
-  heightmaps.
-- **24** `SporeBee` is a real flyer (`setNoGravity(true)` + `travelFlying`).
-- **25** `CultServices.trade` broadcasts menu changes; `CultSystem.add` notifies every changed
-  rank.
-- **26** `@Nullable` added to all listed members.
-- **27** `tools/__pycache__` removed from the index; `__pycache__/` and `*.pyc` ignored.
+**Open: 32 findings — 1 High, 4 Medium, 17 Low, 10 Nit.** The first audit's 27
+resolutions held up: no fix was found wrong, and its #22 (`getMaxY()` inclusive) remains
+invalid.
 
 ---
 
-## High Severity (Gameplay Blockers, Serialization, Security & World Math)
+## High
 
-### 1. Carrying a Whetstone Anywhere in Inventory Hijacks Right-Click for Firearms, Throwables, Bows, and Tridents
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/event/WeaponQualityEvents.java` (lines 36–62, 93–102)
-  - `src/main/java/com/sanchous98/eldritchhorror/bot/BotCommands.java` (lines 311–326)
-- **Problem:**
-  1. `design/16-items.md` (lines 249–250) and the `WeaponQualityEvents` class Javadoc (lines 20–26)
-     specify that tempering requires the weapon in the main hand and the whetstone in the **off hand**,
-     or an explicit non-conflicting gesture. However, `findWhetstone(player)` scans the **entire player
-     inventory** (`0 .. inventory.getContainerSize()`).
-  2. `PlayerInteractEvent.RightClickItem` fires **before** `Item#use`. Because `revolver_38`,
-     `automatic_45`, `shotgun_double`, `carbine_rifle`, `dynamite`, `tear_gas`, `tidal_trident`, and
-     `veil_bow` are all graded weapons in `WeaponGrade.BY_ITEM`, right-clicking to fire a gun, throw
-     dynamite/tear gas, throw the trident, or draw the bow while a whetstone sits *anywhere* in the
-     player's inventory cancels the right-click (`event.setCanceled(true)`), consumes the whetstone,
-     and rolls the temper gamble (potentially **shattering** the player's gun in combat instead of
-     shooting!).
-  3. Even when a weapon is already at `WeaponQuality.MAX` (5), `event.setCanceled(true)` executes on
-     line 51 **before** `if (WeaponQuality.isMax(quality))` on line 55 — completely blocking the
-     player from firing a max-quality gun as long as they carry any whetstone.
-  4. In `BotCommands.useitem` (`BotCommands.java:321-322`), `PlayerInteractEvent.RightClickItem` is
-     posted to `NeoForge.EVENT_BUS`, `event.isCanceled()` is ignored, and `stack.use(...)` is called
-     unconditionally on the next line.
-- **Fix:** Require the whetstone in `OFF_HAND` (or require crouching + whetstone in off hand), move
-  `event.setCanceled(true)` or allow normal use when not tempering, and check `if (event.isCanceled())`
-  in `BotCommands.useitem`.
+### 1. Hydra and Yig escalation is dead code — long overflow at `Long.MIN_VALUE`
+- **Files:** `entity/Hydra.java:41,72-76`, `entity/Yig.java:41,72-76`
+- **Problem:** `lastEscalation` starts at `Long.MIN_VALUE` and the gate is
+  `level.getGameTime() - this.lastEscalation >= ESCALATION_COOLDOWN_TICKS`.
+  `gameTime - Long.MIN_VALUE` overflows to a huge *negative* value, the guard is
+  false on every hit, and `lastEscalation` is assigned only inside the branch —
+  it can never recover. Hydra never buds a `ShamblerOoze` head and Yig never
+  draws a `RisenHusk`: the signature "cut it and it grows" mechanic never fires
+  once (and with `*_KILLABLE=false` they are plain invulnerable melee bags).
+- **Fix:** initialise to `-ESCALATION_COOLDOWN_TICKS` (both files), or guard with
+  `lastEscalation == Long.MIN_VALUE ||`. Pin the cooldown arithmetic with a JUnit
+  test.
 
-### 2. Throwables (`dynamite`, `tear_gas`) Are Temperable with Whetstones for Zero Benefit and Stack Corruption
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/WeaponGrade.java` (lines 41–42)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/WeaponQualityStacks.java` (lines 29–42, 58–69)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/Firearms.java` (lines 33–40)
-- **Problem:**
-  - `dynamite` and `tear_gas` have stack size `16` and no durability (`maxDamage == 0`), yet are in
-    `WeaponGrade.BY_ITEM`.
-  - `WeaponQualityStacks.isGradedWeapon` checks only `WeaponGrade.byItem().containsKey(id)`. Tempering
-    a stack of 16 dynamite grants no durability (`base <= 0`), mutates `WEAPON_QUALITY` and `RARITY`
-    on the entire stack (breaking stacking with untempered dynamite), or shrinks the stack on `BREAK`.
-  - Additionally, `Firearms.DYNAMITE` and `Firearms.TEAR_GAS` do not call `Weapons.lore(p, id)`, so
-    they lack the grey grade line and `.tooltip` lore component that all other 18 graded items have.
-- **Fix:** Require `stack.isDamageableItem()` in `WeaponQualityStacks.isGradedWeapon` (and in
-  `TooltipAppenders`'s quality line check), and wrap `DYNAMITE` and `TEAR_GAS` properties in
-  `Weapons.lore(p, id)`.
+## Medium
 
-### 3. Over-Stacked Unstackable Items (`count = 2` on `maxStackSize = 1`) in Investigator Kits and Chest Loot Tables
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/investigator/Investigators.java` (lines 89, 108–110, 115)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/Consumables.java` (lines 19, 24, 26, 30)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/Conditions.java` (line 39)
-  - `src/main/resources/data/eldritch_horror/loot_table/chests/order.json` (line 39)
-  - `src/main/resources/data/eldritch_horror/loot_table/chests/relic.json` (line 33)
-- **Problem:**
-  - `holy_water`, `lucid_draught`, `soothing_tea`, `valerian_tonic`, `blessed_water`, and
-    `mirror_shard` are registered with `maxStack = 1`.
-  - `Investigators.starterKit` calls `stack("holy_water", 2)`, `stack("lucid_draught", 2)`,
-    `stack("soothing_tea", 2)`, `stack("valerian_tonic", 2)`, and `stack("blessed_water", 2)`,
-    constructing `new ItemStack(item, 2)`.
-  - In Minecraft 26.3, `ItemStack.CODEC` enforces `count <= item.getMaxStackSize()`; an over-stacked
-    `ItemStack` fails codec validation during player/container save.
-  - Similarly, `order.json` sets `set_count` `1..2` on `holy_water` and `relic.json` sets `set_count`
-    `1..2` on `mirror_shard`.
-- **Fix:** Either give two separate `stack(..., 1)` entries in `starterKit` (or raise tonic/water
-  `maxStack` to `16` like `iron_broth`), and cap `set_count` for `maxStack = 1` items in loot tables.
+### 2. `eh bot god` grants creative mode — outside the honesty allow-list
+- **Files:** `bot/BotCommands.java:119-122,955-970`
+- **Problem:** `bot god <name> true` sets `GameType.CREATIVE`. Creative is on the
+  forbidden-equivalents list and the allow-list (invulnerable, travel teleports,
+  time/weather, small forceload windows) does not cover it: while on, the bot
+  skips every consumption/durability/placement cost, silently invalidating an
+  "honest playtest" that flips it (or forgets `false`).
+- **Fix:** delete the subcommand (`bot invulnerable` already covers the
+  documented need), or hard-refuse it once a bot has joined a run.
 
-### 4. Unrestricted State-Mutating Admin Commands Exposed to Non-Op Players
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/commands/EldritchCommands.java` (lines 76–260, 535–555, 668–684)
-- **Problem:** While `investigator set`, `prologue reset`, `home`, `codex learn`, and `cultist` check
-  `Permissions.COMMANDS_GAMEMASTER`, the following state-mutating commands lack any permission gate:
-  - `/eh sanity set <value>` and `/eh sanity add <delta>` (lines 78–81)
-  - `/eh corruption set <value>` and `/eh corruption add <delta>` (lines 82–85)
-  - `/eh taint set <value>`, `/eh taint add <delta>`, and `/eh taint purify` (lines 86–129)
-  - `/eh rep set <cult> <value>` and `/eh rep add <cult> <delta>` (lines 145–174)
-  - `/eh endgame set <outcome>` (lines 234–238, 543–555) — allows any regular player to force or
-    reset the server-wide endgame!
-  - `/eh event <id>` (lines 214–216, 668–684) — force-starts a world event without op permission.
-- **Fix:** Add `.requires(s -> Permissions.COMMANDS_GAMEMASTER.check(s.permissions()))` (matching the
-  existing gamemaster-gated subcommands) to all mutating subcommands.
+### 3. `eh bot attacktype` strikes from 32 blocks — no vanilla reach enforcement
+- **Files:** `bot/BotCommands.java:342-357,973-1003`
+- **Problem:** target selection uses `inflate(32.0)`; vanilla range is enforced
+  only in the packet listener (`isWithinEntityInteractionRange(..., 3.0)`),
+  and `Player.attack` itself has no check (verified in the decompiled sources) —
+  the bot deals full melee damage (cooldown-scaled, durability-paying) from up
+  to 32 blocks. The `attacktype` comment even claims a teleport that does not
+  exist.
+- **Fix:** cap selection at ~3 blocks or teleport the bot adjacent before the
+  swing; drop the stale comment.
 
-### 5. Cylinder / Antimeridian Seam (`±65536`) Bugs in Sea & Rail Routing and Negative Division in `EarthMap.sample`
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/world/transport/SeaPoint.java` (lines 12–16)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/transport/ShippingLines.java` (lines 221–253)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/transport/CoastalPacket.java` (lines 409–424)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/rail/RailRouteFinder.java` (lines 165–175)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/rail/RailPathMath.java` (lines 64–118)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/BoundaryTravel.java` (lines 68–75)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/EarthMap.java` (lines 138–142)
-- **Problem:**
-  1. `SeaGrid` and `RailGrid` use `wrapDelta` during A* search, but downstream path validation and
-     movement (`SeaPoint.distanceTo`, `ShippingLines.firstLand`/`waterSegment`, `CoastalPacket.advance`,
-     `RailPathMath.appendSegment`) compute `dx = b.x() - a.x()` without wrapping across `2 * HALF_WIDTH`.
-     Any segment crossing the Pacific seam (`±65536`) traces a 131,072-block line backwards across all
-     continents.
-  2. `RailRouteFinder.pathLength(route)` iterates over smoothed waypoints and adds only `1.0` or
-     `SQRT2` per waypoint pair instead of the actual cell distance between smoothed waypoints,
-     underestimating smoothed route lengths severalfold.
-  3. `EarthMap.sample` computes `(worldX + HALF_WIDTH) / BLOCKS_PER_PIXEL` using Java `/` (truncation
-     toward zero) instead of `Math.floorDiv(worldX + HALF_WIDTH, BLOCKS_PER_PIXEL)`, duplicating pixel
-     `0` when `worldX < -HALF_WIDTH`.
-- **Fix:** Use cylinder-wrapped `dx` in `SeaPoint`, `ShippingLines`, `CoastalPacket`, and
-  `RailPathMath`; compute actual Euclidean/octile step distance in `RailRouteFinder.pathLength`; use
-  `Math.floorDiv` in `EarthMap.sample`.
+### 4. Rail runtime movement math is not seam-wrapped — the #5 fix stopped at the router
+- **Files:** `world/rail/RailSampler.java:53-56,96-110`, `world/rail/TrainTrail.java:80-84`
+- **Problem:** `distance()`, `sample()` interpolation and `yaw()` still use raw
+  `dx = b.x() - a.x()`. A seam-crossing line has adjacent nodes 131,071 blocks
+  apart raw, so `RailLine.length()` inflates by that amount, the locomotive
+  sweeps backward across the whole world on the crossing segment, and
+  `nodeAt` obstruction checks index past it. Latent today (nearest curated city
+  is ~10.5k from the seam; `trainMaxLineBlocks` is configurable to 60,000).
+- **Fix:** `dx = EarthMap.wrapDelta(from.x(), to.x())` in distance/interp/yaw;
+  interpolate unwrapped and `wrapBlockX` the result; same for `TrainTrail`.
 
-### 6. `Bullet.onHitEntity` Runs Unchecked on Client Side and Loses Weapon Context for `EldritchWarded`
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/entity/Bullet.java` (lines 64–72)
-  - `src/main/java/com/sanchous98/eldritchhorror/entity/EldritchWarded.java` (lines 57–74)
-- **Problem:**
-  - `Bullet.onHitEntity` calls `hit.getEntity().hurt(...)`, decrements `this.pierce`, and calls
-    `this.discard()` on both client and server without `if (!this.level().isClientSide())` (unlike
-    `onHit` on line 77). Client-side `discard()` causes visual desyncs on piercing rounds.
-  - Because `this.damageSources().thrown(this, this.getOwner())` has `source.getWeaponItem() == null`,
-    `EldritchWarded.wardsOff` falls back to `attacker.getWeaponItem()` (the player's currently held
-    main-hand item at impact time), allowing a player to fire a bullet/arrow and swap to
-    `star_iron_sword` before impact to bypass the ward.
-- **Fix:** Guard damage and `pierce`/`discard()` in `Bullet.onHitEntity` with
-  `if (!this.level().isClientSide())`, and only fall back to `attacker.getWeaponItem()` in
-  `EldritchWarded` for direct melee attacks (`source.isDirect()`).
+### 5. `RailLines` stamp/shape direction flips at the seam
+- **Files:** `world/rail/RailLines.java:369-370,431-435`
+- **Problem:** `addLineStamps`/`shape` compute `Integer.signum(next.x() -
+  current.x())` raw. At a seam node (65535 → -65536) the sign flips: a corner at
+  the crossing renders `NORTH_WEST` instead of `NORTH_EAST`, an ascending run
+  gets `ASCENDING_WEST` instead of `ASCENDING_EAST` — a broken rail connection.
+- **Fix:** `signum(EarthMap.wrapDelta(current.x(), next.x()))` for both deltas.
+
+## Low
+
+### 6. `eh bot useat`/`mineat` accept arbitrary coordinates — no distance gate
+- **Files:** `bot/BotCommands.java:290-308,397-419`
+- **Problem:** `ServerPlayerGameMode.useItemOn/destroyBlock` contain no range
+  validation (verified), so a bot remotely activates altars/gates or insta-breaks
+  any block cross-chunk. Durability and honest drops are paid; reach and break
+  time are free.
+- **Fix:** require the target within ~5 blocks (or walk the bot there first).
+
+### 7. `eh bot smelt` conjures smelting results without a furnace or fuel
+- **Files:** `bot/BotCommands.java:505-550`
+- **Problem:** input is consumed but the result appears directly in the
+  inventory — no furnace, no fuel, no smelt time. Free ore→ingot is a real
+  survival-cost skip.
+- **Fix:** require a lit furnace/campfire nearby and charge fuel, or mark the
+  subcommand probe-only and exclude it from honest runs.
+
+### 8. `eh bot placeat` overwrites blocks and bypasses survival placement rules
+- **Files:** `bot/BotCommands.java:466-503`
+- **Problem:** consumes one item (good) but then `setBlockToUpdate` with
+  `defaultBlockState()`: can overwrite existing blocks (chest contents vanish),
+  ignores `canBeReplaced`/`canSurvive`, drops orientation.
+- **Fix:** reject unless the target state `canBeReplaced()`; route through
+  `gameMode.useItemOn` so the block item resolves its own state and checks.
+
+### 9. `banish` raises negative cult standings toward zero — the price rewards the banisher
+- **Files:** `endgame/Endgame.java:95-98`
+- **Problem:** the "pays 25% of reputation" is `current - round(current * 0.25)`;
+  for negative `current` (e.g. −60 → −45) hostility *decreases*. Positive
+  standings are cut correctly; the sign is unhandled.
+- **Fix:** skip non-positive standings, or move them further negative — a
+  banish must never raise a standing.
+
+### 10. Spawner passes do not skip creative/spectator players
+- **Files:** `entity/BestiarySupport.java:68` and callers (`AncientOneSpawner.java:72`,
+  `AmbientSpawner`, `PassiveSpawner`, `SitePopulationSpawner`)
+- **Problem:** `tickAura` explicitly skips creative/spectator players, but the
+  `topUp*` family iterates `level.players()` unfiltered — horrors, including
+  roaming Ancient Ones, spawn around creative builders and spectating admins.
+- **Fix:** early-return in `topUp*` (or the spawner loops) on
+  `isCreative() || isSpectator()`.
+
+### 11. Market stalls are truncated when they straddle a chunk border
+- **Files:** `world/loc/city/CityLocation.java:584` (`streetDetails`/`marketStall`)
+- **Problem:** the stall anchor draws its extra rng only where
+  `isReplaceable(x, ground+1, z)` holds, which is false outside the generating
+  chunk; the neighbouring chunk that owns 1–2 columns of the 3×3 footprint skips
+  the stall entirely and `Builder.put` clips the overhang — seam stalls lose
+  posts/awning cells. (Crates/wells are single-column and safe.)
+- **Fix:** gate on a chunk-independent probe (pavement/land) and let writes
+  clip, so every chunk draws the identical stall sequence; or keep stalls off
+  `x % 16`-unsafe cells.
+
+### 12. `seamWarp` fights vehicle seat logic for passengers near the seam
+- **Files:** `world/BoundaryTravel.java:60-75`
+- **Problem:** it teleports *every* player; a passenger whose seat offset pushes
+  them past ±65536 is teleported 131,072 blocks away every 10 ticks while
+  `positionRider` snaps them back — a desync fight. Ships/trains wrap
+  themselves.
+- **Fix:** skip riding players (`isPassenger()`), or warp the vehicle root.
+
+### 13. `RailRouteFinder.pathLength` wraps with a hard-coded grid width
+- **Files:** `world/rail/RailRouteFinder.java:26,169-187`
+- **Problem:** `CYLINDER_CELLS = 2048` matches the production grid, but every
+  test grid (width 8/20/32) disagrees — a seam-crossing smoothed pair is charged
+  a half-world in tests.
+- **Fix:** pass the grid (or its width) like every other wrap site.
+
+### 14. Unwrapped-distance family: port/station selection, city decoration, town queries
+- **Files:** `transport/Port.java:17-21`, `rail/RailStation.java:26-30`,
+  `SurfaceDecorator.java:157-165` (`inCity`), `CityPopulation.java:125-130`
+  (`near`), `town/Towns.java:165`, `town/TownIndex.java:99,123`
+- **Problem:** raw `distanceSqr` at all six sites: `/eh ship`/`train` nearest
+  picks, printed distances, decoration inside seam-adjacent districts, and
+  town proximity are wrong for callers within a half-world of the seam.
+  Currently unexercised (the only seam land is Antarctica), but these are live
+  gameplay paths.
+- **Fix:** one `EarthMap.wrapDelta` per site.
+
+### 15. `EventTicker` static maps are not cleared by `ServerStateReset` (incomplete fix of #10)
+- **Files:** `event/EventTicker.java:82-83` vs `core/ServerStateReset.java:47-59`
+- **Problem:** `ACTIVE`/`COOLDOWN` are exactly the class of per-world statics
+  the reset was built for, but are only dropped on logout. In the same JVM a
+  new world restarts `getTickCount()` at 0, so stale absolute stamps make
+  `tick < ready` true forever — mod events never trigger again.
+- **Fix:** add `EventTicker.clear()` and call it from `clearAll()`.
+
+### 16. `TrainService` static maps are not cleared on world stop
+- **Files:** `world/rail/TrainService.java:49-57` vs `core/ServerStateReset.java`
+- **Problem:** `ACTIVE/PENDING/PENDING_AGE/LAST_TICK/STUCK` clear only on
+  `ServerStarted`, and `clearAll()` lists `ShipService` but not `TrainService`;
+  between worlds in one JVM they hold strong refs to the old level's entities.
+- **Fix:** add `TrainService.clear()` (all five maps) and register it.
+
+### 17. `SanityTicker`/`CorruptionTicker` `PREVIOUS` maps survive world switches
+- **Files:** `sanity/SanityTicker.java:43`, `corruption/CorruptionTicker.java:43`
+- **Problem:** cleared on logout, but `Bots.clear()` on `ServerStoppedEvent`
+  bypasses `PlayerLoggedOutEvent`, so a same-named bot (deterministic offline
+  UUID) inherits a stale band in the next world — worst case one spurious
+  dread cue on its first tick.
+- **Fix:** add both to `clearAll()`.
+
+### 18. `EarthMaps.getOrNull` never returns null — the contract is a lie
+- **Files:** `world/EarthMaps.java:22-39`
+- **Problem:** the javadoc promises "never throws; null if missing", but the
+  body throws `IllegalStateException` on `IOException`; every caller's
+  `== null` branch is dead code.
+- **Fix:** return null after logging, or fix the doc and rename.
+
+### 19. Tempering cancels only server-side — the client mispredicts the gesture
+- **Files:** `event/WeaponQualityEvents.java:41`
+- **Problem:** the handler returns for non-`ServerPlayer`, so with weapon in
+  main hand + whetstone in off hand the client still runs its local use
+  prediction: `VeilBowItem` starts the draw animation (release looses nothing),
+  guns predict a shot.
+- **Fix:** mirror the `setCanceled` on the client path (without the roll) so
+  the client sees the click consumed.
+
+### 20. Rail candidate search allocates ~33 MB transient per attempt
+- **Files:** `world/rail/RailLines.java:170-205` + `RailRouteFinder.find`
+- **Problem:** each candidate search allocates 4 arrays over the full
+  2048×1024 board, up to `PARTNER_ATTEMPTS`(5) × 24 cities at network build.
+  One-time, logged and bounded, but a hoisted scratch-buffer set (or arrays
+  sized to the `maxLengthCells` window) cuts startup churn several-fold.
+- **Fix:** reuse one scratch set per `RailLines` build.
+
+### 21. `STATUS.md` test counts are 2.4× understated
+- **Files:** `docs/STATUS.md:105` (vs line 641)
+- **Problem:** "Twelve suites, 77 cases" vs the tree's 29 suites / 166
+  `@Test` methods; the doc is the post-compaction source of truth.
+- **Fix:** "29 suites, 166 cases", or drop counts in favour of
+  `./gradlew test`.
+
+### 22. The sea-side seam fix has no regression test
+- **Files:** `transport/SeaPoint.java:16` (vs `RailPathMathTest` seam case)
+- **Problem:** `SeaPoint` is a pure, Minecraft-free record; the exact bug
+  class that regressed once (unwrapped `distanceTo`) is untested while the rail
+  side has a seam case.
+- **Fix:** a 3-line `assertEquals(10, new SeaPoint(half-5, 0)
+  .distanceTo(new SeaPoint(-half+5, 0)), ...)` in `SeaRouteFinderTest`.
+
+## Nit
+
+### 23. Default bot starter kit is a material cheat by the allow-list's standard
+- **Files:** `bot/Bots.java:147-167`
+- **Problem:** iron gear, 48 chalk, 32 salt, three endgame-capable tomes, 14
+  offerings, 48 stone — `spawnjoinbare` is the honest path, but nothing marks
+  non-bare runs as unrepresentative.
+- **Fix:** make the kit opt-in, or emit a loud log line when a kit bot earns
+  progression.
+
+### 24. `/eh` gating style is split — `.requires` vs in-handler
+- **Files:** `commands/EldritchCommands.java:75-77` vs `510-514,621-626,657-662,915-924`
+- **Problem:** both are secure, but non-GM players see half the mutating tree in
+  tab-complete. Standardise on one idiom.
+
+### 25. Tempering is silently dead during a firearm cooldown
+- **Files:** `event/WeaponQualityEvents.java` (vs decompiled `useItem:358-361`)
+- **Problem:** `useItem` returns `PASS` on `isOnCooldown` *before* posting
+  `RightClickItem`, so a whetstone attempt inside e.g. the carbine's 36-tick
+  window consumes nothing and gives no feedback.
+- **Fix:** document the rule in the Javadoc, or move the temper hook for guns
+  into `FirearmItem.use`.
+
+### 26. `WeaponGrade` javadoc contradicts the colour contract
+- **Files:** `registry/items/WeaponGrade.java:9-10`
+- **Problem:** says the grade "sets the item name's colour"; per design/16 and
+  the implementation, grade is colour-neutral and quality owns rarity. Reword
+  before someone "fixes" the code toward the doc.
+
+### 27. design/16 still promises quality for throwables
+- **Files:** `design/16-items.md:216`
+- **Problem:** after fix #2, dynamite/tear-gas are grade-only (untemperable, no
+  quality line); the design sentence is now half-true. Update it.
+
+### 28. `ProphetMaskItem` runs its villager scan once per carried copy
+- **Files:** `registry/items/ProphetMaskItem.java:42-56`
+- **Problem:** unlike Eye/Mirror/Lens it has no `isFirstCarried` guard; N masks
+  run the `getEntitiesOfClass` panic scan N times per 10 ticks (idempotent, so
+  it is cost, not corruption).
+- **Fix:** guard it the same way.
+
+### 29. `WailHuskSpawner` javadoc points at the pre-fix LOS location
+- **Files:** `entity/WailHuskSpawner.java:22`
+- **Problem:** the LOS gate now lives in `auraRequiresLineOfSight()` and is
+  enforced in `BestiarySupport.tickAura`; the stale comment invites re-adding
+  the check in `auraRateFor` (double-counting).
+
+### 30. `UiKeyHandler` derefs two of three nullable key fields unguarded
+- **Files:** `client/UiKeyHandler.java:26-33`
+- **Problem:** safe today (all three assigned together in one registration
+  event), but the invariant is implicit and one refactor away from an NPE.
+- **Fix:** guard all three or expose `MapKeyMappings.ready()`.
+
+### 31. `gradle.properties` cites the pre-3g cgroup budget
+- **Files:** `gradle.properties:2`
+- **Problem:** the `-Xmx2G` comment says "the dev container's cgroup is only
+  6 GiB"; the compose default is now `mem_limit: 3g`.
+- **Fix:** reword to "capped by `DEV_MEM` (3 GiB by default)".
+
+### 32. Small hygiene: orphaned javadoc, unguarded dev flag, dead store
+- **Files:** `world/ModWorldGenEvents.java:83-96,106`,
+  `world/SurfaceDecorator.java:67`
+- **Problem:** the `renderCities` javadoc block sits orphaned above
+  `maybeForceload` (so `maybeRenderCities` has none); `-Deh.forceload`
+  `parseInt` is unguarded inside the `ServerStarted` handler (dev-only); and
+  `pos.set(x, surfaceY + 1, z)` is dead — line 68 re-sets `pos` before any read.
 
 ---
 
-## Medium Severity (Logic Bugs, State Leaks & Edge Cases)
+## Verified OK (no action)
 
-### 7. `DoomClock.awaken` Permanently Latches `awakened = true` Even When Spawning Fails
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/endgame/DoomClock.java` (lines 190–196, 214–245)
-- **Problem:** The Javadoc on `awaken(ServerLevel)` states: *"If it cannot place the presence this
-  pass, nothing is announced and the next tick is free to try again."* However, `checkThresholds` sets
-  `clock.awakened = true; clock.setDirty();` **before** calling `awaken(level)`. If `awaken(level)`
-  cannot find a valid surface spot on that tick (e.g., player is underground or at sea), the 70%
-  awakening never retries.
-- **Fix:** Have `awaken(level)` return `boolean` (`true` when `horror != null` or already nearby) and
-  only latch `clock.awakened = true` when it succeeds (or when `!NPC_CULT_RITUALS_CAN_AWAKEN.get()`).
-
-### 8. `RiteEngine`: Cooldown Stamped Before Altar/Offering Checks, and `closeRift` Consumes Offerings for 0 Rifts
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/rite/RiteEngine.java` (lines 154–220, 737–767)
-- **Problem:**
-  1. Line 161 writes `RITE_READY.put(player.getUUID(), now + cooldown)` **before** verifying that the
-     player is at a valid altar (line 168), inside a Fallen city (line 178), or holding required
-     offerings (line 214), contradicting the class Javadoc (*"a rite that never started — altar,
-     cooldown, missing offerings — pays nothing"*).
-  2. `closeRift` (lines 737–767) returns `new Result(true, "The Way is sealed; 0 rift marker(s) removed...")`
-     even when `removed == 0` (which happens if `REQUIRE_RITE_CONDITIONS` is false, or at the corner of
-     the `riftNear` sphere vs `blockPosition()` box), consuming offerings and granting `+10` sanity
-     when no rift was closed.
-- **Fix:** Stamp `RITE_READY` only after all pre-checks (altar, city, offerings) pass, and return
-  `new Result(false, ...)` in `closeRift` when `removed == 0`.
-
-### 9. `EndgameState.of(level)` and `RiftLedger.of(level)` Are Not Normalized to `server.overworld()`
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/endgame/EndgameState.java` (lines 70–73)
-  - `src/main/java/com/sanchous98/eldritchhorror/endgame/RiftLedger.java` (lines 51–54)
-- **Problem:** Unlike `DoomClock.of(level)` (which resolves `level.getServer().overworld()`),
-  `EndgameState.of` and `RiftLedger.of` use `level.getDataStorage()` on whatever dimension is passed
-  in, splitting endgame state if accessed from `eldritch_horror:threshold` or another dimension.
-- **Fix:** Normalize `ServerLevel overworld = level.getServer().overworld();` in both `of(ServerLevel)`
-  methods.
-
-### 10. Static Maps Not Cleared on Server Stop / World Switch (Cross-World State & Tick Lockouts)
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/world/cult/CultRituals.java` (lines 121–123: `CELLS`, `COOLDOWNS`)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/transport/ShipService.java` (lines 50–54: `ACTIVE`, `LAST_TICK`, `STUCK`)
-  - `src/main/java/com/sanchous98/eldritchhorror/entity/CthulhuSiteTrigger.java` (line 44: `SPAWNED`)
-  - `src/main/java/com/sanchous98/eldritchhorror/entity/ChoirLeviathanTrigger.java` (line 48: `SPAWNED`)
-  - `src/main/java/com/sanchous98/eldritchhorror/rite/RiteEngine.java` (line 104: `RITE_READY`)
-  - `src/main/java/com/sanchous98/eldritchhorror/cult/ReputationDecayTicker.java` (line 37: `LAST_TOUCH`)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/VeilLensItem.java` (line 39: `DRAIN`)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/RiteEchoes.java` (line 20: `LAST`)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/Waypoints.java` (line 28: `MARKS`)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/blocks/CityGateBlock.java` (line 48: `LAST_USE`)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/blocks/InvestigatorPedestalBlock.java` (line 46: `PREVIEW`)
-- **Problem:** When switching from a high-`gameTime` world to a fresh world in the same JVM (or across
-  GameTest runs), stale tick timestamps in `RITE_READY`, `COOLDOWNS`, `LAST_USE`, and `LAST_TOUCH`
-  lock out rites/altars/gates because `now < ready`; `SPAWNED` prevents Cthulhu/Leviathan from ever
-  spawning in the second world; `ShipService.ACTIVE` retains strong references to the old
-  `ServerLevel`; `RiteEchoes.LAST` lets a player echo a previous world's rite.
-- **Fix:** Clear these maps on `ServerStoppedEvent` / `ServerStartedEvent` (and per-player maps on
-  `PlayerLoggedOutEvent`), or check `now < ready - maxCooldown` to self-heal on clock regression.
-
-### 11. Curated City Villagers Immediately Lose Their Professions (`CityPopulation`)
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/world/CityPopulation.java` (lines 219–227)
-- **Problem:** `TownPopulation.java` (line 172) sets `villager.setVillagerXp(1)` so vanilla's
-  `ResetProfession` AI behavior does not strip jobless level-1 villagers back to `NONE` on their first
-  tick. `CityPopulation.style()` assigns a profession from `PROFESSIONS` but omits
-  `villager.setVillagerXp(1)`, causing every professional villager in the 24 curated cities to immediately
-  revert to `VillagerProfession.NONE`.
-- **Fix:** Call `villager.setVillagerXp(1)` in `CityPopulation.style()` whenever `profession` is not
-  `NONE` or `NITWIT`.
-
-### 12. Nikolai Volkov's `Forbidden Insight` Active Ability Can Teach Endgame Fork Rites
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/investigator/SignatureAbilities.java` (lines 164–176)
-- **Problem:** Unlike `LucidDreamPool` (which restricts to tier ≤ 2 and excludes the endgame fork
-  rites), `forbiddenInsight` (20s cooldown, no reagent cost) picks any unknown rite from `Rites.all()`.
-  A player can spam the item every 20 seconds to learn all tier-3 rites, Ancient One solves, and
-  `awaken_the_horror` / `banish_the_horror` / `summon_the_horror` without ever reaching `INNER_CIRCLE`
-  or reading a tome.
-- **Fix:** Filter `forbiddenInsight` candidates through `LucidDreamPool.eligible(...)` (or exclude
-  `LucidDreamPool.EXCLUDED` and tier 3 cult-gated rites).
-
-### 13. `SanityTicker` / `CorruptionTicker` Do Not Re-Apply Threshold Effects After `Sedate` or Dimension Travel
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/sanity/SanityTicker.java` (lines 71–84)
-  - `src/main/java/com/sanchous98/eldritchhorror/corruption/CorruptionTicker.java` (lines 72–85)
-  - `src/main/java/com/sanchous98/eldritchhorror/investigator/SignatureAbilities.java` (lines 90–91)
-- **Problem:** `SanityTicker` only calls `applyEffects(player, after)` when `before != after`. When
-  Dr. Amos Hartley uses `Sedate` (removing `MADNESS`/`MARKED` and restoring `+20` sanity) while deep
-  inside `BREAKING` or `MARKED` so that `after` stays in the same band (`before == after`),
-  `SanityTicker` never re-applies `MADNESS` until the player crosses a band boundary or relogs.
-- **Fix:** In `SanityTicker` and `CorruptionTicker`, also check whether the expected infinite effect for
-  `after` is missing on the player, or clear `PREVIOUS.remove(player.getUUID())` on dimension change.
-
-### 14. Combat Exploits in `WeaponEffects` (Spam-Click Bonus Damage & `hollow_pact_blade` Off-Weapon Kills)
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/registry/items/WeaponEffects.java` (lines 130–193)
-- **Problem:**
-  1. `applyMelee` adds flat `+2.0F` / `+3.0F` bonus damage (`woodsman_axe`, `silver_blade`,
-     `star_iron_sword`) and drains sanity in `LivingDamageEvent.Pre` without checking attack charge, so
-     0-cooldown spam-clicking deals full flat bonus damage on every click.
-  2. `onDeath` checks `isHeld(player.getMainHandItem(), "hollow_pact_blade")` at the moment an entity
-     dies rather than checking `event.getSource().getWeaponItem()`, charging `-4.0` sanity and `+1.0`
-     corruption when a projectile/explosion kills a mob while the player holds the blade (or allowing a
-     player to swap away right before death).
-
-### 15. Incomplete Lesser-Horror Lists in `MobSuppressor.isWardedLesserSpawn` and `StoneSentinel.isWardable`
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/world/MobSuppressor.java` (lines 98–110)
-  - `src/main/java/com/sanchous98/eldritchhorror/entity/StoneSentinel.java` (lines 57–64)
-- **Problem:** `MobSuppressor.isWardedLesserSpawn` only blocks 3 early mobs (`LesserSwarm`, `Watcher`,
-  `BoneChoir`), allowing the other 13 lesser/tainted horrors (`RisenHusk`, `VeilStalker`,
-  `DrownedThrall`, `StarSpawn`, `NightHag`, `Byakhee`, `AshenRevenant`, etc.) to spawn freely inside an
-  active `ward_of_the_eye`.
-
-### 16. Worldgen & Aura Performance Bottlenecks (`CityLocation.build`, `SurfaceDecorator.inCity`, `WailHusk`)
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/world/loc/city/CityLocation.java` (lines 122–160, 275–317)
-  - `src/main/java/com/sanchous98/eldritchhorror/world/SurfaceDecorator.java` (lines 46–52, 147–164)
-  - `src/main/java/com/sanchous98/eldritchhorror/entity/WailHusk.java` (lines 120–122)
-- **Problem:**
-  - `CityLocation.build` runs on all ~2,600 chunks of a city and recomputes ~3,600 elevation probes
-    (`meanLevel` + `edgeRingWidth`) and executes tens of thousands of `b.put(...)` calls for the
-    central landmark on every single chunk, even 350 blocks away where every block is clipped out.
-    This directly contributes to the high CPU/memory churn during worldgen noted in `docs/TODO.md`.
-  - `WailHusk` checks `hasLineOfSight(player)` inside `auraRateFor(player)` instead of overriding
-    `auraRequiresLineOfSight()`. When 3 `WailHusk`s are in range (`auraMaxStack = 2`) and the first 2
-    are behind a wall, they fill the stack cap of 2 with `0.0` drain and block the 3rd `WailHusk` that
-    actually has line of sight.
-
-### 17. Multiple Unstackable Artifacts (`EyeOfTheWatcherItem`, `MirrorShardItem`, `VeilLensItem`) Multiply Passive Sanity Drain
-- **Files:**
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/EyeOfTheWatcherItem.java` (lines 60–65)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/MirrorShardItem.java` (lines 60–69)
-  - `src/main/java/com/sanchous98/eldritchhorror/registry/items/VeilLensItem.java` (lines 60–74)
-- **Problem:** `inventoryTick` fires once per matching stack in the inventory. Carrying two
-  `MirrorShardItem`s or two `VeilLensItem`s drains sanity at 2× the intended rate on the same tick.
-
-### 18. `TomeRiteKnowledge` Listens to `RightClickItem` Instead of `Item#use`
-- **File:** `src/main/java/com/sanchous98/eldritchhorror/rite/TomeRiteKnowledge.java` (lines 61–90)
-- **Problem:**
-  - `TomeRiteKnowledge` ignores `OFF_HAND` (`event.getHand() != InteractionHand.MAIN_HAND`), whereas
-    `ConsumableItem.use` still runs for `OFF_HAND` and drains the player's sanity/corruption without
-    teaching the rite.
-  - Conversely, right-clicking an interactable block (chest/door/altar) with a tome in `MAIN_HAND`
-    fires `RightClickItem` and teaches the rite for free without `ConsumableItem.use` running.
-
----
-
-## Low Severity & Nits
-
-19. **Malformed Translation Keys for Projectile Entities (`en_us.json:922-924`, `ru_ru.json:922-924`):**
-    Keys are written as `"item.eldritch_horror.entity.eldritch_horror.{bullet,thrown_dynamite,tear_gas}"`
-    instead of `"entity.eldritch_horror.{bullet,thrown_dynamite,tear_gas}"`, leaving death messages and
-    entity names untranslated.
-20. **`TokyoStyle.flourish` (`TokyoStyle.java:68`) and `RomeStyle.streetProps` (`RomeStyle.java:190`):**
-    Trees are placed at `b.groundY(x, z)` (raw unlevelled terrain) instead of the levelled city datum
-    `y0` / `ground`, causing floating or buried trees whenever terrain was cut or filled.
-21. **Coordinate Overwrite in `OrderVault.vaultPortal` (`OrderVault.java:165-171`) and Clamped Doorway in `BeijingStyle` (`BeijingStyle.java:160-161`):**
-    `OrderVault` lines 170–171 overwrite `(cx ± 2, y, z)` written on lines 165/168. `BeijingStyle` passes
-    doorway offset `17` on a 16-wide wall (`cx - 8 .. cx + 8`), clamping the gate to the corner instead
-    of the center (`offset = 8`).
-22. **`Builder.put` & `RailWorldgen.inside` Off-By-One at `maxY` (`Builder.java:56, 69, 471`, `RailWorldgen.java:164`):**
-    Checks `y > this.maxY` instead of `y >= this.maxY` (`maxY` is exclusive `320`; valid block Y is
-    `-64..319`).
-23. **`EarthChunkGenerator.getBaseHeight` (`EarthChunkGenerator.java:138-141`):**
-    Returns `surfaceY` instead of `surfaceY + 1` and ignores `Heightmap.Types` over oceans (returning
-    seabed instead of `SEA_LEVEL + 1` for `WORLD_SURFACE_WG`).
-24. **`SporeBee` (`entity/SporeBee.java:42-68`):**
-    Uses `FlyingMoveControl` without `setNoGravity(true)` or `travelFlying`, dropping to the ground
-    whenever idle.
-25. **`CultServices.trade` & `CultSystem.add` (`CultServices.java:115-124`, `CultSystem.java:53-72`):**
-    `CultServices.trade` omits `player.containerMenu.broadcastChanges()`. `CultSystem.add` does not call
-    `notifyRank` for opposed cults whose standing increases on a negative delta.
-26. **`@NullMarked` Missing `@Nullable` Annotations:**
-    - `sanity/SanitySources.java:72` (`cityFootprints`)
-    - `cult/CultServices.java:159` (`item(String path)`)
-    - `investigator/SignatureAbilities.java:200` (`nearestRift`)
-    - `loot/AntiquarianLootModifier.java:77` (`actingPlayer`)
-    - `client/MapKeyMappings.java:28-34` (`openMap`, `openJournal`, `openCodex`, `openSkills`)
-    - `core/CityRenderer.java:168` (`spec` parameter)
-    - `world/cult/CultRituals.java:433` (`BlockPos[] found = {null}`)
-27. **Tracked Python Bytecode Artifact in Git:**
-    `tools/__pycache__/gen_item_icons.cpython-312.pyc` was committed in `6a1b12c`. Remove via
-    `git rm --cached` and add `__pycache__/` to `.gitignore`.
+- **RPG core:** `RITE_READY` stamps after all pre-checks; `closeRift` fails at
+  0 and grants +10 once; `consume` honours Frugal-Rites; `DoomClock` latches
+  exactly once with no half/double spawn; all `SavedData` resolves to the
+  overworld; ticker re-assertion is read-only, once per second, no spam;
+  ModConfig never read at command-tree build.
+- **Items:** the charge gate matches vanilla exactly (ticker reset moved to the
+  end of `attack()` — scale still accurate inside `LivingDamageEvent.Pre`);
+  whetstone/tome interactions verified against `ServerPlayerGameMode` sources —
+  no free or double teach; artifact once-per-tick identity scan is correct
+  against 26.3 `Inventory.tick`/`EntityEquipment` sources (offhand included);
+  all 76 `set_count` modifiers and 47 recipes re-checked against
+  `maxStackSize` — nothing over-stacks.
+- **World:** `getBaseHeight` is per-type correct against the 26.3
+  `Heightmap.Types` sources; `maybeRenderCities` is non-blocking with
+  radius-0 tickets released on every exit path; `CultRituals.nearestCore` never
+  loads chunks; ship/train watchdog maps release on every discard branch;
+  mixins minimal with no client refs.
+- **Entities/city:** `CityLocation` replay parity holds (rng consumers are
+  `chest`/`scatter`/`ruins` only, drawn over full boxes — identical order in
+  near and far chunks); wards cover every hostile mod `Monster` with
+  `TaintedFauna`/`SporeBee` included and harmless entities excluded;
+  `SporeBee` flight is NBT-safe and matches Byakhee/NightHag; the `setVillagerXp(1)`
+  fix is effective against vanilla `ResetProfession`.
+- **Client/data:** zero `@OnlyIn` and zero client leaks; 988/988 lang keys in
+  both locales with `LangParityTest` gating parity; all JSON/recipes/textures
+  resolve; no secrets; `.gitignore` covers bytecode; README matches compose.

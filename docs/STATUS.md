@@ -261,10 +261,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Known limitations / deferred
 
-- **Second code review open:** `docs/CODE-REVIEW-2.md` (audit at `f190219`) — 32 findings,
-  unfixed: 1 High (Hydra/Yig escalation dead via `Long.MIN_VALUE` overflow), 4 Medium
-  (bot `god`/`attacktype` honesty, rail seam in `RailSampler`/`RailLines`), 17 Low, 10 Nit.
-  The first review's 27 resolutions were re-verified — no regressions, #22 still invalid.
+- **Code review open:** `docs/CODE-REVIEW.md` now tracks open findings only (audit at
+  `f190219`) — 32 unfixed: 1 High (Hydra/Yig escalation dead via `Long.MIN_VALUE`
+  overflow), 4 Medium (bot `god`/`attacktype` honesty, rail seam in
+  `RailSampler`/`RailLines`), 17 Low, 10 Nit. The first 27 findings were resolved at
+  `ebd394a..f190219` and re-verified — no regressions, #22 still invalid.
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
   waypoint markers, `design/16`), `rift_scout` (`design/10`, needs a per-rift axis) and the
