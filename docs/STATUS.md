@@ -262,8 +262,27 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   annotated `@Nullable` (registry lookups, `server.getLevel`, `getChunkNow`, `getAttribute`); the
   mixin package stays unmarked.
 
+## Authored cities and transport (2026-11-23)
+
+- **24 curated cities are authored `CityPlan`s** (`world/loc/city/plan/*Plan.java`): streets,
+  districts, landmarks, 6+ POIs, signs, 2 local quest anchors and a secret per city. The procedural
+  layout is only the non-curated fallback. A `CitySurface` grades a flat authored heart into the
+  natural terrain over the rim (no cut plate); plans can use `ctx.surface().at(x,z)` on the rim.
+- **Generation is cached**: `CityLocation` runs a plan once into `CityWrite`s and replays only the
+  current chunk (LRU of two cities); sign text is queued and applied after the chunk loads, which
+  removed the worldgen `setText` stall. Shanghai generation is responsive (~10 s on the dev box).
+- **Transport is authored and connected**: plans expose `STATION`/`PORT` anchors; `RailStations`
+  and `Ports` use them. Startup on a fresh world: 16 rail lines / 24 stations and 23 sea lines /
+  17 ports, with one connected component over all 24 cities (two trans-Pacific bridges).
+- Verified with a green `./gradlew build`, `tools/city_plan_audit.py` (24/24), a clean server boot,
+  and live `/eh train`/`/eh ship` at Shanghai (authored station 1 block, port 469 blocks).
+
 ## Known limitations / deferred
 
+- **Full transport tour / honest run:** a real 24-city ride generates chunks along the whole
+  route and can push the 3G dev container to ~2.9G; run it with a smaller view-distance/forceload
+  budget or a larger `DEV_MEM`. The honest full run is **partial**: boss farm and Hollow Choir
+  passed (`hollow_choir 80`, `awakened true`), the `star` phase was stopped before the endgame.
 - **Code review clean:** `docs/CODE-REVIEW.md` has no open findings. The third audit (14 items:
   2 Medium, 6 Low, 6 Nit, done directly at `c27107a`) is fixed in `d3dde42..60e831c`; the first
   two audits were resolved at `ebd394a..f190219` and `b26a045..797e9dd`. Final tree verified
