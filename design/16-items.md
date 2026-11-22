@@ -196,9 +196,7 @@ weapons and worn gear
 
 The board game's mundane tier (`Assets`: Item — Weapon). FFG's weapons mostly read
 "+N during Combat Encounters"; here that becomes real attack damage, and the one-shot
-effects (Dynamite, Tear Gas) become throwables. Grades are the acquisition ladder, not a
-second stat system: **common** items are craftable early, **quality** items need iron/copper
-and are also found in city and Order chests, **fine** items are loot-only.
+effects (Dynamite, Tear Gas) become throwables.
 
 | id | Name | Grade | FFG card | Adaptation |
 |---|---|---|---|---|
@@ -212,6 +210,25 @@ and are also found in city and Order chests, **fine** items are loot-only.
 | `carbine_rifle` | Carbine Rifle | fine | Carbine Rifle (Core, 3) | 1 cartridge, high velocity, pierces one body |
 | `cartridge` | Brass Cartridge | — | (ammo) | ammunition; copper + iron nugget, also chest loot |
 | `blasting_powder` | Blasting Powder | — | (reagent) | coal + consecrated salt; feeds Dynamite |
+
+### Weapon grades
+
+Every weapon and combat throwable carries one grade. It is **presentation and provenance**, not a
+second balance axis: damage, durability and on-hit effects stay the numbers each item registers.
+The grade sets the item name's colour (vanilla `Rarity`) and adds one tooltip line
+(`grade.eldritch_horror.<grade>`), and it mirrors where the item comes from.
+
+| Grade | Name colour | Provenance | Items |
+|---|---|---|---|
+| Crude | white | improvised, first thing a survivor can make | Bone Club, Ritual Knife |
+| Common | white | mundane 1920s field kit | Occultist's Implement, Axe, Bull Whip, .38 Revolver, Dynamite, Tear Gas |
+| Quality | yellow | crafted or issued with real materials | Silver Blade, .45 Automatic, Double-barreled Shotgun, Sacrificial Dagger, Censer Mace |
+| Fine | aqua | rare materials or elite issue | Star-Iron Sword, Tidal Trident, Warden's Maul, Carbine Rifle |
+| Relic | light purple | unique occult relics | Hollow Pact Blade, Eye Scepter, Veil Bow |
+
+Loot weights follow the grade: common items sit in the common city pool, quality items in the
+Order pool, fine and relic items in the relic pool. `WeaponGradeTest` keeps the table complete and
+the ladder ordered. The table itself is the single source of truth in `WeaponGrade.BY_ITEM`.
 
 Guns never use vanilla arrows: one `bullet` projectile carries the gun's damage and is
 consumed with a cartridge per shot. Durability is spent per shot, so a long expedition still

@@ -1,5 +1,10 @@
 {
   "itemGroup.eldritch_horror": "Древний ужас",
+  "grade.eldritch_horror.crude": "Грейд: грубое",
+  "grade.eldritch_horror.common": "Грейд: обычное",
+  "grade.eldritch_horror.quality": "Грейд: качественное",
+  "grade.eldritch_horror.fine": "Грейд: отличное",
+  "grade.eldritch_horror.relic": "Грейд: реликвия",
   "entity.eldritch_horror.risen_husk": "Восставший кадавр",
   "item.eldritch_horror.risen_husk_spawn_egg": "Яйцо призыва восставшего кадавра",
   "entity.eldritch_horror.tainted_fauna": "Осквернённая живность",

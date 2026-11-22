@@ -135,6 +135,10 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   Shotgun** and **Carbine Rifle** firing a shared `bullet` projectile and spending **Brass
   Cartridge** ammunition (copper + iron nugget). Recipes, city/Order/relic chest loot, generated
   icons, both locales and `FirearmSpecTest` are wired; the four guns are a common → fine ladder.
+- **Weapon grades** (`design/16`): every weapon and combat throwable carries one of five grades
+  (Crude / Common / Quality / Fine / Relic). The grade sets the item name's colour (vanilla
+  `Rarity`) and adds a localized tooltip line; damage and durability stay per-item, so a grade is
+  provenance and clarity, not a second balance axis. `WeaponGradeTest` keeps the table complete.
 - **`/eh bot equip` no longer eats items**: it overwrote the stack already in hand and could zero a
   one-stack weapon when the same slot was re-equipped (which `ensure_weapon` does every 40 hits in
   the playthrough harness). It now swaps and returns the previous item to the inventory.

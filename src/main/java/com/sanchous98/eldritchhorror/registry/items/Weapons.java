@@ -16,6 +16,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.component.ItemLore;
@@ -192,8 +193,21 @@ public final class Weapons {
      * what the weapon really does after {@link WeaponEffects}.
      */
     static Item.Properties lore(Item.Properties properties, String id) {
-        return properties.component(DataComponents.LORE, new ItemLore(List.of(
-                Component.translatable("item.eldritch_horror." + id + ".tooltip"))));
+        WeaponGrade grade = WeaponGrade.of(id);
+        return properties.rarity(rarity(grade))
+                .component(DataComponents.LORE, new ItemLore(List.of(
+                        Component.translatable("item.eldritch_horror." + id + ".tooltip"),
+                        Component.translatable(grade.lineKey()))));
+    }
+
+    /** Grade → the vanilla name colour ({@code design/16}: crude/common white … relic epic). */
+    private static Rarity rarity(WeaponGrade grade) {
+        return switch (grade) {
+            case CRUDE, COMMON -> Rarity.COMMON;
+            case QUALITY -> Rarity.UNCOMMON;
+            case FINE -> Rarity.RARE;
+            case RELIC -> Rarity.EPIC;
+        };
     }
 
     /**

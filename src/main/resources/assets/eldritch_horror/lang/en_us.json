@@ -1,5 +1,10 @@
 {
   "itemGroup.eldritch_horror": "Eldritch Horror",
+  "grade.eldritch_horror.crude": "Grade: Crude",
+  "grade.eldritch_horror.common": "Grade: Common",
+  "grade.eldritch_horror.quality": "Grade: Quality",
+  "grade.eldritch_horror.fine": "Grade: Fine",
+  "grade.eldritch_horror.relic": "Grade: Relic",
   "entity.eldritch_horror.risen_husk": "Risen Husk",
   "item.eldritch_horror.risen_husk_spawn_egg": "Risen Husk Spawn Egg",
   "entity.eldritch_horror.tainted_fauna": "Tainted Fauna",

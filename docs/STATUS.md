@@ -23,7 +23,8 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   Carbine Rifle, with Brass Cartridge ammo, a shared bullet projectile, recipes, chest loot and
   generated icons. Verified on a dev server: revolver 12→7.04 HP, shotgun 12→2.08 (2 cartridges),
   carbine 12→4.06, dynamite blast damage, tear gas Weakness/Blindness; all four guns keep their
-  inventory slot when switched.
+  inventory slot when switched. Every weapon now carries a five-step grade (Crude → Relic) shown
+  as the name colour plus a tooltip line.
 - **Honest endgame playthrough (night 5, no cheats)** — a bare bot (`spawnjoinbare`, empty
   inventory) played the whole road to the Hollow ending: gate → starter chain → mined birch
   wood/cobblestone → stone sword → 4 bones + kit → 4 silver from the Order Vault → cleansing
