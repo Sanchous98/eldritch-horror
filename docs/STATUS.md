@@ -18,14 +18,14 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Done (verified)
 
-- **Full code review passes** — `docs/CODE-REVIEW.md` has no open findings. The first audit
-  (27) was resolved at `ebd394a..f190219` (its #22 was a false positive: `getMaxY()` is
-  inclusive); the second (32) at `b26a045..797e9dd`. Highlights: tempering no longer hijacks
-  right-click (off-hand whetstone only), no over-stacked unstackable kit items, all mutating
-  `/eh` commands are gamemaster-gated, cylinder seam math is wrapped end to end (router and
-  runtime), Hydra/Yig escalation actually fires, the bot commands follow the honest-play
-  contract, per-world statics reset across worlds, and the throwables lost their bogus quality
-  path. Both passes verified with a green `./gradlew build` and a clean `Done (…)` server boot.
+- **Two full code review passes** — the first audit (27) was resolved at `ebd394a..f190219`
+  (its #22 was a false positive: `getMaxY()` is inclusive); the second (32) at
+  `b26a045..797e9dd`. Highlights: tempering no longer hijacks right-click (off-hand whetstone
+  only), no over-stacked unstackable kit items, all mutating `/eh` commands are
+  gamemaster-gated, cylinder seam math is wrapped end to end (router and runtime), Hydra/Yig
+  escalation actually fires, the bot commands follow the honest-play contract, per-world
+  statics reset across worlds, and the throwables lost their bogus quality path. Both passes
+  verified with a green `./gradlew build` and a clean `Done (…)` server boot.
 - **Field gear and firearms (design/16)** — the board game's mundane weapon tier is in: Axe,
   Bull Whip, Dynamite, Tear Gas and the .38 Revolver / .45 Automatic / Double-barreled Shotgun /
   Carbine Rifle, with Brass Cartridge ammo, a shared bullet projectile, recipes, chest loot and
@@ -263,10 +263,11 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Known limitations / deferred
 
-- **Code review clean:** `docs/CODE-REVIEW.md` has no open findings. The `f190219` audit's
-  32 items (1 High, 4 Medium, 17 Low, 10 Nit) were fixed in `b26a045..797e9dd` and verified
-  with `./gradlew build` plus a clean server boot. The first 27 findings were resolved at
-  `ebd394a..f190219`; both reports stay in git history.
+- **Code review open:** `docs/CODE-REVIEW.md` is the third audit, at `c27107a` — 14 open
+  findings (2 Medium, 6 Low, 6 Nit). The two Mediums are bot honesty gaps (`bot attack` still
+  reaches 5 blocks, `bot placeat` has no reach gate); the Lows are residual seam/runtime and
+  cross-world-state issues (`TrainLocomotive.seedTrail`, ship/train proximity, `TownIndex`
+  buckets, `RiftGates.PENDING`, `CityRenderer.active`). The first two audits are fully resolved.
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
   waypoint markers, `design/16`), `rift_scout` (`design/10`, needs a per-rift axis) and the
