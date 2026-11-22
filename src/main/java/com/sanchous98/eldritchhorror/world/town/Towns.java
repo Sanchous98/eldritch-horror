@@ -154,15 +154,19 @@ public final class Towns {
             return;
         }
         int minX = cp.getMinBlockX();
-        int maxX = minX + 15;
         int minZ = cp.getMinBlockZ();
         int maxZ = minZ + 15;
         EarthMap map = EarthMaps.get();
 
+        int centreX = minX + 8;
         Town best = null;
         for (Town town : candidates) {
             int cull = new TownLocation(town).radius() + MARGIN;
-            if (town.x() + cull < minX || town.x() - cull > maxX
+            // X is measured across the cylinder seam; the chunk spans minX..minX+15 (centre ± 8),
+            // so the town's [x-cull, x+cull] span reaches it when the centre delta is within
+            // [-cull-8, cull+7]. Z is ordinary.
+            int dx = EarthMap.wrapDelta(centreX, town.x());
+            if (dx < -(cull + 8) || dx > cull + 7
                     || town.z() + cull < minZ || town.z() - cull > maxZ) {
                 continue;
             }

@@ -187,8 +187,8 @@ public final class CityLocation implements Location {
 
         // 3b. Generic street dressing shared by every culture: stalls, crates and a courtyard well
         // or two. Placed BEFORE buildings, so it can never punch through a wall, a door or a road;
-        // every write is also gated on the cell being air/replaceable. Bounded to the flat heart so
-        // no prop can hover over a terrace step, deterministic like the rest.
+        // crates and wells are also gated on the cell being air/replaceable. Bounded to the flat
+        // heart so no prop can hover over a terrace step, deterministic like the rest.
         streetDetails(b, rng, cx, cz, propRadius, inner, ground, p);
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.
@@ -568,7 +568,12 @@ public final class CityLocation implements Location {
         int plaza = PLAZA;
         int outer = buildRadius - 6; // keep the whole prop inside the flat built fabric
 
-        // A few market stalls in the mid ring, clear of alleys and the plaza.
+        // A few market stalls in the mid ring, clear of alleys and the plaza. Every gate here is
+        // chunk-independent (landBox is EarthMap-derived, the keep-out is pure arithmetic), so the
+        // neighbouring chunk of a stall straddling a border draws the same stall instead of
+        // skipping it and clipping its overhang; Builder.put clips the writes outside this chunk.
+        int[][] stalls = new int[7][2];
+        int stallCount = 0;
         for (int i = 0; i < 7; i++) {
             int x = cx + rng.nextInt(2 * outer + 1) - outer;
             int z = cz + rng.nextInt(2 * outer + 1) - outer;
@@ -580,10 +585,25 @@ public final class CityLocation implements Location {
             if (inLandmarkClear(dx, dz, inner)) {
                 continue; // off the landmark / plaza keep-out box
             }
-            // The whole 3x3 stall footprint must be land and stand on replaceable (open) ground.
-            if (!landBox(b, x, z, x + 2, z + 2) || !b.isReplaceable(x, ground + 1, z)) {
+            // The whole 3x3 stall footprint must be land; no chunk-local replaceability test, so
+            // the decision is the same in every chunk the stall reaches into.
+            if (!landBox(b, x, z, x + 2, z + 2)) {
                 continue;
             }
+            // Never let two accepted 3x3 footprints intersect (pure test, no rng draw).
+            boolean clash = false;
+            for (int j = 0; j < stallCount; j++) {
+                if (Math.abs(x - stalls[j][0]) <= 2 && Math.abs(z - stalls[j][1]) <= 2) {
+                    clash = true;
+                    break;
+                }
+            }
+            if (clash) {
+                continue;
+            }
+            stalls[stallCount][0] = x;
+            stalls[stallCount][1] = z;
+            stallCount++;
             marketStall(b, rng, x, z, ground, p);
         }
 
@@ -599,11 +619,15 @@ public final class CityLocation implements Location {
             if (inLandmarkClear(dx, dz, inner) || onPlaza(x, z, cx, cz, plaza)) {
                 continue;
             }
-            if (!b.isLand(x, z) || !b.isReplaceable(x, ground + 1, z)) {
-                continue; // never overwrite a wall, a door or a landmark with a crate
+            // Land is chunk-independent, so every chunk draws the same crate sequence. The stack
+            // height is drawn unconditionally (before any write) for the same reason; props run
+            // before buildings, so there is no wall to protect here and Builder.put clips overhang.
+            if (!b.isLand(x, z)) {
+                continue;
             }
+            boolean tall = rng.nextFloat() < 0.4f;
             b.put(x, ground + 1, z, p.foundation());
-            if (rng.nextFloat() < 0.4f && b.isReplaceable(x, ground + 2, z)) {
+            if (tall) {
                 b.put(x, ground + 2, z, p.foundation());
             }
         }

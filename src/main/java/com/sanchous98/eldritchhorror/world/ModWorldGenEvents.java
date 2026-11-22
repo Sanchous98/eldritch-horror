@@ -9,6 +9,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Server-side worldgen wiring. Keeps the Earth map server-authoritative: the biome registry is
@@ -19,6 +20,9 @@ public final class ModWorldGenEvents {
 
     /** Extra border room past the longitude wrap line so the seam warp fires first. */
     private static final int SEAM_MARGIN = 64;
+
+    /** Forceload radius (blocks) used when a {@code eh.forceload} entry omits {@code :radius}. */
+    private static final int DEFAULT_FORCELOAD_RADIUS = 96;
 
     private ModWorldGenEvents() {
     }
@@ -81,16 +85,6 @@ public final class ModWorldGenEvents {
     }
 
     /**
-     * Dev aid: if {@code -Deh.renderCities} is set, schedule the server-side PNG renderer (see
-     * {@link com.sanchous98.eldritchhorror.core.CityRenderer}). The value is {@code true}/{@code all}
-     * for every city, a comma list of city names, or {@code batch=I/N} (equivalently {@code I/N})
-     * to render only slice I of N — the renderer then walks one or two cities per tick so it can
-     * never trip the server watchdog.
-     *
-     * <p>{@code -Deh.renderExit=true} shuts the server down when the selected slice is finished
-     * (handy for a one-shot render run).
-     */
-    /**
      * Dev aid: {@code -Deh.forceload=name:radius,...} force-loads a disc around each named fixed
      * location so its generation can be exercised (and logged) without a client.
      */
@@ -103,7 +97,7 @@ public final class ModWorldGenEvents {
         for (String part : prop.split(",")) {
             String[] kv = part.split(":");
             String name = kv[0].trim();
-            int r = kv.length > 1 ? Integer.parseInt(kv[1].trim()) : 96;
+            int r = radius(kv.length > 1 ? kv[1].trim() : null);
             boolean hit = false;
             for (Location loc : Locations.byId(name)) {
                 int x = Locations.xOf(loc);
@@ -119,6 +113,33 @@ public final class ModWorldGenEvents {
         }
     }
 
+    /**
+     * Parses a dev forceload radius, falling back to {@link #DEFAULT_FORCELOAD_RADIUS} when the
+     * value is malformed instead of throwing inside the ServerStarted handler.
+     */
+    private static int radius(@Nullable String text) {
+        if (text == null) {
+            return DEFAULT_FORCELOAD_RADIUS;
+        }
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            EldritchHorror.LOGGER.warn("forceload: bad radius '{}', using {}", text,
+                    DEFAULT_FORCELOAD_RADIUS);
+            return DEFAULT_FORCELOAD_RADIUS;
+        }
+    }
+
+    /**
+     * Dev aid: if {@code -Deh.renderCities} is set, schedule the server-side PNG renderer (see
+     * {@link com.sanchous98.eldritchhorror.core.CityRenderer}). The value is {@code true}/{@code all}
+     * for every city, a comma list of city names, or {@code batch=I/N} (equivalently {@code I/N})
+     * to render only slice I of N — the renderer then walks one or two cities per tick so it can
+     * never trip the server watchdog.
+     *
+     * <p>{@code -Deh.renderExit=true} shuts the server down when the selected slice is finished
+     * (handy for a one-shot render run).
+     */
     private static void maybeRenderCities(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         String prop = System.getProperty("eh.renderCities");
         if (prop == null || prop.isBlank()) {

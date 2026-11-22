@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.town;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,8 +96,9 @@ public final class TownIndex {
         int minCellZ = cellOf(z - radius);
         int maxCellZ = cellOf(z + radius);
         return collect(minCellX, maxCellX, minCellZ, maxCellZ, town -> {
+            // X is measured across the cylinder seam; Z is ordinary.
+            long dx = EarthMap.wrapDelta(x, town.x());
             long dz = (long) town.z() - z;
-            long dx = (long) town.x() - x;
             return dx * dx + dz * dz <= (long) radius * radius;
         });
     }
@@ -120,10 +122,23 @@ public final class TownIndex {
         int maxZ = minZ + 15;
         return collect(cellOf(minX - reach), cellOf(maxX + reach),
                 cellOf(minZ - reach), cellOf(maxZ + reach), town -> {
-                    long dx = Math.max(0L, Math.max((long) minX - town.x(), (long) town.x() - maxX));
+                    long dx = xGap(minX, town.x());
                     long dz = Math.max(0L, Math.max((long) minZ - town.z(), (long) town.z() - maxZ));
                     return dx * dx + dz * dz <= (long) reach * reach;
                 });
+    }
+
+    /**
+     * Distance in blocks along X from {@code townX} to the nearest column of the chunk whose
+     * minimum X is {@code minX}, measured across the cylinder seam; 0 when the town lies within
+     * the chunk's span.
+     */
+    private static long xGap(int minX, int townX) {
+        int delta = EarthMap.wrapDelta(minX + 8, townX);
+        if (delta < -8) {
+            return -8L - delta; // town west of the chunk: minX - townX
+        }
+        return delta > 7 ? delta - 7L : 0L; // town east of the chunk: townX - maxX
     }
 
     /** Visitor test for one candidate town. */

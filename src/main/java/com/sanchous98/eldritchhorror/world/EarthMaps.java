@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import java.io.IOException;
 import org.jspecify.annotations.Nullable;
 
@@ -29,7 +30,11 @@ public final class EarthMaps {
                     try {
                         local = EarthMap.load(EarthMaps.class.getClassLoader(), PIXEL_WIDTH);
                     } catch (IOException e) {
-                        throw new IllegalStateException("Earth map layers are missing", e);
+                        // The contract is "null if the layers are missing, never throws": log and
+                        // let get() turn the null into a clear IllegalStateException for callers
+                        // that cannot proceed without the map.
+                        EldritchHorror.LOGGER.error("Earth map layers are missing", e);
+                        return null;
                     }
                     instance = local;
                 }
@@ -47,11 +52,8 @@ public final class EarthMaps {
         return map;
     }
 
+    /** @return whether the baked layers loaded; never throws. */
     public static boolean available() {
-        try {
-            return get() != null;
-        } catch (Throwable t) {
-            return false;
-        }
+        return getOrNull() != null;
     }
 }

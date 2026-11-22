@@ -124,7 +124,8 @@ public final class CityPopulation {
     /** True if {@code player} is within the city's district plus {@link #MARGIN} blocks. */
     private static boolean near(ServerPlayer player, City city) {
         int reach = district(city) + MARGIN;
-        long dx = player.blockPosition().getX() - (long) city.x();
+        // X is measured across the cylinder seam; Z is ordinary.
+        long dx = EarthMap.wrapDelta(city.x(), player.blockPosition().getX());
         long dz = player.blockPosition().getZ() - (long) city.z();
         return dx * dx + dz * dz <= (long) reach * reach;
     }

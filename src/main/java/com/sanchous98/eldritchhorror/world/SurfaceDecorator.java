@@ -64,7 +64,6 @@ public final class SurfaceDecorator {
                 if (surfaceY <= ElevationCurve.SEA_LEVEL) {
                     continue; // underwater / sea ice: leave it
                 }
-                pos.set(x, surfaceY + 1, z);
                 BlockState ground = level.getBlockState(pos.set(x, surfaceY, z));
                 if (ground.is(Blocks.GRASS_BLOCK)) {
                     grassAndFlowers(level, rng, pos, x, surfaceY, z, map.koppenClass(x, z));
@@ -156,7 +155,8 @@ public final class SurfaceDecorator {
     /** True if (x,z) lies inside a curated city's built footprint (keep it clear). */
     private static boolean inCity(List<CityCircle> circles, int x, int z) {
         for (CityCircle c : circles) {
-            long dx = (long) x - c.x();
+            // The world is a cylinder: measure X across the seam, Z normally.
+            long dx = EarthMap.wrapDelta(c.x(), x);
             long dz = (long) z - c.z();
             if (dx * dx + dz * dz <= c.radiusSq()) {
                 return true;
