@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +22,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class RailRouteFinder {
     private static final double SQRT2 = Math.sqrt(2.0);
+    /** Cell columns around the cylinder (the production grid width, used only to wrap deltas). */
+    private static final int CYLINDER_CELLS = 2 * EarthMap.HALF_WIDTH / RailGrid.CELL_BLOCKS;
     /** Safety cap for pathological searches (the geometric length bound normally stops them). */
     private static final int MAX_EXPANSIONS = 600_000;
 
@@ -160,18 +163,27 @@ public final class RailRouteFinder {
     }
 
     /**
-     * @return the geometric length of a cell path in cells (orthogonal = 1, diagonal = sqrt 2)
+     * @return the geometric length of a cell path in cells (orthogonal = 1, diagonal = sqrt 2),
+     *         charging the real octile distance between consecutive smoothed waypoints
      */
     public static double pathLength(List<RailCell> path) {
         double total = 0.0;
         for (int i = 1; i < path.size(); i++) {
             RailCell from = path.get(i - 1);
             RailCell to = path.get(i);
-            int dx = Math.abs(to.x() - from.x());
+            // Longitude wraps: smoothed waypoints are far apart, so use the actual octile step.
+            int dx = Math.abs(wrapDeltaCells(from.x(), to.x()));
             int dz = Math.abs(to.z() - from.z());
-            total += dx != 0 && dz != 0 ? SQRT2 : 1.0;
+            int min = Math.min(dx, dz);
+            total += Math.max(dx, dz) + (SQRT2 - 1.0) * min;
         }
         return total;
+    }
+
+    /** @return the shortest signed column delta, in cells, on the cylinder. */
+    private static int wrapDeltaCells(int fromX, int toX) {
+        int delta = Math.floorMod(toX - fromX, CYLINDER_CELLS);
+        return delta > CYLINDER_CELLS / 2 ? delta - CYLINDER_CELLS : delta;
     }
 
     /**

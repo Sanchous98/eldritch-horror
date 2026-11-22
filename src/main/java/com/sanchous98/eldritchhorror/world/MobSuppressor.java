@@ -3,15 +3,19 @@ package com.sanchous98.eldritchhorror.world;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
-import com.sanchous98.eldritchhorror.entity.BoneChoir;
-import com.sanchous98.eldritchhorror.entity.LesserSwarm;
-import com.sanchous98.eldritchhorror.entity.Watcher;
+import com.sanchous98.eldritchhorror.entity.CultRaider;
+import com.sanchous98.eldritchhorror.entity.CultZealot;
+import com.sanchous98.eldritchhorror.entity.PlagueCrone;
+import com.sanchous98.eldritchhorror.entity.RiteBinder;
+import com.sanchous98.eldritchhorror.entity.SporeBee;
+import com.sanchous98.eldritchhorror.entity.TaintedFauna;
 import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -45,10 +49,11 @@ import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
  * and is re-cancelled on every load; that is harmless and the simplest correct behaviour (a true
  * purge would mean rewriting chunk data, which this class intentionally avoids).
  *
- * <p><b>Wards (design/26):</b> a <em>freshly spawned</em> lesser horror — {@link LesserSwarm},
- * {@link Watcher} or {@link BoneChoir}, never an {@link AncientOne} — inside an unexpired ward is
- * cancelled here too. Chunk-load re-adds are exempt: they are existing creatures, not spawns, and
- * walking into a haven is not the same as one opening inside it.
+ * <p><b>Wards (design/26):</b> a <em>freshly spawned</em> lesser or tainted horror — every hostile
+ * bestiary {@link Monster} except the {@link AncientOne} bosses and the human cultists, plus the
+ * tainted fauna and spore bee — inside an unexpired ward is cancelled here too. Chunk-load re-adds
+ * are exempt: they are existing creatures, not spawns, and walking into a haven is not the same as
+ * one opening inside it.
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class MobSuppressor {
@@ -91,22 +96,36 @@ public final class MobSuppressor {
     }
 
     /**
-     * Whether {@code entity} is a lesser horror spawning inside an unexpired ward. The three
-     * families the bestiary calls "lesser horror" are listed explicitly, so a boss, a cultist or a
-     * mundane animal is never repelled by a haven.
+     * Whether {@code entity} is a lesser/tainted horror spawning inside an unexpired ward. The
+     * bestiary registry is the authority: every hostile {@link Monster} is covered except the
+     * {@link AncientOne} bosses and the human cultists (who are a faction, not horrors), and the
+     * two tainted non-monsters ({@link TaintedFauna}, {@link SporeBee}) are included explicitly.
      */
     private static boolean isWardedLesserSpawn(Entity entity) {
-        if (!ModConfig.ENABLE_WARDS.get() || entity instanceof AncientOne) {
-            return false;
-        }
-        if (!(entity instanceof LesserSwarm) && !(entity instanceof Watcher)
-                && !(entity instanceof BoneChoir)) {
+        if (!ModConfig.ENABLE_WARDS.get() || !isLesserHorror(entity)) {
             return false;
         }
         if (!(entity.level() instanceof ServerLevel level)) {
             return false;
         }
         return WardLedger.of(level).wardAt(level, entity.blockPosition()) != null;
+    }
+
+    /** The shared lesser/tainted-horror classification (mirrors {@code StoneSentinel.isWardable}). */
+    private static boolean isLesserHorror(Entity entity) {
+        if (entity instanceof TaintedFauna || entity instanceof SporeBee) {
+            return true;
+        }
+        if (!(entity instanceof Monster) || entity instanceof AncientOne) {
+            return false;
+        }
+        // Only this mod's bestiary: a haven must not silently repel vanilla monsters.
+        if (!BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getNamespace()
+                .equals(EldritchHorror.MODID)) {
+            return false;
+        }
+        return !(entity instanceof CultRaider) && !(entity instanceof CultZealot)
+                && !(entity instanceof RiteBinder) && !(entity instanceof PlagueCrone);
     }
 
     /**

@@ -1,8 +1,10 @@
 package com.sanchous98.eldritchhorror.entity;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.golem.AbstractGolem;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,15 +56,25 @@ public final class StoneSentinel extends AbstractGolem {
                 (target, level) -> isWardable(target)));
     }
 
-    /** The set of lesser bestiary mobs the sentinel is allowed to deter. */
+    /**
+     * The lesser/tainted bestiary mobs the sentinel is allowed to deter: every hostile
+     * {@link Monster} except the {@link AncientOne} bosses and the human cultists, plus the two
+     * tainted non-monsters. Mirrors {@code MobSuppressor.isLesserHorror}.
+     */
     private static boolean isWardable(LivingEntity target) {
-        return target instanceof RisenHusk
-                || target instanceof LesserSwarm
-                || target instanceof TaintedFauna
-                || target instanceof WeaverSpawn
-                || target instanceof RiftMite
-                || target instanceof ShamblerOoze
-                || target instanceof NightHag;
+        if (target instanceof TaintedFauna || target instanceof SporeBee) {
+            return true;
+        }
+        if (!(target instanceof Monster) || target instanceof AncientOne) {
+            return false;
+        }
+        // Only this mod's bestiary: the sentinel is an Order guard, not a vanilla-mob killer.
+        if (!BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getNamespace()
+                .equals(EldritchHorror.MODID)) {
+            return false;
+        }
+        return !(target instanceof CultRaider) && !(target instanceof CultZealot)
+                && !(target instanceof RiteBinder) && !(target instanceof PlagueCrone);
     }
 
     /** 60 HP, 6 attack, slow and armoured. */

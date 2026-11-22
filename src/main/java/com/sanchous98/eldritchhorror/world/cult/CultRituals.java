@@ -128,6 +128,12 @@ public final class CultRituals {
     private CultRituals() {
     }
 
+    /** Drops every active cell and altar cooldown, so a world switch starts clean. */
+    public static void clear() {
+        CELLS.clear();
+        COOLDOWNS.clear();
+    }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         if (!ModConfig.ENABLE_NPC_CULT_RITUALS.get()) {
@@ -430,7 +436,7 @@ public final class CultRituals {
         ChunkPos origin = ChunkPos.containing(center);
         int chunkRadius = Math.max(1, (radius + 15) / 16);
         double[] bestDistance = {(double) radius * radius};
-        BlockPos[] found = {null};
+        @Nullable BlockPos[] found = {null};
         for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
             for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
                 LevelChunk chunk = level.getChunkSource().getChunkNow(origin.x() + dx, origin.z() + dz);

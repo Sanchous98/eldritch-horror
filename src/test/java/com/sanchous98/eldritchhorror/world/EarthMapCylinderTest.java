@@ -25,6 +25,19 @@ class EarthMapCylinderTest {
     }
 
     @Test
+    void wrapDeltaTakesTheShortWayRoundTheCylinder() {
+        int half = EarthMap.HALF_WIDTH;
+        // A point just west of the seam to one just east of it is a short hop, not a world tour.
+        assertEquals(10, EarthMap.wrapDelta(half - 5, -half + 5));
+        assertEquals(-10, EarthMap.wrapDelta(-half + 5, half - 5));
+        // Half-open range: [-HALF, +HALF), so exactly half a world goes west.
+        assertEquals(-half, EarthMap.wrapDelta(0, half));
+        assertEquals(-half + 5, EarthMap.wrapBlockX(half + 5));
+        assertEquals(-half, EarthMap.wrapBlockX(half));
+        assertEquals(10.0, EarthMap.wrapDelta((double) (half - 5), -half + 5.0), 1.0E-9);
+    }
+
+    @Test
     void longitudeWrapsLatitudeClamps() {
         EarthMap map = load();
         org.junit.jupiter.api.Assumptions.assumeTrue(map != null,

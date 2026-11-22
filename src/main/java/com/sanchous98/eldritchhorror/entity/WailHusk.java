@@ -2,7 +2,6 @@ package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
@@ -34,9 +33,9 @@ import org.jspecify.annotations.Nullable;
  * Wail husk — the floating mourner (replaces the ghast role;
  * {@code design/25-bestiary-and-entities.md}: "floating mourner whose wail is a line-of-sight
  * drain"). It drifts in the dark above players and its wail only costs you while it can actually
- * see you: {@link #auraRateFor} returns zero when {@code hasLineOfSight(player)} is false, so
- * breaking sight breaks the drain ({@code design/25}: "witnessing/line-of-sight is the primary
- * drain").
+ * see you: {@link #auraRequiresLineOfSight()} makes the shared aura pass skip a husk that has no
+ * line of sight, so breaking sight breaks the drain and a blind husk cannot fill the stack cap
+ * ({@code design/25}: "witnessing/line-of-sight is the primary drain").
  *
  * <p>Base {@link Monster}. Flight is the byakhee's verified composition ({@link FlyingMoveControl}
  * + {@link FlyingPathNavigation}, {@code noGravity}, {@link #travelFlying}); the spawner is the
@@ -114,11 +113,12 @@ public final class WailHusk extends Monster implements DreadAura {
 
     /**
      * The wail is a line-of-sight threat: it only drains a player it can actually see, so ducking
-     * behind cover or a hill is the answer. Verified 26.3: {@code LivingEntity.hasLineOfSight(Entity)}.
+     * behind cover or a hill is the answer. The shared pass checks this before counting the husk,
+     * so an unseen husk never consumes a stack slot.
      */
     @Override
-    public double auraRateFor(ServerPlayer player) {
-        return this.hasLineOfSight(player) ? auraRate() : 0.0;
+    public boolean auraRequiresLineOfSight() {
+        return true;
     }
 
     @Override

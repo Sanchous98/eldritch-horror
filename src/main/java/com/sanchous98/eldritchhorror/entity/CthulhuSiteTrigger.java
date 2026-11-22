@@ -47,6 +47,11 @@ public final class CthulhuSiteTrigger {
     private CthulhuSiteTrigger() {
     }
 
+    /** Re-arms the once-only spawn guard, so a world switch can awaken the site again. */
+    public static void clear() {
+        SPAWNED.clear();
+    }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         if (!ModConfig.ENABLE_BOSS_SITE_TRIGGERS.get()) {

@@ -50,6 +50,11 @@ public final class ChoirLeviathanTrigger {
     private ChoirLeviathanTrigger() {
     }
 
+    /** Re-arms the once-only spawn guard, so a world switch can summon the leviathan again. */
+    public static void clear() {
+        SPAWNED.clear();
+    }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         if (!ModConfig.ENABLE_BOSS_SITE_TRIGGERS.get() || !ModConfig.ENABLE_CHOIR_LEVIATHAN_TRIGGER.get()) {

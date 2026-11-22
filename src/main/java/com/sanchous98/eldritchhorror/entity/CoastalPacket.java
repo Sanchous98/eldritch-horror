@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.transport.Port;
 import com.sanchous98.eldritchhorror.world.transport.SeaPoint;
 import com.sanchous98.eldritchhorror.world.transport.ShippingLine;
@@ -406,7 +407,8 @@ public class CoastalPacket extends AbstractBoat {
                 return;
             }
             SeaPoint target = shipping.waypoint(this.direction, this.waypointIndex);
-            double dx = target.x() + 0.5 - this.getX();
+            // Longitude wraps: steer the short way round the seam.
+            double dx = EarthMap.wrapDelta(this.getX(), target.x() + 0.5);
             double dz = target.z() + 0.5 - this.getZ();
             double distance = Math.sqrt(dx * dx + dz * dz);
             if (distance < 1.0E-4) {
@@ -419,7 +421,7 @@ public class CoastalPacket extends AbstractBoat {
                 remaining -= distance;
                 this.waypointIndex++;
             } else {
-                this.setPos(this.getX() + dx / distance * remaining, this.getY(),
+                this.setPos(EarthMap.wrapBlockX(this.getX() + dx / distance * remaining), this.getY(),
                         this.getZ() + dz / distance * remaining);
                 remaining = 0.0;
             }
@@ -433,8 +435,10 @@ public class CoastalPacket extends AbstractBoat {
         }
         int index = Math.min(1, shipping.route().size() - 1);
         SeaPoint target = shipping.waypoint(this.direction, index);
+        // Longitude wraps: face the short way round the seam.
+        double dx = EarthMap.wrapDelta(this.getX(), target.x() + 0.5);
         this.setYRot((float) Math.toDegrees(
-                Math.atan2(-(target.x() + 0.5 - this.getX()), target.z() + 0.5 - this.getZ())));
+                Math.atan2(-dx, target.z() + 0.5 - this.getZ())));
     }
 
     private void arrive(ServerLevel level) {

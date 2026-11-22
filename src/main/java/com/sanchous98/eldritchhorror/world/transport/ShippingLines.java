@@ -222,7 +222,8 @@ public final class ShippingLines {
         for (int i = 1; i < points.size(); i++) {
             SeaPoint a = points.get(i - 1);
             SeaPoint b = points.get(i);
-            double dx = b.x() - (double) a.x();
+            // Longitude wraps: sample the short way round the seam.
+            double dx = EarthMap.wrapDelta(a.x(), b.x());
             double dz = b.z() - (double) a.z();
             int steps = Math.max(1, (int) Math.ceil(Math.sqrt(dx * dx + dz * dz) / VALIDATE_STEP));
             for (int step = 0; step <= steps; step++) {
@@ -238,7 +239,8 @@ public final class ShippingLines {
     }
 
     private static boolean waterSegment(EarthMap map, int x1, int z1, int x2, int z2) {
-        double dx = x2 - (double) x1;
+        // Longitude wraps: sample the short way round the seam.
+        double dx = EarthMap.wrapDelta(x1, x2);
         double dz = z2 - (double) z1;
         int steps = Math.max(1, (int) Math.ceil(Math.sqrt(dx * dx + dz * dz) / VALIDATE_STEP));
         for (int step = 0; step <= steps; step++) {

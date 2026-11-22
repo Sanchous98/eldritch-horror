@@ -157,7 +157,7 @@ public final class BeijingStyle implements CityStyle {
         // Tier 1 — wide base storey.
         int t1h = 16;
         b.room(cx - 8, gy0, gt - 4, cx + 8, gy0 + t1h, gt + 4,
-                new Doorway(Side.S, 17), new Doorway(Side.N, 17));
+                new Doorway(Side.S, 8), new Doorway(Side.N, 8));
         for (int y = gy0; y <= gy0 + t1h; y++) {
             b.put(cx - 8, y, gt - 4, p.accent());
             b.put(cx + 8, y, gt - 4, p.accent());

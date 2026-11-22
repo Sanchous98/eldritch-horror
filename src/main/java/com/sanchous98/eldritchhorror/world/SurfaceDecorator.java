@@ -2,12 +2,15 @@ package com.sanchous98.eldritchhorror.world;
 
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A light, deterministic surface decoration pass: grass, flowers, sparse trees / bamboo / cacti
@@ -29,6 +32,12 @@ public final class SurfaceDecorator {
      */
     private static final int CITY_MARGIN = 16;
 
+    /** City keep-out circles, computed once from the immutable city registry. */
+    private static volatile @Nullable List<CityCircle> cityCircles;
+
+    private record CityCircle(int x, int z, long radiusSq) {
+    }
+
     private SurfaceDecorator() {
     }
 
@@ -42,12 +51,13 @@ public final class SurfaceDecorator {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         int minY = level.getMinY();
         int maxY = level.getMaxY();
+        List<CityCircle> circles = cityCircles();
 
         for (int lx = 0; lx < 16; lx++) {
             for (int lz = 0; lz < 16; lz++) {
                 int x = x0 + lx;
                 int z = z0 + lz;
-                if (inCity(map, x, z)) {
+                if (inCity(circles, x, z)) {
                     continue;
                 }
                 int surfaceY = Math.clamp(ElevationCurve.toY(map.elevationMetres(x, z)), minY + 1, maxY - 1);
@@ -144,22 +154,43 @@ public final class SurfaceDecorator {
     }
 
     /** True if (x,z) lies inside a curated city's built footprint (keep it clear). */
-    private static boolean inCity(EarthMap map, int x, int z) {
-        for (City c : Cities.all()) {
-            // Match the city's *built* district (radius capped at DISTRICT_CAP) plus a small
-            // margin — not the larger cull radius. This keeps greenery out from under the
-            // buildings while leaving a thin natural rim that softens the district edge.
-            // clamp(radius, 220, DISTRICT_CAP), exactly as CityLocation computes its district.
-            int district = Math.clamp(
-                    (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0),
-                    220, CITY_DISTRICT_CAP);
-            int r = district + CITY_MARGIN;
+    private static boolean inCity(List<CityCircle> circles, int x, int z) {
+        for (CityCircle c : circles) {
             long dx = (long) x - c.x();
             long dz = (long) z - c.z();
-            if (dx * dx + dz * dz <= (long) r * r) {
+            if (dx * dx + dz * dz <= c.radiusSq()) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * The city keep-out circles, computed once. Each matches the city's <b>built</b> district
+     * (radius capped at {@link #CITY_DISTRICT_CAP}) plus a small margin — not the larger cull
+     * radius — so greenery stays out from under the buildings while a thin natural rim softens the
+     * district edge. This is the same arithmetic CityLocation uses for its district.
+     */
+    private static List<CityCircle> cityCircles() {
+        List<CityCircle> local = cityCircles;
+        if (local == null) {
+            synchronized (SurfaceDecorator.class) {
+                local = cityCircles;
+                if (local == null) {
+                    List<City> cities = Cities.all();
+                    List<CityCircle> out = new ArrayList<>(cities.size());
+                    for (City c : cities) {
+                        int district = Math.clamp(
+                                (int) Math.round(220.0 + Math.sqrt(Math.max(c.population(), 1)) / 40.0),
+                                220, CITY_DISTRICT_CAP);
+                        long r = district + CITY_MARGIN;
+                        out.add(new CityCircle(c.x(), c.z(), r * r));
+                    }
+                    local = List.copyOf(out);
+                    cityCircles = local;
+                }
+            }
+        }
+        return local;
     }
 }

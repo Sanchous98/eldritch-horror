@@ -93,6 +93,34 @@ public final class EarthMap {
         }
     }
 
+    /**
+     * @return the shortest signed horizontal delta from {@code fromX} to {@code toX}, in blocks,
+     *         in {@code [-HALF_WIDTH, +HALF_WIDTH)}
+     */
+    public static int wrapDelta(int fromX, int toX) {
+        int width = 2 * HALF_WIDTH;
+        int delta = Math.floorMod(toX - fromX, width);
+        return delta >= HALF_WIDTH ? delta - width : delta;
+    }
+
+    /** Continuous-coordinate variant of {@link #wrapDelta(int, int)}, in blocks. */
+    public static double wrapDelta(double fromX, double toX) {
+        double width = 2.0 * HALF_WIDTH;
+        double delta = toX - fromX;
+        return delta - width * Math.floor(delta / width + 0.5);
+    }
+
+    /** @return {@code x} folded onto the cylinder, in {@code [-HALF_WIDTH, +HALF_WIDTH)}. */
+    public static int wrapBlockX(int x) {
+        return Math.floorMod(x + HALF_WIDTH, 2 * HALF_WIDTH) - HALF_WIDTH;
+    }
+
+    /** @return {@code x} folded onto the cylinder, in {@code [-HALF_WIDTH, +HALF_WIDTH)}. */
+    public static double wrapBlockX(double x) {
+        double width = 2.0 * HALF_WIDTH;
+        return x - width * Math.floor((x + HALF_WIDTH) / width);
+    }
+
     public int pixelWidth() {
         return width;
     }
@@ -136,8 +164,9 @@ public final class EarthMap {
 
     // ------------------------------------------------------------------ sampling
     private int sample(BufferedImage img, int worldX, int worldZ) {
-        int px = wrapX((worldX + HALF_WIDTH) / BLOCKS_PER_PIXEL);
-        int py = clamp((worldZ + HALF_HEIGHT) / BLOCKS_PER_PIXEL, height - 1);
+        // floorDiv, not `/`: truncation toward zero duplicates pixel 0 west of the map edge.
+        int px = wrapX(Math.floorDiv(worldX + HALF_WIDTH, BLOCKS_PER_PIXEL));
+        int py = clamp(Math.floorDiv(worldZ + HALF_HEIGHT, BLOCKS_PER_PIXEL), height - 1);
         return img.getRaster().getSample(px, py, 0);
     }
 

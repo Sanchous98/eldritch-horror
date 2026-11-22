@@ -64,7 +64,9 @@ public final class TokyoStyle implements CityStyle {
         if (rng.nextFloat() < 0.3f) {
             int tx = x - 2;
             int tz = z - 2;
-            int gy = b.groundY(tx, tz);
+            // The lot has already been levelled to the building floor; raw groundY can be cut or
+            // filled here, which would leave the tree floating or buried.
+            int gy = y0;
             b.put(tx, gy + 1, tz, Blocks.CHERRY_LOG.defaultBlockState());
             b.put(tx, gy + 2, tz, Blocks.CHERRY_LOG.defaultBlockState());
             b.fill(tx - 1, gy + 3, tz - 1, tx + 1, gy + 3, tz + 1,

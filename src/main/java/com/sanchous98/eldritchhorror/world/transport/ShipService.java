@@ -56,6 +56,21 @@ public final class ShipService {
     private ShipService() {
     }
 
+    /**
+     * Drops every cached hull and its watchdog state. Called on server stop so a world switch in the
+     * same JVM cannot keep strong references to the previous world's entities.
+     */
+    public static void clear() {
+        for (CoastalPacket ship : ACTIVE.values()) {
+            if (!ship.isRemoved()) {
+                ship.discard();
+            }
+        }
+        ACTIVE.clear();
+        LAST_TICK.clear();
+        STUCK.clear();
+    }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         if (!ModConfig.ENABLE_SHIPS.get()) {

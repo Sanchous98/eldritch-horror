@@ -223,6 +223,11 @@ public final class CityPopulation {
                 .getOrThrow(VillagerType.byBiome(level.getBiome(villager.blockPosition())));
         villager.setVillagerData(villager.getVillagerData().withType(type).withProfession(profession));
         villager.setVillagerDataFinalized(true);
+        // Vanilla's ResetProfession strips a jobless level-1 villager back to NONE on its first
+        // tick. One XP keeps a real trade without levelling the villager (see TownPopulation).
+        if (!profession.is(VillagerProfession.NONE) && !profession.is(VillagerProfession.NITWIT)) {
+            villager.setVillagerXp(1);
+        }
         villager.setPersistenceRequired();
     }
 

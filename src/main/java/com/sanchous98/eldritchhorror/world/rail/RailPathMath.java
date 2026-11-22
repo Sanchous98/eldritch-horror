@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,19 +64,21 @@ public final class RailPathMath {
      */
     private static void appendSegment(List<RailPoint> out, int x0, int z0, int x1, int z1,
                                       int run) {
+        // Longitude wraps: step toward the nearest copy of the target across the seam.
+        int targetX = x0 + EarthMap.wrapDelta(x0, x1);
         int x = x0;
         int z = z0;
-        while (x != x1 || z != z1) {
-            int dx = x1 - x;
+        while (x != targetX || z != z1) {
+            int dx = targetX - x;
             int dz = z1 - z;
             if (dx == 0) {
                 z += Integer.signum(dz);
-                out.add(new RailPoint(x, z));
+                out.add(new RailPoint(EarthMap.wrapBlockX(x), z));
                 continue;
             }
             if (dz == 0) {
                 x += Integer.signum(dx);
-                out.add(new RailPoint(x, z));
+                out.add(new RailPoint(EarthMap.wrapBlockX(x), z));
                 continue;
             }
             if (Math.abs(dx) >= Math.abs(dz)) {
@@ -83,22 +86,22 @@ public final class RailPathMath {
                 int sign = Integer.signum(dx);
                 for (int i = 0; i < step; i++) {
                     x += sign;
-                    out.add(new RailPoint(x, z));
+                    out.add(new RailPoint(EarthMap.wrapBlockX(x), z));
                 }
-                if (x != x1) {
+                if (x != targetX) {
                     z += Integer.signum(dz);
-                    out.add(new RailPoint(x, z));
+                    out.add(new RailPoint(EarthMap.wrapBlockX(x), z));
                 }
             } else {
                 int step = Math.min(Math.abs(dz), run);
                 int sign = Integer.signum(dz);
                 for (int i = 0; i < step; i++) {
                     z += sign;
-                    out.add(new RailPoint(x, z));
+                    out.add(new RailPoint(EarthMap.wrapBlockX(x), z));
                 }
                 if (z != z1) {
                     x += Integer.signum(dx);
-                    out.add(new RailPoint(x, z));
+                    out.add(new RailPoint(EarthMap.wrapBlockX(x), z));
                 }
             }
         }
@@ -112,7 +115,9 @@ public final class RailPathMath {
         for (int i = 1; i < points.size(); i++) {
             RailPoint from = points.get(i - 1);
             RailPoint to = points.get(i);
-            total += Math.abs(to.x() - from.x()) + Math.abs(to.z() - from.z());
+            // Longitude wraps: the seam step is one block, not a lap of the world.
+            total += Math.abs(EarthMap.wrapDelta(from.x(), to.x()))
+                    + Math.abs(to.z() - from.z());
         }
         return total;
     }

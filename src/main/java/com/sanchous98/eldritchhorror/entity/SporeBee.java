@@ -29,6 +29,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -42,6 +43,7 @@ public final class SporeBee extends Animal {
     public SporeBee(EntityType<? extends SporeBee> type, Level level) {
         super(type, level);
         this.moveControl = new FlyingMoveControl<>(this, 20, true);
+        this.setNoGravity(true);
         this.xpReward = 2;
     }
 
@@ -64,6 +66,12 @@ public final class SporeBee extends Animal {
         navigation.setCanFloat(true);
         navigation.setRequiredPathLength(32.0F);
         return navigation;
+    }
+
+    /** Keep the bee airborne: the byakhee/night-hag flight composition used elsewhere here. */
+    @Override
+    public void travel(Vec3 input) {
+        this.travelFlying(input, 0.2F);
     }
 
     /** 8 HP, 2 sting, fast flier. */

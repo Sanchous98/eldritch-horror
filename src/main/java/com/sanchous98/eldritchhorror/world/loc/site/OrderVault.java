@@ -161,13 +161,12 @@ public final class OrderVault implements Location {
 
     /** Heavy jambs, a deep lintel, a sealed slab and paired lights marking the strongroom portal. */
     private static void vaultPortal(StructureBuilder b, Palette p, int cx, int z, int y0) {
-        // Thick flanking jambs, two deep, rising well past the door head.
+        // Thick flanking jambs, two deep, rising well past the door head: a foundation casing
+        // outside the accent shaft, with no column written twice.
         for (int y = y0 + 1; y <= y0 + 5; y++) {
-            b.put(cx - 2, y, z, p.accent());
+            b.put(cx - 2, y, z, p.foundation());
             b.put(cx - 1, y, z, p.accent());
             b.put(cx + 1, y, z, p.accent());
-            b.put(cx + 2, y, z, p.accent());
-            b.put(cx - 2, y, z, p.foundation());
             b.put(cx + 2, y, z, p.foundation());
         }
         // A deep lintel and a sealed course above the door.

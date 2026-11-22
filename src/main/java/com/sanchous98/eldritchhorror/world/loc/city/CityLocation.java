@@ -9,11 +9,14 @@ import com.sanchous98.eldritchhorror.world.loc.Tier;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.storage.loot.LootTable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The reference {@link Tier#METROPOLIS}: an irregular, decaying gothic district for a curated
@@ -69,8 +72,23 @@ public final class CityLocation implements Location {
     private static final int EDGE_RING_MIN = 24;
     /** Maximum rim width: on very steep sites the slope widens (flatter) but never eats the city. */
     private static final int EDGE_RING_MAX = 64;
+    /**
+     * Conservative radius in which a style landmark may write (the largest current landmark
+     * reaches ~48 blocks). Chunks beyond it skip the landmark's block writes but still replay its
+     * RNG draws, so later layout in that chunk is unchanged.
+     */
+    private static final int LANDMARK_REACH = INNER_CLEAR + PLAZA;
 
     private final City city;
+    /**
+     * Chunk-independent city geometry, computed once per city (terrain is a global baked map, so
+     * the mean level and rim width are identical for every chunk of this location).
+     */
+    private volatile @Nullable Geometry geometry;
+
+    /** Cached result of the two O(radius²) elevation scans. */
+    private record Geometry(int ground, int edgeRing) {
+    }
 
     public CityLocation(City city) {
         this.city = city;
@@ -111,6 +129,12 @@ public final class CityLocation implements Location {
         int cz = this.city.z();
         int district = Math.min(radius(), DISTRICT_CAP);
         int plaza = PLAZA;
+        // Nothing in this location writes outside the district radius, so a chunk wholly beyond it
+        // can return before any geometry or landmark work. Locations.place already culls at the
+        // (sometimes larger) radius, which still lets a ring of empty chunks reach here.
+        if (!chunkTouches(b, cx, cz, district)) {
+            return;
+        }
         // The city level is the MEAN terrain over the flat interior, not the single centre point:
         // a centre-only level can sit far above or below most of a district that sprawls over a
         // hill, forcing a huge cut and a terraced edge. The mean balances cut and fill so the
@@ -120,8 +144,9 @@ public final class CityLocation implements Location {
         // The rim width adapts to how rugged the site is: a flat site needs only a short blend,
         // while a steep one gets a wider, gentler slope so the flattening never reads as a cliff.
         int interior = district - EDGE_RING_MIN;
-        int ground = meanLevel(b, cx, cz, interior);
-        int edgeRing = edgeRingWidth(b, cx, cz, interior, ground);
+        Geometry geo = geometry(b, cx, cz, interior);
+        int ground = geo.ground();
+        int edgeRing = geo.edgeRing();
         Palette p = b.palette();
         RandomSource rng = b.rng();
         CityStyle style = CityStyles.forCity(this.city.name());
@@ -148,7 +173,14 @@ public final class CityLocation implements Location {
         paveDistrict(b, cx, cz, district, plaza, p, ground, edgeRing);
 
         // 2. Landmark: the cultural skyline piece (cathedral / temple / mosque / pagoda …).
-        style.landmark(b, rng, cx, cz, ground, p);
+        // Only chunks near the centre can receive any of its blocks; farther chunks still run it
+        // against a discarding builder so its RNG draws stay identical (some styles randomise
+        // towers) and the later street/building layout does not shift.
+        if (chunkTouches(b, cx, cz, LANDMARK_REACH)) {
+            style.landmark(b, rng, cx, cz, ground, p);
+        } else {
+            style.landmark(new DiscardingBuilder(b), rng, cx, cz, ground, p);
+        }
 
         // 3. Plaza monument, off the landmark axis.
         b.monument(cx + plaza - 5, cz + plaza - 5, ground + 1);
@@ -263,6 +295,36 @@ public final class CityLocation implements Location {
                     b.put(px, cy, pz, air);
                 }
             }
+        }
+    }
+
+    /** Whether the generating chunk overlaps the square of half-extent {@code reach}. */
+    private static boolean chunkTouches(StructureBuilder b, int cx, int cz, int reach) {
+        int minX = b.chunkMinX();
+        int minZ = b.chunkMinZ();
+        return minX <= cx + reach && minX + 15 >= cx - reach
+                && minZ <= cz + reach && minZ + 15 >= cz - reach;
+    }
+
+    /**
+     * The city's cached geometry: mean level and rim width. Both scans are O(radius²) and pure
+     * ({@code b.groundY}/{@code b.isLand} only), so computing them once per city is enough. The
+     * volatile field plus a synchronized first write keeps the shared location safe for concurrent
+     * worldgen threads; a benign double-compute is possible but never observed by readers.
+     */
+    private Geometry geometry(StructureBuilder b, int cx, int cz, int interior) {
+        Geometry cached = this.geometry;
+        if (cached != null) {
+            return cached;
+        }
+        synchronized (this) {
+            cached = this.geometry;
+            if (cached == null) {
+                int ground = meanLevel(b, cx, cz, interior);
+                cached = new Geometry(ground, edgeRingWidth(b, cx, cz, interior, ground));
+                this.geometry = cached;
+            }
+            return cached;
         }
     }
 
@@ -893,5 +955,121 @@ public final class CityLocation implements Location {
                 .setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
         b.put(dx, y, dz, lower);
         b.put(dx, y + 1, dz, lower.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
+    }
+
+    /**
+     * A write-free view of the real builder for chunks outside the landmark reach: reads and the
+     * RNG delegate (so a style's random choices are replayed), and plain block writes are dropped.
+     * Since the chunk is farther than {@link #LANDMARK_REACH}, the real builder would clip those
+     * writes anyway; this only avoids walking their loops. The RNG-driven helpers ({@code scatter},
+     * {@code ruins}, {@code chest}) still delegate because their draws must match every other
+     * chunk; their own writes are clipped by the real builder.
+     */
+    private static final class DiscardingBuilder implements StructureBuilder {
+
+        private final StructureBuilder delegate;
+
+        private DiscardingBuilder(StructureBuilder delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void put(int x, int y, int z, BlockState state) {
+        }
+
+        @Override
+        public void chest(int x, int y, int z, ResourceKey<LootTable> lootTable) {
+            this.delegate.chest(x, y, z, lootTable);
+        }
+
+        @Override
+        public void fill(int x0, int y0, int z0, int x1, int y1, int z1, BlockState state) {
+        }
+
+        @Override
+        public void walls(int x0, int y0, int z0, int x1, int y1, int z1, BlockState state) {
+        }
+
+        @Override
+        public void room(int x0, int y0, int z0, int x1, int y1, int z1, Doorway... doorways) {
+        }
+
+        @Override
+        public void ground(int x0, int z0, int x1, int z1, int y0, int y1, BlockState state) {
+        }
+
+        @Override
+        public void pitchedRoof(int x0, int z0, int x1, int z1, int y, int height, int ridgeAxis) {
+        }
+
+        @Override
+        public void spire(int cx, int cz, int baseY, int height) {
+        }
+
+        @Override
+        public void buttress(int x, int z, int baseY, int height, Side outward) {
+        }
+
+        @Override
+        public void window(int x, int y, int z, int height, int width, boolean vertical) {
+        }
+
+        @Override
+        public void crenellations(int x0, int z0, int x1, int z1, int y) {
+        }
+
+        @Override
+        public void monument(int cx, int cz, int baseY) {
+        }
+
+        @Override
+        public void scatter(int x0, int z0, int x1, int z1, int y0, int y1, BlockState state,
+                            float chance) {
+            this.delegate.scatter(x0, z0, x1, z1, y0, y1, state, chance);
+        }
+
+        @Override
+        public void ruins(int x0, int y0, int z0, int x1, int y1, int z1, float holeChance) {
+            this.delegate.ruins(x0, y0, z0, x1, y1, z1, holeChance);
+        }
+
+        @Override
+        public RandomSource rng() {
+            return this.delegate.rng();
+        }
+
+        @Override
+        public int groundY(int x, int z) {
+            return this.delegate.groundY(x, z);
+        }
+
+        @Override
+        public boolean isLand(int x, int z) {
+            return this.delegate.isLand(x, z);
+        }
+
+        @Override
+        public boolean isReplaceable(int x, int y, int z) {
+            return this.delegate.isReplaceable(x, y, z);
+        }
+
+        @Override
+        public int chunkMinX() {
+            return this.delegate.chunkMinX();
+        }
+
+        @Override
+        public int chunkMinZ() {
+            return this.delegate.chunkMinZ();
+        }
+
+        @Override
+        public Palette palette() {
+            return this.delegate.palette();
+        }
+
+        @Override
+        public void marker(String name, int x, int y, int z) {
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.world.rail;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +33,18 @@ class RailPathMathTest {
         List<RailPathMath.RailPoint> path = RailPathMath.orthogonalize(
                 List.of(new RailPathMath.RailPoint(5, 5)), 8);
         assertEquals(1, path.size());
+    }
+
+    @Test
+    void crossesTheSeamTheShortWay() {
+        int half = EarthMap.HALF_WIDTH;
+        List<RailPathMath.RailPoint> path = RailPathMath.orthogonalize(List.of(
+                new RailPathMath.RailPoint(half - 2, 0),
+                new RailPathMath.RailPoint(-half + 2, 0)), 8);
+        assertEquals(half - 2, path.get(0).x());
+        assertEquals(-half + 2, path.get(path.size() - 1).x());
+        // Four one-block steps around the seam, not a 131,072-block line back across the map.
+        assertEquals(4.0, RailPathMath.length(path), 1.0E-9);
     }
 
     @Test

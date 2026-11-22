@@ -165,7 +165,8 @@ public final class CityRenderer {
      * @param exitWhenDone shut the server down once every selected city is written (single-shot run)
      * @return the number of cities (or wrapped sites) selected
      */
-    public static synchronized int begin(MinecraftServer server, String spec, boolean exitWhenDone) {
+    public static synchronized int begin(MinecraftServer server, @Nullable String spec,
+                                         boolean exitWhenDone) {
         if (active != null) {
             EldritchHorror.LOGGER.warn("CityRenderer: a render session is already active");
             return 0;

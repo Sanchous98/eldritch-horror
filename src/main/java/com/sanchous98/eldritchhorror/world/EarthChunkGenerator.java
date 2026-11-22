@@ -136,8 +136,16 @@ public class EarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor heightAccessor, RandomState randomState) {
-        return Math.clamp(ElevationCurve.toY(EarthMaps.get().elevationMetres(x, z)),
-                heightAccessor.getMinY(), heightAccessor.getMaxY());
+        int minY = heightAccessor.getMinY();
+        int maxY = heightAccessor.getMaxY();
+        int surfaceY = Math.clamp(ElevationCurve.toY(EarthMaps.get().elevationMetres(x, z)),
+                minY + 1, maxY - 1);
+        // Heightmaps store the first free Y above their top block. Over ocean the water surface is
+        // the top for the surface/motion maps; OCEAN_FLOOR keeps the seabed.
+        int top = surfaceY < ElevationCurve.SEA_LEVEL
+                && type.isOpaque().test(Blocks.WATER.defaultBlockState())
+                ? ElevationCurve.SEA_LEVEL : surfaceY;
+        return Math.clamp(top + 1, minY, maxY);
     }
 
     @Override

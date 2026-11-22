@@ -7,6 +7,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Registers the mod's key bindings, all rebindable in Options → Controls:
@@ -25,13 +26,13 @@ public final class MapKeyMappings {
             new KeyMapping.Category(EldritchHorror.id("keys"));
 
     /** The map key; {@code null} until {@link #onRegisterKeyMappings} runs. */
-    static KeyMapping openMap;
+    static @Nullable KeyMapping openMap;
     /** The journal key; {@code null} until {@link #onRegisterKeyMappings} runs. */
-    static KeyMapping openJournal;
+    static @Nullable KeyMapping openJournal;
     /** The codex key; {@code null} until {@link #onRegisterKeyMappings} runs. */
-    static KeyMapping openCodex;
+    static @Nullable KeyMapping openCodex;
     /** The skill-tree key; {@code null} until {@link #onRegisterKeyMappings} runs. */
-    static KeyMapping openSkills;
+    static @Nullable KeyMapping openSkills;
 
     private MapKeyMappings() {
     }

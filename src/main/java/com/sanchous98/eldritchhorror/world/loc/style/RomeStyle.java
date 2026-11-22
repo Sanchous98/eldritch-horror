@@ -187,7 +187,8 @@ public final class RomeStyle implements CityStyle {
             if (dx * dx + dz * dz < 26 * 26) {
                 continue; // keep the plaza and landmark clear
             }
-            umbrellaPine(b, px, pz, b.groundY(px, pz), p);
+            // Props are placed on the levelled city datum; raw groundY can be cut or filled here.
+            umbrellaPine(b, px, pz, ground, p);
         }
     }
 

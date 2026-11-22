@@ -81,6 +81,15 @@ class RailRouteFinderTest {
     }
 
     @Test
+    void pathLengthChargesTheRealDistanceBetweenSmoothedWaypoints() {
+        // Old code charged 1.0 for any single waypoint pair; ten cells apart is ten blocks.
+        assertEquals(10.0, RailRouteFinder.pathLength(List.of(
+                new RailCell(0, 0), new RailCell(10, 0))), 1.0E-9);
+        assertEquals(4.0 + (Math.sqrt(2.0) - 1.0) * 3.0, RailRouteFinder.pathLength(List.of(
+                new RailCell(0, 0), new RailCell(3, 4))), 1.0E-9);
+    }
+
+    @Test
     void longitudeWrapsAroundTheCylinder() {
         RailGrid grid = flatLand(8, 4);
         List<RailCell> path = RailRouteFinder.find(grid, new RailCell(7, 1),

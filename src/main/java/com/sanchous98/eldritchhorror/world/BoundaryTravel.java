@@ -68,10 +68,9 @@ public final class BoundaryTravel {
     private static void seamWarp(ServerPlayer player) {
         double x = player.getX();
         int half = EarthMap.HALF_WIDTH;
-        if (x >= half) {
-            player.teleportTo(x - 2.0 * half, player.getY(), player.getZ());
-        } else if (x < -half) {
-            player.teleportTo(x + 2.0 * half, player.getY(), player.getZ());
+        // Longitude wraps: fold anything past either edge onto the opposite side of the cylinder.
+        if (x >= half || x < -half) {
+            player.teleportTo(EarthMap.wrapBlockX(x), player.getY(), player.getZ());
         }
     }
 
