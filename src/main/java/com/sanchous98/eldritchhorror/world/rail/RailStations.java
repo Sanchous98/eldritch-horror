@@ -4,6 +4,10 @@ import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlan;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPoi;
+import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -43,6 +47,10 @@ public final class RailStations {
      * @return the station (never {@code null}; a fallback points at the city centre)
      */
     public static RailStation place(EarthMap map, City city, City partner) {
+        RailStation authored = authoredStation(map, city, partner);
+        if (authored != null) {
+            return authored;
+        }
         int district = Math.min(new CityLocation(city).renderRadius(), 380);
         int ring = Math.max(MIN_RING, district + RING_CLEARANCE);
         double bearing = Math.atan2(partner.z() - (double) city.z(),
@@ -94,6 +102,54 @@ public final class RailStations {
         }
         return new RailStation(city.id(), city.name(), bestX, bestZ, bestSurface + 1,
                 boardX, boardZ, dirX, dirZ);
+    }
+
+    /**
+     * Uses the authored {@code STATION} anchor when the city plan has one. The anchor is the rail
+     * point; the platform is offset across the track, and {@code data} may say
+     * {@code north_south}/{@code east_west} to fix the orientation (otherwise the partner bearing
+     * decides, like the terrain scan).
+     */
+    private static @Nullable RailStation authoredStation(EarthMap map, City city, City partner) {
+        CityPlan plan = CityPlans.forCity(city.name());
+        if (plan == null) {
+            return null;
+        }
+        for (CityPoi poi : plan.pois()) {
+            if (poi.kind() != CityPoi.Kind.STATION) {
+                continue;
+            }
+            int x = city.x() + poi.dx();
+            int z = city.z() + poi.dz();
+            int y = CityLocation.authoredGround(map, city) + poi.dy() + 1;
+            String data = poi.data().toLowerCase(Locale.ROOT);
+            int dirX = 0;
+            int dirZ = 0;
+            if (data.contains("north") || data.contains("south")) {
+                dirZ = 1;
+            } else if (data.contains("east") || data.contains("west")) {
+                dirX = 1;
+            } else {
+                double bearing = Math.atan2(partner.z() - (double) city.z(),
+                        wrapDelta(city.x(), partner.x(), 2 * EarthMap.HALF_WIDTH));
+                dirX = Math.abs(Math.cos(bearing)) >= Math.abs(Math.sin(bearing))
+                        ? (int) Math.signum(Math.round(Math.cos(bearing))) : 0;
+                dirZ = dirX == 0 ? (int) Math.signum(Math.round(Math.sin(bearing))) : 0;
+                if (dirX == 0 && dirZ == 0) {
+                    dirX = 1;
+                }
+            }
+            int acrossX = -dirZ;
+            int acrossZ = dirX;
+            int boardX = x + acrossX * 2;
+            int boardZ = z + acrossZ * 2;
+            if (!map.isLand(boardX, boardZ)) {
+                boardX = x;
+                boardZ = z;
+            }
+            return new RailStation(city.id(), city.name(), x, z, y, boardX, boardZ, dirX, dirZ);
+        }
+        return null;
     }
 
     /** @return the nearest other curated city to a city, or {@code null} when it is the only one. */

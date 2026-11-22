@@ -3082,7 +3082,7 @@ public final class ModConfig {
     /** Longest generated rail line, in blocks (also the nearest-partner search bound). */
     public static final ModConfigSpec.IntValue TRAIN_MAX_LINE_BLOCKS =
             BUILDER.comment("Longest generated rail line, in blocks (also the partner search bound).")
-                    .defineInRange("trainMaxLineBlocks", 8000, 500, 60000);
+                    .defineInRange("trainMaxLineBlocks", 25000, 500, 60000);
 
     /** Hard cap on simultaneously live consists. */
     public static final ModConfigSpec.IntValue MAX_TRAINS =

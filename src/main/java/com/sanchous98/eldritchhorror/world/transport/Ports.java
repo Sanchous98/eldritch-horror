@@ -5,6 +5,9 @@ import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.EarthMaps;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlan;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPoi;
 import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -102,6 +105,10 @@ public final class Ports {
     }
 
     private static @Nullable Port harbour(EarthMap map, City city) {
+        Port authored = authoredHarbour(map, city);
+        if (authored != null) {
+            return authored;
+        }
         int radius = city.radius();
         int bestDistance = Integer.MAX_VALUE;
         double bestAngle = 0.0;
@@ -136,6 +143,67 @@ public final class Ports {
             }
         }
         return new Port(city.id(), city.name(), waterX, waterZ, shoreX, shoreZ);
+    }
+
+    /**
+     * Uses the authored {@code PORT} anchor when the city plan has one: the anchor is the quay
+     * point, the water is found outward along the city-to-quay ray, and the shore is the anchor
+     * itself (or the nearest land toward the centre when the anchor is already water).
+     */
+    private static @Nullable Port authoredHarbour(EarthMap map, City city) {
+        CityPlan plan = CityPlans.forCity(city.name());
+        if (plan == null) {
+            return null;
+        }
+        for (CityPoi poi : plan.pois()) {
+            if (poi.kind() != CityPoi.Kind.PORT) {
+                continue;
+            }
+            int px = city.x() + poi.dx();
+            int pz = city.z() + poi.dz();
+            if (map.isLand(px, pz)) {
+                int waterX = Integer.MIN_VALUE;
+                int waterZ = Integer.MIN_VALUE;
+                double dx = px - (double) city.x();
+                double dz = pz - (double) city.z();
+                double length = Math.hypot(dx, dz);
+                if (length < 1.0) {
+                    continue;
+                }
+                for (int distance = (int) Math.ceil(length); distance <= MAX_OFFSET_BLOCKS;
+                        distance += STEP) {
+                    int x = city.x() + (int) Math.round(dx / length * distance);
+                    int z = city.z() + (int) Math.round(dz / length * distance);
+                    if (!map.isLand(x, z)) {
+                        waterX = x;
+                        waterZ = z;
+                        break;
+                    }
+                }
+                if (waterX == Integer.MIN_VALUE) {
+                    continue;
+                }
+                return new Port(city.id(), city.name(), waterX, waterZ, px, pz);
+            }
+            int shoreX = city.x();
+            int shoreZ = city.z();
+            double dx = city.x() - (double) px;
+            double dz = city.z() - (double) pz;
+            double length = Math.hypot(dx, dz);
+            if (length >= 1.0) {
+                for (int distance = STEP; distance <= MAX_OFFSET_BLOCKS; distance += STEP) {
+                    int x = px + (int) Math.round(dx / length * distance);
+                    int z = pz + (int) Math.round(dz / length * distance);
+                    if (map.isLand(x, z)) {
+                        shoreX = x;
+                        shoreZ = z;
+                        break;
+                    }
+                }
+            }
+            return new Port(city.id(), city.name(), px, pz, shoreX, shoreZ);
+        }
+        return null;
     }
 
     /**

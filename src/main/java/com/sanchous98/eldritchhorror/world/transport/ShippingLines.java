@@ -5,7 +5,9 @@ import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.EarthMaps;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
@@ -27,6 +29,10 @@ public final class ShippingLines {
             {"sydney", "jakarta"},
             {"los_angeles", "lima"},
             {"bangkok", "jakarta"},
+            // Trans-Pacific bridges: without one, the Asian/Australian sea component is isolated
+            // from the Americas/Europe/Africa component.
+            {"shanghai", "los_angeles"},
+            {"tokyo", "los_angeles"},
     };
 
     /** Safety margin from land, in coarse cells (64 blocks each). */
@@ -83,6 +89,7 @@ public final class ShippingLines {
         long started = System.nanoTime();
         SeaGrid sea = grid(map);
         List<ShippingLine> lines = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
         for (String[] pair : PAIRS) {
             Port from = Ports.byCity(pair[0]);
             Port to = Ports.byCity(pair[1]);
@@ -90,21 +97,43 @@ public final class ShippingLines {
                 EldritchHorror.LOGGER.warn("transport: pair {} has no harbour, skipped", pair[0] + "-" + pair[1]);
                 continue;
             }
-            SeaRoute route = route(sea, map, from, to);
-            if (route == null) {
-                EldritchHorror.LOGGER.info("transport: no sea lane {} -> {}, line unavailable",
-                        from.cityId(), to.cityId());
-                continue;
+            addLane(sea, map, from, to, seen, lines);
+        }
+        // Authored ports are spread over every coast; the fixed pairs alone leave most of them
+        // isolated. Connect each port to its nearest neighbours so a player can actually reach the
+        // authored harbour network (the route finder still rejects a lane that touches land).
+        List<Port> ports = Ports.all();
+        for (Port from : ports) {
+            List<Port> candidates = new ArrayList<>(ports);
+            candidates.removeIf(other -> other.cityId().equals(from.cityId()));
+            candidates.sort((left, right) -> Double.compare(from.distanceSqr(
+                    left.waterX(), left.waterZ()), from.distanceSqr(right.waterX(), right.waterZ())));
+            int attempts = Math.min(3, candidates.size());
+            for (int i = 0; i < attempts; i++) {
+                addLane(sea, map, from, candidates.get(i), seen, lines);
             }
-            ShippingLine line = new ShippingLine(from.cityId() + "-" + to.cityId(),
-                    from, to, route);
-            lines.add(line);
-            EldritchHorror.LOGGER.info("transport: lane {} ({} blocks, {} waypoints)", line.id(),
-                    Math.round(route.length()), route.size());
         }
         EldritchHorror.LOGGER.info("transport: {} sea lines in {} ms", lines.size(),
                 (System.nanoTime() - started) / 1_000_000L);
         return List.copyOf(lines);
+    }
+
+    private static void addLane(SeaGrid sea, EarthMap map, Port from, Port to,
+                                Set<String> seen, List<ShippingLine> lines) {
+        String key = from.cityId().compareTo(to.cityId()) <= 0
+                ? from.cityId() + "|" + to.cityId() : to.cityId() + "|" + from.cityId();
+        if (!seen.add(key)) {
+            return;
+        }
+        SeaRoute route = route(sea, map, from, to);
+        if (route == null) {
+            EldritchHorror.LOGGER.debug("transport: no sea lane {} -> {}", from.cityId(), to.cityId());
+            return;
+        }
+        ShippingLine line = new ShippingLine(from.cityId() + "-" + to.cityId(), from, to, route);
+        lines.add(line);
+        EldritchHorror.LOGGER.info("transport: lane {} ({} blocks, {} waypoints)", line.id(),
+                Math.round(route.length()), route.size());
     }
 
     private static SeaGrid grid(EarthMap map) {
@@ -146,7 +175,8 @@ public final class ShippingLines {
         if (raw == null) {
             if (!safeAnchors) {
                 EldritchHorror.LOGGER.debug("transport: A* failed {} {}({},{}) -> {}({},{})",
-                        from.cityId(), to.cityId(), start.x(), start.z(), goal.x(), goal.z());
+                        from.cityId(), to.cityId(), start.x(), start.z(), to.cityId(),
+                        goal.x(), goal.z());
             }
             return null;
         }
