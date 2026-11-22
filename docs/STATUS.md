@@ -18,6 +18,17 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Done (verified)
 
+- **Honest endgame playthrough (night 5, no cheats)** — a bare bot (`spawnjoinbare`, empty
+  inventory) played the whole road to the Hollow ending: gate → starter chain → mined birch
+  wood/cobblestone → stone sword → 4 bones + kit → 4 silver from the Order Vault → cleansing
+  rite → 8-site loot tour → 10/10 codex → Chaugnar blood farm → 16 Blood Offerings →
+  Hollow Choir **INNER_CIRCLE (rep 100)** → learned `open_rift` / `awaken_the_horror` /
+  `summon_the_horror` → corruption 100 (CLAIMED) → storm → rift → awakened → **`endgame =
+  summoned`** (open rifts 3, doom 60.8), with the Hollow Crown granted. Evidence:
+  `/home/dev/mcbot/night5/run5.log` + `state.json` (every phase carries its server-side proof:
+  journal lines, inventory, cult rep, codex, doom). Only allowed help was `invulnerable`,
+  travel teleports, `time set`/`weather` and small `forceload` windows.
+
 - **Earth world generator**: real baked layers (landmask, ETOPO elevation, Köppen), real
   terrain + biomes, Overworld replaced. `Earth world generator ready` on server start.
 - **World ×8**: extent **131 072 × 65 536** blocks, layers **16 384 × 8 192** (8 blocks/px),

@@ -7,13 +7,14 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
 
 ## Open
 
-- [ ] **Hollow Choir Inner Circle is a long blood farm (playtest)** — `awaken_the_horror` needs
-  INNER_CIRCLE (80) and the cult accepts only `blood_offering` (5 rep each): 16 blood for the rank
-  plus 4 + 4 for `open_rift`/`awaken_the_horror`, 28 in total. Chaugnar Faugn is the only renewable
-  source, and its loot pool rolls **one of** blood 2–4 / bone 1–3 / grave dust, so the expectation
-  is ~1 blood per kill, not 2–4 per kill (~28 kills). That is farmable but long; decide whether the
-  intended pace is a multi-hour Chaugnar grind or whether a second offering (e.g. `fragment_page`
-  for the Order's Inner Circle, or a tome that teaches `awaken_the_horror`) should exist.
+- [x] **Hollow Choir Inner Circle is a long blood farm (playtest)** — done honestly on night 5:
+  28 Blood Offerings at 5 rep each reached INNER_CIRCLE (rep 100) and paid for `open_rift` +
+  `awaken_the_horror` + `summon_the_horror`; the ending resolved as `endgame = summoned`.
+  Measured pace: Chaugnar's loot pool rolls **one of** blood 2–4 / bone 1–3 / grave dust, i.e.
+  ~1 blood per kill (~30 kills for the run), and its swings cost ~50 hits per kill with a stone
+  sword. The grind is real but inside one evening; the real friction was **gear durability**
+  (a stone sword lasts 131 hits ≈ 2.5 kills, so a long farm punches itself out) — see the
+  durability item below.
 - [ ] **Dev-server OOM under a long bot run** — two playtests were cut by cgroup OOM kills (8 GiB
   cgroup, 5 GiB container cap, `-Xmx3g`); the server restarts itself and bots are session-scoped.
   Bound worldgen/forceload churn for long runs or raise the container budget.
@@ -37,6 +38,11 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   (the doom clock is a race), but a headless playthrough has to finish before ~150 in-game minutes
   or the world makes the decision first. Worth a design note on whether the NPC path should be
   visible to the player (journal/doom warnings) or disabled until a player has opened the Way.
+- [ ] **Stone-tier gear cannot carry a boss farm** — a stone sword has 131 durability and a
+  180 HP boss takes ~50 hits, so a 28-kill blood farm needs a dozen weapons; the bot spent most
+  of night 5 alternating between a sword, an axe and its fists, with ~0.6 damage per punch.
+  Options: a data/quest source of iron (or a purchasable weapon), a repair/reforge service at a
+  cult forge, or a higher-durability bone club. This is a pacing question, not a bug.
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
 - [ ] **Client-only item bits (design/16)** — the veil-lens corruption overlay and the waypoint
