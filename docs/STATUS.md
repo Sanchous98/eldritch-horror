@@ -18,12 +18,14 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Done (verified)
 
-- **Full code review pass** — `docs/CODE-REVIEW.md` (27 findings) is resolved except the one
-  false positive (#22, `getMaxY()` is inclusive). Highlights: tempering no longer hijacks
+- **Full code review passes** — `docs/CODE-REVIEW.md` has no open findings. The first audit
+  (27) was resolved at `ebd394a..f190219` (its #22 was a false positive: `getMaxY()` is
+  inclusive); the second (32) at `b26a045..797e9dd`. Highlights: tempering no longer hijacks
   right-click (off-hand whetstone only), no over-stacked unstackable kit items, all mutating
-  `/eh` commands are gamemaster-gated, cylinder seam math is wrapped, endgame/rite state is
-  normalised and reset across worlds, and the throwables lost their bogus quality path.
-  Verified with a green `./gradlew build` and a clean `Done (…)` server boot.
+  `/eh` commands are gamemaster-gated, cylinder seam math is wrapped end to end (router and
+  runtime), Hydra/Yig escalation actually fires, the bot commands follow the honest-play
+  contract, per-world statics reset across worlds, and the throwables lost their bogus quality
+  path. Both passes verified with a green `./gradlew build` and a clean `Done (…)` server boot.
 - **Field gear and firearms (design/16)** — the board game's mundane weapon tier is in: Axe,
   Bull Whip, Dynamite, Tear Gas and the .38 Revolver / .45 Automatic / Double-barreled Shotgun /
   Carbine Rifle, with Brass Cartridge ammo, a shared bullet projectile, recipes, chest loot and
@@ -261,11 +263,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
 
 ## Known limitations / deferred
 
-- **Code review open:** `docs/CODE-REVIEW.md` now tracks open findings only (audit at
-  `f190219`) — 32 unfixed: 1 High (Hydra/Yig escalation dead via `Long.MIN_VALUE`
-  overflow), 4 Medium (bot `god`/`attacktype` honesty, rail seam in
-  `RailSampler`/`RailLines`), 17 Low, 10 Nit. The first 27 findings were resolved at
-  `ebd394a..f190219` and re-verified — no regressions, #22 still invalid.
+- **Code review clean:** `docs/CODE-REVIEW.md` has no open findings. The `f190219` audit's
+  32 items (1 High, 4 Medium, 17 Low, 10 Nit) were fixed in `b26a045..797e9dd` and verified
+  with `./gradlew build` plus a clean server boot. The first 27 findings were resolved at
+  `ebd394a..f190219`; both reports stay in git history.
 - See **`docs/TODO.md`** for the ordered backlog. Besides the **human visual pass** (`J`/`C`/`K`
   screens, armour in-game), open now: the **client-only item bits** (veil-lens overlay, map
   waypoint markers, `design/16`), `rift_scout` (`design/10`, needs a per-rift axis) and the
