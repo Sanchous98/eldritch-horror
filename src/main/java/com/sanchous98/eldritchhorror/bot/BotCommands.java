@@ -41,6 +41,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -768,10 +769,34 @@ public final class BotCommands {
             if (st.isEmpty() || !st.is(target)) {
                 continue;
             }
-            ItemStack hand = st.copy();
-            hand.setCount(1);
-            bot.setItemInHand(InteractionHand.MAIN_HAND, hand);
+            int selected = inv.getSelectedSlot();
+            // Already in hand: return instead of copying onto the same slot and shrinking the source,
+            // which used to delete the only copy (a one-stack weapon vanished when `ensure_weapon`
+            // re-equipped it every 40 hits).
+            if (i == selected) {
+                ctx.getSource().sendSuccess(() -> Component.literal("bot "
+                        + bot.getGameProfile().name() + " already holds "
+                        + st.getHoverName().getString()), true);
+                return 1;
+            }
+            ItemStack hand = st.copyWithCount(1);
+            ItemStack previous = inv.getItem(selected).copy();
             st.shrink(1);
+            inv.setItem(selected, hand);
+            // Put the item that was in hand back into the inventory instead of overwriting it:
+            // switching from a sword to an axe used to destroy the sword.
+            if (!previous.isEmpty()) {
+                if (st.isEmpty()) {
+                    inv.setItem(i, previous);
+                } else {
+                    int free = inv.getFreeSlot();
+                    if (free >= 0) {
+                        inv.setItem(free, previous);
+                    } else {
+                        bot.drop(previous, false, Prediction.SERVER_ONLY);
+                    }
+                }
+            }
             inv.setChanged();
             ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                     + " equips " + hand.getHoverName().getString()), true);
