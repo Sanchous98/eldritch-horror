@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -77,8 +78,9 @@ public final class TrainTrail {
             if (target >= earlier.distance() && target <= later.distance()) {
                 double span = later.distance() - earlier.distance();
                 double t = span <= 0.0 ? 0.0 : (target - earlier.distance()) / span;
+                double dx = EarthMap.wrapDelta(earlier.x(), later.x());
                 return new RailSample(
-                        earlier.x() + (later.x() - earlier.x()) * t,
+                        EarthMap.wrapBlockX(earlier.x() + dx * t),
                         earlier.y() + (later.y() - earlier.y()) * t,
                         earlier.z() + (later.z() - earlier.z()) * t,
                         lerpYaw(earlier.yaw(), later.yaw(), t));

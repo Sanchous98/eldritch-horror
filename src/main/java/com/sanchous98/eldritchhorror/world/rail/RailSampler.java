@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.List;
 
 /**
@@ -50,11 +51,13 @@ public final class RailSampler {
         RailNode to = this.nodes.get(index + 1);
         double segmentLength = this.cumulative[index + 1] - this.cumulative[index];
         double t = segmentLength <= 0.0 ? 0.0 : (clamped - this.cumulative[index]) / segmentLength;
-        double x = from.x() + (to.x() - from.x()) * t;
+        double dx = EarthMap.wrapDelta((double) from.x(), (double) to.x());
+        double x = EarthMap.wrapBlockX(from.x() + dx * t);
         double y = from.y() + (to.y() - from.y()) * t;
         double z = from.z() + (to.z() - from.z()) * t;
         float yaw = yaw(from, to);
-        return new RailSample(x + 0.5, y, z + 0.5, yaw);
+        // Fold after the half-block centring offset so the returned X is always on the cylinder.
+        return new RailSample(EarthMap.wrapBlockX(x + 0.5), y, z + 0.5, yaw);
     }
 
     /**
@@ -94,14 +97,14 @@ public final class RailSampler {
     }
 
     private static double distance(RailNode a, RailNode b) {
-        double dx = b.x() - (double) a.x();
+        double dx = EarthMap.wrapDelta((double) a.x(), (double) b.x());
         double dy = b.y() - (double) a.y();
         double dz = b.z() - (double) a.z();
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     private static float yaw(RailNode from, RailNode to) {
-        double dx = to.x() - (double) from.x();
+        double dx = EarthMap.wrapDelta((double) from.x(), (double) to.x());
         double dz = to.z() - (double) from.z();
         if (dx == 0.0 && dz == 0.0) {
             return 0.0F;

@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.transport;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
+
 /**
  * A harbour: the curated city that owns it, a water point where the packet floats, and a shore point
  * where passengers are put down. Coordinates are world blocks (overworld).
@@ -15,7 +17,7 @@ public record Port(String cityId, String cityName, int waterX, int waterZ, int s
 
     /** @return squared horizontal distance from a world point to the harbour water point. */
     public double distanceSqr(double x, double z) {
-        double dx = x - this.waterX;
+        double dx = EarthMap.wrapDelta(this.waterX, x);
         double dz = z - this.waterZ;
         return dx * dx + dz * dz;
     }

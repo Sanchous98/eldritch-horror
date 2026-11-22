@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
+
 /**
  * A station on the edge of a curated city: the rail point, the platform orientation and the
  * boarding point where riders are put down.
@@ -24,7 +26,7 @@ public record RailStation(String cityId, String cityName, int x, int z, int y,
 
     /** @return squared horizontal distance from a world point to the station rail point. */
     public double distanceSqr(double worldX, double worldZ) {
-        double dx = worldX - this.x;
+        double dx = EarthMap.wrapDelta(this.x, worldX);
         double dz = worldZ - this.z;
         return dx * dx + dz * dz;
     }

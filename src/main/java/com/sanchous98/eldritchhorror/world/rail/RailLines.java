@@ -116,12 +116,13 @@ public final class RailLines {
         int maxBlocks = Math.clamp(ModConfig.TRAIN_MAX_LINE_BLOCKS.get(), 500, 60_000);
         RailRouteFinder.Options options = RailRouteFinder.Options.forLine(maxBlocks);
         RailGrid grid = grid(map);
+        RailRouteFinder.Scratch scratch = new RailRouteFinder.Scratch();
 
         Map<String, City> byId = new HashMap<>();
         for (City city : cities) {
             byId.put(city.id(), city);
         }
-        Map<String, City> partners = choosePartners(cities, grid, options, maxBlocks);
+        Map<String, City> partners = choosePartners(cities, grid, options, maxBlocks, scratch);
 
         TreeMap<String, RailStation> stationMap = new TreeMap<>();
         for (City city : cities) {
@@ -150,7 +151,8 @@ public final class RailLines {
 
         List<RailLine> lines = new ArrayList<>();
         for (City[] edge : edges.values()) {
-            RailLine line = buildLine(map, grid, options, maxBlocks, stationMap, edge[0], edge[1]);
+            RailLine line = buildLine(map, grid, options, maxBlocks, stationMap, edge[0], edge[1],
+                    scratch);
             if (line != null) {
                 lines.add(line);
             }
@@ -168,7 +170,8 @@ public final class RailLines {
      * (the pair is deduplicated later).
      */
     private static Map<String, City> choosePartners(List<City> cities, RailGrid grid,
-                                                    RailRouteFinder.Options options, int maxBlocks) {
+                                                    RailRouteFinder.Options options, int maxBlocks,
+                                                    RailRouteFinder.Scratch scratch) {
         Map<String, City> partners = new HashMap<>();
         for (City city : cities) {
             List<City> candidates = new ArrayList<>(cities);
@@ -190,11 +193,12 @@ public final class RailLines {
                 if (start == null || goal == null) {
                     continue;
                 }
-                List<RailCell> route = RailRouteFinder.find(grid, start, goal, options);
+                List<RailCell> route = RailRouteFinder.find(grid, start, goal, options, scratch);
                 if (route == null) {
                     continue;
                 }
-                if (RailRouteFinder.pathLength(route) * RailGrid.CELL_BLOCKS > maxBlocks) {
+                if (RailRouteFinder.pathLength(route, grid.width()) * RailGrid.CELL_BLOCKS
+                        > maxBlocks) {
                     continue;
                 }
                 partners.put(city.id(), candidate);
@@ -207,7 +211,8 @@ public final class RailLines {
     private static @Nullable RailLine buildLine(EarthMap map, RailGrid grid,
                                                 RailRouteFinder.Options options, int maxBlocks,
                                                 Map<String, RailStation> stations,
-                                                City cityA, City cityB) {
+                                                City cityA, City cityB,
+                                                RailRouteFinder.Scratch scratch) {
         RailStation a = stations.get(cityA.id());
         RailStation b = stations.get(cityB.id());
         if (a == null || b == null) {
@@ -218,7 +223,7 @@ public final class RailLines {
         if (start == null || goal == null) {
             return null;
         }
-        List<RailCell> route = RailRouteFinder.find(grid, start, goal, options);
+        List<RailCell> route = RailRouteFinder.find(grid, start, goal, options, scratch);
         if (route == null) {
             EldritchHorror.LOGGER.info("rail: no route {} -> {}", a.cityId(), b.cityId());
             return null;
@@ -366,10 +371,10 @@ public final class RailLines {
             RailNode previous = nodes.get(Math.max(0, i - 1));
             RailNode current = nodes.get(i);
             RailNode next = nodes.get(Math.min(nodes.size() - 1, i + 1));
-            int dirX = Integer.signum(next.x() - current.x());
+            int dirX = Integer.signum(EarthMap.wrapDelta(current.x(), next.x()));
             int dirZ = Integer.signum(next.z() - current.z());
             if (dirX == 0 && dirZ == 0) {
-                dirX = Integer.signum(current.x() - previous.x());
+                dirX = Integer.signum(EarthMap.wrapDelta(previous.x(), current.x()));
                 dirZ = Integer.signum(current.z() - previous.z());
             }
             RailShape shape = shape(previous, current, next);
@@ -428,9 +433,9 @@ public final class RailLines {
     }
 
     private static RailShape shape(RailNode previous, RailNode current, RailNode next) {
-        int inX = Integer.signum(current.x() - previous.x());
+        int inX = Integer.signum(EarthMap.wrapDelta(previous.x(), current.x()));
         int inZ = Integer.signum(current.z() - previous.z());
-        int outX = Integer.signum(next.x() - current.x());
+        int outX = Integer.signum(EarthMap.wrapDelta(current.x(), next.x()));
         int outZ = Integer.signum(next.z() - current.z());
         int toPrevX = -inX;
         int toPrevZ = -inZ;

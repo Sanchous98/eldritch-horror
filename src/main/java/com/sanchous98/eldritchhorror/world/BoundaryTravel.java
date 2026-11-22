@@ -66,6 +66,10 @@ public final class BoundaryTravel {
 
     /** Carry a player across the longitude seam, preserving Z and momentum. */
     private static void seamWarp(ServerPlayer player) {
+        if (player.isPassenger()) {
+            // A ship or train wraps itself; teleporting a rider would fight positionRider.
+            return;
+        }
         double x = player.getX();
         int half = EarthMap.HALF_WIDTH;
         // Longitude wraps: fold anything past either edge onto the opposite side of the cylinder.

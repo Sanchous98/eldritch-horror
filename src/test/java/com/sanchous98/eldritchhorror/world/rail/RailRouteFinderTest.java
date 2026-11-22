@@ -44,7 +44,8 @@ class RailRouteFinderTest {
         assertNotNull(path);
         assertEquals(new RailCell(1, 1), path.get(0));
         assertEquals(new RailCell(18, 18), path.get(path.size() - 1));
-        assertTrue(RailRouteFinder.pathLength(path) <= 18.0 * Math.sqrt(2.0) + 0.1,
+        assertTrue(RailRouteFinder.pathLength(path, grid.width())
+                        <= 18.0 * Math.sqrt(2.0) + 0.1,
                 "the smoothed route should be close to the diagonal");
     }
 
@@ -84,9 +85,16 @@ class RailRouteFinderTest {
     void pathLengthChargesTheRealDistanceBetweenSmoothedWaypoints() {
         // Old code charged 1.0 for any single waypoint pair; ten cells apart is ten blocks.
         assertEquals(10.0, RailRouteFinder.pathLength(List.of(
-                new RailCell(0, 0), new RailCell(10, 0))), 1.0E-9);
+                new RailCell(0, 0), new RailCell(10, 0)), 2048), 1.0E-9);
         assertEquals(4.0 + (Math.sqrt(2.0) - 1.0) * 3.0, RailRouteFinder.pathLength(List.of(
-                new RailCell(0, 0), new RailCell(3, 4))), 1.0E-9);
+                new RailCell(0, 0), new RailCell(3, 4)), 2048), 1.0E-9);
+    }
+
+    @Test
+    void pathLengthCrossesTheSeamTheShortWay() {
+        // On an eight-column board, 7 -> 1 is two cells across the antimeridian, not six.
+        assertEquals(2.0, RailRouteFinder.pathLength(List.of(
+                new RailCell(7, 0), new RailCell(1, 0)), 8), 1.0E-9);
     }
 
     @Test

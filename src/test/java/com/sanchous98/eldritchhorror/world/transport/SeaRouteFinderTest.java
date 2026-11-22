@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -98,5 +99,14 @@ class SeaRouteFinderTest {
         assertEquals(new SeaCell(1, 1), smoothed.get(0));
         assertEquals(new SeaCell(4, 1), smoothed.get(smoothed.size() - 1));
         assertTrue(smoothed.size() < raw.size());
+    }
+
+    @Test
+    void seaPointDistanceCrossesTheSeamTheShortWay() {
+        int half = EarthMap.HALF_WIDTH;
+        SeaPoint west = new SeaPoint(half - 5, 100);
+        SeaPoint east = new SeaPoint(-half + 5, 100);
+        assertEquals(10.0, west.distanceTo(east), 1.0E-9);
+        assertEquals(10.0, east.distanceTo(west), 1.0E-9);
     }
 }

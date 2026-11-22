@@ -73,14 +73,19 @@ public final class TrainService {
         }
     }
 
+    /** Forgets every consist and its watchdog state (server start, or a test reset). */
+    public static void clear() {
+        ACTIVE.clear();
+        PENDING.clear();
+        PENDING_AGE.clear();
+        LAST_TICK.clear();
+        STUCK.clear();
+    }
+
     /** Builds and logs the cache once at server start instead of on the first crossing chunk. */
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        ACTIVE.clear();
-        LAST_TICK.clear();
-        STUCK.clear();
-        PENDING.clear();
-        PENDING_AGE.clear();
+        clear();
         if (!ModConfig.ENABLE_TRAINS.get()) {
             return;
         }

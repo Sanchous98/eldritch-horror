@@ -1,6 +1,5 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
-import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,12 +21,33 @@ import org.jspecify.annotations.Nullable;
  */
 public final class RailRouteFinder {
     private static final double SQRT2 = Math.sqrt(2.0);
-    /** Cell columns around the cylinder (the production grid width, used only to wrap deltas). */
-    private static final int CYLINDER_CELLS = 2 * EarthMap.HALF_WIDTH / RailGrid.CELL_BLOCKS;
     /** Safety cap for pathological searches (the geometric length bound normally stops them). */
     private static final int MAX_EXPANSIONS = 600_000;
 
     private RailRouteFinder() {
+    }
+
+    /**
+     * Reusable working buffers for a batch of searches over one board.
+     *
+     * <p>Each search still clears every array it uses, so no state leaks between searches. Not
+     * thread-safe: a holder belongs to one build and is never shared across calls from other
+     * threads.
+     */
+    public static final class Scratch {
+        private float[] cost = new float[0];
+        private float[] along = new float[0];
+        private int[] cameFrom = new int[0];
+        private boolean[] closed = new boolean[0];
+
+        private void ensure(int size) {
+            if (this.cost.length < size) {
+                this.cost = new float[size];
+                this.along = new float[size];
+                this.cameFrom = new int[size];
+                this.closed = new boolean[size];
+            }
+        }
     }
 
     /**
@@ -77,18 +97,35 @@ public final class RailRouteFinder {
      */
     public static @Nullable List<RailCell> find(RailGrid grid, RailCell start, RailCell goal,
                                                 Options options) {
+        return find(grid, start, goal, options, new Scratch());
+    }
+
+    /**
+     * Finds a rail route, reusing a caller-owned scratch holder for the board-sized buffers.
+     *
+     * @param grid    sampled terrain grid
+     * @param start   origin cell (must be land)
+     * @param goal    destination cell (must be land)
+     * @param options search bounds and costs
+     * @param scratch working buffers, reused across searches of the same build
+     * @return a smoothed cell path from start to goal, or {@code null} when no route exists
+     */
+    public static @Nullable List<RailCell> find(RailGrid grid, RailCell start, RailCell goal,
+                                                Options options, Scratch scratch) {
         if (!grid.land(start.x(), start.z()) || !grid.land(goal.x(), goal.z())) {
             return null;
         }
         int width = grid.width();
         int size = width * grid.height();
-        float[] cost = new float[size];
-        float[] along = new float[size];
+        scratch.ensure(size);
+        float[] cost = scratch.cost;
+        float[] along = scratch.along;
+        int[] cameFrom = scratch.cameFrom;
+        boolean[] closed = scratch.closed;
         Arrays.fill(cost, Float.POSITIVE_INFINITY);
         Arrays.fill(along, Float.POSITIVE_INFINITY);
-        int[] cameFrom = new int[size];
         Arrays.fill(cameFrom, -1);
-        boolean[] closed = new boolean[size];
+        Arrays.fill(closed, false);
 
         int startIndex = indexOf(grid, start.x(), start.z(), width);
         int goalIndex = indexOf(grid, goal.x(), goal.z(), width);
@@ -163,16 +200,18 @@ public final class RailRouteFinder {
     }
 
     /**
+     * @param path      cell path
+     * @param gridWidth grid width in cells (the wrapped axis)
      * @return the geometric length of a cell path in cells (orthogonal = 1, diagonal = sqrt 2),
      *         charging the real octile distance between consecutive smoothed waypoints
      */
-    public static double pathLength(List<RailCell> path) {
+    public static double pathLength(List<RailCell> path, int gridWidth) {
         double total = 0.0;
         for (int i = 1; i < path.size(); i++) {
             RailCell from = path.get(i - 1);
             RailCell to = path.get(i);
             // Longitude wraps: smoothed waypoints are far apart, so use the actual octile step.
-            int dx = Math.abs(wrapDeltaCells(from.x(), to.x()));
+            int dx = Math.abs(wrapDeltaCells(from.x(), to.x(), gridWidth));
             int dz = Math.abs(to.z() - from.z());
             int min = Math.min(dx, dz);
             total += Math.max(dx, dz) + (SQRT2 - 1.0) * min;
@@ -180,10 +219,10 @@ public final class RailRouteFinder {
         return total;
     }
 
-    /** @return the shortest signed column delta, in cells, on the cylinder. */
-    private static int wrapDeltaCells(int fromX, int toX) {
-        int delta = Math.floorMod(toX - fromX, CYLINDER_CELLS);
-        return delta > CYLINDER_CELLS / 2 ? delta - CYLINDER_CELLS : delta;
+    /** @return the shortest signed column delta, in cells, on a cylinder of {@code width} columns. */
+    private static int wrapDeltaCells(int fromX, int toX, int width) {
+        int delta = Math.floorMod(toX - fromX, width);
+        return delta > width / 2 ? delta - width : delta;
     }
 
     /**
