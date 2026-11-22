@@ -153,7 +153,10 @@ public final class TownIndex {
     private List<Town> collect(int minCellX, int maxCellX, int minCellZ, int maxCellZ, Filter filter) {
         List<Town> out = null;
         int cells = cellCount();
-        Set<Long> visited = cells > 0 ? new HashSet<>() : null;
+        // Wrapping is injective for a range shorter than the cylinder, so only a full-loop query
+        // needs the dedupe set; the per-chunk hot path stays allocation-free.
+        boolean mayRepeat = cells > 0 && (long) maxCellX - minCellX + 1 > cells;
+        Set<Long> visited = mayRepeat ? new HashSet<>() : null;
         for (int cx = minCellX; cx <= maxCellX; cx++) {
             int wrappedX = cells > 0 ? wrapCell(cx, cells) : cx;
             for (int cz = minCellZ; cz <= maxCellZ; cz++) {
