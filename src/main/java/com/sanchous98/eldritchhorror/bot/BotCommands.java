@@ -19,6 +19,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -335,7 +336,8 @@ public final class BotCommands {
         return 1;
     }
 
-    /** {@code /eh bot attack <name>}: attacks the nearest living entity within 5 blocks. */    private static int attack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    /** {@code /eh bot attack <name>}: attacks the nearest living entity within 3 blocks. */
+    private static int attack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
         }
@@ -344,10 +346,10 @@ public final class BotCommands {
             return 0;
         }
         List<LivingEntity> targets = bot.level().getEntitiesOfClass(LivingEntity.class,
-                bot.getBoundingBox().inflate(5.0), e -> e != bot && e.isAlive());
+                bot.getBoundingBox().inflate(3.0), e -> e != bot && e.isAlive());
         if (targets.isEmpty()) {
             ctx.getSource().sendFailure(Component.literal(
-                    "No living entity within 5 blocks of " + bot.getGameProfile().name()));
+                    "No living entity within 3 blocks of " + bot.getGameProfile().name()));
             return 0;
         }
         LivingEntity target = targets.stream()
@@ -490,6 +492,11 @@ public final class BotCommands {
         }
         BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
+        if (bot.position().distanceToSqr(Vec3.atCenterOf(pos)) > 25.0) {
+            ctx.getSource().sendFailure(Component.literal("Target " + pos.toShortString()
+                    + " is more than 5 blocks from " + bot.getGameProfile().name()));
+            return 0;
+        }
         ServerLevel level = bot.level();
         BlockState targetState = level.getBlockState(pos);
         if (!targetState.canBeReplaced()) {
@@ -595,8 +602,19 @@ public final class BotCommands {
             if (result.isEmpty() || !result.is(target)) {
                 continue;
             }
+            // The bot pays for its own smelt: one fuel item from the inventory, besides the input.
+            int fuelSlot = findFuel(inv, i);
+            if (fuelSlot < 0) {
+                ctx.getSource().sendFailure(Component.literal("Smelting " + itemId
+                        + " needs one fuel item in the inventory (coal, charcoal, wood...)"));
+                return 0;
+            }
+            inv.getItem(fuelSlot).shrink(1);
             s.shrink(1);
-            inv.add(result.copy());
+            ItemStack leftover = result.copy();
+            if (!inv.add(leftover)) {
+                bot.drop(leftover, false, Prediction.SERVER_ONLY);
+            }
             ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                     + " smelted " + result.getCount() + "x "
                     + result.getHoverName().getString()), true);
@@ -707,7 +725,10 @@ public final class BotCommands {
             for (int slot : chosen) {
                 inv.getItem(slot).shrink(1);
             }
-            inv.add(result.copy());
+            ItemStack leftover = result.copy();
+            if (!inv.add(leftover)) {
+                bot.drop(leftover, false, Prediction.SERVER_ONLY);
+            }
             ItemStack made = result;
             // Fire the same hook a crafting table fires, so quests (and any other listener) see it.
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
@@ -738,6 +759,20 @@ public final class BotCommands {
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack st = inv.getItem(i);
             if (!st.isEmpty() && ingredient.test(st)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * First inventory slot holding a fuel item, ignoring {@code skip} (the input stack), or -1.
+     * Fuel is whatever carries the vanilla {@code cooking_fuel} component, so mod fuels count too.
+     */
+    private static int findFuel(net.minecraft.world.entity.player.Inventory inv, int skip) {
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack st = inv.getItem(i);
+            if (i != skip && !st.isEmpty() && st.has(DataComponents.COOKING_FUEL)) {
                 return i;
             }
         }
@@ -1082,7 +1117,7 @@ public final class BotCommands {
 
     /** The block the bot is looking at, falling back to the block under its feet. */
     private static BlockHitResult blockTarget(BotPlayer bot) {
-        HitResult hit = bot.pick(5.0, 0.0F, false);
+        HitResult hit = bot.pick(4.5, 0.0F, false);
         if (hit instanceof BlockHitResult blockHit) {
             return blockHit;
         }
