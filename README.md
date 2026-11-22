@@ -210,8 +210,11 @@ only for builds.
 
 > **Memory:** the first in-container build decompiles Minecraft (26.3 uses IntelliJ's
 > Fernflower), which is memory- and CPU-heavy. The compose service is capped at
-> `cpus: 3` / `mem_limit: 4g` by default — raise them via `DEV_CPUS` / `DEV_MEM` if the
+> `cpus: 2` / `mem_limit: 3g` by default — raise them via `DEV_CPUS` / `DEV_MEM` if the
 > decompile is too slow or gets OOM-killed, e.g. `DEV_MEM=8g docker compose run --rm dev ./gradlew build`.
+> `DEV_CPUS` must not exceed the Docker daemon's CPU count (`docker info --format '{{.NCPU}}'`):
+> a larger value makes container creation fail with *"range of CPUs is from 0.01 to N"*, so
+> `unset DEV_CPUS` (or pick a smaller number) before `docker compose up`.
 > **Note:** these limits must be set on the object that *runs the build* (the container),
 > not on a shell that merely calls `docker` — a container talking to a separate Docker
 > daemon does not pass its own cgroup limits to the build.
