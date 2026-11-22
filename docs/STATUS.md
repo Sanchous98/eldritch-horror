@@ -25,7 +25,7 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   carbine 12→4.06, dynamite blast damage, tear gas Weakness/Blindness; all four guns keep their
   inventory slot when switched. Every weapon now carries a fixed five-step **grade** (Crude →
   Relic, grey tooltip line) and a rolled per-stack **quality** (whetstone tempering; first two
-  steps free, then 95/88/80% with 1/3/6% break risk; +12% durability per step, colour = quality),
+  steps free, then 95/88/50% with 1/3/20% break risk; +12% durability per step, colour = quality),
   and every one of the twenty has a survival path
   (crafted, chest loot, investigator kit or cult trade) — the seven former creative-only weapons
   were wired: censer mace and star-iron sword recipes, sacrificial dagger/eye scepter/veil bow in

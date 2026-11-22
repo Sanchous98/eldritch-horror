@@ -58,11 +58,11 @@ class WeaponQualityTest {
         assertEquals(WeaponQuality.Outcome.DOWNGRADE, WeaponQuality.roll(2, 98));
         assertEquals(WeaponQuality.Outcome.BREAK, WeaponQuality.roll(2, 99));
 
-        // 4 -> 5 is 80 / 14 / 6.
-        assertEquals(WeaponQuality.Outcome.UPGRADE, WeaponQuality.roll(4, 79));
-        assertEquals(WeaponQuality.Outcome.DOWNGRADE, WeaponQuality.roll(4, 80));
-        assertEquals(WeaponQuality.Outcome.DOWNGRADE, WeaponQuality.roll(4, 93));
-        assertEquals(WeaponQuality.Outcome.BREAK, WeaponQuality.roll(4, 94));
+        // 4 -> 5 is 50 / 30 / 20: the top step is a real gamble.
+        assertEquals(WeaponQuality.Outcome.UPGRADE, WeaponQuality.roll(4, 49));
+        assertEquals(WeaponQuality.Outcome.DOWNGRADE, WeaponQuality.roll(4, 50));
+        assertEquals(WeaponQuality.Outcome.DOWNGRADE, WeaponQuality.roll(4, 79));
+        assertEquals(WeaponQuality.Outcome.BREAK, WeaponQuality.roll(4, 80));
         assertEquals(WeaponQuality.Outcome.BREAK, WeaponQuality.roll(4, 99));
     }
 

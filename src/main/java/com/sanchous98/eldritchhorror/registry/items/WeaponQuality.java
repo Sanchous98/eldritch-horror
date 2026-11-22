@@ -47,17 +47,18 @@ public final class WeaponQuality {
 
     /**
      * Odds by current quality: the first two steps are guaranteed, then the failure window opens and
-     * both the downgrade and the break chance climb. Deliberately generous - a session is short, so
-     * a top-tier blade should be a reasonable evening's work, not a grind: the expected attempts are
-     * 1.05 / 1.14 / 1.25 and the cumulative break risk about 1% / 3% / 7%. The last entry is never
-     * rolled (the caller refuses at {@link #MAX}); it is 0/0/100 so the table stays total.
+     * both the downgrade and the break chance climb. The early steps are generous (a short session
+     * should reach the middle without friction), while the last step is a real gamble: 50% success,
+     * 30% downgrade, 20% break, which makes the eventual break risk roughly one blade in three once
+     * downgrade loops are counted. The last entry is never rolled (the caller refuses at
+     * {@link #MAX}); it is 0/0/100 so the table stays total.
      */
     private static final Odds[] ODDS = {
             new Odds(100, 0, 0),
             new Odds(100, 0, 0),
             new Odds(95, 4, 1),
             new Odds(88, 9, 3),
-            new Odds(80, 14, 6),
+            new Odds(50, 30, 20),
             new Odds(0, 0, 100)
     };
 

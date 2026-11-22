@@ -259,12 +259,13 @@ number, so the quality ladder cannot quietly rebalance combat.
 | 1 → 2 | 100% | — | — | white |
 | 2 → 3 | 95% | 4% | 1% | yellow |
 | 3 → 4 | 88% | 9% | 3% | aqua |
-| 4 → 5 | 80% | 14% | 6% | light purple |
+| 4 → 5 | 50% | 30% | 20% | light purple |
 
-The odds are deliberately generous: expected attempts are 1.05 / 1.14 / 1.25 and the cumulative
-break risk about 1% / 3% / 7%, so a top-tier blade is an evening's work rather than a grind. A
-downgrade drops one step (never below 0); a break destroys the weapon. The first two steps are
-free, which is where most of a short session's tempering happens.
+The early steps are deliberately generous — expected attempts 1.05 / 1.14 — so a short session
+reaches the middle without friction. The last step is a real gamble: 50% success, 30% downgrade,
+20% break. With downgrade loops counted, the chance that a blade breaks before it ever reaches the
+top is about one in three. A downgrade drops one step (never below 0); a break destroys the
+weapon. The first two steps are free, which is where most of a short session's tempering happens.
 
 `WeaponQualityTest` pins every boundary and the monotonic risk; `WeaponQuality` is Minecraft-free
 and `WeaponQualityStacks` owns the component, rarity colour and durability scaling.
