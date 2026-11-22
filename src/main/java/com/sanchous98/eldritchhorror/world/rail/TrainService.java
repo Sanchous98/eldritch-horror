@@ -6,6 +6,7 @@ import com.sanchous98.eldritchhorror.entity.TrainCar;
 import com.sanchous98.eldritchhorror.entity.TrainLocomotive;
 import com.sanchous98.eldritchhorror.entity.TrainWagon;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.transport.TransportMath;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -217,9 +218,9 @@ public final class TrainService {
             if (train.isRemoved() || train.level() != level || train.isSailing()) {
                 continue;
             }
-            BlockPos pos = train.blockPosition();
-            if (train.distanceToSqr(station.boardX() + 0.5, pos.getY(),
-                    station.boardZ() + 0.5) <= STATION_CLEARANCE * STATION_CLEARANCE) {
+            if (EarthMap.horizontalDistanceSqr(train.getX(), train.getZ(),
+                    station.boardX() + 0.5, station.boardZ() + 0.5)
+                    <= STATION_CLEARANCE * STATION_CLEARANCE) {
                 return true;
             }
         }
@@ -273,8 +274,9 @@ public final class TrainService {
         Component message = Component.translatable("message.eldritch_horror.train.boarding",
                 destination.cityName(), time);
         for (ServerPlayer player : level.players()) {
-            if (player.distanceToSqr(origin.boardX() + 0.5, player.getY(),
-                    origin.boardZ() + 0.5) <= BOARDING_CALL_RADIUS * BOARDING_CALL_RADIUS) {
+            if (EarthMap.horizontalDistanceSqr(player.getX(), player.getZ(),
+                    origin.boardX() + 0.5, origin.boardZ() + 0.5)
+                    <= BOARDING_CALL_RADIUS * BOARDING_CALL_RADIUS) {
                 player.sendSystemMessage(message, false);
             }
         }

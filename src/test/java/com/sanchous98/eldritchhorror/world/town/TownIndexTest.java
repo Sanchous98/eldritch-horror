@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,18 @@ class TownIndexTest {
         assertEquals(Set.of("west", "east", "south"), ids(index.near(0, 0, 17)));
         assertEquals(Set.of("corner"), ids(index.near(-16, -15, 1)));
         assertEquals(4, index.near(0, 0, 200).size());
+    }
+
+    @Test
+    void nearWrapsTheSeamBucket() {
+        TownIndex index = new TownIndex(512);
+        int half = EarthMap.HALF_WIDTH;
+        index.add(town("west", half - 1, 0));   // last bucket before the seam
+        index.add(town("east", -half + 1, 0));  // first bucket after it
+        index.seal();
+
+        // Three blocks across the seam; without the bucket wrap the east town is never visited.
+        assertEquals(Set.of("west", "east"), ids(index.near(half - 2, 0, 4)));
     }
 
     @Test

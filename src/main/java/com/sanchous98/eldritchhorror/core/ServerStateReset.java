@@ -15,6 +15,7 @@ import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.sanity.SanityTicker;
 import com.sanchous98.eldritchhorror.world.cult.CultRituals;
 import com.sanchous98.eldritchhorror.world.rail.TrainService;
+import com.sanchous98.eldritchhorror.world.rift.RiftGates;
 import com.sanchous98.eldritchhorror.world.transport.ShipService;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -64,5 +65,6 @@ public final class ServerStateReset {
         SanityTicker.clear();
         CorruptionTicker.clear();
         TrainService.clear();
+        RiftGates.clear();
     }
 }

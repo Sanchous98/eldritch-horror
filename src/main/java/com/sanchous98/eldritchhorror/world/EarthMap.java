@@ -121,6 +121,16 @@ public final class EarthMap {
         return x - width * Math.floor((x + HALF_WIDTH) / width);
     }
 
+    /**
+     * @return squared horizontal distance between two world points, measured the short way round
+     *         the cylinder seam; Y is deliberately ignored
+     */
+    public static double horizontalDistanceSqr(double ax, double az, double bx, double bz) {
+        double dx = wrapDelta(ax, bx);
+        double dz = bz - az;
+        return dx * dx + dz * dz;
+    }
+
     public int pixelWidth() {
         return width;
     }

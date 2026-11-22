@@ -232,4 +232,9 @@ public final class RiftGates {
             PENDING.remove(player.getUUID());
         }
     }
+
+    /** Forgets every pending mark; called when the world goes away. */
+    public static void clear() {
+        PENDING.clear();
+    }
 }

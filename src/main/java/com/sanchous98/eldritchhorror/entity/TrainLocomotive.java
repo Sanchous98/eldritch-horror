@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.rail.RailLine;
 import com.sanchous98.eldritchhorror.world.rail.RailNode;
 import com.sanchous98.eldritchhorror.world.rail.RailSample;
@@ -289,7 +290,7 @@ public class TrainLocomotive extends TrainCar {
         this.trail.clear();
         RailSample start = rail.sample(this.direction, 0.0);
         RailSample ahead = rail.sample(this.direction, Math.min(1.0, rail.length()));
-        double dx = ahead.x() - start.x();
+        double dx = EarthMap.wrapDelta(start.x(), ahead.x());
         double dz = ahead.z() - start.z();
         double length = Math.sqrt(dx * dx + dz * dz);
         if (length < 1.0E-6) {

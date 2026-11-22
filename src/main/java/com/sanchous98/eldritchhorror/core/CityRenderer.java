@@ -25,6 +25,7 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jspecify.annotations.Nullable;
 
@@ -310,6 +311,12 @@ public final class CityRenderer {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    /** Drops a render session when the world goes away; its tickets die with the level. */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        active = null;
     }
 
     /** Advances the active session by a bounded slice. Must run on the server thread. */

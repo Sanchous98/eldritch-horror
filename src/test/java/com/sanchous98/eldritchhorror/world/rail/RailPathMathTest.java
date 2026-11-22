@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.List;
@@ -63,5 +64,28 @@ class RailPathMathTest {
         assertEquals(0.5, corner.z(), 1.0E-9);
         assertEquals(0.0F, corner.yaw(), 1.0E-4);
         assertEquals(0, sampler.nodeAt(15.0).z());
+    }
+
+    @Test
+    void samplerCrossesTheSeamInOneBlock() {
+        int half = EarthMap.HALF_WIDTH;
+        RailSampler sampler = new RailSampler(List.of(
+                new RailNode(half - 1, 63, 0),
+                new RailNode(-half, 63, 0)));
+        assertEquals(1.0, sampler.length(), 1.0E-9);
+        // 75% of the way from x=half-1 to the seam, i.e. a quarter block past it on the far side.
+        assertEquals(-half + 0.25, sampler.sample(0.75).x(), 1.0E-9);
+        assertEquals(0.5, sampler.sample(0.75).z(), 1.0E-9);
+    }
+
+    @Test
+    void trailCrossesTheSeamInOneBlock() {
+        int half = EarthMap.HALF_WIDTH;
+        TrainTrail trail = new TrainTrail();
+        trail.append(half - 0.5, 63, 0, 0.0F, 0.0);
+        trail.append(-half + 0.5, 63, 0, 0.0F, 1.0);
+        RailSample middle = trail.sampleBehind(0.5);
+        assertNotNull(middle);
+        assertEquals(-half, middle.x(), 1.0E-9);
     }
 }

@@ -3,8 +3,10 @@ package com.sanchous98.eldritchhorror.world.town;
 import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A coarse, game-free spatial index over {@link Town}s. Towns are bucketed into square world
@@ -150,9 +152,15 @@ public final class TownIndex {
     /** Walks the requested bucket rectangle and keeps the towns matching {@code filter}. */
     private List<Town> collect(int minCellX, int maxCellX, int minCellZ, int maxCellZ, Filter filter) {
         List<Town> out = null;
+        int cells = cellCount();
+        Set<Long> visited = cells > 0 ? new HashSet<>() : null;
         for (int cx = minCellX; cx <= maxCellX; cx++) {
+            int wrappedX = cells > 0 ? wrapCell(cx, cells) : cx;
             for (int cz = minCellZ; cz <= maxCellZ; cz++) {
-                List<Town> bucket = this.buckets.get(key(cx, cz));
+                if (visited != null && !visited.add(key(wrappedX, cz))) {
+                    continue; // the query wrapped around and revisited a bucket
+                }
+                List<Town> bucket = this.buckets.get(key(wrappedX, cz));
                 if (bucket == null) {
                     continue;
                 }
@@ -168,6 +176,17 @@ public final class TownIndex {
             }
         }
         return out == null ? List.of() : out;
+    }
+
+    /** Bucket columns around the cylinder, or 0 when the cell size does not divide it. */
+    private int cellCount() {
+        int width = 2 * EarthMap.HALF_WIDTH;
+        return width % this.cell == 0 ? width / this.cell : 0;
+    }
+
+    /** Folds a bucket X onto the cylinder's bucket range. */
+    private static int wrapCell(int cellX, int cells) {
+        return Math.floorMod(cellX + cells / 2, cells) - cells / 2;
     }
 
     /** Bucket coordinate containing a world block coordinate (rounds towards -infinity). */

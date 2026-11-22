@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.CoastalPacket;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -180,7 +181,8 @@ public final class ShipService {
                 continue;
             }
             if (!ship.isSailing()
-                    && ship.distanceToSqr(port.waterX() + 0.5, ship.getY(), port.waterZ() + 0.5)
+                    && EarthMap.horizontalDistanceSqr(ship.getX(), ship.getZ(),
+                    port.waterX() + 0.5, port.waterZ() + 0.5)
                     <= DOCK_CLEARANCE * DOCK_CLEARANCE) {
                 return true;
             }
@@ -229,7 +231,8 @@ public final class ShipService {
                 destination.cityName(), time);
         Port origin = line.origin(direction);
         for (ServerPlayer player : level.players()) {
-            if (player.distanceToSqr(origin.waterX() + 0.5, player.getY(), origin.waterZ() + 0.5)
+            if (EarthMap.horizontalDistanceSqr(player.getX(), player.getZ(),
+                    origin.waterX() + 0.5, origin.waterZ() + 0.5)
                     <= BOARDING_CALL_RADIUS * BOARDING_CALL_RADIUS) {
                 player.sendSystemMessage(message, false);
             }

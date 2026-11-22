@@ -187,8 +187,8 @@ public final class CityLocation implements Location {
 
         // 3b. Generic street dressing shared by every culture: stalls, crates and a courtyard well
         // or two. Placed BEFORE buildings, so it can never punch through a wall, a door or a road;
-        // crates and wells are also gated on the cell being air/replaceable. Bounded to the flat
-        // heart so no prop can hover over a terrace step, deterministic like the rest.
+        // stalls and crates are gated on chunk-independent land, wells on a land box. Bounded to the
+        // flat heart so no prop can hover over a terrace step, deterministic like the rest.
         streetDetails(b, rng, cx, cz, propRadius, inner, ground, p);
 
         // 4. Buildings on a jittered grid — irregular blocks and 2–3 wide alleys, never a grid.

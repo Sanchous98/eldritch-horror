@@ -16,23 +16,31 @@ public final class EarthMaps {
     public static final int PIXEL_WIDTH = 16384;
 
     private static volatile @Nullable EarthMap instance;
+    /** Set after the first failed load, so a missing map does not re-read and re-log on every call. */
+    private static volatile boolean unavailable;
 
     private EarthMaps() {
     }
 
     /** @return the loaded map, or {@code null} if the layers are missing (never throws). */
     public static @Nullable EarthMap getOrNull() {
+        if (unavailable) {
+            return null;
+        }
         EarthMap local = instance;
         if (local == null) {
             synchronized (EarthMaps.class) {
+                if (unavailable) {
+                    return null;
+                }
                 local = instance;
                 if (local == null) {
                     try {
                         local = EarthMap.load(EarthMaps.class.getClassLoader(), PIXEL_WIDTH);
                     } catch (IOException e) {
-                        // The contract is "null if the layers are missing, never throws": log and
-                        // let get() turn the null into a clear IllegalStateException for callers
-                        // that cannot proceed without the map.
+                        // The contract is "null if the layers are missing, never throws": log once
+                        // and let get() turn the null into a clear IllegalStateException.
+                        unavailable = true;
                         EldritchHorror.LOGGER.error("Earth map layers are missing", e);
                         return null;
                     }
