@@ -31,4 +31,9 @@ public final class RiteEchoes {
     public static @Nullable RiteDefinition last(ServerPlayer player) {
         return Rites.byId(LAST.get(player.getUUID()));
     }
+
+    /** Clears the remembered rites (server stop / world switch). */
+    public static void clear() {
+        LAST.clear();
+    }
 }

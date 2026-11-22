@@ -43,6 +43,10 @@ import net.neoforged.neoforge.event.entity.player.ArrowLooseEvent;
  * corruption per pact-blade kill. There is no natural {@code ModConfig} item/combat section, so these
  * are named constants with this javadoc rather than new config keys, matching how the item pass
  * records flavour.
+ *
+ * <p><b>Charge.</b> The flat bonuses (silver blade, star-iron sword, axe) and the axe's sanity price
+ * only land on a full-charge swing ({@code getAttackStrengthScale} &gt; 0.9), so spam-clicking gets
+ * the base hit and nothing more. The multiplicative effects (dagger, trident) apply to every hit.
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class WeaponEffects {
@@ -131,12 +135,19 @@ public final class WeaponEffects {
                                    LivingEntity victim) {
         ItemStack held = player.getMainHandItem();
         float damage = event.getNewDamage();
+        // A flat bonus is the reward for a full swing: a 0-cooldown spam click lands at a fraction
+        // of the charge and must not collect it (nor the axe's paid blow).
+        boolean charged = player.getAttackStrengthScale(0.5F) > 0.9F;
         if (isHeld(held, "silver_blade")) {
-            event.setNewDamage(WeaponMath.bonusDamage(damage, SILVER_BONUS,
-                    victim.getType().builtInRegistryHolder().is(ELDRITCH)));
+            if (charged) {
+                event.setNewDamage(WeaponMath.bonusDamage(damage, SILVER_BONUS,
+                        victim.getType().builtInRegistryHolder().is(ELDRITCH)));
+            }
         } else if (isHeld(held, "star_iron_sword")) {
-            event.setNewDamage(WeaponMath.bonusDamage(damage, STAR_IRON_BONUS,
-                    victim.getType().builtInRegistryHolder().is(STAR_SPAWN)));
+            if (charged) {
+                event.setNewDamage(WeaponMath.bonusDamage(damage, STAR_IRON_BONUS,
+                        victim.getType().builtInRegistryHolder().is(STAR_SPAWN)));
+            }
         } else if (isHeld(held, "sacrificial_dagger")) {
             event.setNewDamage(WeaponMath.scaled(damage,
                     WeaponMath.daggerMultiplier(CorruptionAPI.get(player))));
@@ -148,7 +159,7 @@ public final class WeaponEffects {
         } else if (isHeld(held, "woodsman_axe")) {
             // FFG Axe: "spend 2 Sanity to reroll" - here a paid heavy blow, and only against the
             // eldritch, so the axe is a boss-fight tool rather than a strict sword upgrade.
-            if (victim.getType().builtInRegistryHolder().is(ELDRITCH)
+            if (charged && victim.getType().builtInRegistryHolder().is(ELDRITCH)
                     && SanityAPI.get(player) >= AXE_SANITY_COST) {
                 event.setNewDamage(WeaponMath.bonusDamage(damage, AXE_ELDRITCH_BONUS, true));
                 SanityAPI.add(player, -AXE_SANITY_COST);
@@ -178,14 +189,17 @@ public final class WeaponEffects {
 
     /**
      * The hollow pact blade's price, paid once per credited kill: the blade "remembers the hand that
-     * signed for it". Only a player attacker with the blade in hand counts.
+     * signed for it". The killing weapon decides — a projectile or explosion kill never charges a
+     * blade the player merely happens to hold, and swapping away before the blow lands does not
+     * dodge the price.
      */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (!isHeld(player.getMainHandItem(), "hollow_pact_blade")) {
+        ItemStack weapon = event.getSource().getWeaponItem();
+        if (weapon == null || !isHeld(weapon, "hollow_pact_blade")) {
             return;
         }
         CorruptionAPI.add(player, PACT_CORRUPTION_GAIN);

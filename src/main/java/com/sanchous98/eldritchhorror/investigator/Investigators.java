@@ -86,7 +86,8 @@ public final class Investigators {
             case SISTER_AGATHA -> List.of(
                     stack(SignatureItems.signatureId(id), 1),
                     stack("holy_cross", 1),
-                    stack("holy_water", 2),
+                    stack("holy_water", 1),
+                    stack("holy_water", 1),
                     stack("blessing_of_isis", 1));
             case MARION_DELACROIX -> List.of(
                     stack(SignatureItems.signatureId(id), 1),
@@ -105,14 +106,18 @@ public final class Investigators {
                     stack("star_reagent", 4));
             case DR_AMOS_HARTLEY -> List.of(
                     stack(SignatureItems.signatureId(id), 1),
-                    stack("lucid_draught", 2),
-                    stack("soothing_tea", 2),
-                    stack("valerian_tonic", 2));
+                    stack("lucid_draught", 1),
+                    stack("lucid_draught", 1),
+                    stack("soothing_tea", 1),
+                    stack("soothing_tea", 1),
+                    stack("valerian_tonic", 1),
+                    stack("valerian_tonic", 1));
             case EVELYN_ASHCOMBE -> List.of(
                     stack(SignatureItems.signatureId(id), 1),
                     stack("relic_coin", 16),
                     stack("barter_seal", 1),
-                    stack("blessed_water", 2));
+                    stack("blessed_water", 1),
+                    stack("blessed_water", 1));
             case ALDOUS_PEMBERTON -> List.of(
                     stack(SignatureItems.signatureId(id), 1),
                     stack("cartographers_lens", 1),

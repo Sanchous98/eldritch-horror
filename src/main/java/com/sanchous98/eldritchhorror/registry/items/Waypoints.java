@@ -66,4 +66,9 @@ public final class Waypoints {
         }
         return nearest;
     }
+
+    /** Clears every player's marks (server stop / world switch). */
+    public static void clear() {
+        MARKS.clear();
+    }
 }

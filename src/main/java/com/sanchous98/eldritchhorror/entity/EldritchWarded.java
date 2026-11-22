@@ -64,8 +64,11 @@ public final class EldritchWarded {
         }
         Entity attacker = source.getEntity();
         if (attacker instanceof Player) {
+            // The weapon that matters is the one the direct attacker swung. A projectile's direct
+            // entity is the projectile (which has no weapon), so it must never borrow whatever the
+            // shooter happens to hold at impact time.
             ItemStack weapon = source.getWeaponItem();
-            if (weapon == null) {
+            if (weapon == null && source.isDirect()) {
                 weapon = attacker.getWeaponItem();
             }
             return weapon == null || !weapon.is(WARD_BREAKERS);

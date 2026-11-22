@@ -317,9 +317,15 @@ public final class BotCommands {
             return 0;
         }
         ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
-        // Post the right-click-item event first so tome handlers (rite knowledge) fire.
-        NeoForge.EVENT_BUS.post(new PlayerInteractEvent.RightClickItem(bot, InteractionHand.MAIN_HAND));
-        InteractionResult result = stack.use(bot.level(), bot, InteractionHand.MAIN_HAND);
+        // Post the right-click-item event first so tome handlers (rite knowledge) fire, then honour
+        // a cancellation exactly as the server's own use path does: a cancelled click never runs
+        // the item's use.
+        PlayerInteractEvent.RightClickItem event =
+                new PlayerInteractEvent.RightClickItem(bot, InteractionHand.MAIN_HAND);
+        NeoForge.EVENT_BUS.post(event);
+        InteractionResult result = event.isCanceled()
+                ? event.getCancellationResult()
+                : stack.use(bot.level(), bot, InteractionHand.MAIN_HAND);
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " used item " + stack.getHoverName().getString() + " -> " + result), true);
         return 1;

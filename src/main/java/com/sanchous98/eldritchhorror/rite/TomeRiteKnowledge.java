@@ -6,6 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -17,6 +18,13 @@ import java.util.Map;
  * Wires tomes to the rite-knowledge system: reading (right-clicking) a tome teaches the rite id(s)
  * it grants, <b>in addition</b> to the sanity/corruption cost applied by
  * {@code ConsumableItem#use}.
+ *
+ * <p>{@link PlayerInteractEvent.RightClickItem} is posted from {@code ServerPlayerGameMode.useItem}
+ * immediately before {@code ItemStack#use}, and from no other server path: a click on a chest, door
+ * or altar goes through {@code useItemOn} and never posts it. Teaching here therefore tracks the use
+ * exactly — and because the handler runs at {@link EventPriority#LOWEST}, a click another handler
+ * cancelled (no {@code use} call) teaches nothing. Both hands are honoured, matching
+ * {@code ConsumableItem#use}, which runs for either.
  *
  * <p>Item→rite grants come from {@code design/16-items.md} (the four documented tomes) and the
  * per-entry comments in {@code registry/items/Tomes.java} for the remaining knowledge items, since
@@ -58,13 +66,9 @@ public final class TomeRiteKnowledge {
     private TomeRiteKnowledge() {
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        // Fires once per hand: without this guard a tome held in the offhand pays its cost twice.
-        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || event.isCanceled()) {
             return;
         }
         ItemStack stack = event.getItemStack();

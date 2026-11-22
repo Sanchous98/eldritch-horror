@@ -19,6 +19,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.common.loot.LootModifier;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Aldous Pemberton's passive: the Antiquarian finds better loot. A global loot modifier adds one
@@ -74,7 +75,7 @@ public final class AntiquarianLootModifier extends LootModifier {
     }
 
     /** The player whose action produced this loot: the killer, else the container's opener. */
-    private static ServerPlayer actingPlayer(LootContext context) {
+    private static @Nullable ServerPlayer actingPlayer(LootContext context) {
         if (context.getOptional(LootContextParams.ATTACKING_ENTITY) instanceof ServerPlayer killer) {
             return killer;
         }

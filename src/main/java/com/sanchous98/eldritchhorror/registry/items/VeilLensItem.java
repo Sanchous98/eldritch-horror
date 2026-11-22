@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -59,17 +60,39 @@ public final class VeilLensItem extends Item {
     @Override
     public void inventoryTick(ItemStack itemStack, ServerLevel level, Entity owner,
                               @Nullable EquipmentSlot slot) {
-        if (owner instanceof ServerPlayer player && level.getGameTime() % 20 == 0) {
-            UUID id = player.getUUID();
-            Integer left = DRAIN.get(id);
-            if (left != null) {
-                SanityAPI.add(player, -DRAIN_PER_SECOND);
-                if (left > 20) {
-                    DRAIN.put(id, left - 20);
-                } else {
-                    DRAIN.remove(id); // the last pulse ends the drain
-                }
+        if (!(owner instanceof ServerPlayer player) || level.getGameTime() % 20 != 0
+                || !isFirstCarried(player, itemStack)) {
+            return;
+        }
+        UUID id = player.getUUID();
+        Integer left = DRAIN.get(id);
+        if (left != null) {
+            SanityAPI.add(player, -DRAIN_PER_SECOND);
+            if (left > 20) {
+                DRAIN.put(id, left - 20);
+            } else {
+                DRAIN.remove(id); // the last pulse ends the drain
             }
         }
+    }
+
+    /**
+     * {@code inventoryTick} runs once per copy, so two lenses would spend the drain twice per
+     * second. Only the copy in the lowest inventory slot acts; one lens behaves exactly as before.
+     */
+    private static boolean isFirstCarried(ServerPlayer player, ItemStack stack) {
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack candidate = inventory.getItem(slot);
+            if (candidate.is(stack.getItem())) {
+                return candidate == stack;
+            }
+        }
+        return false;
+    }
+
+    /** Clears the in-memory drains (server stop / world switch). */
+    public static void clear() {
+        DRAIN.clear();
     }
 }

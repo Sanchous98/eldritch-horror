@@ -13,8 +13,9 @@ import net.minecraft.world.item.Rarity;
  * {@link ModDataComponents#WEAPON_QUALITY} component, mirror it onto the vanilla {@code RARITY}
  * component (the name colour) and rescale durability while preserving the current wear.
  *
- * <p>Only graded weapons (see {@link WeaponGrade#byItem()}) accept quality; a whetstone used on
- * anything else does nothing.
+ * <p>Only graded weapons (see {@link WeaponGrade#byItem()}) that have durability accept quality; a
+ * whetstone used on anything else — the throwables in particular, which are graded but stack — does
+ * nothing.
  */
 public final class WeaponQualityStacks {
 
@@ -26,8 +27,16 @@ public final class WeaponQualityStacks {
         return WeaponQuality.clamp(stack.getOrDefault(ModDataComponents.WEAPON_QUALITY.get(), 0));
     }
 
-    /** Whether this stack is one of the mod's graded weapons (the only valid tempering target). */
+    /**
+     * Whether this stack is one of the mod's graded weapons (the only valid tempering target).
+     * Graded gear without durability — the throwables — is graded for its tooltip only: quality
+     * rescales max durability, so a non-damageable stack has nothing to gain and would only lose
+     * its stackability.
+     */
     public static boolean isGradedWeapon(ItemStack stack) {
+        if (!stack.isDamageableItem()) {
+            return false;
+        }
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return id != null && EldritchHorror.MODID.equals(id.getNamespace())
                 && WeaponGrade.byItem().containsKey(id.getPath());

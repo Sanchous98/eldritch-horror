@@ -31,12 +31,14 @@ public final class Firearms {
 
     /** Dynamite — thrown; a short entity-only blast (no block damage). */
     public static final DeferredItem<ThrowableGearItem> DYNAMITE = ModItems.addItem("dynamite",
-            p -> new ThrowableGearItem(p, (level, owner, stack) -> new ThrownDynamite(level, owner, stack),
+            p -> new ThrowableGearItem(Weapons.lore(p, "dynamite"),
+                    (level, owner, stack) -> new ThrownDynamite(level, owner, stack),
                     0.9F, 1.0F, SoundEvents.TNT_PRIMED), 16);
 
     /** Tear Gas — thrown; Weakness + Blindness cloud, no damage. */
     public static final DeferredItem<ThrowableGearItem> TEAR_GAS = ModItems.addItem("tear_gas",
-            p -> new ThrowableGearItem(p, (level, owner, stack) -> new TearGasFlask(level, owner, stack),
+            p -> new ThrowableGearItem(Weapons.lore(p, "tear_gas"),
+                    (level, owner, stack) -> new TearGasFlask(level, owner, stack),
                     1.1F, 1.0F, SoundEvents.SPLASH_POTION_THROW), 16);
 
     public static final DeferredItem<FirearmItem> REVOLVER_38 = ModItems.addItem("revolver_38",

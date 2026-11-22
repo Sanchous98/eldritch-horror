@@ -63,6 +63,11 @@ public final class Bullet extends ThrowableItemProjectile {
     @Override
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
+        // Damage, pierce accounting and discard are server-side only: a client-side discard would
+        // remove the round on the shooter's screen while the server keeps it flying.
+        if (this.level().isClientSide()) {
+            return;
+        }
         hit.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), this.damage);
         if (this.pierce > 0) {
             this.pierce--;

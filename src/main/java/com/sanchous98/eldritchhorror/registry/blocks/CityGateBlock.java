@@ -109,4 +109,9 @@ public class CityGateBlock extends Block {
         LAST_ATTEMPT.put(playerId, now);
         return false;
     }
+
+    /** Clears the per-player gate cooldowns (server stop / world switch). */
+    public static void clear() {
+        LAST_ATTEMPT.clear();
+    }
 }

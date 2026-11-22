@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -60,13 +61,30 @@ public final class MirrorShardItem extends Item {
     @Override
     public void inventoryTick(ItemStack itemStack, ServerLevel level, Entity owner,
                               @Nullable EquipmentSlot slot) {
-        if (owner instanceof ServerPlayer player
-                && level.getGameTime() % JOLT_CHECK_INTERVAL_TICKS == 0
-                && player.getRandom().nextInt(JOLT_CHANCE) == 0) {
-            SanityAPI.add(player, -JOLT);
-            level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    ModSounds.AMBIENT_WHISPER.get(), SoundSource.AMBIENT, 0.4F, 1.0F);
+        if (!(owner instanceof ServerPlayer player)
+                || level.getGameTime() % JOLT_CHECK_INTERVAL_TICKS != 0
+                || !isFirstCarried(player, itemStack)
+                || player.getRandom().nextInt(JOLT_CHANCE) != 0) {
+            return;
         }
+        SanityAPI.add(player, -JOLT);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                ModSounds.AMBIENT_WHISPER.get(), SoundSource.AMBIENT, 0.4F, 1.0F);
+    }
+
+    /**
+     * {@code inventoryTick} runs once per copy, so two shards would roll (and jolt) twice. Only the
+     * copy in the lowest inventory slot acts; a single shard behaves exactly as before.
+     */
+    private static boolean isFirstCarried(ServerPlayer player, ItemStack stack) {
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack candidate = inventory.getItem(slot);
+            if (candidate.is(stack.getItem())) {
+                return candidate == stack;
+            }
+        }
+        return false;
     }
 
     /** The nearest non-city location whose codex entry the holder does not know, or {@code null}. */

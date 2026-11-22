@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -59,9 +60,27 @@ public final class EyeOfTheWatcherItem extends Item {
     @Override
     public void inventoryTick(ItemStack itemStack, ServerLevel level, Entity owner,
                               @Nullable EquipmentSlot slot) {
-        if (owner instanceof ServerPlayer player && level.getGameTime() % DRAIN_INTERVAL_TICKS == 0) {
-            SanityAPI.add(player, -DRAIN_PER_SECOND);
+        if (!(owner instanceof ServerPlayer player)
+                || level.getGameTime() % DRAIN_INTERVAL_TICKS != 0
+                || !isFirstCarried(player, itemStack)) {
+            return;
         }
+        SanityAPI.add(player, -DRAIN_PER_SECOND);
+    }
+
+    /**
+     * {@code inventoryTick} runs once per copy, so two eyes would drain twice. Only the copy in the
+     * lowest inventory slot acts; the others stay silent, keeping a single eye's behaviour identical.
+     */
+    private static boolean isFirstCarried(ServerPlayer player, ItemStack stack) {
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack candidate = inventory.getItem(slot);
+            if (candidate.is(stack.getItem())) {
+                return candidate == stack;
+            }
+        }
+        return false;
     }
 
     /** The nearest discovered rift, from the synced per-player knowledge, or {@code null}. */

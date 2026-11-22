@@ -91,4 +91,9 @@ public class InvestigatorPedestalBlock extends Block {
         }
         return InteractionResult.SUCCESS;
     }
+
+    /** Clears the armed per-player confirmations (server stop / world switch). */
+    public static void clear() {
+        PENDING.clear();
+    }
 }
