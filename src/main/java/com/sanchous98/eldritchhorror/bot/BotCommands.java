@@ -9,6 +9,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.event.Rifts;
+import com.sanchous98.eldritchhorror.registry.items.WeaponQuality;
+import com.sanchous98.eldritchhorror.registry.items.WeaponQualityStacks;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
 import java.util.Comparator;
 import java.util.List;
@@ -130,6 +132,9 @@ public final class BotCommands {
                 .then(Commands.literal("inventory")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::inventory)))
+                .then(Commands.literal("quality")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::quality)))
                 .then(Commands.literal("craft")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("item", StringArgumentType.string())
@@ -408,6 +413,25 @@ public final class BotCommands {
     }
 
     /** {@code /eh bot inventory <name>}: lists the bot's inventory. */
+    /** {@code /eh bot quality <name>}: the held weapon's per-stack quality and scaled durability. */
+    private static int quality(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        ItemStack held = bot.getMainHandItem();
+        int level = WeaponQualityStacks.quality(held);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " holds " + held.getHoverName().getString()
+                + " quality=" + level + "/" + WeaponQuality.MAX
+                + " max_damage=" + held.getMaxDamage()
+                + " damage=" + held.getDamageValue()), true);
+        return 1;
+    }
+
     private static int inventory(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;

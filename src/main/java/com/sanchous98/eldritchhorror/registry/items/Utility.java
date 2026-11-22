@@ -1,9 +1,15 @@
 package com.sanchous98.eldritchhorror.registry.items;
 
 import com.sanchous98.eldritchhorror.registry.ModItems;
+import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.registries.DeferredItem;
 
-/** Mundane survival tools and field supplies. Stub content; behaviour not wired yet. */
+/** Mundane survival tools and field supplies. */
 public final class Utility {
+
+    /** Whetstone — one tempering attempt on a weapon held in the other hand. */
+    public static final DeferredItem<Item> WHETSTONE = ModItems.add("whetstone", 16);
+
     private Utility() {
     }
 

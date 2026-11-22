@@ -23,8 +23,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   Carbine Rifle, with Brass Cartridge ammo, a shared bullet projectile, recipes, chest loot and
   generated icons. Verified on a dev server: revolver 12→7.04 HP, shotgun 12→2.08 (2 cartridges),
   carbine 12→4.06, dynamite blast damage, tear gas Weakness/Blindness; all four guns keep their
-  inventory slot when switched. Every weapon now carries a five-step grade (Crude → Relic) shown
-  as the name colour plus a tooltip line, and every one of the twenty has a survival path
+  inventory slot when switched. Every weapon now carries a fixed five-step **grade** (Crude →
+  Relic, grey tooltip line) and a rolled per-stack **quality** (whetstone tempering; first two
+  steps free, then 95/88/80% with 1/3/6% break risk; +12% durability per step, colour = quality),
+  and every one of the twenty has a survival path
   (crafted, chest loot, investigator kit or cult trade) — the seven former creative-only weapons
   were wired: censer mace and star-iron sword recipes, sacrificial dagger/eye scepter/veil bow in
   chests, warden's maul and tidal trident at DEVOTED, hollow pact blade at INNER_CIRCLE.

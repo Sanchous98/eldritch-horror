@@ -140,6 +140,12 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   star fragments + stick), the Sacrificial Dagger sits in Order chests, the Eye Scepter and Veil Bow
   in relic chests, and the Warden's Maul / Tidal Trident / Hollow Pact Blade are bought from the
   Order and the Choir at DEVOTED / INNER_CIRCLE. The Carbine Rifle stays loot-only by design.
+- **Weapon quality (per instance)** (`design/16`): grade is now fixed by the item, while **quality**
+  is rolled per stack and is what colours the name. A **whetstone** (flint + stone + consecrated
+  oil) tempers the weapon in hand: the first two steps are free, then 95/88/80% success with a
+  growing 1/3/6% break and 4/9/14% downgrade risk — deliberately generous for short sessions.
+  Quality adds +12% max durability per step (wear preserved) and never changes damage. Verified in
+  game: 250 → 280 → 310 → 340 → 370 max durability over four tempers, then a break on the fifth.
 - **Weapon grades** (`design/16`): every weapon and combat throwable carries one of five grades
   (Crude / Common / Quality / Fine / Relic). The grade sets the item name's colour (vanilla
   `Rarity`) and adds a localized tooltip line; damage and durability stay per-item, so a grade is

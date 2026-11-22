@@ -5,6 +5,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.gametest.GameTests;
 import com.sanchous98.eldritchhorror.loot.LootModifiers;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
+import com.sanchous98.eldritchhorror.registry.ModDataComponents;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
 import com.sanchous98.eldritchhorror.registry.ModBlocks;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
@@ -56,6 +57,7 @@ public final class EldritchHorror {
         ModItems.registerCategories();
         ModBlocks.registerCategories();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
+        ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         ModAttributes.ATTRIBUTES.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModEffects.MOB_EFFECTS.register(modEventBus);

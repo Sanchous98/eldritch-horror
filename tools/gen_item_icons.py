@@ -1711,6 +1711,7 @@ EXACT = {
     "revolver_38": "pistol", "automatic_45": "pistol",
     "shotgun_double": "shotgun", "carbine_rifle": "rifle",
     "cartridge": "cartridge", "blasting_powder": "pouch",
+    "whetstone": "ingot",
     # armour / clothing
     "investigator_coat": "coat", "choir_robe": "robe", "wardens_plate": "plate",
     "drowned_wetsuit": "wetsuit", "cultist_habit": "habit", "occultists_hat": "hat",
@@ -1857,7 +1858,7 @@ def palette_for(item_id: str, category: str, shape: str) -> str:
         "woodsman_axe": "iron", "bull_whip": "leather", "dynamite": "blood",
         "tear_gas": "ichor", "revolver_38": "iron", "automatic_45": "iron",
         "shotgun_double": "iron", "carbine_rifle": "iron", "cartridge": "copper",
-        "blasting_powder": "charcoal",
+        "blasting_powder": "charcoal", "whetstone": "stone",
     }
     if item_id in exact:
         return exact[item_id]

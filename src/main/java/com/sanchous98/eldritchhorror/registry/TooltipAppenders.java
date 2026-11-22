@@ -2,6 +2,8 @@ package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.registry.items.ConsumableItem;
+import com.sanchous98.eldritchhorror.registry.items.WeaponQuality;
+import com.sanchous98.eldritchhorror.registry.items.WeaponQualityStacks;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -34,7 +36,24 @@ public final class TooltipAppenders {
                 appendDelta(builder, "tooltip.eldritch_horror.sanity", consumable.sanityDelta());
                 appendDelta(builder, "tooltip.eldritch_horror.corruption", consumable.corruptionDelta());
             }
+            // Per-stack quality line (design/16): grade is the fixed catalog line, quality is rolled.
+            if (WeaponQualityStacks.isGradedWeapon(stack)) {
+                int quality = WeaponQualityStacks.quality(stack);
+                builder.accept(Component.translatable(WeaponQuality.lineKey(),
+                                Component.translatable(WeaponQuality.nameKey(quality)))
+                        .withStyle(qualityColour(quality)));
+            }
         });
+    }
+
+    /** The quality line's colour, matching the name colour buckets. */
+    private static ChatFormatting qualityColour(int quality) {
+        return switch (WeaponQuality.rarityBucket(quality)) {
+            case 0 -> ChatFormatting.WHITE;
+            case 1 -> ChatFormatting.YELLOW;
+            case 2 -> ChatFormatting.AQUA;
+            default -> ChatFormatting.LIGHT_PURPLE;
+        };
     }
 
     /** Emits one colour-coded "label +N"/"label −N" line when {@code delta} is non-zero. */

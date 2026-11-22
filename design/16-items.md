@@ -213,18 +213,19 @@ effects (Dynamite, Tear Gas) become throwables.
 
 ### Weapon grades
 
-Every weapon and combat throwable carries one grade. It is **presentation and provenance**, not a
-second balance axis: damage, durability and on-hit effects stay the numbers each item registers.
-The grade sets the item name's colour (vanilla `Rarity`) and adds one tooltip line
-(`grade.eldritch_horror.<grade>`), and it mirrors where the item comes from.
+Every weapon and combat throwable carries one **grade** and one **quality**.
 
-| Grade | Name colour | Provenance | Items |
-|---|---|---|---|
-| Crude | white | improvised, first thing a survivor can make | Bone Club, Ritual Knife |
-| Common | white | mundane 1920s field kit | Occultist's Implement, Axe, Bull Whip, .38 Revolver, Dynamite, Tear Gas |
-| Quality | yellow | crafted or issued with real materials | Silver Blade, .45 Automatic, Double-barreled Shotgun, Sacrificial Dagger, Censer Mace |
-| Fine | aqua | rare materials or elite issue | Star-Iron Sword, Tidal Trident, Warden's Maul, Carbine Rifle |
-| Relic | light purple | unique occult relics | Hollow Pact Blade, Eye Scepter, Veil Bow |
+**Grade** is fixed by the item and guaranteed: it says what the thing is and where it comes from,
+and it never changes. It is shown as a neutral grey tooltip line (`grade.eldritch_horror.<grade>`),
+not as a colour, because the colour belongs to the rolled quality.
+
+| Grade | Provenance | Items |
+|---|---|---|
+| Crude | improvised, first thing a survivor can make | Bone Club, Ritual Knife |
+| Common | mundane 1920s field kit | Occultist's Implement, Axe, Bull Whip, .38 Revolver, Dynamite, Tear Gas |
+| Quality | crafted or issued with real materials | Silver Blade, .45 Automatic, Double-barreled Shotgun, Sacrificial Dagger, Censer Mace |
+| Fine | rare materials or elite issue | Star-Iron Sword, Tidal Trident, Warden's Maul, Carbine Rifle |
+| Relic | unique occult relics | Hollow Pact Blade, Eye Scepter, Veil Bow |
 
 Loot weights follow the grade: common items sit in the common city pool, quality items in the
 Order pool, fine and relic items in the relic pool. `WeaponGradeTest` keeps the table complete and
@@ -241,6 +242,32 @@ Acquisition follows the grade:
 | Relic | — | Eye Scepter and Veil Bow in relic chests; Hollow Pact Blade from the Choir at INNER_CIRCLE |
 
 Every weapon now has at least one survival path: nothing on the roster is creative-only.
+
+### Quality (per instance)
+
+Quality is rolled per stack and is the only thing that colours the name. Every weapon starts at
+quality 0; a **whetstone** (flint + stone + consecrated oil) used with the weapon in the main hand
+and the whetstone in the off hand attempts one step. One whetstone is spent per attempt.
+
+Quality gives **max durability** (+12% per step, +60% at the top; current wear is preserved, so
+tempering never repairs or over-damages a blade). It does not change damage — that stays the item's
+number, so the quality ladder cannot quietly rebalance combat.
+
+| Step | Success | Downgrade | Break | Colour |
+|---|---|---|---|---|
+| 0 → 1 | 100% | — | — | white |
+| 1 → 2 | 100% | — | — | white |
+| 2 → 3 | 95% | 4% | 1% | yellow |
+| 3 → 4 | 88% | 9% | 3% | aqua |
+| 4 → 5 | 80% | 14% | 6% | light purple |
+
+The odds are deliberately generous: expected attempts are 1.05 / 1.14 / 1.25 and the cumulative
+break risk about 1% / 3% / 7%, so a top-tier blade is an evening's work rather than a grind. A
+downgrade drops one step (never below 0); a break destroys the weapon. The first two steps are
+free, which is where most of a short session's tempering happens.
+
+`WeaponQualityTest` pins every boundary and the monotonic risk; `WeaponQuality` is Minecraft-free
+and `WeaponQualityStacks` owns the component, rarity colour and durability scaling.
 
 Guns never use vanilla arrows: one `bullet` projectile carries the gun's damage and is
 consumed with a cartridge per shot. Durability is spent per shot, so a long expedition still

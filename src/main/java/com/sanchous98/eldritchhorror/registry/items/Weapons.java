@@ -17,7 +17,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.MaceItem;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.component.ItemLore;
@@ -195,32 +194,12 @@ public final class Weapons {
      */
     static Item.Properties lore(Item.Properties properties, String id) {
         WeaponGrade grade = WeaponGrade.of(id);
-        return properties.rarity(rarity(grade))
-                .component(DataComponents.LORE, new ItemLore(List.of(
-                        Component.translatable("item.eldritch_horror." + id + ".tooltip"),
-                        Component.translatable(grade.lineKey()).withStyle(format(grade)))));
+        // The grade line is neutral: the name colour belongs to the per-stack quality.
+        return properties.component(DataComponents.LORE, new ItemLore(List.of(
+                Component.translatable("item.eldritch_horror." + id + ".tooltip"),
+                Component.translatable(grade.lineKey()).withStyle(ChatFormatting.GRAY))));
     }
 
-    /** Grade → the tooltip line's own colour, so Crude (grey) reads apart from Common (white). */
-    private static ChatFormatting format(WeaponGrade grade) {
-        return switch (grade) {
-            case CRUDE -> ChatFormatting.GRAY;
-            case COMMON -> ChatFormatting.WHITE;
-            case QUALITY -> ChatFormatting.YELLOW;
-            case FINE -> ChatFormatting.AQUA;
-            case RELIC -> ChatFormatting.LIGHT_PURPLE;
-        };
-    }
-
-    /** Grade → the vanilla name colour ({@code design/16}: crude/common white … relic epic). */
-    private static Rarity rarity(WeaponGrade grade) {
-        return switch (grade) {
-            case CRUDE, COMMON -> Rarity.COMMON;
-            case QUALITY -> Rarity.UNCOMMON;
-            case FINE -> Rarity.RARE;
-            case RELIC -> Rarity.EPIC;
-        };
-    }
 
     /**
      * {@code humanoidArmor} plus the two locale tooltip lines: {@code <id>.armor} states the real
