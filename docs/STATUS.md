@@ -24,7 +24,10 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   generated icons. Verified on a dev server: revolver 12→7.04 HP, shotgun 12→2.08 (2 cartridges),
   carbine 12→4.06, dynamite blast damage, tear gas Weakness/Blindness; all four guns keep their
   inventory slot when switched. Every weapon now carries a five-step grade (Crude → Relic) shown
-  as the name colour plus a tooltip line.
+  as the name colour plus a tooltip line, and every one of the twenty has a survival path
+  (crafted, chest loot, investigator kit or cult trade) — the seven former creative-only weapons
+  were wired: censer mace and star-iron sword recipes, sacrificial dagger/eye scepter/veil bow in
+  chests, warden's maul and tidal trident at DEVOTED, hollow pact blade at INNER_CIRCLE.
 - **Honest endgame playthrough (night 5, no cheats)** — a bare bot (`spawnjoinbare`, empty
   inventory) played the whole road to the Hollow ending: gate → starter chain → mined birch
   wood/cobblestone → stone sword → 4 bones + kit → 4 silver from the Order Vault → cleansing

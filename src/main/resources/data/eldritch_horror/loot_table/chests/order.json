@@ -49,6 +49,11 @@
           "name": "eldritch_horror:cartridge",
           "weight": 8,
           "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 6, "max": 12 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:sacrificial_dagger",
+          "weight": 4
         }
       ]
     },

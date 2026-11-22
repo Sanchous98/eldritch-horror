@@ -230,6 +230,18 @@ Loot weights follow the grade: common items sit in the common city pool, quality
 Order pool, fine and relic items in the relic pool. `WeaponGradeTest` keeps the table complete and
 the ladder ordered. The table itself is the single source of truth in `WeaponGrade.BY_ITEM`.
 
+Acquisition follows the grade:
+
+| Grade | Crafted | Found / issued / traded |
+|---|---|---|
+| Crude | Bone Club, Ritual Knife | — |
+| Common | Occultist's Implement, Axe, Bull Whip, Dynamite, Tear Gas, .38 Revolver | .38 Revolver also in Order chests; cartridges in city/Order/relic chests |
+| Quality | Silver Blade, Censer Mace, .45 Automatic, Double-barreled Shotgun | Silver Blade and Sacrificial Dagger in investigator kits; Sacrificial Dagger in Order chests; .45 and shotgun in relic chests |
+| Fine | Star-Iron Sword (star fragments) | Tidal Trident and Warden's Maul bought at DEVOTED standing; Carbine Rifle relic-chest loot only |
+| Relic | — | Eye Scepter and Veil Bow in relic chests; Hollow Pact Blade from the Choir at INNER_CIRCLE |
+
+Every weapon now has at least one survival path: nothing on the roster is creative-only.
+
 Guns never use vanilla arrows: one `bullet` projectile carries the gun's damage and is
 consumed with a cartridge per shot. Durability is spent per shot, so a long expedition still
 needs a melee fallback (the lesson of the night-5 playthrough: stone-tier melee alone cannot

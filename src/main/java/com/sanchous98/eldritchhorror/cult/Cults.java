@@ -60,7 +60,9 @@ public final class Cults {
                         new CultService("teach_banish_the_horror", CultRank.INNER_CIRCLE,
                                 CultService.Kind.TEACH, "banish_the_horror"),
                         CultService.trade("buy_chalk", CultRank.INITIATE,
-                                "black_obol", 1, "chalk_reagent", 2))));
+                                "black_obol", 1, "chalk_reagent", 2),
+                        CultService.trade("buy_maul", CultRank.DEVOTED,
+                                "order_scrip", 12, "wardens_maul", 1))));
 
         register(new CultDefinition(
                 "hollow_choir", "The Hollow Choir",
@@ -91,7 +93,11 @@ public final class Cults {
                         CultService.trade("buy_bone", CultRank.INITIATE,
                                 "black_obol", 1, "bone_reagent", 2),
                         CultService.trade("buy_litanies", CultRank.DEVOTED,
-                                "black_obol", 4, "cult_litanies", 1))));
+                                "black_obol", 4, "cult_litanies", 1),
+                        CultService.trade("buy_trident", CultRank.DEVOTED,
+                                "black_obol", 6, "tidal_trident", 1),
+                        CultService.trade("buy_pact_blade", CultRank.INNER_CIRCLE,
+                                "black_obol", 8, "hollow_pact_blade", 1))));
     }
 
     private Cults() {

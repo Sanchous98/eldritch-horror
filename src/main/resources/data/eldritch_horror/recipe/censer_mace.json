@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "C": "eldritch_horror:black_candle",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    " G ",
+    "GCG",
+    " S "
+  ],
+  "result": {
+    "id": "eldritch_horror:censer_mace"
+  }
+}

@@ -53,6 +53,16 @@
           "name": "eldritch_horror:cartridge",
           "weight": 6,
           "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 8, "max": 16 } }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:eye_scepter",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:veil_bow",
+          "weight": 3
         }
       ]
     },

@@ -135,6 +135,11 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   Shotgun** and **Carbine Rifle** firing a shared `bullet` projectile and spending **Brass
   Cartridge** ammunition (copper + iron nugget). Recipes, city/Order/relic chest loot, generated
   icons, both locales and `FirearmSpecTest` are wired; the four guns are a common → fine ladder.
+- **Every weapon has a survival path** (`design/16`): seven roster weapons had no source at all
+  (creative-only). The Censer Mace and Star-Iron Sword are now craftable (gold + black candle;
+  star fragments + stick), the Sacrificial Dagger sits in Order chests, the Eye Scepter and Veil Bow
+  in relic chests, and the Warden's Maul / Tidal Trident / Hollow Pact Blade are bought from the
+  Order and the Choir at DEVOTED / INNER_CIRCLE. The Carbine Rifle stays loot-only by design.
 - **Weapon grades** (`design/16`): every weapon and combat throwable carries one of five grades
   (Crude / Common / Quality / Fine / Relic). The grade sets the item name's colour (vanilla
   `Rarity`) and adds a localized tooltip line; damage and durability stay per-item, so a grade is
