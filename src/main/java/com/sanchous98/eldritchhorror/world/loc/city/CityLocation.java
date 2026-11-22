@@ -1,13 +1,23 @@
 package com.sanchous98.eldritchhorror.world.loc.city;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
+import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.loc.Builder;
+import com.sanchous98.eldritchhorror.world.loc.CityWrite;
 import com.sanchous98.eldritchhorror.world.loc.Location;
 import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder;
 import com.sanchous98.eldritchhorror.world.loc.StructureBuilder.Side;
 import com.sanchous98.eldritchhorror.world.loc.Tier;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlan;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlanContext;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
@@ -36,7 +46,7 @@ public final class CityLocation implements Location {
     /** Layout pitch of the jittered building grid (blocks). */
     private static final int CELL = 13;
     /** Built district half-extent (blocks); the cull radius ({@link #radius()}) can be larger. */
-    private static final int DISTRICT_CAP = 380;
+    private static final int DISTRICT_CAP = 400;
     /** Plaza half-extent: wide enough to seat the enlarged style landmarks on paving. */
     private static final int PLAZA = 30;
     /** Radius kept clear of ordinary buildings so the (now large) landmark has room. */
@@ -46,13 +56,13 @@ public final class CityLocation implements Location {
      * level is the mean terrain under them, joined by {@link #STEP}-high steps, so a district on a
      * slope becomes a hillside city rather than one flat plate.
      */
-    private static final int TILE = 24;
+    static final int TILE = 24;
     /** Terrace height quantum (blocks): every tile level and terrace coordinate is a multiple. */
-    private static final int STEP = 2;
+    static final int STEP = 2;
     /** Radius of the intentionally flat heart (plaza + landmark) held at {@code ground}. */
-    private static final int FLAT_HEART = PLAZA + TILE;
+    static final int FLAT_HEART = PLAZA + TILE;
     /** Width of the graded ramp that steps the flat heart out into the terrace field. */
-    private static final int HEART_RAMP = TILE;
+    static final int HEART_RAMP = TILE;
     /**
      * Half-width of the flat pad levelled under each lot before it is built. A lot is placed by its
      * origin but grows only in +X/+Z (a 9-wide house reaches origin+9 with its roof), so the pad is
@@ -69,7 +79,7 @@ public final class CityLocation implements Location {
      */
     private static final int CLEAR_ABOVE = 40;
     /** Minimum width (blocks) of the graded rim that blends the flat city into the wild terrain. */
-    private static final int EDGE_RING_MIN = 24;
+    static final int EDGE_RING_MIN = 24;
     /** Maximum rim width: on very steep sites the slope widens (flatter) but never eats the city. */
     private static final int EDGE_RING_MAX = 64;
     /**
@@ -85,6 +95,16 @@ public final class CityLocation implements Location {
      * the mean level and rim width are identical for every chunk of this location).
      */
     private volatile @Nullable Geometry geometry;
+    /** Only a couple of cities are generated at once; an LRU keeps the recorded plans bounded. */
+    private static final int MAX_CACHED_CITIES = 2;
+    private static final Object PLAN_CACHE_LOCK = new Object();
+    private static final Map<String, Map<Long, List<CityWrite>>> PLAN_CACHE =
+            new LinkedHashMap<>(4, 0.75F, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Map<Long, List<CityWrite>>> eldest) {
+                    return size() > MAX_CACHED_CITIES;
+                }
+            };
 
     /** Cached result of the two O(radius²) elevation scans. */
     private record Geometry(int ground, int edgeRing) {
@@ -99,9 +119,17 @@ public final class CityLocation implements Location {
         return this.city;
     }
 
-    /** Half-extent in blocks, scaled from real population: {@code clamp(220 + sqrt(pop)/40, 220, 400)}. */
+    /**
+     * Half-extent in blocks: the authored plan's half-extent (clamped to 300..400) when one is
+     * registered, otherwise scaled from real population:
+     * {@code clamp(220 + sqrt(pop)/40, 220, 400)}.
+     */
     @Override
     public int radius() {
+        CityPlan plan = CityPlans.forCity(this.city.name());
+        if (plan != null) {
+            return Math.clamp(plan.halfExtent(), 300, 400);
+        }
         double r = 220.0 + Math.sqrt(Math.max(this.city.population(), 1)) / 40.0;
         int rounded = (int) Math.round(r);
         return Math.clamp(rounded, 220, 400);
@@ -167,6 +195,38 @@ public final class CityLocation implements Location {
         // 1. Plaza: a paved apron at the heart of the city.
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground - 2, ground, p.ground());
         b.ground(cx - plaza, cz - plaza, cx + plaza, cz + plaza, ground + 1, ground + 1, p.ground());
+
+        // Authored plan: a flat authored plate at the city's ground level, so every plan can
+        // place its blocks at `ground` without fighting terraces. The procedural district below
+        // stays as the fallback while the 24 authored plans land.
+        CityPlan plan = CityPlans.forCity(this.city.name());
+        if (plan != null) {
+            // Authored core: a flat authored heart blended into the natural terrain over the
+            // graded rim, so the city never looks like a plate cut into the landscape. The plan
+            // sits its lots on the exact same surface.
+            gradeAuthoredDistrict(b, cx, cz, district, ground, edgeRing, p);
+            CitySurface surface = CitySurface.of(b, cx, cz, district, ground, edgeRing);
+            CityPlanContext ctx = new CityPlanContext(cx, cz, ground, district, surface);
+            if (b instanceof Builder builder) {
+                Map<Long, List<CityWrite>> writes;
+                synchronized (PLAN_CACHE_LOCK) {
+                    writes = PLAN_CACHE.get(this.id());
+                }
+                if (writes == null) {
+                    var recorder = builder.recorder();
+                    plan.build(recorder, ctx, p);
+                    writes = recorder.writes();
+                    synchronized (PLAN_CACHE_LOCK) {
+                        PLAN_CACHE.put(this.id(), writes);
+                    }
+                }
+                builder.applyChunk(writes, b.chunkMinX() >> 4, b.chunkMinZ() >> 4);
+            } else {
+                plan.build(b, ctx, p);
+            }
+            b.marker("city_center", cx, ground + 1, cz);
+            return;
+        }
 
         // 1b. Pave the whole district on land, so the city reads as urban fabric rather than
         // scattered buildings on wild terrain. Chunk-clipped: only this chunk's columns write.
@@ -329,6 +389,33 @@ public final class CityLocation implements Location {
     }
 
     /**
+     * The authored city's ground level from the baked map alone, for the transport network (which
+     * has no worldgen builder). Mirrors {@link #meanLevel}: the mean terrain over the flat interior.
+     */
+    public static int authoredGround(EarthMap map, City city) {
+        int district = Math.min(new CityLocation(city).renderRadius(), DISTRICT_CAP);
+        int radius = district - EDGE_RING_MIN;
+        long sum = 0;
+        int n = 0;
+        int step = 16;
+        for (int dx = -radius; dx <= radius; dx += step) {
+            for (int dz = -radius; dz <= radius; dz += step) {
+                if (dx * dx + dz * dz > radius * radius) {
+                    continue;
+                }
+                int x = city.x() + dx;
+                int z = city.z() + dz;
+                if (map.isLand(x, z)) {
+                    sum += ElevationCurve.toY(map.elevationMetres(x, z));
+                    n++;
+                }
+            }
+        }
+        return n == 0 ? ElevationCurve.toY(map.elevationMetres(city.x(), city.z()))
+                : (int) Math.round(sum / (double) n);
+    }
+
+    /**
      * The city's build level: the mean terrain height over the flat interior, sampled on a grid.
      * Using the mean instead of the single centre point keeps cut-and-fill balanced, so a district
      * on a slope is levelled gently rather than cut in half. Pure ({@code b.groundY} only, no rng),
@@ -376,6 +463,52 @@ public final class CityLocation implements Location {
             }
         }
         return Math.clamp(maxDeparture * 2, EDGE_RING_MIN, EDGE_RING_MAX);
+    }
+
+    /**
+     * Grades the authored city: a flat authored heart at {@code ground}, blended into the natural
+     * terrain over {@code edgeRing} blocks. This avoids both a knife-cut plate and a floating city
+     * on a slope; plans sit their lots on {@link CitySurface#at(int, int)}, which mirrors this
+     * exact formula.
+     */
+    private static void gradeAuthoredDistrict(StructureBuilder b, int cx, int cz, int district,
+                                              int ground, int edgeRing, Palette p) {
+        int x0 = b.chunkMinX();
+        int z0 = b.chunkMinZ();
+        int district2 = district * district;
+        int flat = district - edgeRing;
+        int flat2 = flat * flat;
+        for (int x = x0; x < x0 + 16; x++) {
+            int dx = x - cx;
+            if (Math.abs(dx) > district) {
+                continue;
+            }
+            for (int z = z0; z < z0 + 16; z++) {
+                int dz = z - cz;
+                int d2 = dx * dx + dz * dz;
+                if (d2 > district2 || !b.isLand(x, z)) {
+                    continue;
+                }
+                int surface = b.groundY(x, z);
+                int target;
+                if (d2 <= flat2) {
+                    target = ground;
+                } else {
+                    double t = Math.clamp((Math.sqrt(d2) - flat) / edgeRing, 0.0, 1.0);
+                    target = (int) Math.round(ground * (1.0 - t) + surface * t);
+                }
+                if (surface > target) {
+                    b.fill(x, target + 1, z, x, surface, z, Blocks.AIR.defaultBlockState());
+                } else if (surface < target) {
+                    b.fill(x, surface + 1, z, x, target, z, p.foundation());
+                }
+                b.put(x, target, z, p.ground());
+                int clearTop = Math.max(surface, target) + 4;
+                for (int y = target + 1; y <= clearTop; y++) {
+                    b.put(x, y, z, Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
     }
 
     /**

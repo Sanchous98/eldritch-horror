@@ -1,6 +1,9 @@
 package com.sanchous98.eldritchhorror.world.loc;
 
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -99,6 +102,26 @@ public interface StructureBuilder {
 
     /** A jigsaw marker: prefers a hand-authored .nbt named `name` if present. */
     void marker(String name, int x, int y, int z);
+
+    /**
+     * Places a standing sign at {@code (x,y,z)} facing {@code facing}. The default implementation
+     * writes the block only; text is written by the concrete builder when the chunk is generating.
+     */
+    default void sign(int x, int y, int z, Direction facing, String... lines) {
+        put(x, y, z, Blocks.OAK_SIGN.defaultBlockState()
+                .setValue(StandingSignBlock.ROTATION, signRotation(facing)));
+    }
+
+    /** Standing-sign rotation segment: 0 = south, 4 = west, 8 = north, 12 = east. */
+    private static int signRotation(Direction facing) {
+        return switch (facing) {
+            case SOUTH -> 0;
+            case WEST -> 4;
+            case NORTH -> 8;
+            case EAST -> 12;
+            default -> 8; // a standing sign cannot face up or down; default to north
+        };
+    }
 
     /** A cardinal side of a room, for doorway placement. */
     enum Side {

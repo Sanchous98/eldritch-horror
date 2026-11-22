@@ -3,6 +3,8 @@ package com.sanchous98.eldritchhorror.world.loc;
 import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.EarthMaps;
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -21,7 +23,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
  * <p>This mirrors how the old {@code CityBuilder} wrote blocks during worldgen: no neighbour
  * updates, no lighting recalculation — plain {@code setBlock} with flags {@code 2}.
  */
-public final class Builder implements StructureBuilder {
+public class Builder implements StructureBuilder {
 
     /** Same flags the old CityBuilder used: no neighbour updates, no lighting update. */
     private static final int FLAGS = 2;
@@ -38,8 +40,14 @@ public final class Builder implements StructureBuilder {
 
     public Builder(WorldGenLevel level, ChunkAccess chunk, RandomSource rng, Palette palette,
                    int centerX, int centerZ) {
+        this(level, chunk.getPos(), rng, palette, centerX, centerZ);
+    }
+
+    /** Recording constructor: the chunk position is enough; the recorder never writes the world. */
+    protected Builder(WorldGenLevel level, ChunkPos chunk, RandomSource rng, Palette palette,
+                      int centerX, int centerZ) {
         this.level = level;
-        this.chunk = chunk.getPos();
+        this.chunk = chunk;
         this.rng = rng;
         this.palette = palette;
         this.centerX = centerX;
@@ -512,6 +520,43 @@ public final class Builder implements StructureBuilder {
     public void marker(String name, int x, int y, int z) {
         // TODO: prefer a hand-authored .nbt named `name` under
         // data/eldritch_horror/structure/ if present; no templates emitted yet.
+    }
+
+    @Override
+    public void sign(int x, int y, int z, Direction facing, String... lines) {
+        StructureBuilder.super.sign(x, y, z, facing, lines);
+        if (x >> 4 != this.chunk.x() || z >> 4 != this.chunk.z()) {
+            return; // the chunk that owns the sign queues its text
+        }
+        CitySigns.queue(this.level.getLevel().dimension(), new BlockPos(x, y, z), lines);
+    }
+
+    /** A recording builder that captures the same writes without touching the world. */
+    public RecordingBuilder recorder() {
+        return new RecordingBuilder(this.level, this.chunk, this.rng, this.palette,
+                this.centerX, this.centerZ);
+    }
+
+    /** Replays one chunk's slice of a recorded city plan. */
+    public void applyChunk(Map<Long, List<CityWrite>> writes, int chunkX, int chunkZ) {
+        List<CityWrite> list = writes.get(ChunkPos.pack(chunkX, chunkZ));
+        if (list == null) {
+            return;
+        }
+        for (CityWrite write : list) {
+            this.pos.set(write.pos());
+            this.level.setBlock(this.pos, write.state(), FLAGS);
+            if (write.entity() != null) {
+                net.minecraft.world.level.block.entity.BlockEntity entity =
+                        this.level.getBlockEntity(this.pos);
+                if (entity != null) {
+                    // Worldgen creates the block entity without a level; sign.setText() and
+                    // friends dereference it, so attach the owning level first.
+                    entity.setLevel(this.level.getLevel());
+                    write.entity().accept(entity);
+                }
+            }
+        }
     }
 
     /** Centre X this builder is building around (for convenience in location code). */

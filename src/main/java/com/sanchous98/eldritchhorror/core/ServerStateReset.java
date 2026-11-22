@@ -14,6 +14,7 @@ import com.sanchous98.eldritchhorror.registry.items.Waypoints;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.sanity.SanityTicker;
 import com.sanchous98.eldritchhorror.world.cult.CultRituals;
+import com.sanchous98.eldritchhorror.world.loc.CitySigns;
 import com.sanchous98.eldritchhorror.world.rail.TrainService;
 import com.sanchous98.eldritchhorror.world.rift.RiftGates;
 import com.sanchous98.eldritchhorror.world.transport.ShipService;
@@ -66,5 +67,6 @@ public final class ServerStateReset {
         CorruptionTicker.clear();
         TrainService.clear();
         RiftGates.clear();
+        CitySigns.clear();
     }
 }
