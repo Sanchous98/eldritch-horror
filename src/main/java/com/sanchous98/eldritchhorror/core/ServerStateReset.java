@@ -1,16 +1,20 @@
 package com.sanchous98.eldritchhorror.core;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.corruption.CorruptionTicker;
 import com.sanchous98.eldritchhorror.cult.ReputationDecayTicker;
 import com.sanchous98.eldritchhorror.entity.ChoirLeviathanTrigger;
 import com.sanchous98.eldritchhorror.entity.CthulhuSiteTrigger;
+import com.sanchous98.eldritchhorror.event.EventTicker;
 import com.sanchous98.eldritchhorror.registry.blocks.CityGateBlock;
 import com.sanchous98.eldritchhorror.registry.blocks.InvestigatorPedestalBlock;
 import com.sanchous98.eldritchhorror.registry.items.RiteEchoes;
 import com.sanchous98.eldritchhorror.registry.items.VeilLensItem;
 import com.sanchous98.eldritchhorror.registry.items.Waypoints;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
+import com.sanchous98.eldritchhorror.sanity.SanityTicker;
 import com.sanchous98.eldritchhorror.world.cult.CultRituals;
+import com.sanchous98.eldritchhorror.world.rail.TrainService;
 import com.sanchous98.eldritchhorror.world.transport.ShipService;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -56,5 +60,9 @@ public final class ServerStateReset {
         Waypoints.clear();
         CityGateBlock.clear();
         InvestigatorPedestalBlock.clear();
+        EventTicker.clear();
+        SanityTicker.clear();
+        CorruptionTicker.clear();
+        TrainService.clear();
     }
 }

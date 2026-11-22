@@ -72,6 +72,10 @@ public final class BestiarySupport {
         if (cap <= 0 || perPass <= 0) {
             return;
         }
+        // Same subject rule as tickAura: a creative/spectator player does not drive spawns.
+        if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
         BlockPos origin = player.blockPosition();
         AABB box = player.getBoundingBox().inflate(radius);
         int present = level.getEntitiesOfClass(typeClass, box, mob -> mob.isAlive()).size();
@@ -180,6 +184,10 @@ public final class BestiarySupport {
         if (cap <= 0 || perPass <= 0) {
             return;
         }
+        // Same subject rule as tickAura: a creative/spectator player does not drive spawns.
+        if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
         BlockPos origin = player.blockPosition();
         AABB box = player.getBoundingBox().inflate(radius);
         int present = level.getEntitiesOfClass(typeClass, box, mob -> mob.isAlive()).size();
@@ -230,6 +238,10 @@ public final class BestiarySupport {
                                                 int radius, int cap, int perPass, int minY, int tick,
                                                 AirGate airGate) {
         if (cap <= 0 || perPass <= 0) {
+            return;
+        }
+        // Same subject rule as tickAura: a creative/spectator player does not drive spawns.
+        if (player.isCreative() || player.isSpectator()) {
             return;
         }
         BlockPos origin = player.blockPosition();

@@ -15,7 +15,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * Bounded spawner for {@link WailHusk}. It is a <b>flier</b>, so it uses the shared
  * {@link BestiarySupport#topUpAir} pass the byakhee and night hag already use: dark air above the
  * terrain, above {@code wailHuskSpawnMinY}, per-player capped, loaded chunks only, deterministic
- * sampling. The line-of-sight gate on its drain lives in {@link WailHusk#auraRateFor}, not here.
+ * sampling. The line-of-sight gate on its drain lives in {@link WailHusk#auraRequiresLineOfSight()}
+ * and is enforced by {@link BestiarySupport#tickAura}; it is not in {@code auraRateFor}.
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class WailHuskSpawner {

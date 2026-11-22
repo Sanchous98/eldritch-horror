@@ -37,8 +37,13 @@ public final class Hydra extends AncientOne {
     /** Budded heads must stay within this radius to count toward the cap (loaded-only query). */
     private static final double ESCALATION_QUERY_RADIUS = 24.0;
 
-    /** Game tick of the last budding; transient (a reload simply re-arms it). */
-    private long lastEscalation = Long.MIN_VALUE;
+    /**
+     * Game tick of the last budding; transient (a reload simply re-arms it). Seeded to
+     * {@code -ESCALATION_COOLDOWN_TICKS}, not {@link Long#MIN_VALUE}: the cooldown check subtracts
+     * this from {@code gameTime}, and subtracting {@code Long.MIN_VALUE} overflows negative forever,
+     * so the first hit would never bud a head.
+     */
+    private long lastEscalation = -ESCALATION_COOLDOWN_TICKS;
 
     public Hydra(EntityType<? extends Hydra> type, Level level) {
         super(type, level, BossEvent.BossBarColor.GREEN, Component.translatable("entity.eldritch_horror.hydra"));

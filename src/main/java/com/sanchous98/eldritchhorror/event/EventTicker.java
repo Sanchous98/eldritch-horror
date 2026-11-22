@@ -108,6 +108,12 @@ public final class EventTicker {
         }
     }
 
+    /** Drop every player's events and cooldowns; used when the world goes away. */
+    public static void clear() {
+        ACTIVE.clear();
+        COOLDOWN.clear();
+    }
+
     /**
      * Force-starts {@code id} for {@code player}, ignoring the per-event toggle and cooldowns (the
      * operator/debug escape hatch behind {@code /eh event}). Still requires the master switch

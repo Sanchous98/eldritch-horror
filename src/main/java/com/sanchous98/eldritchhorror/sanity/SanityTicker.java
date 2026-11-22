@@ -84,6 +84,11 @@ public final class SanityTicker {
         }
     }
 
+    /** Forget every player's cached state; used when the world goes away. */
+    public static void clear() {
+        PREVIOUS.clear();
+    }
+
     /** One player, one second's worth of sanity. */
     private static void tick(ServerPlayer player) {
         SanityContext ctx = SanityContext.of(player);

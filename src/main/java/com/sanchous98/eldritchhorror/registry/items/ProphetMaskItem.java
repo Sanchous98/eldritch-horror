@@ -12,6 +12,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -55,6 +56,11 @@ public final class ProphetMaskItem extends Item {
         if (!(owner instanceof ServerPlayer player)) {
             return;
         }
+        // inventoryTick runs once per carried copy: only the lowest slot acts, so two masks do not
+        // reconcile twice or panic villagers twice.
+        if (!isFirstCarried(player, itemStack)) {
+            return;
+        }
         reconcile(player);
         if (level.getGameTime() % PANIC_CHECK_INTERVAL_TICKS != 0) {
             return;
@@ -65,6 +71,22 @@ public final class ProphetMaskItem extends Item {
             brain.setMemory(MemoryModuleType.HURT_BY_ENTITY, player);
             brain.setActiveActivityIfPossible(Activity.PANIC);
         }
+    }
+
+    /**
+     * {@code inventoryTick} runs once per copy, so two masks would reconcile twice and panic
+     * villagers twice. Only the copy in the lowest inventory slot acts; the others stay silent,
+     * keeping a single mask's behaviour identical.
+     */
+    private static boolean isFirstCarried(ServerPlayer player, ItemStack stack) {
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack candidate = inventory.getItem(slot);
+            if (candidate.is(stack.getItem())) {
+                return candidate == stack;
+            }
+        }
+        return false;
     }
 
     /**

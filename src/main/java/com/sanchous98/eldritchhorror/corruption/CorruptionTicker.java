@@ -85,6 +85,11 @@ public final class CorruptionTicker {
         }
     }
 
+    /** Forget every player's cached state; used when the world goes away. */
+    public static void clear() {
+        PREVIOUS.clear();
+    }
+
     /** One player, one second's worth of corruption. */
     private static void tick(ServerPlayer player) {
         CorruptionContext ctx = CorruptionContext.of(player);
