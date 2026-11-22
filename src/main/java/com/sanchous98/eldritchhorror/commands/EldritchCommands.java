@@ -207,6 +207,7 @@ public final class EldritchCommands {
                         .then(Commands.literal("investigator")
                                 .then(Commands.literal("get").executes(EldritchCommands::getInvestigator))
                                 .then(Commands.literal("set")
+                                        .requires(GAMEMASTER)
                                         .then(Commands.argument("id", StringArgumentType.word())
                                                 .executes(EldritchCommands::setInvestigator))))
                         .then(Commands.literal("cult")
@@ -223,6 +224,7 @@ public final class EldritchCommands {
         eh.then(Commands.literal("codex")
                         .executes(EldritchCommands::listCodex)
                         .then(Commands.literal("learn")
+                                .requires(GAMEMASTER)
                                 .then(Commands.argument("id", StringArgumentType.greedyString())
                                         .executes(EldritchCommands::learnCodex))))
                 .then(Commands.literal("codexentries").executes(EldritchCommands::listCodexEntries));
@@ -232,12 +234,13 @@ public final class EldritchCommands {
                                 .executes(EldritchCommands::forceEvent)))
                 .then(Commands.literal("events").executes(EldritchCommands::listEvents));
         // Debug travel to the starting city (respawn handles the normal case).
-        eh.then(Commands.literal("home").executes(EldritchCommands::goHome));
+        eh.then(Commands.literal("home").requires(GAMEMASTER).executes(EldritchCommands::goHome));
         // Debug: report the nearest curated city's condition (derived from district taint).
         eh.then(Commands.literal("city").executes(EldritchCommands::cityState));
         // Debug: reset the one-time prologue and return to the Threshold.
         eh.then(Commands.literal("prologue")
-                .then(Commands.literal("reset").executes(EldritchCommands::resetPrologue)));
+                .then(Commands.literal("reset").requires(GAMEMASTER)
+                        .executes(EldritchCommands::resetPrologue)));
         // Quest journal (server-authoritative progress; synced to the owner for a future screen).
         eh.then(Commands.literal("quests").executes(EldritchCommands::listQuests));
         // Skill tree.
@@ -271,6 +274,7 @@ public final class EldritchCommands {
                 .then(Commands.literal("board").executes(EldritchCommands::boardTrain)));
         // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
         eh.then(Commands.literal("cultist")
+                .requires(GAMEMASTER)
                 .then(Commands.argument("cult", StringArgumentType.word())
                         .then(Commands.argument("count", IntegerArgumentType.integer(1, 32))
                                 .executes(EldritchCommands::spawnCultists))));

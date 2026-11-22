@@ -81,7 +81,6 @@ public final class Bots {
         if (!level.players().contains(bot)) {
             level.players().add(bot);
         }
-        giveStarterKit(bot);
         BOTS.put(uuid, bot);
         EldritchHorror.LOGGER.info("bot: spawned {} ({}) at {}, {}, {} in {}",
                 name, uuid, bot.getX(), bot.getY(), bot.getZ(), level.dimension().identifier());
@@ -143,8 +142,17 @@ public final class Bots {
         BOTS.clear();
     }
 
-    /** A simple kit so a bot survives long enough to exercise the world (the mod is very hostile). */
-    private static void giveStarterKit(BotPlayer bot) {
+    /**
+     * Grants the debug field kit: iron armour, a sword, ritual reagents and some stone.
+     *
+     * <p><b>This is not an honest run.</b> Every item here is free material, so only use it for
+     * probes that need a bot to survive; for a playthrough use {@code /eh bot spawnjoinbare} and let
+     * the bot earn everything.
+     */
+    public static void giveStarterKit(BotPlayer bot) {
+        EldritchHorror.LOGGER.warn("bot: granting the DEBUG starter kit to {} — this is free "
+                + "material and not an honest run; use /eh bot spawnjoinbare for a real playthrough",
+                bot.getGameProfile().name());
         bot.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
         bot.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
         bot.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));

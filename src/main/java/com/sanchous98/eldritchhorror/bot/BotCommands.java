@@ -27,6 +27,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -116,10 +117,6 @@ public final class BotCommands {
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("value", BoolArgumentType.bool())
                                         .executes(BotCommands::invulnerable))))
-                .then(Commands.literal("god")
-                        .then(Commands.argument("name", StringArgumentType.word())
-                                .then(Commands.argument("value", BoolArgumentType.bool())
-                                        .executes(BotCommands::god))))
                 .then(Commands.literal("mine")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::mine)))
@@ -178,7 +175,7 @@ public final class BotCommands {
                                                 .executes(BotCommands::walk)))));
     }
 
-    /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point. */
+    /** {@code /eh bot spawn <name>}: adds a bot at the level's respawn point (with the debug kit). */
     private static int spawn(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
@@ -189,7 +186,9 @@ public final class BotCommands {
             return 0;
         }
         ServerLevel level = ctx.getSource().getLevel();
-        Bots.spawn(level, name);
+        BotPlayer bot = Bots.spawn(level, name);
+        // Explicit, because a kit is a debug convenience, not part of an honest run.
+        Bots.giveStarterKit(bot);
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "Spawned bot " + name + " in " + level.dimension().identifier()), true);
         return 1;
@@ -297,6 +296,11 @@ public final class BotCommands {
         }
         BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
+        if (bot.position().distanceToSqr(Vec3.atCenterOf(pos)) > 25.0) {
+            ctx.getSource().sendFailure(Component.literal("Target " + pos.toShortString()
+                    + " is more than 5 blocks from " + bot.getGameProfile().name()));
+            return 0;
+        }
         BlockState state = bot.level().getBlockState(pos);
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
         ItemStack stack = bot.getItemInHand(InteractionHand.MAIN_HAND);
@@ -405,6 +409,11 @@ public final class BotCommands {
         }
         BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
+        if (bot.position().distanceToSqr(Vec3.atCenterOf(pos)) > 25.0) {
+            ctx.getSource().sendFailure(Component.literal("Target " + pos.toShortString()
+                    + " is more than 5 blocks from " + bot.getGameProfile().name()));
+            return 0;
+        }
         BlockState state = bot.level().getBlockState(pos);
         boolean ok = bot.gameMode.destroyBlock(pos);
         if (ok) {
@@ -475,34 +484,65 @@ public final class BotCommands {
         String itemId = StringArgumentType.getString(ctx, "item");
         Identifier id = itemId.contains(":") ? Identifier.parse(itemId) : EldritchHorror.id(itemId);
         Item it = BuiltInRegistries.ITEM.getValue(id);
-        if (!(it instanceof BlockItem blockItem)) {
+        if (!(it instanceof BlockItem)) {
             ctx.getSource().sendFailure(Component.literal("Not a placeable block: " + itemId));
             return 0;
         }
         BlockPos pos = BlockPos.containing(DoubleArgumentType.getDouble(ctx, "x"),
                 DoubleArgumentType.getDouble(ctx, "y"), DoubleArgumentType.getDouble(ctx, "z"));
         ServerLevel level = bot.level();
+        BlockState targetState = level.getBlockState(pos);
+        if (!targetState.canBeReplaced()) {
+            ctx.getSource().sendFailure(Component.literal("Cannot place at " + pos.toShortString()
+                    + ": occupied by " + targetState.getBlock()));
+            return 0;
+        }
         var inv = bot.getInventory();
-        boolean consumed = false;
+        int selected = inv.getSelectedSlot();
+        int chosen = -1;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
             if (!s.isEmpty() && s.is(it)) {
-                s.shrink(1);
-                consumed = true;
+                chosen = i;
                 break;
             }
         }
-        if (!consumed) {
+        if (chosen < 0) {
             ctx.getSource().sendFailure(Component.literal("No " + itemId + " in the inventory"));
             return 0;
         }
-        level.setBlockAndUpdate(pos, blockItem.getBlock().defaultBlockState());
+        // Route through the real use path so the placement rules, the block's own placement and the
+        // cost are all the game's, not a setBlock shortcut. Only the chosen stack is charged: the
+        // copy in the hand is a temporary loan and is reconciled from what the use left behind.
+        ItemStack previous = inv.getItem(selected).copy();
+        ItemStack held;
+        if (chosen == selected) {
+            held = inv.getItem(selected);
+        } else {
+            held = inv.getItem(chosen).copyWithCount(1);
+            inv.setItem(selected, held);
+        }
+        int before = held.getCount();
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+        InteractionResult result = bot.gameMode.useItemOn(bot, level, held,
+                InteractionHand.MAIN_HAND, hit);
+        if (chosen != selected) {
+            int remaining = inv.getItem(selected).getCount();
+            inv.setItem(selected, previous.isEmpty() ? ItemStack.EMPTY : previous);
+            if (remaining < before) {
+                ItemStack source = inv.getItem(chosen);
+                if (!source.isEmpty()) {
+                    source.shrink(before - remaining);
+                }
+            }
+            inv.setChanged();
+        }
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
-                + " placed " + itemId + " at " + pos.toShortString()), true);
+                + " placed " + itemId + " at " + pos.toShortString() + " -> " + result), true);
         return 1;
     }
 
-    /** {@code /eh bot smelt <name> <item>}: smelts one inventory item into {@code item} (no furnace). */
+    /** {@code /eh bot smelt <name> <item>}: smelts one inventory item at a nearby lit furnace. */
     private static int smelt(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
@@ -522,6 +562,23 @@ public final class BotCommands {
             return 0;
         }
         ServerLevel level = bot.level();
+        // Smelting is not free: require a furnace that someone actually lit (and is therefore
+        // burning fuel) within arm's reach. No furnace, no smelt — the bot may not conjure one.
+        BlockPos center = bot.blockPosition();
+        boolean litFurnace = false;
+        for (BlockPos p : BlockPos.betweenClosed(center.offset(-5, -5, -5), center.offset(5, 5, 5))) {
+            BlockState bs = level.getBlockState(p);
+            if (bs.getBlock() instanceof AbstractFurnaceBlock
+                    && bs.getValue(AbstractFurnaceBlock.LIT)) {
+                litFurnace = true;
+                break;
+            }
+        }
+        if (!litFurnace) {
+            ctx.getSource().sendFailure(Component.literal("Smelting " + itemId
+                    + " needs a lit furnace nearby"));
+            return 0;
+        }
         var inv = bot.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
@@ -882,7 +939,10 @@ public final class BotCommands {
         ServerLevel level = ctx.getSource().getLevel();
         BotPlayer bot = Bots.spawn(level, name);
         if (bare) {
+            // Safety net only: spawn no longer grants a kit, so the bare path starts truly empty.
             bot.getInventory().clearContent();
+        } else {
+            Bots.giveStarterKit(bot);
         }
         NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(bot));
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + name
@@ -952,23 +1012,6 @@ public final class BotCommands {
         return 1;
     }
 
-    /** {@code /eh bot god <name> <value>}: creative mode and flight for probes (not for play). */
-    private static int god(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if (!gate(ctx)) {
-            return 0;
-        }
-        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
-        if (bot == null) {
-            return 0;
-        }
-        boolean value = BoolArgumentType.getBool(ctx, "value");
-        bot.setGameMode(value ? net.minecraft.world.level.GameType.CREATIVE
-                : net.minecraft.world.level.GameType.SURVIVAL);
-        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
-                + " creative=" + value), true);
-        return 1;
-    }
-
     /** {@code /eh bot attacktype <name> <type>}: attacks the nearest entity of a given type. */
     private static int attacktype(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
@@ -986,16 +1029,15 @@ public final class BotCommands {
             return 0;
         }
         List<LivingEntity> targets = bot.level().getEntitiesOfClass(LivingEntity.class,
-                bot.getBoundingBox().inflate(32.0), e -> e != bot && e.isAlive() && e.getType() == type);
+                bot.getBoundingBox().inflate(3.0), e -> e != bot && e.isAlive() && e.getType() == type);
         if (targets.isEmpty()) {
-            ctx.getSource().sendFailure(Component.literal("No " + typeId + " within 32 blocks"));
+            ctx.getSource().sendFailure(Component.literal("No " + typeId + " within 3 blocks"));
             return 0;
         }
         LivingEntity target = targets.stream()
                 .min(Comparator.comparingDouble(bot::distanceToSqr)).orElse(targets.get(0));
         bot.attack(target);
         vacuum(bot);
-        // Teleport the bot onto the target's face so reach is unambiguous for the next hit.
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " attacked " + target.getName().getString() + " hp=" + target.getHealth()
                 + " dist=" + String.format(Locale.ROOT, "%.1f", Math.sqrt(bot.distanceToSqr(target)))), true);

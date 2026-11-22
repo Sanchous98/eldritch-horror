@@ -94,7 +94,12 @@ public final class Endgame {
         SkillTree.addPoints(player, -BANISH_POINTS);
         for (CultDefinition cult : Cults.all()) {
             int current = CultSystem.get(player, cult.id());
-            CultSystem.set(player, cult.id(), current - (int) Math.round(current * BANISH_REPUTATION));
+            // A banish must never improve a standing: cutting a fixed fraction of a negative value
+            // rounds it toward zero (-60 -> -45), which is a reward. Only positive standings pay.
+            if (current > 0) {
+                CultSystem.set(player, cult.id(),
+                        current - (int) Math.round(current * BANISH_REPUTATION));
+            }
         }
         int closed = closeRifts(level, player);
         grant(player, "banishment_focus", 1);
