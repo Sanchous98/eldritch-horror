@@ -38,7 +38,18 @@
           "weight": 8,
           "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 2 } }
         },
-        { "type": "minecraft:empty", "weight": 14 }
+        { "type": "minecraft:empty", "weight": 14 },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:revolver_38",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:cartridge",
+          "weight": 8,
+          "modifier": { "type": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 6, "max": 12 } }
+        }
       ]
     },
     {

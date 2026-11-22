@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "eldritch_horror:blasting_powder",
+    "minecraft:paper",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "eldritch_horror:dynamite"
+  }
+}

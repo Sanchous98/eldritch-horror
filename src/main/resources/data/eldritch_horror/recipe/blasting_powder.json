@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:coal",
+    "eldritch_horror:salt_reagent"
+  ],
+  "result": {
+    "id": "eldritch_horror:blasting_powder",
+    "count": 2
+  }
+}

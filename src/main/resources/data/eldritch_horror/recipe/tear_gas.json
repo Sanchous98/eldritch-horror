@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "eldritch_horror:blasting_powder",
+    "eldritch_horror:mandrake_root"
+  ],
+  "result": {
+    "id": "eldritch_horror:tear_gas"
+  }
+}

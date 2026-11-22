@@ -128,6 +128,16 @@ the version in `gradle.properties` (currently `0.1.0`, unreleased).
   tags (`#eldritch`, `#star_spawn`), corruption-scaled dagger damage, the trident's underwater cut,
   the censer's paid ward, the pact blade's kill price and the veil bow's cost, eldritch bonus and
   pierce.
+- **Field gear and firearms** (`design/16`, the board game's mundane `Item — Weapon` tier): the
+  **Axe** (iron profile; a paid +3 heavy blow against eldritch things), the **Bull Whip** (fast;
+  shove + slow), thrown **Dynamite** (entity-only blast, no block damage) and **Tear Gas**
+  (Weakness/Blindness cloud), plus the **.38 Revolver**, **.45 Automatic**, **Double-barreled
+  Shotgun** and **Carbine Rifle** firing a shared `bullet` projectile and spending **Brass
+  Cartridge** ammunition (copper + iron nugget). Recipes, city/Order/relic chest loot, generated
+  icons, both locales and `FirearmSpecTest` are wired; the four guns are a common → fine ladder.
+- **`/eh bot equip` no longer eats items**: it overwrote the stack already in hand and could zero a
+  one-stack weapon when the same slot was re-equipped (which `ensure_weapon` does every 40 hits in
+  the playthrough harness). It now swaps and returns the previous item to the inventory.
 - **Audio wired**: thirteen procedural ogg through `ModSounds`/`sounds.json` — the rites, the
   endgame fork (banish/summon/**seal**), the Horror's own voice (it no longer sounds like a wither),
   whispers and dread.

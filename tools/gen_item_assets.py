@@ -33,6 +33,9 @@ HANDHELD = {
     "occult_tool", "silver_blade", "hollow_pact_blade", "ritual_knife", "wardens_maul",
     "bone_club", "star_iron_sword", "tidal_trident", "sacrificial_dagger", "censer_mace",
     "eye_scepter", "veil_bow",
+    # field gear and firearms (design/16): held like tools; the throwables and ammo stay flat
+    "woodsman_axe", "bull_whip", "revolver_38", "automatic_45", "shotgun_double",
+    "carbine_rifle",
 }
 
 # category class -> (draw kind, base colour, accent colour)
@@ -55,7 +58,7 @@ def ids_for(path):
     src = open(path).read()
     # Plain stubs use add("id", …); functional items use addItem("id", …). Match both so the atlas
     # (a custom class) keeps getting a model/texture/item-definition on regeneration.
-    return re.findall(r'ModItems\.add(?:Item)?\("([a-z_]+)"', src)
+    return re.findall(r'ModItems\.add(?:Item)?\("([a-z0-9_]+)"', src)
 
 
 def registry():

@@ -7,6 +7,7 @@ import com.sanchous98.eldritchhorror.registry.items.ConsumableItem;
 import com.sanchous98.eldritchhorror.registry.items.Consumables;
 import com.sanchous98.eldritchhorror.registry.items.Currency;
 import com.sanchous98.eldritchhorror.registry.items.Factions;
+import com.sanchous98.eldritchhorror.registry.items.Firearms;
 import com.sanchous98.eldritchhorror.registry.items.Keys;
 import com.sanchous98.eldritchhorror.registry.items.Navigation;
 import com.sanchous98.eldritchhorror.registry.items.Reagents;
@@ -113,6 +114,7 @@ public final class ModItems {
     public static void registerCategories() {        Reagents.init();
         Tomes.init();
         Artifacts.init();
+        Firearms.init();
         Weapons.init();
         Consumables.init();
         Currency.init();

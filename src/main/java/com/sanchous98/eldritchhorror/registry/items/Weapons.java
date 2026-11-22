@@ -104,6 +104,14 @@ public final class Weapons {
         // two extra bodies and deals +2 vs. eldritch targets (VeilBowItem, WeaponEffects).
         ModItems.addItem("veil_bow",
                 p -> new VeilBowItem(lore(p.durability(500).enchantable(1), "veil_bow")), 1);
+        // Axe — the board game's mundane Axe (Core, cost 2): an iron axe profile (8 damage, slow)
+        // with an optional heavy blow against eldritch things that costs 2 sanity (WeaponEffects).
+        ModItems.addItem("woodsman_axe",
+                p -> new Item(lore(p.axe(ToolMaterial.IRON, 5.0F, -3.0F), "woodsman_axe")), 1);
+        // Bull Whip — fast, light weapon (4 damage); knocks the target back and slows it briefly
+        // (WeaponEffects). The board game's reroll becomes control, since no dice exist here.
+        ModItems.addItem("bull_whip",
+                p -> new Item(lore(p.sword(ToolMaterial.IRON, 1.0F, -1.6F), "bull_whip")), 1);
 
         // Investigator's Coat — chest armour (iron-ish, light): −sanity drain in darkness stays
         // flavour (design/16; the darkness source answers to lantern_of_steadfast instead).
@@ -183,7 +191,7 @@ public final class Weapons {
      * component, the same presentation path as the worn gear: no client class, and the line states
      * what the weapon really does after {@link WeaponEffects}.
      */
-    private static Item.Properties lore(Item.Properties properties, String id) {
+    static Item.Properties lore(Item.Properties properties, String id) {
         return properties.component(DataComponents.LORE, new ItemLore(List.of(
                 Component.translatable("item.eldritch_horror." + id + ".tooltip"))));
     }

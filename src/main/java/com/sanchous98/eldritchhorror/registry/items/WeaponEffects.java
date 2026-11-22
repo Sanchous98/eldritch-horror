@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -67,6 +68,18 @@ public final class WeaponEffects {
 
     /** Star-iron sword: flat bonus against a star-spawn (meteoric iron finds its kin). */
     private static final float STAR_IRON_BONUS = 2.0F;
+
+    /** Axe: the board game's "spend 2 Sanity to reroll" as a heavy blow on eldritch targets. */
+    private static final double AXE_SANITY_COST = 2.0;
+
+    /** Axe: extra damage of the paid heavy blow. */
+    private static final float AXE_ELDRITCH_BONUS = 3.0F;
+
+    /** Bull whip: the slow applied by a landing lash, in ticks. */
+    private static final int WHIP_SLOW_TICKS = 60;
+
+    /** Bull whip: horizontal shove of a landing lash. */
+    private static final double WHIP_KNOCKBACK = 0.6;
 
     /** Censer mace: sanity paid for the ward it raises on every landing swing. */
     private static final double CENSER_SANITY_COST = 1.0;
@@ -132,6 +145,27 @@ public final class WeaponEffects {
                     WeaponMath.waterMultiplier(player.isUnderWater())));
         } else if (isHeld(held, "censer_mace")) {
             raiseCenserWard(player);
+        } else if (isHeld(held, "woodsman_axe")) {
+            // FFG Axe: "spend 2 Sanity to reroll" - here a paid heavy blow, and only against the
+            // eldritch, so the axe is a boss-fight tool rather than a strict sword upgrade.
+            if (victim.getType().builtInRegistryHolder().is(ELDRITCH)
+                    && SanityAPI.get(player) >= AXE_SANITY_COST) {
+                event.setNewDamage(WeaponMath.bonusDamage(damage, AXE_ELDRITCH_BONUS, true));
+                SanityAPI.add(player, -AXE_SANITY_COST);
+            }
+        } else if (isHeld(held, "bull_whip")) {
+            lash(player, victim);
+        }
+    }
+
+    /** The whip's board-game reroll becomes control: a shove and a short slow. */
+    private static void lash(ServerPlayer player, LivingEntity victim) {
+        victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WHIP_SLOW_TICKS, 1,
+                true, false));
+        Vec3 away = victim.position().subtract(player.position());
+        if (away.horizontalDistanceSqr() > 1.0E-4) {
+            Vec3 push = away.normalize().scale(WHIP_KNOCKBACK);
+            victim.push(push.x, 0.25, push.z);
         }
     }
 

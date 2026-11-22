@@ -11,6 +11,7 @@ import com.sanchous98.eldritchhorror.entity.BlightPod;
 import com.sanchous98.eldritchhorror.entity.BogBear;
 import com.sanchous98.eldritchhorror.entity.BoneChoir;
 import com.sanchous98.eldritchhorror.entity.Burrowling;
+import com.sanchous98.eldritchhorror.entity.Bullet;
 import com.sanchous98.eldritchhorror.entity.Byakhee;
 import com.sanchous98.eldritchhorror.entity.CaveDrifter;
 import com.sanchous98.eldritchhorror.entity.ChaugnarFaugn;
@@ -56,7 +57,9 @@ import com.sanchous98.eldritchhorror.entity.SporeBee;
 import com.sanchous98.eldritchhorror.entity.StarSpawn;
 import com.sanchous98.eldritchhorror.entity.StoneSentinel;
 import com.sanchous98.eldritchhorror.entity.TaintedFauna;
+import com.sanchous98.eldritchhorror.entity.TearGasFlask;
 import com.sanchous98.eldritchhorror.entity.TheHorror;
+import com.sanchous98.eldritchhorror.entity.ThrownDynamite;
 import com.sanchous98.eldritchhorror.entity.TideGrazer;
 import com.sanchous98.eldritchhorror.entity.TrainLocomotive;
 import com.sanchous98.eldritchhorror.entity.TrainWagon;
@@ -857,6 +860,42 @@ public final class ModEntities {
     public static final DeferredItem<SpawnEggItem> THE_HORROR_SPAWN_EGG =
             ModItems.ITEMS.registerItem("the_horror_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(THE_HORROR.get())));
+
+    /**
+     * The fired round of the field firearms ({@code design/16-items.md}): small, fast, no loot table
+     * and no spawn egg. Damage, pierce and velocity are set by the gun before the round enters the
+     * level, so one entity type covers the whole ladder.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<Bullet>> BULLET =
+            ENTITY_TYPES.register("bullet", () ->
+                    EntityType.Builder.<Bullet>of(Bullet::new, MobCategory.MISC)
+                            .noLootTable()
+                            .sized(0.25F, 0.25F)
+                            .clientTrackingRange(4)
+                            .updateInterval(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("bullet"))));
+
+    /** Thrown Dynamite ({@code design/16-items.md}): entity-only blast, never edits the world. */
+    public static final DeferredHolder<EntityType<?>, EntityType<ThrownDynamite>> THROWN_DYNAMITE =
+            ENTITY_TYPES.register("thrown_dynamite", () ->
+                    EntityType.Builder.<ThrownDynamite>of(ThrownDynamite::new, MobCategory.MISC)
+                            .noLootTable()
+                            .sized(0.25F, 0.25F)
+                            .clientTrackingRange(4)
+                            .updateInterval(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                                    EldritchHorror.id("thrown_dynamite"))));
+
+    /** Thrown Tear Gas ({@code design/16-items.md}): a burst of Weakness/Blindness, no damage. */
+    public static final DeferredHolder<EntityType<?>, EntityType<TearGasFlask>> TEAR_GAS =
+            ENTITY_TYPES.register("tear_gas", () ->
+                    EntityType.Builder.<TearGasFlask>of(TearGasFlask::new, MobCategory.MISC)
+                            .noLootTable()
+                            .sized(0.25F, 0.25F)
+                            .clientTrackingRange(4)
+                            .updateInterval(10)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                                    EldritchHorror.id("tear_gas"))));
 
     /**
      * The coastal packet ({@code design/30-transport.md}, stage 1): a large scheduled passenger hull.

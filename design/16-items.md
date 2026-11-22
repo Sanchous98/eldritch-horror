@@ -104,6 +104,8 @@ ritual components consumed by rites
 | `veil_dust` | Veil Dust |
 | `effigy_doll` | Effigy Doll |
 | `spirit_ash` | Spirit Ash |
+| `blasting_powder` | Blasting Powder |
+| `cartridge` | Brass Cartridge |
 
 ### Consumables (15)
 
@@ -189,6 +191,32 @@ weapons and worn gear
 | `occultists_hat` | Occultist's Hat |
 | `boots_of_silence` | Boots of Silence |
 | `gloves_of_precision` | Gloves of Precision |
+
+### Firearms and field gear (10)
+
+The board game's mundane tier (`Assets`: Item — Weapon). FFG's weapons mostly read
+"+N during Combat Encounters"; here that becomes real attack damage, and the one-shot
+effects (Dynamite, Tear Gas) become throwables. Grades are the acquisition ladder, not a
+second stat system: **common** items are craftable early, **quality** items need iron/copper
+and are also found in city and Order chests, **fine** items are loot-only.
+
+| id | Name | Grade | FFG card | Adaptation |
+|---|---|---|---|---|
+| `woodsman_axe` | Axe | common | Axe (Core, 2) | iron axe profile; on hit, spend 2 sanity for a heavy blow (+damage) |
+| `bull_whip` | Bull Whip | common | Bull Whip (Core, 1) | fast low-damage weapon; knocks the target back and slows it briefly |
+| `dynamite` | Dynamite | common | Dynamite (Core, 3) | thrown, short fuse, entity-only explosion (no terrain damage) |
+| `tear_gas` | Tear Gas | common | Tear Gas (Forsaken Lore, 1) | thrown; cloud of Weakness + Blindness, no damage |
+| `revolver_38` | .38 Revolver | common | .38 Revolver (Core, 1) | single-shot sidearm, 1 cartridge, short cooldown |
+| `automatic_45` | .45 Automatic | quality | .45 Automatic (Core, 2) | faster sidearm, 1 cartridge, slightly more damage |
+| `shotgun_double` | Double-barreled Shotgun | quality | Double-barreled Shotgun (Core, 4) | both barrels at once: one 10-damage charge, 2 cartridges, close range |
+| `carbine_rifle` | Carbine Rifle | fine | Carbine Rifle (Core, 3) | 1 cartridge, high velocity, pierces one body |
+| `cartridge` | Brass Cartridge | — | (ammo) | ammunition; copper + iron nugget, also chest loot |
+| `blasting_powder` | Blasting Powder | — | (reagent) | coal + consecrated salt; feeds Dynamite |
+
+Guns never use vanilla arrows: one `bullet` projectile carries the gun's damage and is
+consumed with a cartridge per shot. Durability is spent per shot, so a long expedition still
+needs a melee fallback (the lesson of the night-5 playthrough: stone-tier melee alone cannot
+carry a boss farm).
 
 ### Conditions (14)
 

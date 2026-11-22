@@ -5,6 +5,7 @@ import com.sanchous98.eldritchhorror.registry.ModEntities;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 /**
@@ -24,6 +25,11 @@ public final class ClientEntityRenderers {
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        // Field gear: the vanilla thrown-item renderer draws the cartridge/dynamite/flask icon, so
+        // the three projectile types need no bespoke model.
+        event.registerEntityRenderer(ModEntities.BULLET.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.THROWN_DYNAMITE.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.TEAR_GAS.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.RISEN_HUSK.get(), RisenHuskRenderer::new);
         event.registerEntityRenderer(ModEntities.TAINTED_FAUNA.get(), TaintedFaunaRenderer::new);
         event.registerEntityRenderer(ModEntities.LESSER_SWARM.get(), LesserSwarmRenderer::new);
