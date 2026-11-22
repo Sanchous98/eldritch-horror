@@ -23,6 +23,20 @@ Status legend: `[ ]` open · `[~]` in progress · `[x]` done.
   then ignores every later hit (this is what stalled the night-3 bone-choir kills at 9/10 HP).
   The night-3 driver now keeps at most two small `forceload` windows and re-centres one on every
   teleport destination before a swing; combat and boss farms work with that in place.
+- [ ] **Killing one cultist can soft-lock the Hollow endgame** — `CultKills` takes 40 standing
+  for a single cultist kill, and every reputation-gaining service (`offer_blood`,
+  `teach_*`) requires at least NEUTRAL. One accidental kill (a sword **sweep** during a boss
+  farm is enough: the sweep damages every mob in the arc) drops the player to Outsider at −40,
+  after which no service is available and the Hollow road to `awaken_the_horror` is closed with
+  no deterministic way back. Night 4 hit exactly this at the Temple of the Feaster (rep 3 → −37
+  on one kill). Decide: accept one offering from Outsider, add a slow rep creep, or let rites
+  that grant rep be cast below Neutral.
+- [ ] **NPC cult ritual cells can finish the endgame while the player idles** — after a night-3
+  run ended, the Hollow cell completed its ritual in the unobserved world: doom reached 100 and
+  the endgame read `summoned` with an open rift, no player involved. This is presumably by design
+  (the doom clock is a race), but a headless playthrough has to finish before ~150 in-game minutes
+  or the world makes the decision first. Worth a design note on whether the NPC path should be
+  visible to the player (journal/doom warnings) or disabled until a player has opened the Way.
 - [ ] **Visual pass on the new screens (design/13)** — Journal/Codex/Skills (`J`/`C`/`K`) are
   verified by API/compile only; needs a human client run.
 - [ ] **Client-only item bits (design/16)** — the veil-lens corruption overlay and the waypoint
