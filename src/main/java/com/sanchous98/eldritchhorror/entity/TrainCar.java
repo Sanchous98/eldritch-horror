@@ -19,6 +19,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -28,18 +29,18 @@ import org.jspecify.annotations.Nullable;
  * only through the fare interaction while the consist's boarding window is open.
  *
  * <p>The car is a plain entity, not a vanilla minecart: movement is server-driven along the cached
- * line (a minecart's own rail physics would fight it), and the client renders a scaled vanilla
- * minecart model as placeholder art. A wagon holds no tickets of its own — the locomotive's 5×5
+ * line (a minecart's own rail physics would fight it), and the client draws a full carriage model
+ * ({@code client/model/TrainCarModel}). A wagon holds no tickets of its own — the locomotive's 5×5
  * ticket covers the whole consist.
+ *
+ * <p>The carriage is modelled at real scale: 14 blocks long for a wagon (16 for the locomotive),
+ * 3 wide and about 3.8 tall, with a walkable floor, window bands and twelve chairs in
+ * {@link TrainSeats}. The entity box stays small (the dimensions are the car cross-section); the
+ * renderer uses {@link #renderBounds} so the whole length is frustum-culled as one object.
  */
 public abstract class TrainCar extends Entity {
-    /** Rider height above the car origin. */
-    private static final double RIDE_HEIGHT = 0.62;
-    /** Seat offsets in the car's local frame: {x, z}, in blocks. */
-    private static final double[][] SEAT_OFFSETS = {
-            {-0.42, -0.75}, {0.42, -0.75},
-            {-0.42, 0.75}, {0.42, 0.75},
-    };
+    /** Wagon body length, in blocks (the locomotive overrides this). */
+    private static final double WAGON_LENGTH = 14.0;
 
     private @Nullable TrainLocomotive locomotive;
     private int carIndex;
@@ -75,9 +76,28 @@ public abstract class TrainCar extends Entity {
         this.locomotive = null;
     }
 
-    /** @return this car's configured seat count. */
+    /** @return this car's configured seat count (never above the twelve physical chairs). */
     public int seats() {
         return TrainTimetable.seats(ModConfig.TRAIN_SEATS.get());
+    }
+
+    /** @return the car's length in blocks, used for culling. */
+    public double carLength() {
+        return WAGON_LENGTH;
+    }
+
+    /**
+     * A frustum-culling box that covers the whole carriage at any heading. The entity box itself is
+     * only the cross-section (a rotated 14-block body cannot be expressed by
+     * {@link EntityDimensions}), so the renderer asks for this inflated box instead.
+     *
+     * @param partialTicks interpolation fraction
+     * @return a box around the interpolated position, wide enough for the full car length
+     */
+    public AABB renderBounds(float partialTicks) {
+        double half = this.carLength() * 0.5 + 1.0;
+        return this.getInterpolatedBoundingBox(partialTicks)
+                .inflate(half, 0.5, half);
     }
 
     /** @return whether the consist's boarding window is open. */
@@ -196,8 +216,8 @@ public abstract class TrainCar extends Entity {
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions,
                                                float scale) {
         int index = Math.max(0, this.getPassengers().indexOf(passenger));
-        double[] seat = SEAT_OFFSETS[Math.min(index, SEAT_OFFSETS.length - 1)];
-        return new Vec3(seat[0], RIDE_HEIGHT, seat[1])
+        double[] seat = TrainSeats.offset(index, this instanceof TrainLocomotive);
+        return new Vec3(seat[0], TrainSeats.RIDE_HEIGHT, seat[1])
                 .yRot(-this.getYRot() * (float) (Math.PI / 180.0));
     }
 

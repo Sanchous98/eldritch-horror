@@ -8,17 +8,20 @@ import com.sanchous98.eldritchhorror.world.transport.TransportMath;
  *
  * <p>Departures use the same in-game clock and boarding arithmetic as the ships
  * ({@link TransportMath}); this class only staggers the configured hour list per line and direction
- * and fixes the consist shape (2–4 wagons, 1–4 seats per car, fixed coupling spacing).
+ * and fixes the consist shape (2–4 wagons, 1–12 seats per car, fixed coupling spacing).
  */
 public final class TrainTimetable {
     /** Smallest consist the design allows. */
     public static final int MIN_WAGONS = 2;
     /** Largest consist the design allows. */
     public static final int MAX_WAGONS = 4;
-    /** Seats in one car (the locomotive and each wagon). */
-    public static final int MAX_SEATS = 4;
-    /** Distance between car centres, in blocks. */
-    public static final double SPACING = 4.5;
+    /** Seats in one car (the locomotive and each wagon); matches {@code TrainSeats.TOTAL}. */
+    public static final int MAX_SEATS = 12;
+    /**
+     * Distance between car centres, in blocks. A wagon is 14 blocks long and the locomotive 16, so
+     * this leaves a 2-block coupling gap between wagons and 1 block behind the locomotive.
+     */
+    public static final double SPACING = 16.0;
 
     private TrainTimetable() {
     }
@@ -61,7 +64,7 @@ public final class TrainTimetable {
         return Math.clamp(configured, MIN_WAGONS, MAX_WAGONS);
     }
 
-    /** @return the configured seats per car clamped to the design's 1–4. */
+    /** @return the configured seats per car clamped to the design's 1–12. */
     public static int seats(int configured) {
         return Math.clamp(configured, 1, MAX_SEATS);
     }

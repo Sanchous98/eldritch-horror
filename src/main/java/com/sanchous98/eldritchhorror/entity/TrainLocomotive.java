@@ -75,6 +75,12 @@ public class TrainLocomotive extends TrainCar {
         super(type, level);
     }
 
+    /** @return the locomotive body length (engine nose + cab), in blocks. */
+    @Override
+    public double carLength() {
+        return 16.0;
+    }
+
     /**
      * Wires a freshly spawned locomotive to its line and timetable. The station chunk ticket is
      * already held by the service.
