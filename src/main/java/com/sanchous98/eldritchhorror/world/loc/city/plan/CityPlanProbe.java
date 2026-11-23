@@ -261,6 +261,14 @@ public final class CityPlanProbe implements StructureBuilder {
     }
 
     @Override
+    public BlockState getState(int x, int y, int z) {
+        // The probe only knows its own recorded writes; anything else is air (same contract as
+        // RecordingBuilder). CitySurface.of(...) reads terrain through this.
+        BlockState state = this.blocks.get(BlockPos.asLong(x, y, z));
+        return state == null ? Blocks.AIR.defaultBlockState() : state;
+    }
+
+    @Override
     public void chest(int x, int y, int z, ResourceKey<LootTable> lootTable) {
         put(x, y, z, Blocks.CHEST.defaultBlockState());
     }
