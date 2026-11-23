@@ -278,11 +278,17 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   and live `/eh train`/`/eh ship` at Shanghai (authored station 1 block, port 469 blocks).
 - **Pregen:** `/eh pregen cities|rail|all|status|stop` (or `-Deh.pregen=all`) queues the 24 city
   districts plus a 3x3 chunk corridor around every rail node — 72,997 chunks on the current world —
-  and generates two per tick with progress/ETA. On the 2-core Ampere Oracle instance it runs at
-  ~13 chunks/s (ETA ~1.5 h, RAM ~3.8 G of the 8 G container). The queue is bounded; chunks are
-  persisted by the normal world save, so later sessions only read them. The remote container
-  `eh-oracle` uses `--restart unless-stopped`; RCON 25575 is local-only over SSH, and OCI ingress
-  25565 must be opened before players can connect.
+  and generates two per tick with progress/ETA (one every five ticks while a player is online). On
+  the 2-core Ampere Oracle instance it sustains ~25 chunks/s (ETA ~45 min, RAM ~3.5 G of the 8 G
+  container). A per-world `SavedData` flag marks a completed run, so `-Deh.pregen=all` skips it on
+  later boots; an explicit `/eh pregen all` always re-runs. The queue is bounded and chunks are
+  persisted by the normal world save, so later sessions only read them.
+- **Oracle server:** `eh-oracle` runs `--restart unless-stopped` from the bind-mounted source
+  (`~/eldritch-horror`) with `~/eh-run`, `~/eh-build` and `~/eh-gradle` volumes, heap 6 G, container
+  limit 8 G, 2 CPUs. `pause-when-empty-seconds=0` is required — at the default 60 s an empty server
+  pauses ticking and stalls pregen. RCON 25575 stays local (SSH only). OCI ingress 25565 must be
+  added to the security list/NSG of the subnet that holds the VNIC; firewalld on the instance is
+  already open.
 
 ## Known limitations / deferred
 
