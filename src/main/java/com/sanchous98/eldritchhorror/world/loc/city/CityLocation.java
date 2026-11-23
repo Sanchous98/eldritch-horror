@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.world.loc.city;
 
 import com.sanchous98.eldritchhorror.world.EarthMap;
+import com.sanchous98.eldritchhorror.world.EarthMaps;
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.Builder;
@@ -16,12 +17,17 @@ import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
 import com.sanchous98.eldritchhorror.world.loc.style.StyleKit;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -74,11 +80,16 @@ public final class CityLocation implements Location {
     /** Offset from a lot's origin to the centre of its flattened pad (lots grow in +X/+Z). */
     private static final int LOT_CENTER = 4;
     /**
-     * Height above the surface cleared of vanilla vegetation inside the district, so a forest or
-     * jungle city is not buried by the biome's own trees (which run before this generator's city
-     * pass). Taller than the tallest tree we expect to remove; buildings are placed afterwards.
+     * Height above the planned surface swept free of vanilla vegetation inside the district, so a
+     * forest or jungle city is not buried by the biome's own trees (which run before this
+     * generator's city pass). Taller than the tallest tree we expect to remove; buildings are
+     * placed afterwards.
+     *
+     * <p>Shared by the procedural {@code paveDistrict} pass, the authored-plan sweep and the
+     * runtime {@code CityVegetation} safety net, so all three agree on what "above the surface"
+     * means.
      */
-    private static final int CLEAR_ABOVE = 40;
+    public static final int CLEAR_ABOVE = 40;
     /** Minimum width (blocks) of the graded rim that blends the flat city into the wild terrain. */
     static final int EDGE_RING_MIN = 24;
     /** Maximum rim width: on very steep sites the slope widens (flatter) but never eats the city. */
@@ -155,6 +166,48 @@ public final class CityLocation implements Location {
         return Math.min(radius(), DISTRICT_CAP);
     }
 
+    /**
+     * The authored log/leaf positions of one chunk, from the server's plan cache; {@code null}
+     * when this city's plan is not cached (fresh server, evicted entry). Runtime cleanup must not
+     * guess: without this it cannot tell an authored courtyard palm from a biome tree, so it
+     * leaves the chunk alone rather than risk the plan's gardens.
+     */
+    public @Nullable Set<Long> authoredVegetation(int chunkX, int chunkZ) {
+        synchronized (PLAN_CACHE_LOCK) {
+            Map<Long, List<CityWrite>> writes = PLAN_CACHE.get(this.id());
+            if (writes == null) {
+                return null;
+            }
+            List<CityWrite> list = writes.get(ChunkPos.pack(chunkX, chunkZ));
+            if (list == null) {
+                return Set.of();
+            }
+            Set<Long> authored = new HashSet<>();
+            for (CityWrite write : list) {
+                if (isVegetation(write.state())) {
+                    authored.add(write.pos().asLong());
+                }
+            }
+            return authored;
+        }
+    }
+
+    /**
+     * The authored city's graded surface computed from the baked Earth map alone, for runtime
+     * passes (such as {@code CityVegetation}) that have no generating chunk. Mirrors
+     * {@link #geometry} and the {@link CitySurface} the plan sits on.
+     */
+    public static CitySurface surfaceOf(City city) {
+        EarthMap map = EarthMaps.get();
+        int cx = city.x();
+        int cz = city.z();
+        int district = Math.min(new CityLocation(city).radius(), DISTRICT_CAP);
+        int interior = district - EDGE_RING_MIN;
+        int ground = mapMeanLevel(map, cx, cz, interior);
+        int edgeRing = mapEdgeRingWidth(map, cx, cz, interior, ground);
+        return CitySurface.ofMap(map, cx, cz, district, ground, edgeRing);
+    }
+
     @Override
     public String id() {
         return "eldritch_horror:city/" + this.city.id();
@@ -221,6 +274,7 @@ public final class CityLocation implements Location {
             gradeAuthoredDistrict(b, cx, cz, district, ground, edgeRing, p);
             CitySurface surface = CitySurface.of(b, cx, cz, district, ground, edgeRing);
             CityPlanContext ctx = new CityPlanContext(cx, cz, ground, district, surface);
+            @Nullable Map<Long, List<CityWrite>> planWrites = null;
             if (b instanceof Builder builder) {
                 Map<Long, List<CityWrite>> writes;
                 synchronized (PLAN_CACHE_LOCK) {
@@ -235,10 +289,19 @@ public final class CityLocation implements Location {
                     }
                 }
                 builder.applyChunk(writes, b.chunkMinX() >> 4, b.chunkMinZ() >> 4);
+                planWrites = writes;
             } else {
                 plan.build(b, ctx, p);
             }
             lightAuthoredCity(b, ctx, p);
+            // The plan branch returns before the procedural paveDistrict sweep, so without this
+            // pass the biome's trees survive inside an authored district (trunks left standing in
+            // streets, crowns through roofs). The plan's own palms/logs are exempt: they are the
+            // chunk's authored writes whose final state is a log or leaf.
+            if (planWrites != null) {
+                sweepPlanVegetation(b, ctx,
+                        planWrites.get(ChunkPos.pack(b.chunkMinX() >> 4, b.chunkMinZ() >> 4)));
+            }
             b.marker("city_center", cx, ground + 1, cz);
             return;
         }
@@ -478,6 +541,53 @@ public final class CityLocation implements Location {
             }
         }
         return Math.clamp(maxDeparture * 2, EDGE_RING_MIN, EDGE_RING_MAX);
+    }
+
+    /** {@link #meanLevel} from the baked map alone, for runtime passes without a builder. */
+    private static int mapMeanLevel(EarthMap map, int cx, int cz, int radius) {
+        long sum = 0;
+        int n = 0;
+        int step = 16;
+        for (int dx = -radius; dx <= radius; dx += step) {
+            for (int dz = -radius; dz <= radius; dz += step) {
+                if (dx * dx + dz * dz > radius * radius) {
+                    continue;
+                }
+                int x = cx + dx;
+                int z = cz + dz;
+                if (map.isLand(x, z)) {
+                    sum += mapGroundY(map, x, z);
+                    n++;
+                }
+            }
+        }
+        return n == 0 ? mapGroundY(map, cx, cz) : (int) Math.round(sum / (double) n);
+    }
+
+    /** {@link #edgeRingWidth} from the baked map alone, for runtime passes without a builder. */
+    private static int mapEdgeRingWidth(EarthMap map, int cx, int cz, int radius, int ground) {
+        int maxDeparture = 0;
+        int step = 16;
+        for (int dx = -radius; dx <= radius; dx += step) {
+            for (int dz = -radius; dz <= radius; dz += step) {
+                if (dx * dx + dz * dz > radius * radius) {
+                    continue;
+                }
+                int x = cx + dx;
+                int z = cz + dz;
+                if (!map.isLand(x, z)) {
+                    continue;
+                }
+                maxDeparture = Math.max(maxDeparture, Math.abs(mapGroundY(map, x, z) - ground));
+            }
+        }
+        return Math.clamp(maxDeparture * 2, EDGE_RING_MIN, EDGE_RING_MAX);
+    }
+
+    /** Natural terrain Y for a column, clamped exactly like {@link StructureBuilder#groundY}. */
+    private static int mapGroundY(EarthMap map, int x, int z) {
+        return Math.clamp(ElevationCurve.toY(map.elevationMetres(x, z)),
+                ElevationCurve.MIN_Y + 1, ElevationCurve.MAX_Y - 1);
     }
 
     /**
@@ -741,6 +851,72 @@ public final class CityLocation implements Location {
                 }
             }
         }
+    }
+
+    /**
+     * Removes natural biome vegetation from the authored city's columns: for every column of the
+     * generating chunk inside the district, scan from the planned surface ({@link CitySurface#at})
+     * up to {@link #CLEAR_ABOVE} blocks and replace any block in {@code BlockTags.LOGS} or
+     * {@code BlockTags.LEAVES} with air.
+     *
+     * <p>The plan branch returns before {@link #paveDistrict}, which is the pass that sweeps
+     * vegetation for procedural cities. This pass fills that gap. It only removes a block when the
+     * plan did <b>not</b> author vegetation at that exact position: a position is exempt when the
+     * chunk's recorded writes have it as their final state and that state is itself a log or leaf,
+     * so Cairo's courtyard palms and every other authored garden tree survive while the biome's
+     * trunks and crowns do not.
+     *
+     * <p>Chunk-clipped and deterministic: reads only the generating chunk through
+     * {@link StructureBuilder#getState} and the global terrain through the surface. Nothing below
+     * the planned surface is touched.
+     */
+    private static void sweepPlanVegetation(StructureBuilder b, CityPlanContext ctx,
+                                            @Nullable List<CityWrite> writes) {
+        Set<Long> authored = new HashSet<>();
+        if (writes != null) {
+            for (CityWrite write : writes) {
+                if (isVegetation(write.state())) {
+                    authored.add(write.pos().asLong());
+                }
+            }
+        }
+        BlockState air = Blocks.AIR.defaultBlockState();
+        int x0 = b.chunkMinX();
+        int z0 = b.chunkMinZ();
+        int cx = ctx.cx();
+        int cz = ctx.cz();
+        int district2 = ctx.district() * ctx.district();
+        CitySurface surface = ctx.surface();
+        for (int x = x0; x < x0 + 16; x++) {
+            int dx = x - cx;
+            if (dx * dx > district2) {
+                continue;
+            }
+            for (int z = z0; z < z0 + 16; z++) {
+                int dz = z - cz;
+                if (dx * dx + dz * dz > district2 || !b.isLand(x, z)) {
+                    continue;
+                }
+                int s = surface.at(x, z);
+                // Where a hill was cut down to the graded surface, the biome's trees stood above
+                // the ORIGINAL surface: scan to the higher of the two, or their crowns are left
+                // dangling above the new street. The scan still starts above the planned surface.
+                int top = Math.max(s, b.groundY(x, z)) + CLEAR_ABOVE;
+                for (int y = s + 1; y <= top; y++) {
+                    if (authored.contains(BlockPos.asLong(x, y, z))) {
+                        continue; // the plan's own palm or garden tree
+                    }
+                    if (isVegetation(b.getState(x, y, z))) {
+                        b.put(x, y, z, air);
+                    }
+                }
+            }
+        }
+    }
+
+    /** True for a trunk/wood or leaf block: the vegetation both city sweeps remove. */
+    public static boolean isVegetation(BlockState state) {
+        return state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES);
     }
 
     /**
@@ -1267,6 +1443,11 @@ public final class CityLocation implements Location {
 
         @Override
         public void put(int x, int y, int z, BlockState state) {
+        }
+
+        @Override
+        public BlockState getState(int x, int y, int z) {
+            return this.delegate.getState(x, y, z);
         }
 
         @Override
