@@ -14,6 +14,7 @@ import com.sanchous98.eldritchhorror.registry.items.Waypoints;
 import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.sanity.SanityTicker;
 import com.sanchous98.eldritchhorror.world.cult.CultRituals;
+import com.sanchous98.eldritchhorror.world.PregenService;
 import com.sanchous98.eldritchhorror.world.loc.CitySigns;
 import com.sanchous98.eldritchhorror.world.rail.TrainService;
 import com.sanchous98.eldritchhorror.world.rift.RiftGates;
@@ -68,5 +69,6 @@ public final class ServerStateReset {
         TrainService.clear();
         RiftGates.clear();
         CitySigns.clear();
+        PregenService.stop();
     }
 }

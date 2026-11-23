@@ -272,6 +272,14 @@ public final class EldritchCommands {
         eh.then(Commands.literal("train")
                 .executes(EldritchCommands::trainInfo)
                 .then(Commands.literal("board").executes(EldritchCommands::boardTrain)));
+        // One-shot world pre-generation for cities and rail corridors (tick-sliced).
+        eh.then(Commands.literal("pregen")
+                .requires(GAMEMASTER)
+                .then(Commands.literal("cities").executes(ctx -> pregen(ctx, "cities")))
+                .then(Commands.literal("rail").executes(ctx -> pregen(ctx, "rail")))
+                .then(Commands.literal("all").executes(ctx -> pregen(ctx, "all")))
+                .then(Commands.literal("status").executes(EldritchCommands::pregenStatus))
+                .then(Commands.literal("stop").executes(EldritchCommands::pregenStop)));
         // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
         eh.then(Commands.literal("cultist")
                 .requires(GAMEMASTER)
@@ -503,6 +511,28 @@ public final class EldritchCommands {
         com.sanchous98.eldritchhorror.entity.TrainLocomotive lead = best.locomotive();
         String key = lead == null ? "train" : lead.serviceKey();
         ctx.getSource().sendSuccess(() -> Component.literal("Boarded " + key), false);
+        return 1;
+    }
+
+    /** {@code /eh pregen <cities|rail|all>}: start the tick-sliced pre-generation queue. */
+    private static int pregen(CommandContext<CommandSourceStack> ctx, String scope) {
+        String result = com.sanchous98.eldritchhorror.world.PregenService.start(
+                ctx.getSource().getServer(), scope);
+        ctx.getSource().sendSuccess(() -> Component.literal(result), true);
+        return 1;
+    }
+
+    /** {@code /eh pregen status}: queue progress and ETA. */
+    private static int pregenStatus(CommandContext<CommandSourceStack> ctx) {
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                com.sanchous98.eldritchhorror.world.PregenService.status()), false);
+        return 1;
+    }
+
+    /** {@code /eh pregen stop}: cancel the current queue. */
+    private static int pregenStop(CommandContext<CommandSourceStack> ctx) {
+        com.sanchous98.eldritchhorror.world.PregenService.stop();
+        ctx.getSource().sendSuccess(() -> Component.literal("pregen stopped"), true);
         return 1;
     }
 
