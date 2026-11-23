@@ -17,6 +17,18 @@ set -uo pipefail
 export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/home/dev/.docker-run}
 export DOCKER_HOST=${DOCKER_HOST:-unix:///home/dev/.docker-run/docker.sock}
 
+# Serialise builds across worktrees. All worktrees share one cgroup and the
+# pre-clean below kills every gradlew in every dev container, so two concurrent
+# runs destroy each other (SIGTERM mid-compile). Take an exclusive lock instead:
+# a second caller waits for the slot rather than killing the first.
+LOCK_FILE=${SAFE_BUILD_LOCK:-/home/dev/.eh-build.lock}
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  echo "safe-build: another build is running, waiting for the slot..." >&2
+  flock 9
+fi
+echo "safe-build: lock acquired (${LOCK_FILE})"
+
 CG_MAX=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || echo 0)
 CG_CUR=$(cat /sys/fs/cgroup/memory.current 2>/dev/null || echo 0)
 # cgroup v2 counts reclaimable page cache in memory.current; the kernel evicts it under
