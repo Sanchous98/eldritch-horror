@@ -278,6 +278,7 @@ public final class EldritchCommands {
                 .then(Commands.literal("cities").executes(ctx -> pregen(ctx, "cities")))
                 .then(Commands.literal("rail").executes(ctx -> pregen(ctx, "rail")))
                 .then(Commands.literal("all").executes(ctx -> pregen(ctx, "all")))
+                .then(Commands.literal("world").executes(ctx -> pregen(ctx, "world")))
                 .then(Commands.literal("status").executes(EldritchCommands::pregenStatus))
                 .then(Commands.literal("stop").executes(EldritchCommands::pregenStop)));
         // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
