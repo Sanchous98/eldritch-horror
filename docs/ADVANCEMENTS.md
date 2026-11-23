@@ -21,9 +21,8 @@ guidance is available even on worlds created before the tab existed.
 
 ```
 root ("Eldritch Horror", black_obol, stone background)
-└── prologue/
-    ├── choose_investigator        (investigators_badge, task)
-    └── first_steps                (gate_fragment, task)          quest: first_steps
+└── prologue/choose_investigator   (investigators_badge, task)
+    └── prologue/first_steps       (gate_fragment, task)          quest: first_steps
         ├── investigation/          the 12 investigator starter chains, 2 nodes each
         │   ├── starter_agatha_grave → starter_agatha_vigil
         │   ├── starter_aldous_notes → starter_aldous_survey
@@ -40,26 +39,21 @@ root ("Eldritch Horror", black_obol, stone background)
         ├── cities/                 one node per curated contract, plus the capstone
         │   ├── tokyo … nairobi     (24 tasks, city_map)
         │   └── all_contracts       (world_atlas, challenge; all 24)
-        └── threats/
-            ├── fallen_city         (cursed_charm, goal)
-            └── reclaim_the_city    (order_sigil, goal)           quest: reclaim_the_city
-        └── first_rite              (chalk_reagent, goal)         quest: first_rite
-            ├── investigation/
-            │   ├── lorekeeper      (tome_of_the_eye, goal)        quest: lorekeeper
-            │   └── lorekeeper_ii   (star_codex, challenge)        quest: lorekeeper_ii
-            ├── cults/
-            │   ├── sworn_ally      (cult_token, goal)             quest: sworn_ally
-            │   ├── drowned_choir/
-            │   │   ├── initiate → member → devoted → inner_circle
-            │   ├── unblinking_eye/
-            │   │   └── initiate → member → devoted → inner_circle
-            │   ├── hollow_choir/
-            │   │   └── initiate → member → devoted → inner_circle
-            │   ├── open_the_way      (ritual_knife, goal)         quest: open_the_way
-            │   ├── awaken_the_horror (void_reagent, challenge)    quest: awaken_the_horror
-            │   ├── the_decision      (effigy_doll, challenge)     quest: the_decision
-            │   └── the_seal          (order_sigil, challenge)     quest: the_seal
-            └── threats/first_ancient_one (eye_of_the_watcher, challenge)
+        ├── threats/
+        │   ├── fallen_city         (cursed_charm, goal)
+        │   └── reclaim_the_city    (order_sigil, goal)           quest: reclaim_the_city
+        └── prologue/first_rite     (chalk_reagent, goal)         quest: first_rite
+            ├── investigation/lorekeeper     (tome_of_the_eye, goal)   quest: lorekeeper
+            ├── investigation/lorekeeper_ii  (star_codex, challenge)   quest: lorekeeper_ii
+            ├── threats/first_ancient_one    (eye_of_the_watcher, challenge)
+            └── cults/sworn_ally             (cult_token, goal)        quest: sworn_ally
+                ├── cults/drowned_choir/     initiate → member → devoted → inner_circle
+                ├── cults/unblinking_eye/    initiate → member → devoted → inner_circle
+                ├── cults/hollow_choir/      initiate → member → devoted → inner_circle
+                ├── cults/open_the_way       (ritual_knife, goal)      quest: open_the_way
+                │   └── cults/awaken_the_horror (void_reagent, challenge)
+                │       ├── cults/the_decision (effigy_doll, challenge)
+                │       └── cults/the_seal     (order_sigil, challenge)
 ```
 
 `cities/all_contracts` is the only node granted by a derived condition rather than a direct
