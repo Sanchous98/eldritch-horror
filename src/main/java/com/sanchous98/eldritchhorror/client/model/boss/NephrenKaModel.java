@@ -12,14 +12,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Nephren-Ka, the Black Pharaoh who remembers: a bandaged king in a tall double crown, one eye
  * burning through the wrappings, a false beard and a staff of office held like a weapon.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NephrenKaModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

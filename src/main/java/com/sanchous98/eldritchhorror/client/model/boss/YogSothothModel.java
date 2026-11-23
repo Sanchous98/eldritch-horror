@@ -14,14 +14,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Yog-Sothoth: the gate and the key. A core of orange-gold light inside two great rotating rings,
  * surrounded by lesser spheres, with tendrils dripping into our space. Nothing humanoid.
  */
-@OnlyIn(Dist.CLIENT)
 public final class YogSothothModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

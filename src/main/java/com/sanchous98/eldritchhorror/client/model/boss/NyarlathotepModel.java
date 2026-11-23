@@ -14,15 +14,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Nyarlathotep, the Crawling Chaos: a slim black-robed figure whose face is a pale, eyeless mask
  * with a third eye, a ragged cloak of tendrils, and a second mask floating beside it because it is
  * never only one thing.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NyarlathotepModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

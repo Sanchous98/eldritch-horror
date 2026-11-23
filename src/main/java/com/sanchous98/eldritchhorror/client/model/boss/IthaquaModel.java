@@ -15,14 +15,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Ithaqua, the Wind-Walker: an unnaturally tall, starved humanoid with too-long arms, claws of ice,
  * a ragged cloak of frozen strips and a ring of wind that never stops turning around its legs.
  */
-@OnlyIn(Dist.CLIENT)
 public final class IthaquaModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

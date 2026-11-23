@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Rhan-Tegoth: the crab-idol on the polar shore. A domed carapace crowded with eyes, a golden crown
  * of spikes, eight jointed crab legs and two massive pincers held out in front. It scuttles rather
  * than walks.
  */
-@OnlyIn(Dist.CLIENT)
 public final class RhanTegothModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

@@ -14,15 +14,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The Choir Leviathan: a drowned whale that should not still be singing. A long barnacled body
  * hanging in the water, one great head crowded with eyes, rows of mouths opening along the belly,
  * and a fluked tail that never quite stops moving.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ChoirLeviathanModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

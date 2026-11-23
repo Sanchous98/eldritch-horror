@@ -6,8 +6,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Mob;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Base renderer for the Ancient Ones: a {@link MobRenderer} bound to {@link BossRenderState}, with
@@ -23,7 +21,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * translation. Because that translation is post-multiplied (applied to the model point before the
  * scale), the feet stay on the ground at any scale, so no extra compensation is needed.
  */
-@OnlyIn(Dist.CLIENT)
 public abstract class BossRenderer<T extends Mob, M extends EntityModel<BossRenderState>>
         extends MobRenderer<T, BossRenderState, M> {
 

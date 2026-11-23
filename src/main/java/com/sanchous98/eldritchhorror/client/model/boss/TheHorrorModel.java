@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The Horror at the end of the roster: the final, accumulated mass. A mountain of eyes and mouths
  * surrounded by two crowns of tentacles, with faces growing out of its flanks and tendrils reaching
  * the ground. It has no legs and no one shape.
  */
-@OnlyIn(Dist.CLIENT)
 public final class TheHorrorModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

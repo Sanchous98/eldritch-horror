@@ -13,15 +13,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The Hydra of the drowned marsh: a low, bloated body with four stumpy legs and six long necks
  * fanning out, each ending in a horned head. The necks move out of phase so it always looks like
  * more than one creature is deciding what to do.
  */
-@OnlyIn(Dist.CLIENT)
 public final class HydraModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

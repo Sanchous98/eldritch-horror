@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Zstylzhemghi: a name being erased, worn as a swarm. A dark chitinous core disappears inside a
  * cloud of beetle-like motes that orbits it on two axes; a few eyes and a fringe of legs are the
  * only fixed parts.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ZstylzhemghiModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

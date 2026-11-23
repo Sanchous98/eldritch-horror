@@ -15,8 +15,6 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Shub-Niggurath, the Black Goat of the Woods with a Thousand Young: a tree-thick torso of matted
@@ -24,7 +22,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * of tentacles. The heads browse independently, which is what makes the silhouette read as a
  * many-headed thing rather than a bull.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ShubNiggurathModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

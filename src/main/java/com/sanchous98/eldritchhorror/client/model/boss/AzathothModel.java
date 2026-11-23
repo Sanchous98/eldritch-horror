@@ -14,15 +14,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Azathoth: the blind, bubbling nucleus at the centre of everything. A bloated core of poisonous
  * light, a ring of lesser bubbles orbiting it, flutes of bone jutting out of the mass and a skirt of
  * tendrils. No eyes, no limbs, no face.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AzathothModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

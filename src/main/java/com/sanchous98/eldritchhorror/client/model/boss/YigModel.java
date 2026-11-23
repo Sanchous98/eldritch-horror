@@ -12,14 +12,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Yig, Father of Serpents: a great coiled body rising from the ground into an upright S-neck, a
  * wedge head with a flared hood, fangs and scaled ridges. Nothing bipedal anywhere.
  */
-@OnlyIn(Dist.CLIENT)
 public final class YigModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

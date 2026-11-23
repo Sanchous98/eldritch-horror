@@ -5,8 +5,6 @@ import java.util.List;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Tiny animation kit shared by every Ancient One model.
@@ -25,7 +23,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * {@link #applyLunge} for the attack animation. The lunge uses the swing progress captured in
  * {@link BossRenderState}, so no external animation library and no server changes are needed.
  */
-@OnlyIn(Dist.CLIENT)
 public abstract class BossModelBase extends EntityModel<BossRenderState> {
 
     private static final float WALK_FREQUENCY = 0.6662F;

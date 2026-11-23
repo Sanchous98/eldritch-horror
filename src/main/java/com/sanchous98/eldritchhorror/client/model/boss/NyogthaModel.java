@@ -13,14 +13,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Nyogtha: the thing under the floor. A wide tar-black pool of protoplasm with bubbles and eyes,
  * out of which a dozen long tendrils rear up like kelp. It has no body above the pool.
  */
-@OnlyIn(Dist.CLIENT)
 public final class NyogthaModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

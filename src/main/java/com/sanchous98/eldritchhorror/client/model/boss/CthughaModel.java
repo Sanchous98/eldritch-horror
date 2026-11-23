@@ -16,15 +16,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Cthugha: the living flame that watches. A tall licking column of fire with a ring of embers
  * orbiting it, three eyes floating inside the flame and burning tendrils rooted to the ground.
  * No legs and no humanoid torso.
  */
-@OnlyIn(Dist.CLIENT)
 public final class CthughaModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

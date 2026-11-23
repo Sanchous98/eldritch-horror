@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Atlach-Nacha: the spider that weaves the bridge between the worlds. A low, wide cephalothorax
  * and abdomen on eight long jointed legs, a cluster of eyes and a crown of pale web-struts spun
  * above the back. Low to the ground but very wide, like a web-anchor.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AtlachNachaModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

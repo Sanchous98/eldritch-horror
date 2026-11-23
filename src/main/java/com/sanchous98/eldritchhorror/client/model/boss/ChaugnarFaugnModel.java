@@ -13,14 +13,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Chaugnar Faugn: an elephantine idol that walks. Broad trunked head, curved tusks, heavy arms and
  * stunted legs under a bloated gut: a temple statue that decided to feed.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ChaugnarFaugnModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

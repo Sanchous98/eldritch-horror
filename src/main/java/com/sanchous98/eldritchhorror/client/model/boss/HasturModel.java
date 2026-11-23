@@ -13,14 +13,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Hastur, the Yellow King: a tall robed figure under a hood, its face a pale mask, a jagged crown
  * above and a hem of ragged yellow strips. The sleeves swallow the arms; only the mask is pale.
  */
-@OnlyIn(Dist.CLIENT)
 public final class HasturModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

@@ -14,14 +14,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Glaaki: a drowned, spined shell squatting in the marsh on a skirt of tendrils, ringed with eyes.
  * Green-black chitin dome above, pale spines, no slime cube anywhere.
  */
-@OnlyIn(Dist.CLIENT)
 public final class GlaakiModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

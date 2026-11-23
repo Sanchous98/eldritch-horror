@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Cthulhu: vast winged humanoid, tentacled face, clawed hands and a crown of horns. The silhouette
  * is a hunched giant with wings folded behind the shoulders; it wakes with a lunge that spreads
  * them.
  */
-@OnlyIn(Dist.CLIENT)
 public final class CthulhuModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

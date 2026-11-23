@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Tulzscha, the Green Flame: a narrow spiralling column of green fire inside a slowly turning ring
  * of embers, with flame tendrils licking down to the ground. Tall and thin, unlike Cthugha's
  * spreading fireball.
  */
-@OnlyIn(Dist.CLIENT)
 public final class TulzschaModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

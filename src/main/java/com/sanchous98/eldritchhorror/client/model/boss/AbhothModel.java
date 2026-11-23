@@ -15,15 +15,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Abhoth: the source of all filth. A broad grey-pink pool of protoplasm, half-formed spawn budding
  * on its surface, mouths opening in the scum and a handful of thick arms reaching up. Sits low and
  * wide like something that should be scooped out and burned.
  */
-@OnlyIn(Dist.CLIENT)
 public final class AbhothModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

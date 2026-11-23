@@ -15,8 +15,6 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The Dunwich Horror: a bloated, half-invisible mass with a crown of tentacles, too many mismatched
@@ -26,7 +24,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * eight tentacles hang from the crown. Four spindly two-segment legs carry it, with a phase offset
  * per leg so the gait reads as skittering rather than trotting.
  */
-@OnlyIn(Dist.CLIENT)
 public final class DunwichHorrorModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

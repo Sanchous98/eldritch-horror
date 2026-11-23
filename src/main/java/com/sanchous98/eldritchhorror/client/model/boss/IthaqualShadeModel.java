@@ -12,15 +12,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The Ithaqual Shade: the cold that walks after the Wind-Walker. A gaunt, hooded grey shape whose
  * lower body has given up being legs and become a drift of frozen rags, with long arms and two pale
  * eyes. Thin enough to look like a hole in the snow.
  */
-@OnlyIn(Dist.CLIENT)
 public final class IthaqualShadeModel extends BossModelBase {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(

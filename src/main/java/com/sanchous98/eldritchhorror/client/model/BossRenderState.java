@@ -1,8 +1,6 @@
 package com.sanchous98.eldritchhorror.client.model;
 
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Shared render state for every Ancient One. 26.3 mobs have no generic "attack ticks" field, but
@@ -12,7 +10,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * <p>One state class for the whole roster keeps the renderers tiny and lets
  * {@link BossModelBase} animate every boss the same way.
  */
-@OnlyIn(Dist.CLIENT)
 public class BossRenderState extends LivingEntityRenderState {
 
     /** 0..1 progress through the current attack swing; 0 when idle. */
