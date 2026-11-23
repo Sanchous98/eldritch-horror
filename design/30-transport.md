@@ -51,16 +51,17 @@ The occult branch stays the rift gate (`26-rituals-and-occult.md`) — fast, tai
   blocks: players can walk it, build beside it, or block it.
 - **Consist**: a locomotive plus 2–4 wagons, as **coupled entities**. The locomotive owns the path;
   each wagon samples the leader's recent trail at a fixed spacing (so the consist bends around
-  curves instead of clipping through them). Each car has 4 seats; players board at a station and
-  ride; the train keeps to the line, slows into a station, dwells for a boarding window, and
-  departs on the timetable.
+  curves instead of clipping through them). Each car is a full carriage (14 blocks for a wagon,
+  16 for the locomotive, 3 wide and 3.8 tall) with 12 window-facing seats; players board at a
+  station and ride; the train keeps to the line, slows into a station, dwells for a boarding
+  window, and departs on the timetable.
 - **Same timetable/fare stack as ships**: in-game departure times, boarding window, tickets, and a
   real-time journey proportional to the line length. No teleport.
 - **Safety and interruption**: the line can be blocked (a placed block stops the train until
   cleared/removed by the crew), and the same transit dangers as the sea route apply. A derailed or
   stopped train lets riders disembark where it stands.
-- **Placeholder look**: scaled vanilla minecart models until the art pass; the mechanics and the
-  line are the deliverable of this stage.
+- **Look**: custom locomotive and carriage models at real scale, with walk-in interiors, window
+  bands, benches and doors; see `docs/TRANSPORT-VEHICLES.md`.
 
 ## Open questions / defaults
 
