@@ -1,38 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.DunwichHorrorModel;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.ravager.RavagerModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.RavagerRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for the Dunwich Horror: the vanilla ravager quadruped model and a flat
- * placeholder texture (128x128 ravager sheet). Art is the user's job.
- *
- * <p>26.3 verified as for {@link CthulhuRenderer}: {@code RavagerModel} +
- * {@code RavagerRenderState}, only {@code createRenderState()} and {@code getTextureLocation} to
- * implement.
- */
-public final class DunwichHorrorRenderer
-        extends MobRenderer<DunwichHorror, RavagerRenderState, RavagerModel> {
+/** Renderer for the custom {@link DunwichHorrorModel}. */
+public final class DunwichHorrorRenderer extends BossRenderer<DunwichHorror, DunwichHorrorModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/dunwich_horror.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/dunwich_horror.png");
 
     public DunwichHorrorRenderer(EntityRendererProvider.Context context) {
-        super(context, new RavagerModel(context.bakeLayer(ModelLayers.RAVAGER)), 1.0F);
-    }
-
-    @Override
-    public RavagerRenderState createRenderState() {
-        return new RavagerRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(RavagerRenderState state) {
-        return TEXTURE;
+        super(context, new DunwichHorrorModel(context.bakeLayer(DunwichHorrorModel.LAYER)), 1.6F, TEXTURE, 1.50F);
     }
 }

@@ -1,39 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.RhanTegothModel;
 import com.sanchous98.eldritchhorror.entity.RhanTegoth;
-import net.minecraft.client.model.animal.golem.IronGolemModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.IronGolemRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Rhan-Tegoth: the vanilla iron golem model (a standing carved shape, which
- * is closer to an idol on a plinth than any quadruped) with our own flat placeholder texture (128x128
- * golem sheet). Art is the user's job.
- *
- * <p>26.3 verified as for {@code PassiveRenderers.StoneSentinelRenderer}: {@code IronGolemModel} +
- * {@code IronGolemRenderState}, only {@code createRenderState()} and {@code getTextureLocation} to
- * implement.
- */
-public final class RhanTegothRenderer
-        extends MobRenderer<RhanTegoth, IronGolemRenderState, IronGolemModel> {
+/** Renderer for the custom {@link RhanTegothModel}. */
+public final class RhanTegothRenderer extends BossRenderer<RhanTegoth, RhanTegothModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/rhan_tegoth.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/rhan_tegoth.png");
 
     public RhanTegothRenderer(EntityRendererProvider.Context context) {
-        super(context, new IronGolemModel(context.bakeLayer(ModelLayers.IRON_GOLEM)), 1.2F);
-    }
-
-    @Override
-    public IronGolemRenderState createRenderState() {
-        return new IronGolemRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(IronGolemRenderState state) {
-        return TEXTURE;
+        super(context, new RhanTegothModel(context.bakeLayer(RhanTegothModel.LAYER)), 1.8F, TEXTURE, 1.6F);
     }
 }

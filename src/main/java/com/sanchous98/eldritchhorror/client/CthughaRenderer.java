@@ -1,38 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.CthughaModel;
 import com.sanchous98.eldritchhorror.entity.Cthugha;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.blaze.BlazeModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Cthugha: the vanilla blaze model (a hovering fire) with our own flat
- * placeholder texture (64x32 blaze sheet). Art is the user's job.
- *
- * <p>26.3 verified: {@code BlazeModel extends EntityModel<LivingEntityRenderState>} and vanilla's
- * {@code BlazeRenderer} is a {@code MobRenderer<Blaze, LivingEntityRenderState, BlazeModel>}; we take
- * the same shape and need only {@code createRenderState()} + {@code getTextureLocation(state)}.
- */
-public final class CthughaRenderer
-        extends MobRenderer<Cthugha, LivingEntityRenderState, BlazeModel> {
+/** Renderer for the custom {@link CthughaModel}. */
+public final class CthughaRenderer extends BossRenderer<Cthugha, CthughaModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/cthugha.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/cthugha.png");
 
     public CthughaRenderer(EntityRendererProvider.Context context) {
-        super(context, new BlazeModel(context.bakeLayer(ModelLayers.BLAZE)), 1.0F);
-    }
-
-    @Override
-    public LivingEntityRenderState createRenderState() {
-        return new LivingEntityRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(LivingEntityRenderState state) {
-        return TEXTURE;
+        super(context, new CthughaModel(context.bakeLayer(CthughaModel.LAYER)), 1.5F, TEXTURE, 1.65F);
     }
 }

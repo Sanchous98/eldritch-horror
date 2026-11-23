@@ -1,43 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.NyogthaModel;
 import com.sanchous98.eldritchhorror.entity.Nyogtha;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.silverfish.SilverfishModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Nyogtha: the vanilla silverfish model (a segmented thing under the floor)
- * with our own flat placeholder texture (64x32 silverfish sheet). Art is the user's job.
- *
- * <p>26.3 verified: {@code SilverfishModel extends EntityModel<EntityRenderState>} and vanilla's
- * {@code SilverfishRenderer} is a {@code MobRenderer<Silverfish, LivingEntityRenderState,
- * SilverfishModel>} with a 180-degree flip (it walks on ceilings); we mirror both.
- */
-public final class NyogthaRenderer
-        extends MobRenderer<Nyogtha, LivingEntityRenderState, SilverfishModel> {
+/** Renderer for the custom {@link NyogthaModel}. */
+public final class NyogthaRenderer extends BossRenderer<Nyogtha, NyogthaModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/nyogtha.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/nyogtha.png");
 
     public NyogthaRenderer(EntityRendererProvider.Context context) {
-        super(context, new SilverfishModel(context.bakeLayer(ModelLayers.SILVERFISH)), 0.6F);
-    }
-
-    @Override
-    protected float getFlipDegrees() {
-        return 180.0F;
-    }
-
-    @Override
-    public LivingEntityRenderState createRenderState() {
-        return new LivingEntityRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(LivingEntityRenderState state) {
-        return TEXTURE;
+        super(context, new NyogthaModel(context.bakeLayer(NyogthaModel.LAYER)), 2.0F, TEXTURE, 1.6F);
     }
 }

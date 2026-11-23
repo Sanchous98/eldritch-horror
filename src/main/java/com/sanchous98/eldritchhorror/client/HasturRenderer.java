@@ -1,33 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.HasturModel;
 import com.sanchous98.eldritchhorror.entity.Hastur;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.wither.WitherBossModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Hastur: the vanilla wither model (a many-part, floating silhouette) with
- * our own flat placeholder texture. Art is the user's job.
- */
-public final class HasturRenderer extends MobRenderer<Hastur, WitherRenderState, WitherBossModel> {
+/** Renderer for the custom {@link HasturModel}. */
+public final class HasturRenderer extends BossRenderer<Hastur, HasturModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/hastur.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/hastur.png");
 
     public HasturRenderer(EntityRendererProvider.Context context) {
-        super(context, new WitherBossModel(context.bakeLayer(ModelLayers.WITHER)), 1.8F);
-    }
-
-    @Override
-    public WitherRenderState createRenderState() {
-        return new WitherRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(WitherRenderState state) {
-        return TEXTURE;
+        super(context, new HasturModel(context.bakeLayer(HasturModel.LAYER)), 2.2F, TEXTURE, 2.2F);
     }
 }

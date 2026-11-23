@@ -1,34 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.ZstylzhemghiModel;
 import com.sanchous98.eldritchhorror.entity.Zstylzhemghi;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.creeper.CreeperModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Zstylzhemghi: the vanilla creeper model (a tall, wrong silhouette) with
- * our own flat placeholder texture. Art is the user's job.
- */
-public final class ZstylzhemghiRenderer
-        extends MobRenderer<Zstylzhemghi, CreeperRenderState, CreeperModel> {
+/** Renderer for the custom {@link ZstylzhemghiModel}. */
+public final class ZstylzhemghiRenderer extends BossRenderer<Zstylzhemghi, ZstylzhemghiModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/zstylzhemghi.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/zstylzhemghi.png");
 
     public ZstylzhemghiRenderer(EntityRendererProvider.Context context) {
-        super(context, new CreeperModel(context.bakeLayer(ModelLayers.CREEPER)), 1.0F);
-    }
-
-    @Override
-    public CreeperRenderState createRenderState() {
-        return new CreeperRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(CreeperRenderState state) {
-        return TEXTURE;
+        super(context, new ZstylzhemghiModel(context.bakeLayer(ZstylzhemghiModel.LAYER)), 1.8F, TEXTURE, 1.45F);
     }
 }

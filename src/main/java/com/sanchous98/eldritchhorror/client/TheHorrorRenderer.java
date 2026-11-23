@@ -1,33 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.TheHorrorModel;
 import com.sanchous98.eldritchhorror.entity.TheHorror;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.wither.WitherBossModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for The Horror: the vanilla wither silhouette (a many-part, floating
- * presence) with our own flat placeholder texture. Art is the user's job.
- */
-public final class TheHorrorRenderer extends MobRenderer<TheHorror, WitherRenderState, WitherBossModel> {
+/** Renderer for the custom {@link TheHorrorModel}. */
+public final class TheHorrorRenderer extends BossRenderer<TheHorror, TheHorrorModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/the_horror.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/the_horror.png");
 
     public TheHorrorRenderer(EntityRendererProvider.Context context) {
-        super(context, new WitherBossModel(context.bakeLayer(ModelLayers.WITHER)), 2.4F);
-    }
-
-    @Override
-    public WitherRenderState createRenderState() {
-        return new WitherRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(WitherRenderState state) {
-        return TEXTURE;
+        super(context, new TheHorrorModel(context.bakeLayer(TheHorrorModel.LAYER)), 2.8F, TEXTURE, 1.55F);
     }
 }

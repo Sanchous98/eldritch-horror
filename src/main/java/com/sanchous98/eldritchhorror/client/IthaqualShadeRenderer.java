@@ -1,34 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.IthaqualShadeModel;
 import com.sanchous98.eldritchhorror.entity.IthaqualShade;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.warden.WardenModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.WardenRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for the Ithaqual Shade: the vanilla warden silhouette (the design's listed
- * stand-in) with our own frost white-blue texture (128x128, the warden sheet layout). We
- * deliberately do not add the warden's emissive layers. Art is the user's job.
- */
-public final class IthaqualShadeRenderer extends MobRenderer<IthaqualShade, WardenRenderState, WardenModel> {
+/** Renderer for the custom {@link IthaqualShadeModel}. */
+public final class IthaqualShadeRenderer extends BossRenderer<IthaqualShade, IthaqualShadeModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/ithaqual_shade.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/ithaqual_shade.png");
 
     public IthaqualShadeRenderer(EntityRendererProvider.Context context) {
-        super(context, new WardenModel(context.bakeLayer(ModelLayers.WARDEN)), 1.0F);
-    }
-
-    @Override
-    public WardenRenderState createRenderState() {
-        return new WardenRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(WardenRenderState state) {
-        return TEXTURE;
+        super(context, new IthaqualShadeModel(context.bakeLayer(IthaqualShadeModel.LAYER)), 1.0F, TEXTURE, 1.27F);
     }
 }

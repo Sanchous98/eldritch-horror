@@ -1,34 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.ChaugnarFaugnModel;
 import com.sanchous98.eldritchhorror.entity.ChaugnarFaugn;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.ravager.RavagerModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.RavagerRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Chaugnar Faugn: the vanilla ravager quadruped (a squat, hungry bulk) with
- * our own flat placeholder texture. Art is the user's job.
- */
-public final class ChaugnarFaugnRenderer
-        extends MobRenderer<ChaugnarFaugn, RavagerRenderState, RavagerModel> {
+/** Renderer for the custom {@link ChaugnarFaugnModel}. */
+public final class ChaugnarFaugnRenderer extends BossRenderer<ChaugnarFaugn, ChaugnarFaugnModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/chaugnar_faugn.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/chaugnar_faugn.png");
 
     public ChaugnarFaugnRenderer(EntityRendererProvider.Context context) {
-        super(context, new RavagerModel(context.bakeLayer(ModelLayers.RAVAGER)), 1.2F);
-    }
-
-    @Override
-    public RavagerRenderState createRenderState() {
-        return new RavagerRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(RavagerRenderState state) {
-        return TEXTURE;
+        super(context, new ChaugnarFaugnModel(context.bakeLayer(ChaugnarFaugnModel.LAYER)), 1.8F, TEXTURE, 1.45F);
     }
 }

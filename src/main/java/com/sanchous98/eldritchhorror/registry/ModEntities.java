@@ -558,11 +558,11 @@ public final class ModEntities {
 
     // --- Ancient Ones (design/28-ancient-ones.md) ----------------------------------------------
 
-    /** The drowned-temple site boss. */
+    /** Cthulhu: 3.5 x 8.0, the drowned-temple site boss. */
     public static final DeferredHolder<EntityType<?>, EntityType<Cthulhu>> CTHULHU =
             ENTITY_TYPES.register("cthulhu", () ->
                     EntityType.Builder.<Cthulhu>of(Cthulhu::new, MobCategory.MONSTER)
-                            .sized(3.0F, 4.0F)
+                            .sized(3.5F, 8.0F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("cthulhu"))));
@@ -571,11 +571,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("cthulhu_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(CTHULHU.get())));
 
-    /** The Dunwich Horror: 1.9 x 2.4, the mobile settlement threat. */
+    /** The Dunwich Horror: 2.8 x 4.5, the mobile settlement threat. */
     public static final DeferredHolder<EntityType<?>, EntityType<DunwichHorror>> DUNWICH_HORROR =
             ENTITY_TYPES.register("dunwich_horror", () ->
                     EntityType.Builder.<DunwichHorror>of(DunwichHorror::new, MobCategory.MONSTER)
-                            .sized(1.9F, 2.4F)
+                            .sized(2.8F, 4.5F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("dunwich_horror"))));
@@ -584,11 +584,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("dunwich_horror_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(DUNWICH_HORROR.get())));
 
-    /** Shub-Niggurath: 4.0 x 5.0, the pure biome presence (large, slow). */
+    /** Shub-Niggurath: 3.4 x 8.0, the pure biome presence (large, slow). */
     public static final DeferredHolder<EntityType<?>, EntityType<ShubNiggurath>> SHUB_NIGGURATH =
             ENTITY_TYPES.register("shub_niggurath", () ->
                     EntityType.Builder.<ShubNiggurath>of(ShubNiggurath::new, MobCategory.MONSTER)
-                            .sized(4.0F, 5.0F)
+                            .sized(3.4F, 8.0F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("shub_niggurath"))));
@@ -597,11 +597,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("shub_niggurath_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(SHUB_NIGGURATH.get())));
 
-    /** Azathoth: 3.5 x 3.5, the rift_scar presence that has no melee (replaces the Wither). */
+    /** Azathoth: 3.2 x 6.5, the rift_scar presence that has no melee (replaces the Wither). */
     public static final DeferredHolder<EntityType<?>, EntityType<Azathoth>> AZATHOTH =
             ENTITY_TYPES.register("azathoth", () ->
                     EntityType.Builder.<Azathoth>of(Azathoth::new, MobCategory.MONSTER)
-                            .sized(3.5F, 3.5F)
+                            .sized(3.2F, 6.5F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("azathoth"))));
@@ -610,11 +610,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("azathoth_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(AZATHOTH.get())));
 
-    /** Yog-Sothoth: 4.0 x 6.0, the gate on the observatory plateau (replaces the Ender Dragon). */
+    /** Yog-Sothoth: 3.5 x 8.0, the gate on the observatory plateau (replaces the Ender Dragon). */
     public static final DeferredHolder<EntityType<?>, EntityType<YogSothoth>> YOG_SOTHOTH =
             ENTITY_TYPES.register("yog_sothoth", () ->
                     EntityType.Builder.<YogSothoth>of(YogSothoth::new, MobCategory.MONSTER)
-                            .sized(4.0F, 6.0F)
+                            .sized(3.5F, 8.0F)
                             .clientTrackingRange(14)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("yog_sothoth"))));
@@ -623,11 +623,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("yog_sothoth_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(YOG_SOTHOTH.get())));
 
-    /** Ithaqua: 0.9 x 2.9, the walking wind of the cold edge (replaces the Warden). */
+    /** Ithaqua: 1.6 x 5.5, the walking wind of the cold edge (replaces the Warden). */
     public static final DeferredHolder<EntityType<?>, EntityType<Ithaqua>> ITHAQUA =
             ENTITY_TYPES.register("ithaqua", () ->
                     EntityType.Builder.<Ithaqua>of(Ithaqua::new, MobCategory.MONSTER)
-                            .sized(0.9F, 2.9F)
+                            .sized(1.6F, 5.5F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("ithaqua"))));
@@ -636,11 +636,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("ithaqua_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ITHAQUA.get())));
 
-    /** Yig: 1.4 x 1.4, the ashen_waste presence that escalates when struck. */
+    /** Yig: 2.4 x 4.5, the ashen_waste presence that escalates when struck. */
     public static final DeferredHolder<EntityType<?>, EntityType<Yig>> YIG =
             ENTITY_TYPES.register("yig", () ->
                     EntityType.Builder.<Yig>of(Yig::new, MobCategory.MONSTER)
-                            .sized(1.4F, 1.4F)
+                            .sized(2.4F, 4.5F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("yig"))));
@@ -649,11 +649,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("yig_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(YIG.get())));
 
-    /** Atlach-Nacha: 2.0 x 1.2, the rift_scar weaver (a large spider). */
+    /** Atlach-Nacha: 3.2 x 3.4, the rift_scar weaver (a large spider). */
     public static final DeferredHolder<EntityType<?>, EntityType<AtlachNacha>> ATLACH_NACHA =
             ENTITY_TYPES.register("atlach_nacha", () ->
                     EntityType.Builder.<AtlachNacha>of(AtlachNacha::new, MobCategory.MONSTER)
-                            .sized(2.0F, 1.2F)
+                            .sized(3.2F, 3.4F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("atlach_nacha"))));
@@ -662,11 +662,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("atlach_nacha_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ATLACH_NACHA.get())));
 
-    /** Nyarlathotep: 0.6 x 1.95, the trusted face at the cult_stronghold (a humanoid silhouette). */
+    /** Nyarlathotep: 1.6 x 3.5, the trusted face at the cult_stronghold (a humanoid silhouette). */
     public static final DeferredHolder<EntityType<?>, EntityType<Nyarlathotep>> NYARLATHOTEP =
             ENTITY_TYPES.register("nyarlathotep", () ->
                     EntityType.Builder.<Nyarlathotep>of(Nyarlathotep::new, MobCategory.MONSTER)
-                            .sized(0.6F, 1.95F)
+                            .sized(1.6F, 3.5F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("nyarlathotep"))));
@@ -675,11 +675,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("nyarlathotep_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(NYARLATHOTEP.get())));
 
-    /** Cthugha: 1.0 x 1.8, the watching flame of the ashen_waste. */
+    /** Cthugha: 2.2 x 4.5, the watching flame of the ashen_waste. */
     public static final DeferredHolder<EntityType<?>, EntityType<Cthugha>> CTHUGHA =
             ENTITY_TYPES.register("cthugha", () ->
                     EntityType.Builder.<Cthugha>of(Cthugha::new, MobCategory.MONSTER)
-                            .sized(1.0F, 1.8F)
+                            .sized(2.2F, 4.5F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("cthugha"))));
@@ -688,11 +688,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("cthugha_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(CTHUGHA.get())));
 
-    /** Glaaki: 1.6 x 1.6, the lake-dream of the drowned_marsh (a large drowned mass). */
+    /** Glaaki: 3.2 x 4.2, the lake-dream of the drowned_marsh (a large drowned mass). */
     public static final DeferredHolder<EntityType<?>, EntityType<Glaaki>> GLAAKI =
             ENTITY_TYPES.register("glaaki", () ->
                     EntityType.Builder.<Glaaki>of(Glaaki::new, MobCategory.MONSTER)
-                            .sized(1.6F, 1.6F)
+                            .sized(3.2F, 4.2F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("glaaki"))));
@@ -701,11 +701,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("glaaki_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(GLAAKI.get())));
 
-    /** Hydra: 1.4 x 1.6, the head-budding presence of the drowned_marsh. */
+    /** Hydra: 2.6 x 4.5, the head-budding presence of the drowned_marsh. */
     public static final DeferredHolder<EntityType<?>, EntityType<Hydra>> HYDRA =
             ENTITY_TYPES.register("hydra", () ->
                     EntityType.Builder.<Hydra>of(Hydra::new, MobCategory.MONSTER)
-                            .sized(1.4F, 1.6F)
+                            .sized(2.6F, 4.5F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("hydra"))));
@@ -714,11 +714,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("hydra_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(HYDRA.get())));
 
-    /** Nyogtha: 1.2 x 1.0, the thing under the floor in the deep caves. */
+    /** Nyogtha: 3.0 x 4.0, the thing under the floor in the deep caves. */
     public static final DeferredHolder<EntityType<?>, EntityType<Nyogtha>> NYOGTHA =
             ENTITY_TYPES.register("nyogtha", () ->
                     EntityType.Builder.<Nyogtha>of(Nyogtha::new, MobCategory.MONSTER)
-                            .sized(1.2F, 1.0F)
+                            .sized(3.0F, 4.0F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("nyogtha"))));
@@ -727,11 +727,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("nyogtha_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(NYOGTHA.get())));
 
-    /** Rhan-Tegoth: 1.4 x 2.2, the idol at the polar/cold edge. */
+    /** Rhan-Tegoth: 2.4 x 5.0, the idol at the polar/cold edge. */
     public static final DeferredHolder<EntityType<?>, EntityType<RhanTegoth>> RHAN_TEGOTH =
             ENTITY_TYPES.register("rhan_tegoth", () ->
                     EntityType.Builder.<RhanTegoth>of(RhanTegoth::new, MobCategory.MONSTER)
-                            .sized(1.4F, 2.2F)
+                            .sized(2.4F, 5.0F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("rhan_tegoth"))));
@@ -740,11 +740,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("rhan_tegoth_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(RHAN_TEGOTH.get())));
 
-    /** Hastur: 1.6 x 2.6, the unspoken name of the yellow_court. */
+    /** Hastur: 3.5 x 7.0, the unspoken name of the yellow_court. */
     public static final DeferredHolder<EntityType<?>, EntityType<Hastur>> HASTUR =
             ENTITY_TYPES.register("hastur", () ->
                     EntityType.Builder.<Hastur>of(Hastur::new, MobCategory.MONSTER)
-                            .sized(1.6F, 2.6F)
+                            .sized(3.5F, 7.0F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("hastur"))));
@@ -753,11 +753,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("hastur_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(HASTUR.get())));
 
-    /** Nephren-Ka: 0.9 x 2.4, the remembering king of the black_pyramid. */
+    /** Nephren-Ka: 1.8 x 3.6, the remembering king of the black_pyramid. */
     public static final DeferredHolder<EntityType<?>, EntityType<NephrenKa>> NEPHREN_KA =
             ENTITY_TYPES.register("nephren_ka", () ->
                     EntityType.Builder.<NephrenKa>of(NephrenKa::new, MobCategory.MONSTER)
-                            .sized(0.9F, 2.4F)
+                            .sized(1.8F, 3.6F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("nephren_ka"))));
@@ -766,11 +766,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("nephren_ka_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(NEPHREN_KA.get())));
 
-    /** Abhoth: 3.0 x 2.2, the spawning filth-pool of the spawning_pool. */
+    /** Abhoth: 3.4 x 3.6, the spawning filth-pool of the spawning_pool. */
     public static final DeferredHolder<EntityType<?>, EntityType<Abhoth>> ABHOTH =
             ENTITY_TYPES.register("abhoth", () ->
                     EntityType.Builder.<Abhoth>of(Abhoth::new, MobCategory.MONSTER)
-                            .sized(3.0F, 2.2F)
+                            .sized(3.4F, 3.6F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("abhoth"))));
@@ -779,11 +779,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("abhoth_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ABHOTH.get())));
 
-    /** Chaugnar Faugn: 2.2 x 2.8, the audible hunger of the temple_of_the_feaster. */
+    /** Chaugnar Faugn: 3.2 x 4.0, the audible hunger of the temple_of_the_feaster. */
     public static final DeferredHolder<EntityType<?>, EntityType<ChaugnarFaugn>> CHAUGNAR_FAUGN =
             ENTITY_TYPES.register("chaugnar_faugn", () ->
                     EntityType.Builder.<ChaugnarFaugn>of(ChaugnarFaugn::new, MobCategory.MONSTER)
-                            .sized(2.2F, 2.8F)
+                            .sized(3.2F, 4.0F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("chaugnar_faugn"))));
@@ -792,11 +792,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("chaugnar_faugn_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(CHAUGNAR_FAUGN.get())));
 
-    /** Tulzscha: 1.4 x 2.4, the green flame at the rift_scar. */
+    /** Tulzscha: 2.0 x 3.6, the green flame at the rift_scar. */
     public static final DeferredHolder<EntityType<?>, EntityType<Tulzscha>> TULZSCHA =
             ENTITY_TYPES.register("tulzscha", () ->
                     EntityType.Builder.<Tulzscha>of(Tulzscha::new, MobCategory.MONSTER)
-                            .sized(1.4F, 2.4F)
+                            .sized(2.0F, 3.6F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("tulzscha"))));
@@ -805,11 +805,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("tulzscha_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(TULZSCHA.get())));
 
-    /** Zstylzhemghi: 2.4 x 3.0, the forgotten name eroding the rift_scar court. */
+    /** Zstylzhemghi: 3.0 x 3.8, the forgotten name eroding the rift_scar court. */
     public static final DeferredHolder<EntityType<?>, EntityType<Zstylzhemghi>> ZSTYLZHEMGHI =
             ENTITY_TYPES.register("zstylzhemghi", () ->
                     EntityType.Builder.<Zstylzhemghi>of(Zstylzhemghi::new, MobCategory.MONSTER)
-                            .sized(2.4F, 3.0F)
+                            .sized(3.0F, 3.8F)
                             .clientTrackingRange(12)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("zstylzhemghi"))));
@@ -822,11 +822,11 @@ public final class ModEntities {
     // The Ithaqual Shade (the warden row) and the Choir Leviathan (design/18's drowned-temple
     // boss). Both are Ancient Ones with eggs, matching the twenty above.
 
-    /** Ithaqual Shade: 0.9 x 2.9, the wind-that-walks of the cold edge and deep places. */
+    /** Ithaqual Shade: 1.4 x 3.8, the wind-that-walks of the cold edge and deep places. */
     public static final DeferredHolder<EntityType<?>, EntityType<IthaqualShade>> ITHAQUAL_SHADE =
             ENTITY_TYPES.register("ithaqual_shade", () ->
                     EntityType.Builder.<IthaqualShade>of(IthaqualShade::new, MobCategory.MONSTER)
-                            .sized(0.9F, 2.9F)
+                            .sized(1.4F, 3.8F)
                             .clientTrackingRange(10)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("ithaqual_shade"))));
@@ -835,11 +835,11 @@ public final class ModEntities {
             ModItems.ITEMS.registerItem("ithaqual_shade_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ITHAQUAL_SHADE.get())));
 
-    /** Choir Leviathan: 5.0 x 5.0, the drowned-temple tide-thing (the ghast silhouette, grown). */
+    /** Choir Leviathan: 3.5 x 5.0, the drowned-temple tide-thing (the ghast silhouette, grown). */
     public static final DeferredHolder<EntityType<?>, EntityType<ChoirLeviathan>> CHOIR_LEVIATHAN =
             ENTITY_TYPES.register("choir_leviathan", () ->
                     EntityType.Builder.<ChoirLeviathan>of(ChoirLeviathan::new, MobCategory.MONSTER)
-                            .sized(5.0F, 5.0F)
+                            .sized(3.5F, 5.0F)
                             .clientTrackingRange(14)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("choir_leviathan"))));
@@ -852,7 +852,7 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<TheHorror>> THE_HORROR =
             ENTITY_TYPES.register("the_horror", () ->
                     EntityType.Builder.<TheHorror>of(TheHorror::new, MobCategory.MONSTER)
-                            .sized(4.0F, 6.0F)
+                            .sized(3.5F, 9.0F)
                             .clientTrackingRange(16)
                             .notInPeaceful()
                             .build(ResourceKey.create(Registries.ENTITY_TYPE, EldritchHorror.id("the_horror"))));

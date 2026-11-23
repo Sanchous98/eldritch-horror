@@ -1,38 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.NyarlathotepModel;
 import com.sanchous98.eldritchhorror.entity.Nyarlathotep;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.npc.VillagerModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Nyarlathotep: the vanilla villager model (the trusted face) with our own
- * flat placeholder texture (64x64 villager sheet). Art is the user's job.
- *
- * <p>26.3 verified as for {@code WorshipperRenderer}: {@code VillagerModel} +
- * {@code VillagerRenderState}, only {@code createRenderState()} and {@code getTextureLocation} to
- * implement.
- */
-public final class NyarlathotepRenderer
-        extends MobRenderer<Nyarlathotep, VillagerRenderState, VillagerModel> {
+/** Renderer for the custom {@link NyarlathotepModel}. */
+public final class NyarlathotepRenderer extends BossRenderer<Nyarlathotep, NyarlathotepModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/nyarlathotep.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/nyarlathotep.png");
 
     public NyarlathotepRenderer(EntityRendererProvider.Context context) {
-        super(context, new VillagerModel(context.bakeLayer(ModelLayers.VILLAGER)), 0.5F);
-    }
-
-    @Override
-    public VillagerRenderState createRenderState() {
-        return new VillagerRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(VillagerRenderState state) {
-        return TEXTURE;
+        super(context, new NyarlathotepModel(context.bakeLayer(NyarlathotepModel.LAYER)), 0.8F, TEXTURE, 1.45F);
     }
 }

@@ -1,38 +1,19 @@
 package com.sanchous98.eldritchhorror.client;
 
+import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.BossRenderer;
+import com.sanchous98.eldritchhorror.client.model.boss.AzathothModel;
 import com.sanchous98.eldritchhorror.entity.Azathoth;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.monster.wither.WitherBossModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.Identifier;
 
-/**
- * Placeholder renderer for Azathoth: the vanilla wither model (a floating, many-part silhouette)
- * with our own flat placeholder texture. Art is the user's job.
- *
- * <p>26.3 verified: {@code WitherBossModel extends EntityModel<WitherRenderState>} and
- * {@code MobRenderer<T, S, M extends EntityModel<? super S>>}, so the shape is
- * {@code MobRenderer<Azathoth, WitherRenderState, WitherBossModel>}; only {@code createRenderState()}
- * and {@code getTextureLocation(state)} are abstract.
- */
-public final class AzathothRenderer extends MobRenderer<Azathoth, WitherRenderState, WitherBossModel> {
+/** Renderer for the custom {@link AzathothModel}. */
+public final class AzathothRenderer extends BossRenderer<Azathoth, AzathothModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("eldritch_horror", "textures/entity/azathoth.png");
+            Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/azathoth.png");
 
     public AzathothRenderer(EntityRendererProvider.Context context) {
-        super(context, new WitherBossModel(context.bakeLayer(ModelLayers.WITHER)), 2.0F);
-    }
-
-    @Override
-    public WitherRenderState createRenderState() {
-        return new WitherRenderState();
-    }
-
-    @Override
-    public Identifier getTextureLocation(WitherRenderState state) {
-        return TEXTURE;
+        super(context, new AzathothModel(context.bakeLayer(AzathothModel.LAYER)), 2.0F, TEXTURE, 1.2F);
     }
 }

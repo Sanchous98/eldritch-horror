@@ -1,0 +1,163 @@
+# Boss models
+
+Every Ancient One now has a bespoke client model and a procedural texture. The vanilla placeholders
+(Ravager, Slime, Wither, Blaze, Spider, Creeper, Warden, Ghast, Iron Golem, Phantom, Villager, Cow,
+Hoglin, Silverfish, Endermite, Vex, Witch) are gone from the boss renderers.
+
+This document covers the model kit, the roster and its palettes, how sizes/hitboxes are matched, how
+to regenerate textures, and how to add the next boss.
+
+## Layout
+
+| Path | Purpose |
+| --- | --- |
+| `client/model/BossModelBase.java` | Shared animation kit: idle breathing, sway, walk cycle, wing flap, scale pulse and the attack lunge |
+| `client/model/BossRenderState.java` | One render state for the roster; carries `attackProgress`, `attacking`, `lunge` |
+| `client/model/BossRenderer.java` | `MobRenderer` base with one texture + one world scale per boss, plus ground compensation |
+| `client/model/kit/BossParts.java` | Box/blob/limb/spike/eye/bar builders and the reserved eye UV constants |
+| `client/model/kit/Tentacles.java` | Radial crowns, beards and loose tentacle clusters |
+| `client/model/kit/SpinedShell.java` | Glaaki's dome of spines and eyes |
+| `client/model/kit/TrunkedIdol.java` | Chaugnar Faugn's elephantine head, trunk and tusks |
+| `client/model/kit/CrownOfEyes.java` | Mismatched eye scatter |
+| `client/model/kit/Wings.java` | Leathery wings for Cthulhu |
+| `client/model/kit/SerpentCoils.java` | Coil base + S-neck for Yig |
+| `client/model/kit/FlameBody.java` | Fire column/orb for Cthugha and Tulzscha |
+| `client/model/kit/WebLimbs.java` | Eight jointed spider/crab legs |
+| `client/model/kit/HumanoidRig.java` | Configurable upright rig for the human-shaped presences |
+| `client/model/boss/*Model.java` | One model per Ancient One (23) |
+| `client/ClientLayerDefinitions.java` | `RegisterLayerDefinitions` listener that bakes every custom layer |
+| `client/*Renderer.java` | One thin renderer per Ancient One |
+| `tools/generate_boss_textures.py` | Deterministic 128x128 texture generator |
+
+Everything is client-only (`@EventBusSubscriber(value = Dist.CLIENT)`); no server, AI, stat or combat
+code depends on the models.
+
+## Scale and hitboxes
+
+The geometry is authored at a readable design size (roughly 2-5 blocks) and scaled in the renderer to
+the canonical presence size. `ModEntities` carries the same width/height, so the body fills the
+hitbox and pathfinding uses the correct footprint. Eye height is vanilla's `0.85 * height`.
+
+- Major presences: 6-9 blocks tall.
+- Roaming nine: 4-6 blocks.
+- Lesser/site presences: 3-4 blocks (the Choir Leviathan is a deliberately long 5).
+
+| Entity | Hitbox W x H | Renderer scale | Family | Silhouette |
+| --- | --- | --- | --- | --- |
+| Cthulhu | 3.5 x 8.0 | 1.85 | major | winged humanoid, tentacle beard, horns |
+| Azathoth | 3.2 x 6.5 | 1.20 | major | blind bubbling nucleus, orbiting bubbles, bone flutes |
+| Yog-Sothoth | 3.5 x 8.0 | 1.45 | major | two rotating gate-rings around a golden core |
+| Hastur | 3.5 x 7.0 | 2.20 | major | hooded yellow robe, pale mask, jagged crown |
+| Shub-Niggurath | 3.4 x 8.0 | 1.60 | major | tree-thick mass, three goat necks, tentacle curtain |
+| The Horror | 3.5 x 9.0 | 1.55 | major | accumulated mass, many eyes/mouths, two tentacle crowns |
+| Dunwich Horror | 2.8 x 4.5 | 1.50 | roaming | bloated body, tentacle crown, four thin legs |
+| Glaaki | 3.2 x 4.2 | 1.90 | roaming | spined drowned shell on a tendril skirt |
+| Ithaqua | 1.6 x 5.5 | 1.85 | roaming | gaunt giant, long arms, wind ring, ice claws |
+| Yig | 2.4 x 4.5 | 2.30 | roaming | coiled serpent, upright S-neck, hooded head |
+| Cthugha | 2.2 x 4.5 | 1.65 | roaming | flame column, orbiting embers, floating eyes |
+| Hydra | 2.6 x 4.5 | 1.50 | roaming | low body, six fanning necks, four stumpy legs |
+| Nyogtha | 3.0 x 4.0 | 1.60 | roaming | tar pool with a dozen rearing tendrils |
+| Rhan-Tegoth | 2.4 x 5.0 | 1.60 | roaming | domed crab-idol, eight legs, two pincers |
+| Chaugnar Faugn | 3.2 x 4.0 | 1.45 | lesser | elephantine humanoid idol, trunk, tusks, heavy arms |
+| Atlach-Nacha | 3.2 x 3.4 | 1.40 | lesser | wide spider, eight legs, pale web crown |
+| Nyarlathotep | 1.6 x 3.5 | 1.45 | lesser | slim masked figure, ragged cloak, second mask |
+| Tulzscha | 2.0 x 3.6 | 1.25 | lesser | narrow green flame column inside an ember halo |
+| Zstylzhemghi | 3.0 x 3.8 | 1.45 | lesser | dark core inside an orbiting insect swarm |
+| Abhoth | 3.4 x 3.6 | 1.80 | lesser | filth pool, budding spawn, thick arms, mouths |
+| Nephren-Ka | 1.8 x 3.6 | 1.75 | lesser | bandaged king, double crown, staff |
+| Choir Leviathan | 3.5 x 5.0 | 1.70 | lesser | drowned whale, head of eyes, belly mouths, flukes |
+| Ithaqual Shade | 1.4 x 3.8 | 1.27 | lesser | hooded ghost, tattered lower body, long arms |
+
+Model origins sit on the ground: the design rig places feet at model y=24 (1.5 blocks), which is
+exactly the fixed `-1.501` translation `LivingEntityRenderer` applies in model space, so scaling the
+model in `BossRenderer` keeps the feet on the floor without a separate offset. Shadows are passed
+per renderer and kept proportional.
+
+## Animation
+
+`BossModelBase.setupAnim` resets every part (26.3 contract), then applies:
+
+- **idle breathing** — a small scale pulse on the body part registered with `breatheWith`;
+- **idle sway** — additive sine on tentacles, robes, necks and wings registered with `sway`;
+- **walk cycle** — `leg`/`arm` driven by vanilla `walkAnimationPos`/`walkAnimationSpeed`;
+- **wing flap** — `flap`, faster while moving;
+- **pulse** — `pulse`, for blobs, flames and swarms;
+- **attack lunge** — `applyLunge`, driven by `BossRenderState.lunge`, a `sin(pi * progress)` curve
+  computed in `BossRenderer.extractRenderState` from `LivingEntity#getSwingAnimation`.
+
+`applyIdle` is the per-boss hook for head tracking, trunk sway, neck curvature, flame flicker, orbit
+rotation, etc.
+
+## Textures
+
+All textures are 128x128 RGB PNGs under
+`src/main/resources/assets/eldritch_horror/textures/entity/` and are generated by
+`tools/generate_boss_textures.py`. The script is deterministic (seed = `zlib.crc32(name)`), so
+re-running it reproduces identical pixels.
+
+The top-left corner of every sheet is reserved:
+
+- `(0,0)-(16,16)` — pale eye region (`BossParts.EYE_U/EYE_V`);
+- `(16,0)-(28,12)` — near-black pupil/maw region (`BossParts.PUPIL_U/PUPIL_V`).
+
+Each texture is built from a base colour, a lighter shade, a darker shade, an accent, an eye colour
+and a pupil colour, then layered with a vertical gradient, ~120 mottling blobs, veins/cracks,
+pustules, fine grain and speckles.
+
+### Palettes
+
+| Texture | Base | Accent | Look |
+| --- | --- | --- | --- |
+| dunwich_horror | 120,130,104 | 196,210,164 | sickly grey-green, half-invisible |
+| glaaki | 42,62,48 | 118,152,108 | green-black drowned chitin |
+| chaugnar_faugn | 116,108,92 | 188,174,134 | grey-ochre temple stone |
+| cthulhu | 44,86,74 | 146,176,130 | deep sea green, pale tentacles |
+| azathoth | 46,34,58 | 126,190,120 | violet void, radioactive green |
+| yog_sothoth | 96,64,34 | 226,176,92 | orange-gold gates, void shadow |
+| hastur | 138,118,44 | 230,212,122 | yellow robe, pale mask |
+| nyarlathotep | 38,30,34 | 146,38,42 | black robe, ivory mask, red eye |
+| shub_niggurath | 52,38,28 | 128,54,34 | matted black-brown goat mass |
+| the_horror | 32,24,38 | 104,62,138 | void black and purple |
+| atlach_nacha | 30,28,34 | 158,40,52 | black spider, crimson web |
+| ithaqua | 156,178,192 | 232,244,250 | frost white-blue |
+| yig | 34,76,46 | 172,196,92 | emerald serpent scales |
+| cthugha | 152,46,22 | 250,176,58 | orange-red fire |
+| hydra | 54,82,54 | 140,164,84 | swamp green scales |
+| nyogtha | 24,20,26 | 86,60,102 | tar black with violet sheen |
+| rhan_tegoth | 92,82,62 | 176,148,82 | crab shell and gold |
+| tulzscha | 36,96,42 | 156,236,110 | green flame |
+| zstylzhemghi | 52,44,30 | 164,120,44 | brown-black chitin swarm |
+| abhoth | 112,100,92 | 178,138,128 | grey-pink filth |
+| nephren_ka | 162,148,112 | 216,186,84 | bandage ivory and gold |
+| choir_leviathan | 42,58,68 | 108,140,138 | drowned blue-grey whale |
+| ithaqual_shade | 146,162,178 | 216,234,242 | pale cold ghost |
+
+### Regenerate
+
+```bash
+python3 tools/generate_boss_textures.py                 # all 23
+python3 tools/generate_boss_textures.py glaaki cthulhu   # selected
+python3 tools/generate_boss_textures.py --list           # names
+```
+
+Pillow is used when installed. If it is missing the script falls back to a small built-in PNG
+encoder; the pixels are the same. The script prints each written file, size and encoder.
+
+## Adding the next boss
+
+1. Add a palette to `PALETTES` in `tools/generate_boss_textures.py` and run the script.
+2. Create `client/model/boss/YourBossModel.java`:
+   - `public static final ModelLayerLocation LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "your_boss"), "main");`
+   - `createBodyLayer()` builds the rig with `BossParts` / kit builders at the design size;
+   - the constructor fetches parts with `root.getChild(...)` and registers
+     `breatheWith`, `sway`, `leg`/`arm`, `flap`, `pulse`;
+   - override `applyIdle` and `applyLunge` for the boss's signature motion.
+3. Register the layer in `ClientLayerDefinitions`.
+4. Replace the renderer with a `BossRenderer<YourBoss, YourBossModel>` subclass passing texture,
+   shadow and the renderer scale.
+5. Keep the renderer registration in `ClientEntityRenderers` (the class name is unchanged).
+6. Set the matching `.sized(width, height)` in `ModEntities` (keep widths at or below ~3.5) and add
+   the row to the table above.
+
+Names are checked at construction time (`ModelPart#getChild` throws), so the build gate is the
+compile plus a quick client spawn of the boss.
