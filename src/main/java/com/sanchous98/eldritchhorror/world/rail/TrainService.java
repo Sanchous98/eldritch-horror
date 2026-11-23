@@ -7,6 +7,7 @@ import com.sanchous98.eldritchhorror.entity.TrainLocomotive;
 import com.sanchous98.eldritchhorror.entity.TrainWagon;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.world.EarthMap;
+import com.sanchous98.eldritchhorror.world.transport.DepartureHours;
 import com.sanchous98.eldritchhorror.world.transport.TransportMath;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,8 +105,8 @@ public final class TrainService {
         if (lines.isEmpty()) {
             return;
         }
-        int hourA = Math.clamp(ModConfig.TRAIN_DEPARTURE_HOUR_A.get(), 0, 23);
-        int hourB = Math.clamp(ModConfig.TRAIN_DEPARTURE_HOUR_B.get(), 0, 23);
+        int[] baseHours = DepartureHours.parse(ModConfig.TRAIN_DEPARTURE_HOURS.get(),
+                DepartureHours.TRAIN_DEFAULT);
         int period = Math.max(1, ModConfig.TRAIN_PERIOD_DAYS.get());
         int boardingMinutes = Math.max(1, ModConfig.TRAIN_BOARDING_MINUTES.get());
         int maxTrains = Math.max(1, ModConfig.MAX_TRAINS.get());
@@ -118,7 +119,8 @@ public final class TrainService {
                 if (ACTIVE.containsKey(key)) {
                     continue;
                 }
-                long departure = TrainTimetable.nextDeparture(now, direction, hourA, hourB, period);
+                long departure = TrainTimetable.nextDeparture(now, line.id(), direction, baseHours,
+                        period);
                 long opens = TransportMath.boardingOpens(departure, boardingMinutes);
                 if (now < opens || now >= departure) {
                     releasePending(level, key);
@@ -267,10 +269,7 @@ public final class TrainService {
                                      long departure) {
         RailStation origin = line.origin(direction);
         RailStation destination = line.destination(direction);
-        int hour = direction == 0
-                ? Math.clamp(ModConfig.TRAIN_DEPARTURE_HOUR_A.get(), 0, 23)
-                : Math.clamp(ModConfig.TRAIN_DEPARTURE_HOUR_B.get(), 0, 23);
-        String time = String.format(java.util.Locale.ROOT, "%02d:00", hour);
+        String time = TransportMath.formatTime(departure);
         Component message = Component.translatable("message.eldritch_horror.train.boarding",
                 destination.cityName(), time);
         for (ServerPlayer player : level.players()) {
@@ -328,10 +327,10 @@ public final class TrainService {
 
     private static String describeLine(ServerLevel level, RailLine line, int direction,
                                        long now) {
-        int hourA = Math.clamp(ModConfig.TRAIN_DEPARTURE_HOUR_A.get(), 0, 23);
-        int hourB = Math.clamp(ModConfig.TRAIN_DEPARTURE_HOUR_B.get(), 0, 23);
+        int[] baseHours = DepartureHours.parse(ModConfig.TRAIN_DEPARTURE_HOURS.get(),
+                DepartureHours.TRAIN_DEFAULT);
         int period = Math.max(1, ModConfig.TRAIN_PERIOD_DAYS.get());
-        long departure = TrainTimetable.nextDeparture(now, direction, hourA, hourB, period);
+        long departure = TrainTimetable.nextDeparture(now, line.id(), direction, baseHours, period);
         TrainLocomotive train = ACTIVE.get(line.id() + ":" + direction);
         StringBuilder text = new StringBuilder();
         text.append(line.id()).append(" dir ").append(direction).append(" (")

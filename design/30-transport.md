@@ -11,9 +11,11 @@ The occult branch stays the rift gate (`26-rituals-and-occult.md`) — fast, tai
 
 - **Real vehicles.** A ship is a large floating entity several blocks long with several seats; a
   train is a locomotive with coupled wagons on real rails. No screen-fade teleports.
-- **Timetable, in game time.** Each line has a departure time (e.g. 06:00 and 18:00 in-game) and a
-  period (daily / every N days). Boarding opens one in-game hour before departure and closes when
-  the vehicle leaves. Missing it means waiting for the next service.
+- **Timetable, in game time.** Each line has a list of departure times (e.g. six a day for trains,
+  four for ships) and a period (daily / every N days); neighbouring lines are staggered so stations
+  are not synchronised. Boarding opens one in-game hour before departure and closes when the
+  vehicle leaves. Missing it means waiting for the next service. Implementation and config:
+  [`docs/TRANSPORT.md`](../docs/TRANSPORT.md).
 - **Fares and capacity.** A ticket costs coin (the existing currencies); seats are limited. A line
   can be free for a cult/quest that owns it (later).
 - **Real time on the water.** The voyage takes real time proportional to the distance and the

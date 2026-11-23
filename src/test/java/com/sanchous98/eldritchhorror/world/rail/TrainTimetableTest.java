@@ -1,21 +1,34 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Guards the train-specific timetable layer (design/30 stage 2): the direction-to-hour mapping, the
+ * Guards the train-specific timetable layer (design/30 stage 2): the per-line direction stagger, the
  * real-tick voyage duration, and the consist shape defaults.
  */
 class TrainTimetableTest {
-    private static final int SIX = 6;
-    private static final int EIGHTEEN = 18;
+    private static final int[] HOURS = {4, 8, 12, 16, 20, 0};
 
     @Test
-    void eachDirectionUsesItsConfiguredHour() {
-        assertEquals(24000L, TrainTimetable.nextDeparture(0L, 0, SIX, EIGHTEEN, 1));
-        assertEquals(12000L, TrainTimetable.nextDeparture(0L, 1, SIX, EIGHTEEN, 1));
+    void eachDirectionGetsAStableStagger() {
+        int[] forward = TrainTimetable.staggeredHours("london-paris", 0, HOURS);
+        int[] reverse = TrainTimetable.staggeredHours("london-paris", 1, HOURS);
+        assertEquals(HOURS.length, forward.length);
+        assertArrayEquals(forward, TrainTimetable.staggeredHours("london-paris", 0, HOURS));
+        assertNotEquals(forward[0], reverse[0], "opposite directions must not share a phase");
+    }
+
+    @Test
+    void theHourListDrivesTheNextDeparture() {
+        // Clock 0 is 06:00; the first departure of the day is 08:00 (raw 2000).
+        assertEquals(2000L,
+                TrainTimetable.nextDeparture(0L, "london-paris", 0, HOURS, 1));
+        assertEquals(2000L,
+                TrainTimetable.nextDeparture(0L, "london-paris", 0, HOURS, 2));
     }
 
     @Test

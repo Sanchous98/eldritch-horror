@@ -48,6 +48,27 @@ class TransportMathTest {
     }
 
     @Test
+    void nextDepartureUsesTheWholeHourList() {
+        int[] hours = {4, 8, 12, 16, 20, 0};
+        // Clock 0 is 06:00, so the first of these departures is 08:00 (raw 2000).
+        assertEquals(2000L, TransportMath.nextDeparture(0L, hours, 1));
+        assertEquals(6000L, TransportMath.nextDeparture(2000L, hours, 1));
+        // At 04:00 (raw 22000) the last service has just left; 08:00 comes round the next day.
+        assertEquals(26000L, TransportMath.nextDeparture(22000L, hours, 1));
+    }
+
+    @Test
+    void hourListOrderAndDuplicatesDoNotMatter() {
+        assertEquals(2000L, TransportMath.nextDeparture(0L, new int[]{20, 4, 12, 0, 16, 8}, 1));
+        assertEquals(2000L, TransportMath.nextDeparture(0L, new int[]{8, 8, 8}, 1));
+    }
+
+    @Test
+    void anEmptyHourListHasNoService() {
+        assertEquals(24000L, TransportMath.nextDeparture(0L, new int[0], 1));
+    }
+
+    @Test
     void boardingWindowIsTheHourBeforeDeparture() {
         long departure = 12000L;
         long opens = TransportMath.boardingOpens(departure, 60);

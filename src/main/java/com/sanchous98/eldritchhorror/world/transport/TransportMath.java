@@ -48,11 +48,45 @@ public final class TransportMath {
     }
 
     /**
-     * Finds the next departure strictly after {@code now}.
+     * Finds the next departure strictly after {@code now} from a daily hour list.
      *
-     * <p>Departures happen on days whose index is a multiple of {@code periodDays}, at
-     * {@code hourA} and {@code hourB} on the 24-hour clock. If both hours are equal the duplicate
-     * is ignored.
+     * <p>Departures happen on days whose index is a multiple of {@code periodDays}, at any hour in
+     * {@code hours} on the 24-hour clock. Duplicate hours are harmless; an empty list has no
+     * service, so the fallback is a day later rather than an exception.
+     *
+     * @param now        current overworld clock tick
+     * @param hours      departure hours, each {@code 0..23} (order is irrelevant)
+     * @param periodDays days between service days (1 = daily)
+     * @return the absolute clock tick of the next departure
+     */
+    public static long nextDeparture(long now, int[] hours, int periodDays) {
+        if (hours.length == 0) {
+            return now + DAY_TICKS;
+        }
+        int period = Math.max(1, periodDays);
+        long day = dayOf(now);
+        // At most period + 1 days ahead is enough to pass a service day, even at midnight.
+        for (long candidateDay = day; candidateDay <= day + period + 1; candidateDay++) {
+            if (Math.floorMod(candidateDay, period) != 0) {
+                continue;
+            }
+            long best = Long.MAX_VALUE;
+            for (int hour : hours) {
+                long candidate = candidateDay * DAY_TICKS + departureTicks(hour);
+                if (candidate > now && candidate < best) {
+                    best = candidate;
+                }
+            }
+            if (best != Long.MAX_VALUE) {
+                return best;
+            }
+        }
+        // Unreachable for a sane period, but a deterministic value beats an exception here.
+        return now + DAY_TICKS;
+    }
+
+    /**
+     * Finds the next departure strictly after {@code now} from the legacy two-hour schedule.
      *
      * @param now        current overworld clock tick
      * @param hourA      first departure hour, {@code 0..23}
@@ -61,29 +95,7 @@ public final class TransportMath {
      * @return the absolute clock tick of the next departure
      */
     public static long nextDeparture(long now, int hourA, int hourB, int periodDays) {
-        int period = Math.max(1, periodDays);
-        long day = dayOf(now);
-        // At most period + 1 days ahead is enough to pass a service day, even at midnight.
-        for (long candidateDay = day; candidateDay <= day + period + 1; candidateDay++) {
-            if (Math.floorMod(candidateDay, period) != 0) {
-                continue;
-            }
-            long first = candidateDay * DAY_TICKS + departureTicks(hourA);
-            long second = candidateDay * DAY_TICKS + departureTicks(hourB);
-            if (second < first) {
-                long swap = first;
-                first = second;
-                second = swap;
-            }
-            if (first > now) {
-                return first;
-            }
-            if (second > now) {
-                return second;
-            }
-        }
-        // Unreachable for a sane period, but a deterministic value beats an exception here.
-        return now + DAY_TICKS;
+        return nextDeparture(now, new int[]{hourA, hourB}, periodDays);
     }
 
     /**

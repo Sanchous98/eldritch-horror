@@ -3054,8 +3054,16 @@ public final class ModConfig {
     // --- Scheduled transport (design/30, stage 1: ships) --------------------------------------
     // A line is two coastal ports, a cached A* sea lane and a timetable. Boarding opens
     // shipBoardingMinutes before departure, the packet sails at shipSpeed blocks/tick, riders pay
-    // shipFare black obols, and an empty service despawns at departure. The default hours run the
-    // A->B leg at 06:00 and the B->A leg at 18:00.
+    // shipFare black obols, and an empty service despawns at departure. shipDepartureHours lists
+    // the daily departures; each line/direction shifts that list by a stable phase.
+
+    /**
+     * How many transport partners one city may keep: rail lines and sea lanes both select the
+     * nearest reachable neighbours, and a major city can fill this cap in every useful direction.
+     */
+    public static final ModConfigSpec.IntValue MAX_PARTNERS_PER_CITY =
+            BUILDER.comment("Most rail/sea partners one city may keep (nearest reachable first).")
+                    .defineInRange("maxPartnersPerCity", 3, 1, 8);
 
     /** Master switch for scheduled ships. */
     public static final ModConfigSpec.BooleanValue ENABLE_SHIPS =
@@ -3082,15 +3090,13 @@ public final class ModConfig {
             BUILDER.comment("Days between service days (1 = every day).")
                     .defineInRange("shipPeriodDays", 1, 1, 30);
 
-    /** First departure hour (in-game clock). */
-    public static final ModConfigSpec.IntValue SHIP_DEPARTURE_HOUR_A =
-            BUILDER.comment("First daily departure hour, in-game clock (0-23).")
-                    .defineInRange("shipDepartureHourA", 6, 0, 23);
-
-    /** Second departure hour (in-game clock). */
-    public static final ModConfigSpec.IntValue SHIP_DEPARTURE_HOUR_B =
-            BUILDER.comment("Second daily departure hour, in-game clock (0-23).")
-                    .defineInRange("shipDepartureHourB", 18, 0, 23);
+    /**
+     * Daily departure hours, comma-separated on the 24-hour clock. Each line/direction staggers the
+     * list by a stable phase; ships default to four a day (every six hours).
+     */
+    public static final ModConfigSpec.ConfigValue<String> SHIP_DEPARTURE_HOURS =
+            BUILDER.comment("Daily departure hours, comma separated (0-23); default 4 a day.")
+                    .define("shipDepartureHours", "00,06,12,18");
 
     /** How long before departure the gangway opens, in in-game minutes (60 = one in-game hour). */
     public static final ModConfigSpec.IntValue SHIP_BOARDING_MINUTES =
@@ -3106,7 +3112,8 @@ public final class ModConfig {
     // A line is two curated stations, a cached A* route over the landmask and a real block-level
     // track. Boarding opens trainBoardingMinutes before departure, the consist runs at trainSpeed
     // blocks/tick, riders pay trainFare black obols, and an empty service despawns at departure.
-    // The default hours run the A->B leg at 06:00 and the B->A leg at 18:00, like the ships.
+    // trainDepartureHours lists the daily departures; each line/direction shifts that list by a
+    // stable phase so neighbouring stations are not synchronised.
 
     /** Master switch for scheduled trains. */
     public static final ModConfigSpec.BooleanValue ENABLE_TRAINS =
@@ -3138,15 +3145,13 @@ public final class ModConfig {
             BUILDER.comment("Days between service days (1 = every day).")
                     .defineInRange("trainPeriodDays", 1, 1, 30);
 
-    /** First departure hour (in-game clock). */
-    public static final ModConfigSpec.IntValue TRAIN_DEPARTURE_HOUR_A =
-            BUILDER.comment("First daily departure hour, in-game clock (0-23).")
-                    .defineInRange("trainDepartureHourA", 6, 0, 23);
-
-    /** Second departure hour (in-game clock). */
-    public static final ModConfigSpec.IntValue TRAIN_DEPARTURE_HOUR_B =
-            BUILDER.comment("Second daily departure hour, in-game clock (0-23).")
-                    .defineInRange("trainDepartureHourB", 18, 0, 23);
+    /**
+     * Daily departure hours, comma-separated on the 24-hour clock. Each line/direction staggers the
+     * list by a stable phase; trains default to six a day (roughly every four hours).
+     */
+    public static final ModConfigSpec.ConfigValue<String> TRAIN_DEPARTURE_HOURS =
+            BUILDER.comment("Daily departure hours, comma separated (0-23); default 6 a day.")
+                    .define("trainDepartureHours", "04,08,12,16,20,00");
 
     /** How long before departure boarding opens, in in-game minutes (60 = one in-game hour). */
     public static final ModConfigSpec.IntValue TRAIN_BOARDING_MINUTES =
@@ -3349,5 +3354,10 @@ public final class ModConfig {
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {
+    }
+
+    /** @return whether the server config is loaded; network builders fall back to defaults without it. */
+    public static boolean loaded() {
+        return SPEC.isLoaded();
     }
 }

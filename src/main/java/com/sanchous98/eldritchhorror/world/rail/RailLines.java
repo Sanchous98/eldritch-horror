@@ -9,8 +9,11 @@ import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -20,18 +23,21 @@ import org.jspecify.annotations.Nullable;
  * The stage-2 rail network ({@code design/30-transport.md}): a small, curated set of station pairs,
  * each with a real A* route over the baked landmask and a finished block-level track.
  *
- * <p>Selection is nearest-reachable: for each curated city, the closest other city whose coarse
- * route fits inside {@code trainMaxLineBlocks} becomes a partner; duplicate pairs collapse, so the
- * result is a sparse graph rather than every city pair. A city with no reachable partner still gets
- * a (dormant) station platform.
+ * <p>Selection is nearest-reachable: for each curated city, up to {@code maxPartnersPerCity} of the
+ * closest other cities whose coarse route fits inside {@code trainMaxLineBlocks} become partners,
+ * one line per partner. Duplicate pairs collapse, so the result is still a sparse graph rather than
+ * every city pair. A city gets one station per partner (a major city's authored terminal can serve
+ * several directions); a city with no reachable partner still gets a (dormant) station platform.
  *
  * <p>Routes are computed once on first use and cached for the server's lifetime; a tick never
  * pathfinds. The finished line is bucket-indexed by chunk, so worldgen pays a map lookup and a tiny
  * list per chunk. Server-side only: the builder reads {@link EarthMaps} and samples the world map.
  */
 public final class RailLines {
-    /** How many nearest cities are tried per city when looking for a land-reachable partner. */
+    /** How many nearest cities are tried per wanted partner when looking for a reachable one. */
     private static final int PARTNER_ATTEMPTS = 5;
+    /** Partner cap used when the server config is not loaded (bare unit probes). */
+    private static final int DEFAULT_MAX_PARTNERS = 3;
     /** Station platform half-length along the track, in blocks. */
     private static final int PLATFORM_HALF_LENGTH = 12;
     /** Station platform half-width across the track, in blocks. */
@@ -113,7 +119,12 @@ public final class RailLines {
             return Network.empty();
         }
         long started = System.nanoTime();
-        int maxBlocks = Math.clamp(ModConfig.TRAIN_MAX_LINE_BLOCKS.get(), 500, 60_000);
+        int maxBlocks = ModConfig.loaded()
+                ? Math.clamp(ModConfig.TRAIN_MAX_LINE_BLOCKS.get(), 500, 60_000)
+                : 25_000;
+        int maxPartners = ModConfig.loaded()
+                ? Math.clamp(ModConfig.MAX_PARTNERS_PER_CITY.get(), 1, 8)
+                : DEFAULT_MAX_PARTNERS;
         RailRouteFinder.Options options = RailRouteFinder.Options.forLine(maxBlocks);
         RailGrid grid = grid(map);
         RailRouteFinder.Scratch scratch = new RailRouteFinder.Scratch();
@@ -122,31 +133,36 @@ public final class RailLines {
         for (City city : cities) {
             byId.put(city.id(), city);
         }
-        Map<String, City> partners = choosePartners(cities, grid, options, maxBlocks, scratch);
+        Map<String, List<City>> partners = choosePartners(cities, grid, options, maxBlocks,
+                maxPartners, scratch);
+
+        TreeMap<String, City[]> edges = new TreeMap<>();
+        for (Map.Entry<String, List<City>> entry : partners.entrySet()) {
+            City a = byId.get(entry.getKey());
+            if (a == null) {
+                continue;
+            }
+            for (City b : entry.getValue()) {
+                edges.putIfAbsent(pairKey(a.id(), b.id()), orderedPair(byId, a.id(), b.id()));
+            }
+        }
 
         TreeMap<String, RailStation> stationMap = new TreeMap<>();
+        Map<String, RailStation> placed = new HashMap<>();
+        Set<String> stationCities = new HashSet<>();
+        for (City[] edge : edges.values()) {
+            placeStation(map, stationMap, placed, stationCities, edge[0], edge[1]);
+            placeStation(map, stationMap, placed, stationCities, edge[1], edge[0]);
+        }
         for (City city : cities) {
-            City partner = partners.get(city.id());
-            if (partner == null) {
-                partner = RailStations.nearestOther(city, cities);
+            if (stationCities.contains(city.id())) {
+                continue;
             }
+            City partner = RailStations.nearestOther(city, cities);
             if (partner == null) {
                 partner = city;
             }
-            stationMap.put(city.id(), RailStations.place(map, city, partner));
-        }
-
-        TreeMap<String, City[]> edges = new TreeMap<>();
-        for (Map.Entry<String, City> entry : partners.entrySet()) {
-            City a = byId.get(entry.getKey());
-            City b = entry.getValue();
-            if (a == null || b == null) {
-                continue;
-            }
-            String[] ids = a.id().compareTo(b.id()) <= 0
-                    ? new String[]{a.id(), b.id()} : new String[]{b.id(), a.id()};
-            edges.putIfAbsent(ids[0] + "|" + ids[1],
-                    new City[]{byId.get(ids[0]), byId.get(ids[1])});
+            placeStation(map, stationMap, placed, stationCities, city, partner);
         }
 
         List<RailLine> lines = new ArrayList<>();
@@ -157,22 +173,44 @@ public final class RailLines {
                 lines.add(line);
             }
         }
-        RailStation[] stationArray = stationMap.values().toArray(new RailStation[0]);
+        RailStation[] stationArray = new LinkedHashSet<>(stationMap.values())
+                .toArray(new RailStation[0]);
         Map<Long, List<RailStamp>> stamps = buildStamps(lines, stationArray, map);
-        EldritchHorror.LOGGER.info("rail: {} lines, {} stations in {} ms", lines.size(),
-                stationArray.length, (System.nanoTime() - started) / 1_000_000L);
+        EldritchHorror.LOGGER.info("rail: {} lines from {} pairs, {} stations in {} ms",
+                lines.size(), edges.size(), stationArray.length,
+                (System.nanoTime() - started) / 1_000_000L);
         return new Network(List.copyOf(lines), List.of(stationArray), stamps);
     }
 
     /**
-     * For each city, tries its nearest candidates on the coarse grid and keeps the first whose route
-     * fits. The returned map is keyed by the selecting city, so two cities can select each other
-     * (the pair is deduplicated later).
+     * Places the station for one end of one edge, reusing an existing platform when the scan lands
+     * on the same site (an authored terminal serves every direction from one building).
      */
-    private static Map<String, City> choosePartners(List<City> cities, RailGrid grid,
-                                                    RailRouteFinder.Options options, int maxBlocks,
-                                                    RailRouteFinder.Scratch scratch) {
-        Map<String, City> partners = new HashMap<>();
+    private static void placeStation(EarthMap map, Map<String, RailStation> stationMap,
+                                     Map<String, RailStation> placed, Set<String> stationCities,
+                                     City city, City partner) {
+        RailStation station = RailStations.place(map, city, partner);
+        String site = city.id() + "|" + station.x() + "|" + station.z();
+        RailStation existing = placed.putIfAbsent(site, station);
+        if (existing != null) {
+            station = existing;
+        }
+        stationMap.put(city.id() + "|" + partner.id(), station);
+        stationCities.add(city.id());
+    }
+
+    /**
+     * For each city, tries its nearest candidates on the coarse grid and keeps up to
+     * {@code maxPartners} whose route fits. The returned map is keyed by the selecting city, so two
+     * cities can select each other (the pair is deduplicated later). A pair's reachability is
+     * checked once and reused when the other city tries the same candidate.
+     */
+    private static Map<String, List<City>> choosePartners(List<City> cities, RailGrid grid,
+                                                          RailRouteFinder.Options options,
+                                                          int maxBlocks, int maxPartners,
+                                                          RailRouteFinder.Scratch scratch) {
+        Map<String, List<City>> partners = new HashMap<>();
+        Map<String, Boolean> reachable = new HashMap<>();
         for (City city : cities) {
             List<City> candidates = new ArrayList<>(cities);
             candidates.removeIf(other -> other.id().equals(city.id()));
@@ -182,30 +220,54 @@ public final class RailLines {
                 return byDistance != 0 ? (int) Math.signum(byDistance)
                         : left.id().compareTo(right.id());
             });
-            int attempts = Math.min(PARTNER_ATTEMPTS, candidates.size());
-            for (int i = 0; i < attempts; i++) {
+            int attempts = Math.min(PARTNER_ATTEMPTS * maxPartners, candidates.size());
+            List<City> chosen = new ArrayList<>(maxPartners);
+            for (int i = 0; i < attempts && chosen.size() < maxPartners; i++) {
                 City candidate = candidates.get(i);
+                // Candidates are sorted by distance, so every later one is also out of range.
                 if (Math.sqrt(RailStations.distanceSqr(city, candidate)) > maxBlocks) {
-                    continue;
+                    break;
                 }
-                RailCell start = anchor(grid, city.x(), city.z());
-                RailCell goal = anchor(grid, candidate.x(), candidate.z());
-                if (start == null || goal == null) {
-                    continue;
+                String key = pairKey(city.id(), candidate.id());
+                Boolean fits = reachable.get(key);
+                if (fits == null) {
+                    fits = routeFits(grid, options, maxBlocks, city, candidate, scratch);
+                    reachable.put(key, fits);
                 }
-                List<RailCell> route = RailRouteFinder.find(grid, start, goal, options, scratch);
-                if (route == null) {
-                    continue;
+                if (fits) {
+                    chosen.add(candidate);
                 }
-                if (RailRouteFinder.pathLength(route, grid.width()) * RailGrid.CELL_BLOCKS
-                        > maxBlocks) {
-                    continue;
-                }
-                partners.put(city.id(), candidate);
-                break;
+            }
+            if (!chosen.isEmpty()) {
+                partners.put(city.id(), List.copyOf(chosen));
             }
         }
         return partners;
+    }
+
+    private static boolean routeFits(RailGrid grid, RailRouteFinder.Options options, int maxBlocks,
+                                     City from, City to, RailRouteFinder.Scratch scratch) {
+        RailCell start = anchor(grid, from.x(), from.z());
+        RailCell goal = anchor(grid, to.x(), to.z());
+        if (start == null || goal == null) {
+            return false;
+        }
+        List<RailCell> route = RailRouteFinder.find(grid, start, goal, options, scratch);
+        return route != null
+                && RailRouteFinder.pathLength(route, grid.width()) * RailGrid.CELL_BLOCKS
+                <= maxBlocks;
+    }
+
+    /** @return the undirected pair key, in stable id order. */
+    private static String pairKey(String cityA, String cityB) {
+        return cityA.compareTo(cityB) <= 0 ? cityA + "|" + cityB : cityB + "|" + cityA;
+    }
+
+    /** @return the edge's two cities in stable id order. */
+    private static City[] orderedPair(Map<String, City> byId, String cityA, String cityB) {
+        return cityA.compareTo(cityB) <= 0
+                ? new City[]{byId.get(cityA), byId.get(cityB)}
+                : new City[]{byId.get(cityB), byId.get(cityA)};
     }
 
     private static @Nullable RailLine buildLine(EarthMap map, RailGrid grid,
@@ -213,8 +275,8 @@ public final class RailLines {
                                                 Map<String, RailStation> stations,
                                                 City cityA, City cityB,
                                                 RailRouteFinder.Scratch scratch) {
-        RailStation a = stations.get(cityA.id());
-        RailStation b = stations.get(cityB.id());
+        RailStation a = stations.get(cityA.id() + "|" + cityB.id());
+        RailStation b = stations.get(cityB.id() + "|" + cityA.id());
         if (a == null || b == null) {
             return null;
         }

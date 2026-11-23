@@ -94,8 +94,8 @@ public final class ShipService {
         if (lines.isEmpty()) {
             return;
         }
-        int hourA = Math.clamp(ModConfig.SHIP_DEPARTURE_HOUR_A.get(), 0, 23);
-        int hourB = Math.clamp(ModConfig.SHIP_DEPARTURE_HOUR_B.get(), 0, 23);
+        int[] baseHours = DepartureHours.parse(ModConfig.SHIP_DEPARTURE_HOURS.get(),
+                DepartureHours.SHIP_DEFAULT);
         int period = Math.max(1, ModConfig.SHIP_PERIOD_DAYS.get());
         int boardingMinutes = Math.max(0, ModConfig.SHIP_BOARDING_MINUTES.get());
         int maxShips = Math.max(1, ModConfig.MAX_SHIPS.get());
@@ -107,8 +107,7 @@ public final class ShipService {
                 if (ACTIVE.containsKey(key)) {
                     continue;
                 }
-                int hour = direction == 0 ? hourA : hourB;
-                long departure = TransportMath.nextDeparture(now, hour, hour, period);
+                long departure = nextDeparture(now, line, direction, baseHours, period);
                 long opens = TransportMath.boardingOpens(departure, boardingMinutes);
                 if (now < opens || now >= departure) {
                     continue;
@@ -129,6 +128,13 @@ public final class ShipService {
                 callBoarding(level, line, direction, departure);
             }
         }
+    }
+
+    /** @return the next departure for one line/direction, with its stable stagger applied. */
+    private static long nextDeparture(long now, ShippingLine line, int direction, int[] baseHours,
+                                      int period) {
+        int[] hours = DepartureHours.forLine(line.id() + ":" + direction, baseHours);
+        return TransportMath.nextDeparture(now, hours, period);
     }
 
     private static void prune(ServerLevel level, long now) {
@@ -223,10 +229,7 @@ public final class ShipService {
     private static void callBoarding(ServerLevel level, ShippingLine line, int direction,
                                      long departure) {
         Port destination = line.destination(direction);
-        int hour = direction == 0
-                ? Math.clamp(ModConfig.SHIP_DEPARTURE_HOUR_A.get(), 0, 23)
-                : Math.clamp(ModConfig.SHIP_DEPARTURE_HOUR_B.get(), 0, 23);
-        String time = String.format(java.util.Locale.ROOT, "%02d:00", hour);
+        String time = TransportMath.formatTime(departure);
         Component message = Component.translatable("message.eldritch_horror.ship.boarding",
                 destination.cityName(), time);
         Port origin = line.origin(direction);
@@ -284,11 +287,10 @@ public final class ShipService {
 
     private static String describeLine(ServerLevel level, ShippingLine line, int direction,
                                        long now) {
-        int hour = direction == 0
-                ? Math.clamp(ModConfig.SHIP_DEPARTURE_HOUR_A.get(), 0, 23)
-                : Math.clamp(ModConfig.SHIP_DEPARTURE_HOUR_B.get(), 0, 23);
+        int[] baseHours = DepartureHours.parse(ModConfig.SHIP_DEPARTURE_HOURS.get(),
+                DepartureHours.SHIP_DEFAULT);
         int period = Math.max(1, ModConfig.SHIP_PERIOD_DAYS.get());
-        long departure = TransportMath.nextDeparture(now, hour, hour, period);
+        long departure = nextDeparture(now, line, direction, baseHours, period);
         CoastalPacket ship = ACTIVE.get(line.id() + ":" + direction);
         StringBuilder text = new StringBuilder();
         text.append(line.id()).append(" dir ").append(direction).append(" (")

@@ -1,23 +1,26 @@
 package com.sanchous98.eldritchhorror.world.transport;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.EarthMaps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The stage-1 shipping network ({@code design/30-transport.md}): a small curated set of port pairs,
- * each with a real A* sea lane over the baked landmask.
+ * The stage-1 shipping network ({@code design/30-transport.md}): curated port pairs plus nearest
+ * reachable neighbours, each with a real A* sea lane over the baked landmask.
  *
  * <p>Routes are computed once on first use and cached for the server's lifetime; a tick never
- * pathfinds. A pair whose lane cannot be found, or whose polyline still touches land, is simply
- * absent: "no lane, no line". The lane is bidirectional, so one A* serves both directions.
+ * pathfinds. Every port keeps up to {@code maxPartnersPerCity} partners (curated bridges count
+ * toward the cap); duplicate pairs collapse. A pair whose lane cannot be found, or whose polyline
+ * still touches land, is simply absent: "no lane, no line". The lane is bidirectional, so one A*
+ * serves both directions.
  *
  * <p>Server-side only: the route builder reads {@link EarthMaps} and samples the world map.
  */
@@ -35,6 +38,10 @@ public final class ShippingLines {
             {"tokyo", "los_angeles"},
     };
 
+    /** How many nearest candidates are tried per wanted partner before giving up. */
+    private static final int ATTEMPTS_PER_PARTNER = 3;
+    /** Partner cap used when the server config is not loaded (bare unit probes). */
+    private static final int DEFAULT_MAX_PARTNERS = 3;
     /** Safety margin from land, in coarse cells (64 blocks each). */
     private static final int MARGIN_CELLS = 1;
     /** How far from a harbour a lane may use unsafe coastal water. */
@@ -100,17 +107,43 @@ public final class ShippingLines {
             addLane(sea, map, from, to, seen, lines);
         }
         // Authored ports are spread over every coast; the fixed pairs alone leave most of them
-        // isolated. Connect each port to its nearest neighbours so a player can actually reach the
-        // authored harbour network (the route finder still rejects a lane that touches land).
+        // isolated. Keep up to maxPartnersPerCity partners per port, nearest first, so a player can
+        // actually reach the authored harbour network (the route finder still rejects a lane that
+        // touches land). Curated bridges count toward the cap.
+        int maxPartners = ModConfig.loaded()
+                ? Math.clamp(ModConfig.MAX_PARTNERS_PER_CITY.get(), 1, 8)
+                : DEFAULT_MAX_PARTNERS;
+        Map<String, Set<String>> partnered = partnerMap(lines);
         List<Port> ports = Ports.all();
         for (Port from : ports) {
+            Set<String> existing = partnered.computeIfAbsent(from.cityId(), ignored -> new HashSet<>());
+            int remaining = maxPartners - existing.size();
+            if (remaining <= 0) {
+                continue;
+            }
             List<Port> candidates = new ArrayList<>(ports);
             candidates.removeIf(other -> other.cityId().equals(from.cityId()));
-            candidates.sort((left, right) -> Double.compare(from.distanceSqr(
-                    left.waterX(), left.waterZ()), from.distanceSqr(right.waterX(), right.waterZ())));
-            int attempts = Math.min(3, candidates.size());
-            for (int i = 0; i < attempts; i++) {
-                addLane(sea, map, from, candidates.get(i), seen, lines);
+            candidates.sort((left, right) -> {
+                double byDistance = Double.compare(from.distanceSqr(
+                                left.waterX(), left.waterZ()),
+                        from.distanceSqr(right.waterX(), right.waterZ()));
+                return byDistance != 0 ? (int) Math.signum(byDistance)
+                        : left.cityId().compareTo(right.cityId());
+            });
+            int attempts = Math.min(remaining * ATTEMPTS_PER_PARTNER, candidates.size());
+            int added = 0;
+            for (int i = 0; i < attempts && added < remaining; i++) {
+                Port to = candidates.get(i);
+                if (existing.contains(to.cityId())) {
+                    continue;
+                }
+                if (!addLane(sea, map, from, to, seen, lines)) {
+                    continue;
+                }
+                existing.add(to.cityId());
+                partnered.computeIfAbsent(to.cityId(), ignored -> new HashSet<>())
+                        .add(from.cityId());
+                added++;
             }
         }
         EldritchHorror.LOGGER.info("transport: {} sea lines in {} ms", lines.size(),
@@ -118,22 +151,36 @@ public final class ShippingLines {
         return List.copyOf(lines);
     }
 
-    private static void addLane(SeaGrid sea, EarthMap map, Port from, Port to,
-                                Set<String> seen, List<ShippingLine> lines) {
+    /** @return directed partner sets derived from the lanes built so far. */
+    private static Map<String, Set<String>> partnerMap(List<ShippingLine> lines) {
+        Map<String, Set<String>> partners = new HashMap<>();
+        for (ShippingLine line : lines) {
+            partners.computeIfAbsent(line.a().cityId(), ignored -> new HashSet<>())
+                    .add(line.b().cityId());
+            partners.computeIfAbsent(line.b().cityId(), ignored -> new HashSet<>())
+                    .add(line.a().cityId());
+        }
+        return partners;
+    }
+
+    /** @return whether a new lane was actually added. */
+    private static boolean addLane(SeaGrid sea, EarthMap map, Port from, Port to,
+                                   Set<String> seen, List<ShippingLine> lines) {
         String key = from.cityId().compareTo(to.cityId()) <= 0
                 ? from.cityId() + "|" + to.cityId() : to.cityId() + "|" + from.cityId();
         if (!seen.add(key)) {
-            return;
+            return false;
         }
         SeaRoute route = route(sea, map, from, to);
         if (route == null) {
             EldritchHorror.LOGGER.debug("transport: no sea lane {} -> {}", from.cityId(), to.cityId());
-            return;
+            return false;
         }
         ShippingLine line = new ShippingLine(from.cityId() + "-" + to.cityId(), from, to, route);
         lines.add(line);
         EldritchHorror.LOGGER.info("transport: lane {} ({} blocks, {} waypoints)", line.id(),
                 Math.round(route.length()), route.size());
+        return true;
     }
 
     private static SeaGrid grid(EarthMap map) {

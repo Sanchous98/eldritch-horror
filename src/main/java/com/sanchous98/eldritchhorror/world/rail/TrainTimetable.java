@@ -1,13 +1,14 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.transport.DepartureHours;
 import com.sanchous98.eldritchhorror.world.transport.TransportMath;
 
 /**
  * The train-specific part of the shared timetable stack ({@code design/30-transport.md}).
  *
  * <p>Departures use the same in-game clock and boarding arithmetic as the ships
- * ({@link TransportMath}); this class only maps a direction to its configured departure hour and
- * fixes the consist shape (2–4 wagons, 1–4 seats per car, fixed coupling spacing).
+ * ({@link TransportMath}); this class only staggers the configured hour list per line and direction
+ * and fixes the consist shape (2–4 wagons, 1–4 seats per car, fixed coupling spacing).
  */
 public final class TrainTimetable {
     /** Smallest consist the design allows. */
@@ -23,17 +24,27 @@ public final class TrainTimetable {
     }
 
     /**
-     * @param now        current overworld clock tick
+     * @param lineId     stable line id (used for the stagger phase)
      * @param direction  0 = A to B, 1 = B to A
-     * @param hourA      departure hour for direction 0
-     * @param hourB      departure hour for direction 1
-     * @param periodDays days between service days
-     * @return the next absolute departure tick for that direction
+     * @param baseHours  configured departure hours, before staggering
+     * @return the line's staggered departure hours, stable across restarts
      */
-    public static long nextDeparture(long now, int direction, int hourA, int hourB,
+    public static int[] staggeredHours(String lineId, int direction, int[] baseHours) {
+        return DepartureHours.forLine(lineId + ":" + direction, baseHours);
+    }
+
+    /**
+     * @param now        current overworld clock tick
+     * @param lineId     stable line id
+     * @param direction  0 = A to B, 1 = B to A
+     * @param baseHours  configured departure hours, before staggering
+     * @param periodDays days between service days
+     * @return the next absolute departure tick for that line and direction
+     */
+    public static long nextDeparture(long now, String lineId, int direction, int[] baseHours,
                                      int periodDays) {
-        int hour = direction == 0 ? hourA : hourB;
-        return TransportMath.nextDeparture(now, hour, hour, periodDays);
+        return TransportMath.nextDeparture(now, staggeredHours(lineId, direction, baseHours),
+                periodDays);
     }
 
     /**
