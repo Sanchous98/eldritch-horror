@@ -5,6 +5,9 @@ import com.sanchous98.eldritchhorror.registry.ModSounds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -33,12 +36,12 @@ public final class Glaaki extends AncientOne {
         }
     }
 
-    /** 130 HP, 5 attack, 0.18 speed (it wades), 40 follow range, heavy. */
+    /** 130 HP, 10 attack, 0.22 speed (it wades), 40 follow range, heavy. */
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 130.0)
-                .add(Attributes.ATTACK_DAMAGE, 5.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.18)
+                .add(Attributes.ATTACK_DAMAGE, 10.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.22)
                 .add(Attributes.FOLLOW_RANGE, 40.0)
                 .add(Attributes.ARMOR, 6.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.6);
@@ -72,6 +75,21 @@ public final class Glaaki extends AncientOne {
         if (kind == Solve.SOOTHED) {
             this.playSound(ModSounds.GLAAKI_DEATH.get(), 1.0F, 0.5F);
         }
+    }
+
+    /**
+     * The drowned grip: a hit drags the body down (slowness) while the lake dream floods the mind
+     * (nausea). The servitors' call is the real weapon, so a player who trades blows with Glaaki
+     * keeps losing the ability to disengage.
+     */
+    @Override
+    public boolean doHurtTarget(ServerLevel level, Entity target) {
+        boolean hurt = super.doHurtTarget(level, target);
+        if (hurt && target instanceof net.minecraft.world.entity.LivingEntity living) {
+            living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 140, 1));
+            living.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 180, 0));
+        }
+        return hurt;
     }
 
     // --- Presence -------------------------------------------------------------------------------

@@ -47,7 +47,7 @@ public final class ShubNiggurath extends AncientOne {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 200.0)
-                .add(Attributes.ATTACK_DAMAGE, 5.0)
+                .add(Attributes.ATTACK_DAMAGE, 10.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.12)
                 .add(Attributes.FOLLOW_RANGE, 48.0)
                 .add(Attributes.ARMOR, 10.0)

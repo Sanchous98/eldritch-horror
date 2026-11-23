@@ -726,7 +726,7 @@ public final class ModConfig {
 
     public static final ModConfigSpec.IntValue DUNWICH_HORROR_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Dunwich Horror spawn passes (minimum 20).")
-                    .defineInRange("dunwichHorrorSpawnIntervalTicks", 2400, 20, 72000);
+                    .defineInRange("dunwichHorrorSpawnIntervalTicks", 12000, 20, 72000);
 
     public static final ModConfigSpec.IntValue DUNWICH_HORROR_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which the Horror may appear.")
@@ -759,7 +759,7 @@ public final class ModConfig {
 
     public static final ModConfigSpec.IntValue SHUB_NIGGURATH_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Shub-Niggurath spawn passes (minimum 20; long, it is rare).")
-                    .defineInRange("shubNiggurathSpawnIntervalTicks", 3600, 20, 144000);
+                    .defineInRange("shubNiggurathSpawnIntervalTicks", 18000, 20, 144000);
 
     public static final ModConfigSpec.IntValue SHUB_NIGGURATH_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Shub-Niggurath may appear.")
@@ -847,7 +847,7 @@ public final class ModConfig {
                     .define("enableIthaquaSpawns", true);
     public static final ModConfigSpec.IntValue ITHAQUA_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Ithaqua spawn passes (minimum 20).")
-                    .defineInRange("ithaquaSpawnIntervalTicks", 2400, 20, 72000);
+                    .defineInRange("ithaquaSpawnIntervalTicks", 12000, 20, 72000);
     public static final ModConfigSpec.IntValue ITHAQUA_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Ithaqua may appear.")
                     .defineInRange("ithaquaSpawnRadius", 48, 8, 128);
@@ -873,7 +873,7 @@ public final class ModConfig {
                     .define("enableYigSpawns", true);
     public static final ModConfigSpec.IntValue YIG_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Yig spawn passes (minimum 20).")
-                    .defineInRange("yigSpawnIntervalTicks", 2400, 20, 72000);
+                    .defineInRange("yigSpawnIntervalTicks", 12000, 20, 72000);
     public static final ModConfigSpec.IntValue YIG_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Yig may appear.")
                     .defineInRange("yigSpawnRadius", 48, 8, 128);
@@ -954,7 +954,7 @@ public final class ModConfig {
                     .define("enableCthughaSpawns", true);
     public static final ModConfigSpec.IntValue CTHUGHA_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Cthugha spawn passes (minimum 20).")
-                    .defineInRange("cthughaSpawnIntervalTicks", 2400, 20, 72000);
+                    .defineInRange("cthughaSpawnIntervalTicks", 12000, 20, 72000);
     public static final ModConfigSpec.IntValue CTHUGHA_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Cthugha may appear.")
                     .defineInRange("cthughaSpawnRadius", 48, 8, 128);
@@ -980,7 +980,7 @@ public final class ModConfig {
                     .define("enableGlaakiSpawns", true);
     public static final ModConfigSpec.IntValue GLAAKI_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Glaaki spawn passes (minimum 20).")
-                    .defineInRange("glaakiSpawnIntervalTicks", 2600, 20, 72000);
+                    .defineInRange("glaakiSpawnIntervalTicks", 13000, 20, 72000);
     public static final ModConfigSpec.IntValue GLAAKI_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Glaaki may appear.")
                     .defineInRange("glaakiSpawnRadius", 48, 8, 128);
@@ -1006,7 +1006,7 @@ public final class ModConfig {
                     .define("enableHydraSpawns", true);
     public static final ModConfigSpec.IntValue HYDRA_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Hydra spawn passes (minimum 20).")
-                    .defineInRange("hydraSpawnIntervalTicks", 2800, 20, 72000);
+                    .defineInRange("hydraSpawnIntervalTicks", 14000, 20, 72000);
     public static final ModConfigSpec.IntValue HYDRA_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which the Hydra may appear.")
                     .defineInRange("hydraSpawnRadius", 48, 8, 128);
@@ -1038,7 +1038,7 @@ public final class ModConfig {
                     .define("enableNyogthaSpawns", true);
     public static final ModConfigSpec.IntValue NYOGTHA_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Nyogtha spawn passes (minimum 20).")
-                    .defineInRange("nyogthaSpawnIntervalTicks", 3000, 20, 72000);
+                    .defineInRange("nyogthaSpawnIntervalTicks", 15000, 20, 72000);
     public static final ModConfigSpec.IntValue NYOGTHA_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Nyogtha may appear.")
                     .defineInRange("nyogthaSpawnRadius", 40, 8, 128);
@@ -1067,7 +1067,7 @@ public final class ModConfig {
                     .define("enableRhanTegothSpawns", true);
     public static final ModConfigSpec.IntValue RHAN_TEGOTH_SPAWN_INTERVAL_TICKS =
             BUILDER.comment("Ticks between Rhan-Tegoth spawn passes (minimum 20).")
-                    .defineInRange("rhanTegothSpawnIntervalTicks", 3200, 20, 72000);
+                    .defineInRange("rhanTegothSpawnIntervalTicks", 16000, 20, 72000);
     public static final ModConfigSpec.IntValue RHAN_TEGOTH_SPAWN_RADIUS =
             BUILDER.comment("Radius (blocks) around each player in which Rhan-Tegoth may appear.")
                     .defineInRange("rhanTegothSpawnRadius", 48, 8, 128);

@@ -3,6 +3,10 @@ package com.sanchous98.eldritchhorror.entity;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import com.sanchous98.eldritchhorror.world.city.CityStates;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,7 +40,27 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class AncientOneSpawner {
 
+    /**
+     * After any roaming presence appears near a player, no other roaming Ancient One may appear for
+     * this long. Without it, the per-type intervals (all a few minutes) stack: Glaaki from the
+     * water, Cthugha and Yig from tainted ground and the Dunwich Horror all arrive in one evening.
+     */
+    private static final int ROAMING_COOLDOWN_TICKS = 6000;
+
+    /** A player who already has an Ancient One this close is skipped by every roaming pass. */
+    private static final int PRESENCE_RADIUS = 96;
+
+    /** Per-player tick of the last roaming spawn. */
+    private static final Map<UUID, Long> LAST_ROAMING = new ConcurrentHashMap<>();
+
     private AncientOneSpawner() {
+    }
+
+    /** @return whether a living Ancient One is already near {@code player}. */
+    private static boolean presenceNear(ServerLevel level, ServerPlayer player) {
+        return !level.getEntitiesOfClass(AncientOne.class,
+                player.getBoundingBox().inflate(PRESENCE_RADIUS),
+                ancient -> ancient.isAlive()).isEmpty();
     }
 
     @SubscribeEvent
@@ -70,6 +94,19 @@ public final class AncientOneSpawner {
             return;
         }
         for (ServerPlayer player : level.players()) {
+            // Canonical placement: the roaming presences are wilderness encounters. A curated
+            // city's streets keep their own (much smaller) troubles, so a quest chain in town is
+            // never interrupted by a Great Old One walking down the boulevard.
+            if (CityStates.nearestCity(level, player.blockPosition()) != null) {
+                continue;
+            }
+            Long last = LAST_ROAMING.get(player.getUUID());
+            if (last != null && tick - last < ROAMING_COOLDOWN_TICKS) {
+                continue;
+            }
+            if (presenceNear(level, player)) {
+                continue;
+            }
             if (dunwichDue) {
                 spawnDunwich(level, cache, player, tick);
             }
@@ -96,6 +133,9 @@ public final class AncientOneSpawner {
             }
             if (rhanDue) {
                 spawnRhanTegoth(level, cache, player, tick);
+            }
+            if (presenceNear(level, player)) {
+                LAST_ROAMING.put(player.getUUID(), (long) tick);
             }
         }
     }

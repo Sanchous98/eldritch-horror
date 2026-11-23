@@ -37,7 +37,7 @@ public final class Ithaqua extends AncientOne {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 120.0)
-                .add(Attributes.ATTACK_DAMAGE, 7.0)
+                .add(Attributes.ATTACK_DAMAGE, 12.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.30)
                 .add(Attributes.FOLLOW_RANGE, 40.0)
                 .add(Attributes.ARMOR, 2.0)
