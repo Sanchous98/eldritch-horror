@@ -798,9 +798,11 @@ World generation hooks `applyBiomeDecoration` after the towns: ballast and sleep
 and a stone-brick **tunnel** corridor through ridges. Every stamp is pre-bucketed by `ChunkPos` and
 chunk-clipped, so crossing a line never force-loads anything; rails are walkable and can be blocked.
 
-The consist is a **locomotive plus 2–4 wagons** (config `trainCars`, four seats each) as separate
-coupled entities: the locomotive owns the line distance at `trainSpeed`, and each wagon samples the
-locomotive's recent trail at a fixed spacing, so the train bends around curves. Only the locomotive
+The consist is a **locomotive plus 2–4 wagons** (config `trainCars`, twelve seats per car) as
+separate coupled entities: the locomotive owns the line distance at `trainSpeed`, and each wagon
+samples the locomotive's recent trail at a fixed spacing, so the train bends around curves. The
+cars are full carriages (14 blocks long for a wagon, 16 for the locomotive) with window-facing
+chairs; see `docs/TRANSPORT-VEHICLES.md`. Only the locomotive
 holds an entity-ticking ticket around the hull and moves it as it goes. Timetable, fare and boarding
 are the shared `TransportMath` stack: 06:00 out, 18:00 back, `trainBoardingMinutes` of boarding,
 `black_obol` fare, empty services despawn at departure, riders are put on the destination platform,

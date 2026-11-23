@@ -919,8 +919,8 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<TrainLocomotive>> TRAIN_LOCOMOTIVE =
             ENTITY_TYPES.register("train_locomotive", () ->
                     EntityType.Builder.<TrainLocomotive>of(TrainLocomotive::new, MobCategory.MISC)
-                            .sized(1.8F, 1.5F)
-                            .eyeHeight(1.0F)
+                            .sized(3.0F, 4.0F)
+                            .eyeHeight(2.2F)
                             .clientTrackingRange(10)
                             .build(ResourceKey.create(Registries.ENTITY_TYPE,
                                     EldritchHorror.id("train_locomotive"))));
@@ -932,8 +932,8 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<TrainWagon>> TRAIN_WAGON =
             ENTITY_TYPES.register("train_wagon", () ->
                     EntityType.Builder.<TrainWagon>of(TrainWagon::new, MobCategory.MISC)
-                            .sized(1.8F, 1.5F)
-                            .eyeHeight(1.0F)
+                            .sized(3.0F, 4.0F)
+                            .eyeHeight(2.2F)
                             .clientTrackingRange(10)
                             .build(ResourceKey.create(Registries.ENTITY_TYPE,
                                     EldritchHorror.id("train_wagon"))));

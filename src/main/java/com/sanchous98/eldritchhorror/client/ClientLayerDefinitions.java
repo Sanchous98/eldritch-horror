@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.client.model.CoastalPacketModel;
+import com.sanchous98.eldritchhorror.client.model.TrainCarModel;
 import com.sanchous98.eldritchhorror.client.model.boss.ChaugnarFaugnModel;
 import com.sanchous98.eldritchhorror.client.model.boss.DunwichHorrorModel;
 import com.sanchous98.eldritchhorror.client.model.boss.GlaakiModel;
@@ -70,5 +71,8 @@ public final class ClientLayerDefinitions {
         event.registerLayerDefinition(NephrenKaModel.LAYER, NephrenKaModel::createBodyLayer);
         event.registerLayerDefinition(ChoirLeviathanModel.LAYER, ChoirLeviathanModel::createBodyLayer);
         event.registerLayerDefinition(IthaqualShadeModel.LAYER, IthaqualShadeModel::createBodyLayer);
+        event.registerLayerDefinition(TrainCarModel.WAGON_LAYER, TrainCarModel::createWagonLayer);
+        event.registerLayerDefinition(TrainCarModel.LOCOMOTIVE_LAYER,
+                TrainCarModel::createLocomotiveLayer);
     }
 }

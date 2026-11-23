@@ -3130,10 +3130,10 @@ public final class ModConfig {
             BUILDER.comment("Wagons behind the locomotive (2-4).")
                     .defineInRange("trainCars", 3, 2, 4);
 
-    /** Seats in one car (the locomotive and each wagon). */
+    /** Seats in one car (the locomotive and each wagon); twelve chairs exist in the model. */
     public static final ModConfigSpec.IntValue TRAIN_SEATS =
-            BUILDER.comment("Seats in one car (the locomotive and each wagon).")
-                    .defineInRange("trainSeats", 4, 1, 4);
+            BUILDER.comment("Seats in one car (the locomotive and each wagon, max 12 physical chairs).")
+                    .defineInRange("trainSeats", 12, 1, 12);
 
     /** Fare in black obols, charged once on boarding. */
     public static final ModConfigSpec.IntValue TRAIN_FARE =

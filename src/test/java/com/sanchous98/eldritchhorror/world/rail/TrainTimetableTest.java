@@ -43,8 +43,8 @@ class TrainTimetableTest {
         assertEquals(3, TrainTimetable.wagons(3));
         assertEquals(4, TrainTimetable.wagons(9));
         assertEquals(1, TrainTimetable.seats(0));
-        assertEquals(4, TrainTimetable.seats(9));
-        assertEquals(16, TrainTimetable.totalSeats(3, 4));
-        assertEquals(13.5, TrainTimetable.consistLength(3), 1.0E-9);
+        assertEquals(12, TrainTimetable.seats(20));
+        assertEquals(48, TrainTimetable.totalSeats(3, 12));
+        assertEquals(48.0, TrainTimetable.consistLength(3), 1.0E-9);
     }
 }

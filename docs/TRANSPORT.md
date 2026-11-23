@@ -12,6 +12,9 @@ Two services share one timetable stack:
 Both are **real journeys**, not teleports. Fares, speeds, capacities, boarding windows and the
 empty-service despawn rule are unchanged by the network-density work.
 
+The train's carriages, seat layout and custom models are described in
+[`TRANSPORT-VEHICLES.md`](TRANSPORT-VEHICLES.md).
+
 ## Line selection
 
 Routes are computed once on first use and cached for the server's lifetime; a tick never
