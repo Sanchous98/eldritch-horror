@@ -276,6 +276,13 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   17 ports, with one connected component over all 24 cities (two trans-Pacific bridges).
 - Verified with a green `./gradlew build`, `tools/city_plan_audit.py` (24/24), a clean server boot,
   and live `/eh train`/`/eh ship` at Shanghai (authored station 1 block, port 469 blocks).
+- **Pregen:** `/eh pregen cities|rail|all|status|stop` (or `-Deh.pregen=all`) queues the 24 city
+  districts plus a 3x3 chunk corridor around every rail node — 72,997 chunks on the current world —
+  and generates two per tick with progress/ETA. On the 2-core Ampere Oracle instance it runs at
+  ~13 chunks/s (ETA ~1.5 h, RAM ~3.8 G of the 8 G container). The queue is bounded; chunks are
+  persisted by the normal world save, so later sessions only read them. The remote container
+  `eh-oracle` uses `--restart unless-stopped`; RCON 25575 is local-only over SSH, and OCI ingress
+  25565 must be opened before players can connect.
 
 ## Known limitations / deferred
 
