@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.CoastalPacketModel;
 import com.sanchous98.eldritchhorror.client.model.boss.ChaugnarFaugnModel;
 import com.sanchous98.eldritchhorror.client.model.boss.DunwichHorrorModel;
 import com.sanchous98.eldritchhorror.client.model.boss.GlaakiModel;
@@ -43,6 +44,9 @@ public final class ClientLayerDefinitions {
 
     @SubscribeEvent
     public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(CoastalPacketModel.LAYER, CoastalPacketModel::createBodyLayer);
+        event.registerLayerDefinition(CoastalPacketModel.LANTERN_LAYER,
+                CoastalPacketModel::createLanternLayer);
         event.registerLayerDefinition(DunwichHorrorModel.LAYER, DunwichHorrorModel::createBodyLayer);
         event.registerLayerDefinition(GlaakiModel.LAYER, GlaakiModel::createBodyLayer);
         event.registerLayerDefinition(ChaugnarFaugnModel.LAYER, ChaugnarFaugnModel::createBodyLayer);

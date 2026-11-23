@@ -905,8 +905,8 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<CoastalPacket>> COASTAL_PACKET =
             ENTITY_TYPES.register("coastal_packet", () ->
                     EntityType.Builder.<CoastalPacket>of(CoastalPacket::new, MobCategory.MISC)
-                            .sized(3.0F, 1.5F)
-                            .eyeHeight(0.8F)
+                            .sized(5.5F, 3.6F)
+                            .eyeHeight(3.5F)
                             .clientTrackingRange(10)
                             .build(ResourceKey.create(Registries.ENTITY_TYPE,
                                     EldritchHorror.id("coastal_packet"))));

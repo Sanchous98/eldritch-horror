@@ -46,25 +46,39 @@ import org.jspecify.annotations.Nullable;
  * riders down at the destination shore and lingers briefly before despawning. A rider who logs off
  * mid-voyage is recorded by {@code ShipRiders} and put down at the destination on their next login.
  *
- * <p>Placeholder art: the client renders a vanilla boat scaled up (see
- * {@code client/CoastalPacketRenderer}).
+ * <p>Art: the client renders the full 17.75 x 5.5 block hull from
+ * {@code client/model/CoastalPacketModel}, with a walkable deck, bulwark and cap rail, a cabin
+ * with windows and a railed poop deck, a mast with square sails, a funnel and lanterns.
  */
 public class CoastalPacket extends AbstractBoat {
-    /** Deck seats, laid out in four rows of two. */
-    public static final int SEATS = 8;
+    /** Deck seats: twelve on the two railing benches, four under the cabin roof. */
+    public static final int SEATS = 14;
     private static final int TICKET_RADIUS = 2;
     /** How long the empty hull stays at the destination after putting riders ashore. */
     private static final int LINGER_TICKS = 200;
     /** How long a voyage may run with no riders aboard before the hull is removed. */
     private static final int EMPTY_GRACE_TICKS = 200;
-    /** Rider height above the hull origin. */
-    private static final double RIDE_HEIGHT = 0.8;
-    /** Seat offsets in the hull's local frame: {x, z}, in blocks. */
+    /**
+     * Rider feet above the hull origin. {@code CoastalPacketRenderer} lifts the whole model 2.9
+     * blocks to clear the {@code AbstractBoat} buoyancy line, so this is that lift plus 0.33:
+     * the deck top is 3.65 blocks above the origin, the rider sits 0.42 into it (legs hidden
+     * inside the hull, as in a vanilla boat) and the eye lands about 1.2 blocks above the
+     * planking, just over the cap rail.
+     */
+    private static final double RIDE_HEIGHT = 3.23;
+    /**
+     * Seat offsets in the hull's local frame: {x, z}, in blocks. The model's bow is +Z here.
+     * Rows 1-10 are the benches along the port and starboard bulwarks, rows 11-14 sit inside the
+     * cabin against its side benches.
+     */
     private static final double[][] SEAT_OFFSETS = {
-            {-0.8, 2.1}, {0.8, 2.1},
-            {-0.8, 0.7}, {0.8, 0.7},
-            {-0.8, -0.7}, {0.8, -0.7},
-            {-0.8, -2.1}, {0.8, -2.1},
+            {-2.06, 3.25}, {2.06, 3.25},
+            {-2.06, 1.625}, {2.06, 1.625},
+            {-2.06, 0.0}, {2.06, 0.0},
+            {-2.06, -1.625}, {2.06, -1.625},
+            {-2.06, -3.25}, {2.06, -3.25},
+            {-1.55, -4.4}, {1.55, -4.4},
+            {-1.55, -6.0}, {1.55, -6.0},
     };
 
     /**

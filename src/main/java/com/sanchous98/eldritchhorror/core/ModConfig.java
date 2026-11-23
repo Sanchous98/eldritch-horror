@@ -3077,8 +3077,8 @@ public final class ModConfig {
 
     /** Number of deck seats. */
     public static final ModConfigSpec.IntValue SHIP_SEATS =
-            BUILDER.comment("Passenger seats on a packet (the hull has 8).")
-                    .defineInRange("shipSeats", 8, 1, 8);
+            BUILDER.comment("Passenger seats on a packet (the hull has 14).")
+                    .defineInRange("shipSeats", 14, 1, 14);
 
     /** Fare in black obols, charged once on boarding. */
     public static final ModConfigSpec.IntValue SHIP_FARE =
