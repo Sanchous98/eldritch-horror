@@ -9,7 +9,11 @@
           "name": "eldritch_horror:void_reagent",
           "modifier": {
             "type": "minecraft:set_count",
-            "count": { "type": "minecraft:uniform", "min": 2, "max": 4 }
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 4
+            }
           }
         },
         {
@@ -17,10 +21,34 @@
           "name": "eldritch_horror:bone_reagent",
           "modifier": {
             "type": "minecraft:set_count",
-            "count": { "type": "minecraft:uniform", "min": 2, "max": 4 }
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 4
+            }
           }
         },
-        { "type": "minecraft:item", "name": "eldritch_horror:grave_dust" }
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:grave_dust"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eldritch_horror:void_reagent",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            }
+          }
+        }
       ]
     }
   ]
