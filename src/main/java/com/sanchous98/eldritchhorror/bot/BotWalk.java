@@ -32,9 +32,6 @@ public final class BotWalk {
     /** Sprint speed, used for long legs. */
     private static final double SPRINT_SPEED = 0.28;
 
-    /** Ticks without horizontal progress before a jump is attempted. */
-    private static final int STUCK_TICKS = 8;
-
     /** Radius (chunks) of the moving forced ticket. */
     private static final int CHUNK_RADIUS = 3;
 

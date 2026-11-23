@@ -89,10 +89,10 @@ public record CityQuestChain(City city, List<Step> steps) {
         int hash = Math.abs(city.id().hashCode());
         String item = GATHER_POOL[hash % GATHER_POOL.length];
         // 2..4: enough to make the player look, small enough for one ruin chest to cover it.
-        int itemCount = 2 + (hash / 7) % 3;
+        int itemCount = 2 + hash / 7 % 3;
         steps.add(new Step(Kind.GATHER, "gather", city.x(), city.z(), item, "", itemCount, ""));
-        String entity = HUNT_POOL[(hash / 3) % HUNT_POOL.length];
-        int kills = 2 + (hash / 11) % 2;
+        String entity = HUNT_POOL[hash / 3 % HUNT_POOL.length];
+        int kills = 2 + hash / 11 % 2;
         steps.add(new Step(Kind.HUNT, "hunt", city.x(), city.z(), "", entity, kills, ""));
         if (secret != null) {
             steps.add(reach(Kind.SECRET, "secret", secret, city, secret.id()));
