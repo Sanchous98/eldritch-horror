@@ -329,6 +329,8 @@ public final class EldritchCommands {
         eh.then(Commands.literal("doom").executes(EldritchCommands::doomInfo));
         // Scheduled ships (design/30): nearest port, line state, next departure, hull positions.
         // "board" is a debug ride hook: it calls the same fare interaction right-click uses.
+        eh.then(Commands.literal("ports")
+                .executes(EldritchCommands::portsInfo));
         eh.then(Commands.literal("ship")
                 .executes(EldritchCommands::shipInfo)
                 .then(Commands.literal("board").executes(EldritchCommands::boardShip)));
@@ -498,6 +500,22 @@ public final class EldritchCommands {
         net.minecraft.world.phys.Vec3 at = ctx.getSource().getPosition();
         for (String line : com.sanchous98.eldritchhorror.world.transport.ShipService.describe(
                 overworld, at.x, at.z)) {
+            ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        }
+        return 1;
+    }
+
+    /** {@code /eh ports}: every harbour the service knows, with its berth and berth level. */
+    private static int portsInfo(CommandContext<CommandSourceStack> ctx) {
+        com.sanchous98.eldritchhorror.world.EarthMap map =
+                com.sanchous98.eldritchhorror.world.EarthMaps.getOrNull();
+        for (com.sanchous98.eldritchhorror.world.transport.Port port
+                : com.sanchous98.eldritchhorror.world.transport.Ports.all()) {
+            String line = String.format(java.util.Locale.ROOT,
+                    "%s: berth (%d, %d) y=%d shore (%d, %d) sea=%s",
+                    port.cityId(), port.waterX(), port.waterZ(), port.waterY(),
+                    port.shoreX(), port.shoreZ(),
+                    map != null && !map.isLand(port.waterX(), port.waterZ()));
             ctx.getSource().sendSuccess(() -> Component.literal(line), false);
         }
         return 1;

@@ -21,9 +21,10 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>An authored {@code PORT} anchor is authoritative: the plan is probed headlessly for the water
  * body next to the anchor, and that basin's own surface Y becomes the berth level. This is what
- * makes inland and river ports (Mexico City's canal, Rome's Tiber) reachable at the ship's Y. Only
- * a city with no authored anchor falls back to the 32-direction ring scan over the baked landmask,
- * which cannot see a dug basin.
+ * makes an authored river port reachable at the ship's Y. An authored basin that is inland or
+ * lifted above the ocean cannot carry a sea lane, so it falls back to real sea water along the
+ * anchor ray; only a city with no authored anchor falls back to the 32-direction ring scan over the
+ * baked landmask, which cannot see a dug basin.
  *
  * <p>Server-side and cached once. Never call from client code.
  */
@@ -40,6 +41,10 @@ public final class Ports {
     private static final int OFFSHORE = 6;
     /** Region recorded around an authored anchor while probing its plan. */
     private static final int PROBE_RADIUS = 96;
+    /** An authored berth may sit this far above/below sea level and still be a sea berth. */
+    private static final int SEA_LEVEL_TOLERANCE = 2;
+    /** Radius searched for open sea around an authored berth point. */
+    private static final int SEA_CHECK_RADIUS = 8;
 
     private static volatile @Nullable List<Port> cached;
 
@@ -105,6 +110,9 @@ public final class Ports {
             Port port = harbour(map, city);
             if (port != null) {
                 out.add(port);
+                EldritchHorror.LOGGER.debug("transport: port {} berth ({}, {}) y={} sea={}",
+                        port.cityId(), port.waterX(), port.waterZ(), port.waterY(),
+                        !map.isLand(port.waterX(), port.waterZ()));
             }
         }
         EldritchHorror.LOGGER.info("transport: {} coastal ports from {} curated cities",
@@ -143,12 +151,18 @@ public final class Ports {
                     new MapTerrain(map), CityPlanProbe.Bounds.around(anchorX, anchorZ,
                             PROBE_RADIUS));
             CityPlanProbe.Berth berth = probe.waterBerth(anchorX, anchorZ, PROBE_RADIUS);
-            if (berth != null) {
+            if (berth != null && openSeaNear(map, berth.x(), berth.z())
+                    && Math.abs(berth.y() - ElevationCurve.SEA_LEVEL) <= SEA_LEVEL_TOLERANCE) {
                 int shoreX = map.isLand(anchorX, anchorZ) ? anchorX : city.x();
                 int shoreZ = map.isLand(anchorX, anchorZ) ? anchorZ : city.z();
                 return new Port(city.id(), city.name(), berth.x(), berth.z(), shoreX, shoreZ,
                         berth.y());
             }
+            // An authored basin that is inland or lifted above the ocean (Mexico City's canal,
+            // Lima's cliff-top Callao basin, Jakarta's drainage canal) cannot carry a sea lane on
+            // the baked landmask: the lane builder starts from a map-water point, and the packet
+            // rides the ocean surface. Fall through to real sea water along the anchor ray so the
+            // city still has a berth; the authored quay stays as shore scenery.
             int[] water = mapWaterFrom(map, city, anchorX, anchorZ, AUTHORED_REACH);
             if (water != null) {
                 return new Port(city.id(), city.name(), water[0], water[1], anchorX, anchorZ,
@@ -156,6 +170,22 @@ public final class Ports {
             }
         }
         return null;
+    }
+
+    /**
+     * @return true when the baked landmask has ocean within {@link #SEA_CHECK_RADIUS} blocks, i.e.
+     *     the authored basin is reachable from the sea by a short channel and the lane builder can
+     *     start a voyage there.
+     */
+    private static boolean openSeaNear(EarthMap map, int x, int z) {
+        for (int dx = -SEA_CHECK_RADIUS; dx <= SEA_CHECK_RADIUS; dx += STEP) {
+            for (int dz = -SEA_CHECK_RADIUS; dz <= SEA_CHECK_RADIUS; dz += STEP) {
+                if (!map.isLand(EarthMap.wrapBlockX(x + dx), z + dz)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
