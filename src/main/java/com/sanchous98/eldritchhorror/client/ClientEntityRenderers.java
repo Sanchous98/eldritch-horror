@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.client.model.TrainCarModel;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -100,8 +101,12 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.THE_HORROR.get(), TheHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.COASTAL_PACKET.get(), CoastalPacketRenderer::new);
         event.registerEntityRenderer(ModEntities.TRAIN_LOCOMOTIVE.get(),
-                context -> new TrainCarRenderer<>(context, 2.3F));
+                context -> new TrainCarRenderer<>(context,
+                        new TrainCarModel(context.bakeLayer(TrainCarModel.LOCOMOTIVE_LAYER)),
+                        TrainCarModel.LOCOMOTIVE_TEXTURE, 4.5F));
         event.registerEntityRenderer(ModEntities.TRAIN_WAGON.get(),
-                context -> new TrainCarRenderer<>(context, 2.0F));
+                context -> new TrainCarRenderer<>(context,
+                        new TrainCarModel(context.bakeLayer(TrainCarModel.WAGON_LAYER)),
+                        TrainCarModel.WAGON_TEXTURE, 4.0F));
     }
 }
