@@ -74,6 +74,43 @@ no `PORT` (or whose plan authored no water and whose map has no reachable sea). 
 `MAX_OFFSET_BLOCKS = 320` cap still applies only to that fallback; the authored anchor path reaches
 512 blocks, which is what brings Bangkok (344) and Istanbul (326) in.
 
+**The authored berth must be map water.** A basin the plan dug into a pixel the baked landmask
+calls land (Buenos Aires' delta quay) exists only in the plan: the packet would spawn on land and
+no sea lane can leave, so the city falls through to real sea water along the anchor ray, and then
+to the ring scan. Buenos Aires therefore keeps its authored quay as scenery but berths at
+(−21229, 12598), the estuary 34 blocks west. Every other harbour berths at its authored quay.
+
+#### The lane
+
+A berth is a berth; a lane is a lane. The harbour point stays where the plan put it (the ship must
+look moored at the authored quay), and `ShippingLines` builds the lane in three passes:
+
+1. **safe** — A* on safe water (a full 64-block margin from land), both ends anchored on safe cells;
+2. **coastal** — A* on plain water with an 8-cell escape at the two ends, because a harbour always
+   touches the coast;
+3. **channel** — `SeaChannel`: A* on a *loose* grid (a cell is navigable when any of its 64 pixels
+   is water, corner cuts allowed) for a corridor, then each corridor hop is threaded through the
+   landmask's own 8-block pixels with a short local A*. A hop the landmask refuses marks its cell
+   blocked and the corridor is rebuilt, so a shortcut across an isthmus is abandoned for the real
+   channel. The polyline is validated against the landmask and simplified by line of sight.
+
+The third pass is what makes narrow water work: Gibraltar (47 blocks wide), the Bosphorus and the
+Dardanelles, and the Gulf of Suez are all thinner than the coarse grid's safety margin, so before
+it Rome, Istanbul and Cairo had no sea partner at all. It never moves the berth and never crosses
+land; where the map really is a land bridge (a filled canal, an isthmus) the pair stays unlinked.
+
+Coverage after the harbour rework (`build/sea-network-report.txt`): **31 lines, 18 harbours, 0
+isolated**, built once in ~7 s on the server's first `ShippingLines.all()`. The four that the
+coarse grid used to lose:
+
+| harbour | partner | lane |
+|---|---|---|
+| rome | london | 16 196 blocks, out through Gibraltar |
+| istanbul | rome | 7 541 blocks, Bosphorus → Marmara → Dardanelles |
+| cairo | mumbai | Red Sea → Indian Ocean |
+| buenos_aires | rio_de_janeiro | Río de la Plata estuary (berth moved to real water) |
+
+
 `ShipService` spawns at `origin.waterY() + 0.85` instead of `level.getSeaLevel() + 0.85`.  This is
 what puts Mexico City's canal basin at its authored Y (~124 in the probe, not 63) and keeps a
 coastal basin that is dug below sea level at its own surface.
@@ -135,7 +172,13 @@ basin (Y 111), which is why the authored basin is far above the ocean.
 * `world/loc/city/plan/CityPlanProbe.java`: deterministic headless plan recorder and berth finder.
 * `world/transport/Port.java`: `waterY`.
 * `world/transport/Ports.java`: authored berth authoritative, real berth Y, reach 512 for the
-  authored fallback, ring scan only for cities without a `PORT`.
+  authored fallback, ring scan only for cities without a `PORT`; the berth must be map water.
+* `world/transport/SeaChannel.java`: pixel-resolution lane threading for straits and quays the
+  64-block grid cannot resolve (corridor on a loose grid, local pixel A* per hop, retry on a
+  blocked hop).
+* `world/transport/SeaGrid.java`: `cellX`/`cellZ`/`centreX`/`centreZ` block↔cell helpers.
+* `world/transport/SeaRouteFinder.java`: optional corner cutting for the corridor search only.
+* `world/transport/ShippingLines.java`: third (channel) pass after safe and coastal.
 * `world/transport/ShipService.java`: spawn at `waterY + 0.85`.
 * All 24 `*Plan.java`: axis keyword and anchor placement; platforms widened / canopies raised
   where the old ones were too low or too narrow; basins deepened to four courses; new basins for
@@ -145,11 +188,16 @@ basin (Y 111), which is why the authored basin is far above the ocean.
 
 ## Verification
 
-`src/test/java/.../world/rail/StationHarbourGeometryTest.java` is the gate. It records every plan,
-asserts the `STATION` axis, the authored rail within 32 blocks, a five-wide authored platform with
-five clear above it, and the generated platform (86, five wide, edge 3, clear 5, canopy +6, sign,
-lamp, buffer). For every city with a `PORT` it asserts a berth of at least 12 × 24 × 4 and prints
-the per-city numbers to `build/station-harbour-report.txt`.
+`src/test/java/.../world/rail/StationHarbourGeometryTest.java` is the station gate. It records
+every plan, asserts the `STATION` axis, the authored rail within 32 blocks, a five-wide authored
+platform with five clear above it, and the generated platform (86, five wide, edge 3, clear 5,
+canopy +6, sign, lamp, buffer). For every city with a `PORT` it asserts a berth of at least
+12 × 24 × 4 and prints the per-city numbers to `build/station-harbour-report.txt`.
+
+`src/test/java/.../world/transport/SeaNetworkCoverageTest.java` is the sea gate: every harbour has
+at least one partner, the network has at least 18 lines, no harbour is isolated, and no lane
+crosses land (sampled every 6 blocks). It prints the per-harbour partner table to
+`build/sea-network-report.txt`.
 
 ```
 ./scripts/safe-build.sh bash -lc 'docker compose build dev >/dev/null && \
@@ -161,11 +209,11 @@ worlds keep their old platforms, sheds and basins until the city/harbour chunks 
 
 ## Known gaps
 
-* **Inland/river ports and sea lanes.** `ShippingLines` still plans over the baked landmask, so a
-  berth on an authored basin that is land in the map (Mexico City, the Lima cliff, the Rome/Bangkok
-  rivers) can have no sea route even though its spawn Y is now correct. Partner selection, fares
-  and schedules were out of scope and are unchanged. A coastal basin that overlays map ocean is
-  unaffected.
+* **Inland/river ports and sea lanes.** The channel pass threads narrow water, but a berth whose
+  basin is genuinely land in the baked map (Mexico City's canal, Lima's cliff-top Callao basin)
+  cannot carry a lane and those cities are not coastal ports at all. Buenos Aires is the only
+  scheduled harbour whose authored quay is land; it now berths on the estuary instead. Partner
+  selection, fares and schedules were out of scope and are unchanged.
 * **The generated platform palette is neutral stone brick.** Authored cities keep their own
   quays, sheds and signs, but the worldgen platform/canopy is a shared transport material, not a
   per-city palette.

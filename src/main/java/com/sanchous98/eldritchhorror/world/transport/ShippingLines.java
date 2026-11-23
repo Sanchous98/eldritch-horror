@@ -22,6 +22,10 @@ import org.jspecify.annotations.Nullable;
  * still touches land, is simply absent: "no lane, no line". The lane is bidirectional, so one A*
  * serves both directions.
  *
+ * <p>Each pair is tried three ways: safe-anchored A*, coastal A* with a short escape, and finally
+ * {@link SeaChannel}, which threads the landmask at pixel resolution for straits and quays the
+ * 64-block grid cannot resolve.
+ *
  * <p>Server-side only: the route builder reads {@link EarthMaps} and samples the world map.
  */
 public final class ShippingLines {
@@ -189,7 +193,7 @@ public final class ShippingLines {
             int width = 2 * EarthMap.HALF_WIDTH / SeaGrid.CELL_BLOCKS;
             int height = 2 * EarthMap.HALF_HEIGHT / SeaGrid.CELL_BLOCKS;
             local = SeaGrid.of(width, height, MARGIN_CELLS,
-                    (cx, cz) -> map.isLand(centreX(cx), centreZ(cz)));
+                    (cx, cz) -> map.isLand(SeaGrid.centreX(cx), SeaGrid.centreZ(cz)));
             grid = local;
         }
         return local;
@@ -200,7 +204,29 @@ public final class ShippingLines {
         if (safe != null) {
             return safe;
         }
-        return attempt(sea, map, from, to, false);
+        SeaRoute coastal = attempt(sea, map, from, to, false);
+        if (coastal != null) {
+            return coastal;
+        }
+        return channel(map, from, to);
+    }
+
+    /**
+     * The last attempt: thread the lane at the landmask's pixel resolution ({@link SeaChannel}).
+     * A narrow strait or a quay inside a land pixel is invisible to the coarse grid but perfectly
+     * navigable at 8 blocks, and the lane still starts and ends at the authored berth.
+     */
+    private static @Nullable SeaRoute channel(EarthMap map, Port from, Port to) {
+        List<SeaPoint> points = SeaChannel.lane(map, new SeaPoint(from.waterX(), from.waterZ()),
+                new SeaPoint(to.waterX(), to.waterZ()));
+        if (points == null || firstLand(map, points) != null) {
+            return null;
+        }
+        double length = 0.0;
+        for (int i = 1; i < points.size(); i++) {
+            length += points.get(i - 1).distanceTo(points.get(i));
+        }
+        return new SeaRoute(points, length);
     }
 
     /**
@@ -243,7 +269,7 @@ public final class ShippingLines {
         List<SeaPoint> points = new ArrayList<>(cells.size() + 2);
         addPoint(points, new SeaPoint(from.waterX(), from.waterZ()));
         for (SeaCell cell : cells) {
-            addPoint(points, new SeaPoint(centreX(cell.x()), centreZ(cell.z())));
+            addPoint(points, new SeaPoint(SeaGrid.centreX(cell.x()), SeaGrid.centreZ(cell.z())));
         }
         addPoint(points, new SeaPoint(to.waterX(), to.waterZ()));
         if (points.size() < 2 || firstLand(map, points) != null) {
@@ -263,7 +289,7 @@ public final class ShippingLines {
     }
 
     private static @Nullable SeaCell anchor(SeaGrid sea, EarthMap map, Port port, boolean safeOnly) {
-        SeaCell centre = new SeaCell(cellX(port.waterX()), cellZ(port.waterZ()));
+        SeaCell centre = new SeaCell(SeaGrid.cellX(port.waterX()), SeaGrid.cellZ(port.waterZ()));
         SeaCell best = null;
         double bestDistance = Double.MAX_VALUE;
         for (int ring = 0; ring <= ANCHOR_CELLS; ring++) {
@@ -278,7 +304,7 @@ public final class ShippingLines {
                         continue;
                     }
                     if (!waterSegment(map, port.waterX(), port.waterZ(),
-                            centreX(x), centreZ(z))) {
+                            SeaGrid.centreX(x), SeaGrid.centreZ(z))) {
                         continue;
                     }
                     double distance = (double) dx * dx + (double) dz * dz;
@@ -331,19 +357,4 @@ public final class ShippingLines {
         return true;
     }
 
-    private static int cellX(int blockX) {
-        return Math.floorDiv(blockX + EarthMap.HALF_WIDTH, SeaGrid.CELL_BLOCKS);
-    }
-
-    private static int cellZ(int blockZ) {
-        return Math.floorDiv(blockZ + EarthMap.HALF_HEIGHT, SeaGrid.CELL_BLOCKS);
-    }
-
-    private static int centreX(int cellX) {
-        return -EarthMap.HALF_WIDTH + cellX * SeaGrid.CELL_BLOCKS + SeaGrid.CELL_BLOCKS / 2;
-    }
-
-    private static int centreZ(int cellZ) {
-        return -EarthMap.HALF_HEIGHT + cellZ * SeaGrid.CELL_BLOCKS + SeaGrid.CELL_BLOCKS / 2;
-    }
 }

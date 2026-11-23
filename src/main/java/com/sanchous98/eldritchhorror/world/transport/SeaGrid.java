@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.world.transport;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.Arrays;
 
 /**
@@ -128,6 +129,26 @@ public final class SeaGrid {
     /** Wraps a cell column onto the cylinder. */
     public int wrapX(int cellX) {
         return Math.floorMod(cellX, this.width);
+    }
+
+    /** @return the cell column holding a world X (wrapped onto the cylinder). */
+    public static int cellX(int blockX) {
+        return Math.floorDiv(blockX + EarthMap.HALF_WIDTH, CELL_BLOCKS);
+    }
+
+    /** @return the cell row holding a world Z (clamped, latitude does not wrap). */
+    public static int cellZ(int blockZ) {
+        return Math.floorDiv(blockZ + EarthMap.HALF_HEIGHT, CELL_BLOCKS);
+    }
+
+    /** @return the world X of a cell column's centre. */
+    public static int centreX(int cellX) {
+        return -EarthMap.HALF_WIDTH + cellX * CELL_BLOCKS + CELL_BLOCKS / 2;
+    }
+
+    /** @return the world Z of a cell row's centre. */
+    public static int centreZ(int cellZ) {
+        return -EarthMap.HALF_HEIGHT + cellZ * CELL_BLOCKS + CELL_BLOCKS / 2;
     }
 
     /** @return the shortest signed horizontal distance from {@code fromX} to {@code toX}, in cells. */

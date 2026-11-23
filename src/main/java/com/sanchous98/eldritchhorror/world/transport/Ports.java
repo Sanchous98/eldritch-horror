@@ -21,10 +21,11 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>An authored {@code PORT} anchor is authoritative: the plan is probed headlessly for the water
  * body next to the anchor, and that basin's own surface Y becomes the berth level. This is what
- * makes an authored river port reachable at the ship's Y. An authored basin that is inland or
- * lifted above the ocean cannot carry a sea lane, so it falls back to real sea water along the
- * anchor ray; only a city with no authored anchor falls back to the 32-direction ring scan over the
- * baked landmask, which cannot see a dug basin.
+ * makes an authored river port reachable at the ship's Y. An authored basin that is inland, lifted
+ * above the ocean, or dug into a land pixel the baked landmask knows nothing about cannot carry a
+ * sea lane, so it falls back to real sea water along the anchor ray; only a city with no authored
+ * anchor falls back to the 32-direction ring scan over the baked landmask, which cannot see a dug
+ * basin.
  *
  * <p>Server-side and cached once. Never call from client code.
  */
@@ -133,10 +134,12 @@ public final class Ports {
 
     /**
      * The authored anchor is authoritative. Its plan is probed for the water body next to it: a
-     * berth point, the berth surface Y, and the anchor as the shore. When the plan authored no
-     * water (an ocean quay whose basin is the baked sea), the map is walked outward from the anchor
-     * instead. The authored reach is not capped at {@link #MAX_OFFSET_BLOCKS}, which used to drop
-     * Bangkok and Istanbul.
+     * berth point, the berth surface Y, and the anchor as the shore. The berth must itself be map
+     * water — a basin the plan dug into a land pixel (Buenos Aires' delta quay) exists only in the
+     * plan, so it cannot carry a sea lane and the city falls back to real sea water. When the plan
+     * authored no water at all (an ocean quay whose basin is the baked sea), the map is walked
+     * outward from the anchor instead. The authored reach is not capped at
+     * {@link #MAX_OFFSET_BLOCKS}, which used to drop Bangkok and Istanbul.
      */
     private static @Nullable Port authoredHarbour(EarthMap map, City city, CityPlan plan) {
         for (CityPoi poi : plan.pois()) {
@@ -151,7 +154,9 @@ public final class Ports {
                     new MapTerrain(map), CityPlanProbe.Bounds.around(anchorX, anchorZ,
                             PROBE_RADIUS));
             CityPlanProbe.Berth berth = probe.waterBerth(anchorX, anchorZ, PROBE_RADIUS);
-            if (berth != null && openSeaNear(map, berth.x(), berth.z())
+            if (berth != null
+                    && !map.isLand(berth.x(), berth.z())
+                    && openSeaNear(map, berth.x(), berth.z())
                     && Math.abs(berth.y() - ElevationCurve.SEA_LEVEL) <= SEA_LEVEL_TOLERANCE) {
                 int shoreX = map.isLand(anchorX, anchorZ) ? anchorX : city.x();
                 int shoreZ = map.isLand(anchorX, anchorZ) ? anchorZ : city.z();

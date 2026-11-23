@@ -45,16 +45,31 @@ public final class SeaRouteFinder {
      */
     public static @Nullable List<SeaCell> findRaw(SeaGrid grid, SeaCell start, SeaCell goal,
                                                   int escapeRadius) {
+        return findRaw(grid, start, goal, escapeRadius, false);
+    }
+
+    /**
+     * As {@link #findRaw(SeaGrid, SeaCell, SeaCell, int)}, but optionally allowing a diagonal step
+     * whose two orthogonal neighbours are not both navigable. A corridor search over a coarse grid
+     * needs this to follow a channel that crosses a cell corner; a real lane must never do it, so
+     * the flag stays off for the lane itself.
+     *
+     * @param cornerCutting allow diagonal moves that cut a cell corner
+     * @return the raw cell path, or {@code null}
+     */
+    public static @Nullable List<SeaCell> findRaw(SeaGrid grid, SeaCell start, SeaCell goal,
+                                                  int escapeRadius, boolean cornerCutting) {
         if (!grid.water(start.x(), start.z()) || !grid.water(goal.x(), goal.z())) {
             return null;
         }
         int width = grid.width();
         int size = width * grid.height();
-        return search(grid, start, goal, escapeRadius, width, size);
+        return search(grid, start, goal, escapeRadius, width, size, cornerCutting);
     }
 
     private static @Nullable List<SeaCell> search(SeaGrid grid, SeaCell start, SeaCell goal,
-                                                  int escapeRadius, int width, int size) {
+                                                  int escapeRadius, int width, int size,
+                                                  boolean cornerCutting) {
         float[] best = new float[size];
         Arrays.fill(best, Float.POSITIVE_INFINITY);
         int[] cameFrom = new int[size];
@@ -93,7 +108,7 @@ public final class SeaRouteFinder {
                     if (!allowed(grid, nx, nz, start, goal, escapeRadius, allowedCache, width)) {
                         continue;
                     }
-                    if (dx != 0 && dz != 0
+                    if (dx != 0 && dz != 0 && !cornerCutting
                             && (!allowed(grid, nx, z, start, goal, escapeRadius, allowedCache, width)
                             || !allowed(grid, x, nz, start, goal, escapeRadius, allowedCache,
                             width))) {

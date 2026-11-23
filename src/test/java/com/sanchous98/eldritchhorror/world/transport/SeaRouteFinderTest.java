@@ -102,6 +102,19 @@ class SeaRouteFinderTest {
     }
 
     @Test
+    void cornerCuttingThreadsAOneCellDiagonalChannel() {
+        // Water only along the diagonal (0,0)-(1,1)-(2,2)-(3,3): every orthogonal neighbour of the
+        // channel is land, so a ship may not cut the corner but a corridor may.
+        SeaGrid grid = SeaGrid.of(4, 4, 0, (x, z) -> x != z);
+        assertNull(SeaRouteFinder.findRaw(grid, new SeaCell(0, 0), new SeaCell(3, 3), 0),
+                "a lane must not cut a cell corner");
+        List<SeaCell> corridor = SeaRouteFinder.findRaw(grid, new SeaCell(0, 0),
+                new SeaCell(3, 3), 0, true);
+        assertNotNull(corridor, "a corridor search may follow the diagonal");
+        assertEquals(4, corridor.size());
+    }
+
+    @Test
     void seaPointDistanceCrossesTheSeamTheShortWay() {
         int half = EarthMap.HALF_WIDTH;
         SeaPoint west = new SeaPoint(half - 5, 100);
