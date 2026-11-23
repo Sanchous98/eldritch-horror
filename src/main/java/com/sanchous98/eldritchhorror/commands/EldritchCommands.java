@@ -279,6 +279,9 @@ public final class EldritchCommands {
                 .then(Commands.literal("rail").executes(ctx -> pregen(ctx, "rail")))
                 .then(Commands.literal("all").executes(ctx -> pregen(ctx, "all")))
                 .then(Commands.literal("world").executes(ctx -> pregen(ctx, "world")))
+                .then(Commands.literal("radius")
+                        .then(Commands.argument("blocks", IntegerArgumentType.integer(256, 4096))
+                                .executes(EldritchCommands::pregenRadius)))
                 .then(Commands.literal("status").executes(EldritchCommands::pregenStatus))
                 .then(Commands.literal("stop").executes(EldritchCommands::pregenStop)));
         // Probe hook for ritual cells: spawn persistent cultists of one cult at the caller.
@@ -523,9 +526,17 @@ public final class EldritchCommands {
         return 1;
     }
 
+    /** {@code /eh pregen radius <blocks>}: cities plus a square margin, plus rail corridors. */
+    private static int pregenRadius(CommandContext<CommandSourceStack> ctx) {
+        int blocks = IntegerArgumentType.getInteger(ctx, "blocks");
+        String result = com.sanchous98.eldritchhorror.world.PregenService.startRadius(
+                ctx.getSource().getServer(), blocks);
+        ctx.getSource().sendSuccess(() -> Component.literal(result), true);
+        return 1;
+    }
+
     /** {@code /eh pregen status}: queue progress and ETA. */
-    private static int pregenStatus(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSuccess(() -> Component.literal(
+    private static int pregenStatus(CommandContext<CommandSourceStack> ctx) {        ctx.getSource().sendSuccess(() -> Component.literal(
                 com.sanchous98.eldritchhorror.world.PregenService.status()), false);
         return 1;
     }

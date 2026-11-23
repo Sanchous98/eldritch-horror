@@ -14,9 +14,8 @@ import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.util.ArrayDeque;
-import java.util.HashSet;
+import java.util.BitSet;
 import java.util.Locale;
-import java.util.Set;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -66,7 +65,8 @@ public final class PregenService {
     /** Persist the world cursor this often (chunks). */
     private static final int CURSOR_SAVE_EVERY = 256;
     /** Stop the world job when the world volume has less than this much usable space. */
-    private static final int MIN_FREE_GIB = 8;
+    private static final int MIN_FREE_GIB = Math.clamp(
+            Integer.getInteger("eh.pregen.min-free-gib", 40), 4, 200);
     /** Warn at most this often when the world job is waiting for players to leave. */
     private static final long WAIT_LOG_NANOS = 300_000_000_000L;
 
@@ -80,7 +80,8 @@ public final class PregenService {
             (MAX_X - MIN_X + 1) * (MAX_Z - MIN_Z + 1);
 
     private static final ArrayDeque<ChunkPos> QUEUE = new ArrayDeque<>();
-    private static final Set<Long> SEEN = new HashSet<>();
+    /** One bit per chunk of the cylinder; 4 MiB instead of a 33M-entry hash set. */
+    private static final BitSet SEEN = new BitSet(WORLD_TOTAL);
     private static boolean running;
     private static boolean worldMode;
     private static int total;
@@ -116,24 +117,39 @@ public final class PregenService {
         }
         stop();
         if (selected.equals("cities") || selected.equals("all")) {
-            queueCities();
+            queueCities(0);
         }
         if (selected.equals("rail") || selected.equals("all")) {
             queueRail();
         }
+        return beginQueueRun(server, selected);
+    }
+
+    /**
+     * Queues a square of {@code halfBlocks} around every city plus the rail corridors. This is the
+     * practical middle ground between the 73k-chunk content set and the whole cylinder: 1,000
+     * blocks is ~0.38M chunks (~4 h), 2,000 is ~1.5M (~17 h), 4,096 is ~6.3M (~3 days).
+     *
+     * @param halfBlocks half-size of the square around each city, in blocks
+     */
+    public static String startRadius(MinecraftServer server, int halfBlocks) {
+        if (running && worldMode) {
+            saveWorldCursor(server);
+        }
+        stop();
+        queueCities(halfBlocks);
+        queueRail();
+        return beginQueueRun(server, "radius " + halfBlocks);
+    }
+
+    private static String beginQueueRun(MinecraftServer server, String label) {
         worldMode = false;
         total = QUEUE.size();
         done = 0;
         failures = 0;
         tickCounter = 0;
         beginRun();
-        if (running) {
-            State state = State.of(server);
-            state.done = false;
-            state.chunks = 0;
-            state.setDirty();
-        }
-        EldritchHorror.LOGGER.info("pregen: {} chunks queued ({})", total, selected);
+        EldritchHorror.LOGGER.info("pregen: {} chunks queued ({})", total, label);
         return running ? "pregen started: " + total + " chunks" : "pregen: nothing to generate";
     }
 
@@ -145,6 +161,11 @@ public final class PregenService {
         State state = State.of(server);
         if (state.worldComplete) {
             return "pregen world: already complete (" + WORLD_TOTAL + " chunks)";
+        }
+        long free = freeGiB(server);
+        if (free >= 0 && free < MIN_FREE_GIB) {
+            return "pregen world: only " + free + " GiB free, need at least " + MIN_FREE_GIB
+                    + " (set -Deh.pregen.min-free-gib to override)";
         }
         cursorX = Math.clamp(state.worldX, MIN_X, MAX_X);
         cursorZ = Math.clamp(state.worldZ, MIN_Z, MAX_Z);
@@ -379,10 +400,16 @@ public final class PregenService {
         stop();
     }
 
-    private static void queueCities() {
+    /**
+     * @param halfOverride half-size of the square around each city in blocks, or {@code 0} to use
+     *                     the plan's own extent
+     */
+    private static void queueCities(int halfOverride) {
         for (City city : Cities.all()) {
             CityPlan plan = CityPlans.forCity(city.name());
-            int half = plan == null ? 340 : Math.clamp(plan.halfExtent(), 300, 400);
+            int half = halfOverride > 0
+                    ? halfOverride
+                    : plan == null ? 340 : Math.clamp(plan.halfExtent(), 300, 400);
             int minX = city.x() - half;
             int maxX = city.x() + half;
             int minZ = city.z() - half;
@@ -410,7 +437,13 @@ public final class PregenService {
     }
 
     private static void add(int chunkX, int chunkZ) {
-        if (SEEN.add(ChunkPos.pack(chunkX, chunkZ))) {
+        if (chunkX < MIN_X || chunkX > MAX_X || chunkZ < MIN_Z || chunkZ > MAX_Z) {
+            QUEUE.add(new ChunkPos(chunkX, chunkZ));
+            return;
+        }
+        int index = (chunkZ - MIN_Z) * (MAX_X - MIN_X + 1) + chunkX - MIN_X;
+        if (!SEEN.get(index)) {
+            SEEN.set(index);
             QUEUE.add(new ChunkPos(chunkX, chunkZ));
         }
     }

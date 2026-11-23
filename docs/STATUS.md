@@ -283,6 +283,14 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   container). A per-world `SavedData` flag marks a completed run, so `-Deh.pregen=all` skips it on
   later boots; an explicit `/eh pregen all` always re-runs. The queue is bounded and chunks are
   persisted by the normal world save, so later sessions only read them.
+- **Pregen size (measured 2026-11):** wilderness chunks are not uniformly cheap. 256-chunk
+  samples: Himalaya 11.3 KB, Amazon 10.7 KB, Siberia 10.5 KB, Sahara 5.5 KB, Pacific 5.9 KB,
+  open ocean 4.5 KB. The full cylinder is 33,554,432 chunks, i.e. **~200–230 GiB**, which does
+  not fit the instance's 155 GiB free and leaves nothing for play. The practical scopes are
+  `/eh pregen radius <blocks>` around cities plus the rail corridors: 1,000 blocks ≈ 0.38M
+  chunks (~2.6 GiB, ~4 h), 2,000 ≈ 1.5M (~10–13 GiB, ~17 h), 4,096 ≈ 6.3M (~44 GiB, ~3 days).
+  `/eh pregen world` is resumable (cursor in `SavedData`, no 33M-entry set) but refuses to start
+  below `-Deh.pregen.min-free-gib` (default 40 GiB) and stops if free space drops under it.
 - **Oracle server:** `eh-oracle` runs `--restart unless-stopped` from the bind-mounted source
   (`~/eldritch-horror`) with `~/eh-run`, `~/eh-build` and `~/eh-gradle` volumes, heap 6 G, container
   limit 8 G, 2 CPUs. `pause-when-empty-seconds=0` is required — at the default 60 s an empty server
