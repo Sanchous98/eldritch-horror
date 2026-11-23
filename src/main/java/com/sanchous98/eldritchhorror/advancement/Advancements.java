@@ -173,6 +173,8 @@ public final class Advancements {
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             award(player, ROOT);
+            // Backfill the capstone for a world whose 24 contracts predate this tree.
+            awardAllContractsIfComplete(player);
         }
     }
 
