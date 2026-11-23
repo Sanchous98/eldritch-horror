@@ -2,10 +2,7 @@ package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
-import com.sanchous98.eldritchhorror.cult.CultDefinition;
-import com.sanchous98.eldritchhorror.cult.CultRank;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
-import com.sanchous98.eldritchhorror.cult.Cults;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,13 +67,13 @@ public final class BossSanityReward {
                     continue;
                 }
                 ServerPlayer player = server.getPlayerList().getPlayer(hit.getKey());
-                if (player != null && !isCultist(player)) {
+                if (player != null && !CultSystem.isInitiated(player)) {
                     full.add(player);
                 }
             }
         }
         if (event.getSource().getEntity() instanceof ServerPlayer killer
-                && !isCultist(killer)) {
+                && !CultSystem.isInitiated(killer)) {
             full.add(killer);
         }
         for (ServerPlayer player : full) {
@@ -85,7 +82,7 @@ public final class BossSanityReward {
         double ambient = ModConfig.BOSS_KILL_AMBIENT_SANITY.get();
         if (ambient > 0.0) {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (!full.contains(player) && !isCultist(player)) {
+                if (!full.contains(player) && !CultSystem.isInitiated(player)) {
                     reward(player, boss, ambient, false);
                 }
             }
@@ -118,15 +115,5 @@ public final class BossSanityReward {
         player.sendSystemMessage(Component.translatable(
                 direct ? "boss.reward.eldritch_horror" : "boss.reward.ambient.eldritch_horror",
                 boss.getDisplayName(), amount));
-    }
-
-    /** A cultist is anyone at {@code INITIATE} or above with any cult; they get no relief. */
-    private static boolean isCultist(ServerPlayer player) {
-        for (CultDefinition cult : Cults.all()) {
-            if (CultSystem.rankOf(player, cult.id()).atLeast(CultRank.INITIATE)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -3238,6 +3238,33 @@ public final class ModConfig {
             BUILDER.comment("Ticks within which damage to a boss counts as participation.")
                     .defineInRange("bossContributionWindow", 12000, 200, 240000);
 
+    // --- Cult betrayal (design/09, design/28) -----------------------------------------------
+
+    /** Master switch for the cultist betrayal/redemption reaction to attacking a boss. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CULT_BETRAYAL =
+            BUILDER.comment("Striking an Ancient One as an initiated cultist costs standing and severs rites.")
+                    .define("enableCultBetrayal", true);
+
+    /** Reputation lost with every cult the player is initiated in, per betrayal event. */
+    public static final ModConfigSpec.IntValue CULT_BETRAYAL_REPUTATION =
+            BUILDER.comment("Cult standing lost per betrayal (each initiated cult).")
+                    .defineInRange("cultBetrayalReputation", 10, 1, 100);
+
+    /** Ticks between betrayal events for one player. */
+    public static final ModConfigSpec.IntValue CULT_BETRAYAL_COOLDOWN =
+            BUILDER.comment("Ticks between betrayal reactions for one player.")
+                    .defineInRange("cultBetrayalCooldown", 6000, 0, 240000);
+
+    /** How long rites fail after the patron is severed. */
+    public static final ModConfigSpec.IntValue CULT_BETRAYAL_SEVERED_TICKS =
+            BUILDER.comment("Ticks during which the player's rites fail after a betrayal.")
+                    .defineInRange("cultBetrayalSeveredTicks", 6000, 0, 240000);
+
+    /** Corruption removed per betrayal event: the redemption side of fighting the dark. */
+    public static final ModConfigSpec.DoubleValue CULT_BETRAYAL_REDEMPTION_CORRUPTION =
+            BUILDER.comment("Corruption removed per betrayal event (redemption).")
+                    .defineInRange("cultBetrayalRedemptionCorruption", 5.0, 0.0, 100.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

@@ -736,6 +736,8 @@
   "boss.escape.eldritch_horror": "You abandon %s to its fate. The guilt gnaws at your mind.",
   "boss.reward.eldritch_horror": "%s is broken. Your mind steadies (+%s sanity).",
   "boss.reward.ambient.eldritch_horror": "The pressure of %s lifts. You steady yourself (+%s sanity).",
+  "cult.betrayal.eldritch_horror": "Your patron recoils. Cult standing -%s, corruption -%s.",
+  "rite.severed.eldritch_horror": "The presence drowns your patron's whisper. The rite fails.",
   "screen.eldritch_horror.events": "Active World Events",
   "events.eldritch_horror.empty": "No world events are active.",
   "events.eldritch_horror.remaining": "ends in %ss",

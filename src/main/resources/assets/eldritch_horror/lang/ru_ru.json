@@ -736,6 +736,8 @@
   "boss.escape.eldritch_horror": "Ты бросаешь %s на произвол судьбы. Вина гложет рассудок.",
   "boss.reward.eldritch_horror": "%s сломлен. Рассудок возвращается (+%s).",
   "boss.reward.ambient.eldritch_horror": "Давление %s спадает. Ты приходишь в себя (+%s).",
+  "cult.betrayal.eldritch_horror": "Покровитель отшатывается. Положение в культе -%s, скверна -%s.",
+  "rite.severed.eldritch_horror": "Присутствие глушит шёпот покровителя. Ритуал не срабатывает.",
   "screen.eldritch_horror.events": "Активные мировые события",
   "events.eldritch_horror.empty": "Активных мировых событий нет.",
   "events.eldritch_horror.remaining": "закончится через %s с",

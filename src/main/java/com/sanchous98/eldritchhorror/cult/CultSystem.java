@@ -46,6 +46,18 @@ public final class CultSystem {
     }
 
     /**
+     * @return whether {@code player} is initiated ({@code INITIATE} or above) in any cult
+     */
+    public static boolean isInitiated(ServerPlayer player) {
+        for (CultDefinition cult : Cults.all()) {
+            if (rankOf(player, cult.id()).atLeast(CultRank.INITIATE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Adds {@code delta} to a cult and applies the opposed cross-consequence to its opposites
      * (a gain costs them {@code OPPOSED_FACTOR × delta}, and vice versa). Returns the new value
      * with the cult itself.

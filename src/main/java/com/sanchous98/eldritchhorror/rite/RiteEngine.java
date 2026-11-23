@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.rite;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.cult.CultBetrayal;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.cult.CultRank;
@@ -147,6 +148,10 @@ public final class RiteEngine {
      *                      cooldown) still applies.
      */
     public static Result perform(ServerPlayer player, RiteDefinition rite, boolean freeOfferings) {
+        if (CultBetrayal.isSevered(player)) {
+            return new Result(false,
+                    Component.translatable("rite.severed.eldritch_horror"));
+        }
         if (!RiteKnowledge.knows(player, rite.id())) {
             return new Result(false, Component.literal("You do not know the rite: " + rite.id()));
         }
