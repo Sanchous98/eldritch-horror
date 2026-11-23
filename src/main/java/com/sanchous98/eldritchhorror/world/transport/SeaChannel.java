@@ -53,7 +53,7 @@ final class SeaChannel {
     }
 
     /** The cached loose grid: any water pixel makes a cell navigable. */
-    private record Loose(SeaGrid grid, boolean[] passable) {
+    private record Loose(boolean[] passable, int width, int height) {
     }
 
     /**
@@ -67,9 +67,8 @@ final class SeaChannel {
      */
     static @Nullable List<SeaPoint> lane(EarthMap map, SeaPoint from, SeaPoint to) {
         Loose loose = loose(map);
-        int width = loose.grid().width();
-        int height = loose.grid().height();
-        boolean[] blocked = new boolean[width * height];
+        int width = loose.width();
+        boolean[] blocked = new boolean[width * loose.height()];
         for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             SeaGrid grid = corridorGrid(loose, blocked);
             SeaCell start = cellOf(grid, from);
@@ -354,17 +353,16 @@ final class SeaChannel {
                     passable[z * width + x] = anyWaterPixel(map, x, z);
                 }
             }
-            local = new Loose(SeaGrid.of(width, height, 0,
-                    (x, z) -> !passable[z * width + x]), passable);
+            local = new Loose(passable, width, height);
             cached = local;
         }
         return local;
     }
 
     private static SeaGrid corridorGrid(Loose loose, boolean[] blocked) {
-        int width = loose.grid().width();
+        int width = loose.width();
         boolean[] passable = loose.passable();
-        return SeaGrid.of(width, loose.grid().height(), 0,
+        return SeaGrid.of(width, loose.height(), 0,
                 (x, z) -> !passable[z * width + x] || blocked[z * width + x]);
     }
 
