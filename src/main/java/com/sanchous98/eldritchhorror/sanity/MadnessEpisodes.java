@@ -3,33 +3,36 @@ package com.sanchous98.eldritchhorror.sanity;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.BestiarySupport;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -38,6 +41,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jspecify.annotations.Nullable;
 
@@ -47,34 +51,34 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  *   <li><b>Hallucination</b> — one or two phantom mobs appear around the player. The type is drawn
  *       from this biome's own monster spawn list, so it looks exactly like something that could
- *       really be there. A phantom chases and its hits are converted: no health damage, a sanity
- *       cost instead. It has real health and must be fought (arrows, durability), but gives no
- *       drops and no XP; killing it earns a small "it was never there" relief. It fades on its own
- *       after the configured lifetime. Nearby lucid players get a warning message — the phantom is
- *       <b>not</b> suppressed or revealed to the afflicted; a companion can only tell them.</li>
+ *       really be there. They hit <b>hard</b> (damage multiplier) so a player cannot safely "test"
+ *       one by letting it strike them, and they have real health, so destroying one costs arrows
+ *       and durability; they give no drops and no XP, and only the afflicted player can see them.
+ *       Killing one earns a small "it was never there" relief.</li>
  *   <li><b>Fugue</b> — blindness and nausea, and a short involuntary displacement (8–16 blocks).</li>
  *   <li><b>Compulsion</b> — the main-hand stack is dropped; weakness/mining fatigue follow.</li>
  * </ul>
  *
- * <p>Episodes fire on a downward band transition (design/27: effects on the transition, not every
- * tick), with a per-player cooldown; at {@code MARKED} hallucinations recur. Nothing is persisted
- * across restarts: phantoms are ordinary entities tagged in persistent data, tracked here for
- * expiry, caps and cleanup.
+ * <p>Phantoms are ordinary entities tagged in persistent data, tracked here for expiry, caps and
+ * cleanup. They are visible to the owner only: the tracker's spawn packet is followed by a remove
+ * packet for every other player (the tracking event is not cancellable in NeoForge 26.3), re-sent
+ * whenever someone starts tracking one.
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class MadnessEpisodes {
 
     private static final String ILLUSION_TAG = "eh_illusion";
     private static final int TICK_INTERVAL = 20;
-    private static final int HIT_COOLDOWN_TICKS = 40;
     private static final int MAX_ILLUSIONS_PER_PLAYER = 2;
+    private static final int HIT_COOLDOWN_TICKS = 40;
 
     private record Illusion(UUID owner, long until) {
     }
 
     private static final Map<UUID, Long> LAST_EPISODE = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> LAST_HIT = new ConcurrentHashMap<>();
     private static final Map<UUID, Illusion> ILLUSIONS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> LAST_HIT = new ConcurrentHashMap<>();
+    private static final Set<UUID> HIDE = ConcurrentHashMap.newKeySet();
 
     private MadnessEpisodes() {
     }
@@ -114,6 +118,7 @@ public final class MadnessEpisodes {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
+        processHides(server);
         if (server.getTickCount() % TICK_INTERVAL != 0) {
             return;
         }
@@ -139,32 +144,58 @@ public final class MadnessEpisodes {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID id = event.getEntity().getUUID();
         LAST_EPISODE.remove(id);
-        LAST_HIT.remove(id);
     }
 
     /**
-     * Phantoms deal no health damage; their hits are sanity. Environmental damage is ignored so a
-     * phantom never burns or falls to death and spoils the illusion. Player damage is allowed, so a
-     * phantom can be fought and killed.
+     * Phantoms never deal damage. Their attack is cancelled but staged as a hit (hurt sound and
+     * animation to nearby clients), so finding out whether a mob is real by letting it strike you is
+     * a trade-off rather than a free test.
      */
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (isIllusion(victim)) {
+        if (isPhantom(victim)) {
             if (!(event.getSource().getEntity() instanceof ServerPlayer)) {
                 event.setCanceled(true);
             }
             return;
         }
         Entity attacker = event.getSource().getEntity();
-        if (attacker != null && isIllusion(attacker) && victim instanceof ServerPlayer player) {
+        if (attacker != null && isPhantom(attacker) && victim instanceof ServerPlayer player) {
             event.setCanceled(true);
-            long now = player.level().getGameTime();
-            Long last = LAST_HIT.get(attacker.getUUID());
-            if (last == null || now - last >= HIT_COOLDOWN_TICKS) {
-                LAST_HIT.put(attacker.getUUID(), now);
-                SanityAPI.add(player, -ModConfig.MADNESS_ILLUSION_SANITY_COST.get());
-                player.sendSystemMessage(Component.translatable("madness.eldritch_horror.touched"));
+            fakeHit(player, attacker);
+        }
+    }
+
+    /** Plays the hurt sound/animation without touching health. */
+    private static void fakeHit(ServerPlayer victim, Entity illusion) {
+        long now = victim.level().getGameTime();
+        Long last = LAST_HIT.get(illusion.getUUID());
+        if (last != null && now - last < HIT_COOLDOWN_TICKS) {
+            return;
+        }
+        LAST_HIT.put(illusion.getUUID(), now);
+        if (!(victim.level() instanceof ServerLevel level)) {
+            return;
+        }
+        level.playSound(null, victim.getX(), victim.getY(), victim.getZ(),
+                SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 0.8F, 0.9F);
+        var packet = new ClientboundHurtAnimationPacket(victim.getId(), 0.0F);
+        for (ServerPlayer nearby : level.players()) {
+            if (nearby.distanceToSqr(victim) <= 16.0 * 16.0) {
+                nearby.connection.send(packet);
+            }
+        }
+    }
+
+    /** A late tracker must not see someone else's phantom. */
+    @SubscribeEvent
+    public static void onStartTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof LivingEntity target && isPhantom(target)
+                && event.getEntity() instanceof ServerPlayer player) {
+            Illusion illusion = ILLUSIONS.get(target.getUUID());
+            if (illusion != null && !illusion.owner().equals(player.getUUID())) {
+                HIDE.add(target.getUUID());
             }
         }
     }
@@ -172,7 +203,7 @@ public final class MadnessEpisodes {
     /** A phantom "dies" like a real mob, but leaves nothing behind. */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (!isIllusion(event.getEntity())) {
+        if (!isPhantom(event.getEntity())) {
             return;
         }
         ServerPlayer killer = event.getSource().getEntity() instanceof ServerPlayer player
@@ -181,21 +212,38 @@ public final class MadnessEpisodes {
         pop(event.getEntity(), killer);
     }
 
+    /** A phantom that explodes (blight pod, or a vanilla creeper if one is present) is staged. */
+    @SubscribeEvent
+    public static void onExplosion(ExplosionEvent.Start event) {
+        Entity source = event.getExplosion().getDirectSourceEntity();
+        if (source == null || !isPhantom(source)) {
+            return;
+        }
+        event.setCanceled(true);
+        if (source.level() instanceof ServerLevel level) {
+            level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, source.getX(), source.getY() + 0.5,
+                    source.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+            level.playSound(null, source.getX(), source.getY(), source.getZ(),
+                    SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+        pop(source, null);
+    }
+
     @SubscribeEvent
     public static void onDrops(LivingDropsEvent event) {
-        if (isIllusion(event.getEntity())) {
+        if (isPhantom(event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onExperience(LivingExperienceDropEvent event) {
-        if (isIllusion(event.getEntity())) {
+        if (isPhantom(event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
-    /** Spawns phantoms around the player and warns nearby lucid players. */
+    /** Spawns phantoms around the player. */
     private static void hallucinate(ServerPlayer player, int count) {
         if (!(player.level() instanceof ServerLevel level)) {
             return;
@@ -218,7 +266,6 @@ public final class MadnessEpisodes {
             player.sendSystemMessage(Component.translatable("madness.eldritch_horror.hallucination"));
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     ModSounds.AMBIENT_WHISPER.get(), SoundSource.AMBIENT, 0.7F, 1.0F);
-            notifyWitnesses(level, player);
         }
     }
 
@@ -232,44 +279,46 @@ public final class MadnessEpisodes {
             if (spot == null) {
                 continue;
             }
-            EntityType<?> type = biomeMob(level, spot);
+            EntityType<?> type = phantomType(level, spot);
             Entity entity = type.spawn(level, spot, EntitySpawnReason.EVENT);
             if (entity == null) {
                 continue;
             }
             entity.getPersistentData().putBoolean(ILLUSION_TAG, true);
+            if (entity instanceof LivingEntity living) {
+                double health = ModConfig.MADNESS_ILLUSION_HEALTH.get();
+                var maxHealth = living.getAttribute(Attributes.MAX_HEALTH);
+                if (maxHealth != null) {
+                    maxHealth.setBaseValue(health);
+                    living.setHealth((float) health);
+                }
+            }
             if (entity instanceof Mob mob) {
                 mob.setTarget(player);
             }
             ILLUSIONS.put(entity.getUUID(),
                     new Illusion(player.getUUID(), now + ModConfig.MADNESS_ILLUSION_LIFETIME.get()));
+            HIDE.add(entity.getUUID());
             return true;
         }
         return false;
     }
 
-    /** A monster that this biome can actually spawn, with a vanilla fallback. */
-    private static EntityType<?> biomeMob(ServerLevel level, BlockPos pos) {
-        MobSpawnSettings spawns = level.environmentAttributes()
-                .getValue(EnvironmentAttributes.NATURAL_MOB_SPAWNS, pos);
-        var pick = spawns.getMobsToSpawn(MobCategory.MONSTER).getRandom(level.getRandom());
-        return pick.<EntityType<?>>map(data -> data.type()).orElse(EntityTypes.ZOMBIE);
-    }
-
-    /** Tells nearby lucid players that something is wrong with the afflicted. */
-    private static void notifyWitnesses(ServerLevel level, ServerPlayer afflicted) {
-        double radius = ModConfig.MADNESS_WITNESS_RADIUS.get();
-        double minimum = ModConfig.MADNESS_WITNESS_MIN_SANITY.get();
-        for (ServerPlayer other : level.players()) {
-            if (other == afflicted || other.distanceToSqr(afflicted) > radius * radius) {
-                continue;
-            }
-            double max = SanitySystem.max(other);
-            if (max > 0.0 && SanitySystem.get(other) / max >= minimum) {
-                other.sendSystemMessage(Component.translatable(
-                        "madness.eldritch_horror.witness", afflicted.getDisplayName()));
-            }
+    /** A hostile mob from this mod that plausibly lives here (no vanilla-role creeper exists). */
+    private static EntityType<?> phantomType(ServerLevel level, BlockPos pos) {
+        var biome = level.getBiome(pos);
+        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)
+                || biome.is(BiomeTags.IS_BEACH)) {
+            return ModEntities.DROWNED_THRALL.get();
         }
+        EntityType<?>[] land = {
+                ModEntities.RISEN_HUSK.get(),
+                ModEntities.WATCHER.get(),
+                ModEntities.BLIGHT_POD.get(),
+                ModEntities.LESSER_SWARM.get(),
+                ModEntities.VEIL_STALKER.get()
+        };
+        return land[level.getRandom().nextInt(land.length)];
     }
 
     /** Blindness, nausea and a short involuntary step to a loaded surface spot. */
@@ -299,6 +348,31 @@ public final class MadnessEpisodes {
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
         player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, 100, 0));
         player.sendSystemMessage(Component.translatable("madness.eldritch_horror.compulsion"));
+    }
+
+    /** Sends a remove packet to everyone but the owner, one tick after a spawn/tracking event. */
+    private static void processHides(MinecraftServer server) {
+        if (HIDE.isEmpty()) {
+            return;
+        }
+        Iterator<UUID> iterator = HIDE.iterator();
+        while (iterator.hasNext()) {
+            UUID id = iterator.next();
+            Entity entity = server.overworld().getEntity(id);
+            Illusion illusion = ILLUSIONS.get(id);
+            if (entity == null || illusion == null) {
+                iterator.remove();
+                continue;
+            }
+            var packet = new ClientboundRemoveEntitiesPacket(entity.getId());
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (!player.getUUID().equals(illusion.owner())
+                        && player.level() == entity.level()) {
+                    player.connection.send(packet);
+                }
+            }
+            iterator.remove();
+        }
     }
 
     private static void expire(MinecraftServer server, long now) {
@@ -333,7 +407,8 @@ public final class MadnessEpisodes {
         }
     }
 
-    private static boolean isIllusion(Entity entity) {
+    /** @return whether {@code entity} is a madness phantom (also used by the aura ticker). */
+    public static boolean isPhantom(Entity entity) {
         return entity.getPersistentData().getBooleanOr(ILLUSION_TAG, false);
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -71,6 +72,7 @@ public final class CodexDiscovery {
             }
             discoverSites(player);
             discoverBosses(player);
+            discoverMobs(player);
             discoverEvents(player);
         }
     }
@@ -101,6 +103,18 @@ public final class CodexDiscovery {
                 LivingEntity.class, bossBox, e -> e.isAlive() && e instanceof AncientOne);
         for (LivingEntity boss : bosses) {
             String id = entityId(boss);
+            if (id != null && CodexAPI.learn(player, id)) {
+                com.sanchous98.eldritchhorror.quest.QuestTriggers.onDiscovery(player, id);
+            }
+        }
+    }
+
+    /** Loaded mobs nearby are added to the bestiary on sight, not only on a kill. */
+    private static void discoverMobs(ServerPlayer player) {
+        AABB box = player.getBoundingBox().inflate(ModConfig.CODEX_MOB_RADIUS.get());
+        List<Mob> mobs = player.level().getEntitiesOfClass(Mob.class, box, Mob::isAlive);
+        for (Mob mob : mobs) {
+            String id = entityId(mob);
             if (id != null && CodexAPI.learn(player, id)) {
                 com.sanchous98.eldritchhorror.quest.QuestTriggers.onDiscovery(player, id);
             }

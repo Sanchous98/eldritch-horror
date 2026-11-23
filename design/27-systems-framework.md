@@ -49,14 +49,15 @@ Horror, not a port**: no rounds, dice, decks or tokens.
 - Recovery: daylight, settlement aura, sleep, wards, Order services.
 - **Corruption suppresses recovery** (read via `CorruptionAPI`).
 - **Madness episodes (2026-11):** a downward band change triggers one episode (per-player cooldown).
-  *Hallucination* spawns one or two phantom mobs drawn from the biome's own monster spawn list;
-  they look real, chase, and must be fought (real health, no drops/XP), but their hits are cancelled
-  into a sanity cost instead of health damage; killing one pops it with a small relief. *Fugue* is
-  blindness/nausea plus an 8–16 block involuntary step. *Compulsion* drops the held stack and adds
-  weakness/mining fatigue. At `Marked`, hallucinations recur until sanity recovers. A nearby
-  companion with a high sanity fraction acts as an **anchor**: no new phantoms, existing ones
-  dissolve, and both players are slowed while the afflicted stays below Fraying — the squad pays in
-  pace for clarity. No state is persisted across restarts.
+  *Hallucination* spawns one or two phantom mobs drawn from the biome's own monster spawn list; they
+  look real, chase, and stage **hard-hitting attacks** (hurt sound and animation, no damage), so
+  finding out whether a mob is real by letting it strike you is a trade-off: a real one hurts. They
+  must be fought (real health, no drops/XP). They are visible only to the afflicted player: other
+  clients receive a remove packet for the entity, and the sane companion cannot see them at all.
+  Their staged hits cost no health and no sanity. *Fugue* is blindness/nausea plus an 8–16 block involuntary
+  step. *Compulsion* drops the held stack and adds weakness/mining fatigue. At `Marked`,
+  hallucinations recur until sanity recovers. A nearby companion with a high sanity fraction slowly
+  restores sanity, but does **not** suppress the phantoms. No state is persisted across restarts.
 - **Active-events journal (2026-11):** the running events are mirrored to the owner-synced
   `ACTIVE_EVENTS` attachment once a second and shown in `ActiveEventsScreen` (key V), with name,
   flavour line and time remaining.

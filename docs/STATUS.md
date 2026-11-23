@@ -291,15 +291,22 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   chunks (~2.6 GiB, ~4 h), 2,000 ≈ 1.5M (~10–13 GiB, ~17 h), 4,096 ≈ 6.3M (~44 GiB, ~3 days).
   `/eh pregen world` is resumable (cursor in `SavedData`, no 33M-entry set) but refuses to start
   below `-Deh.pregen.min-free-gib` (default 40 GiB) and stops if free space drops under it.
+- **Codex / bestiary (2026-11):** the BESTIARY category now lists only actual mobs (non-Mob
+  entity types are skipped), discovers a mob on sight within `codexMobRadius` (default 24) as well
+  as on kill, and the codex has a detail pane: the selected entry shows its name, discovered state
+  and a lore line (`bestiary.eldritch_horror.<id>.desc`, en/ru for the hostile roster, with a
+  "no lore" fallback).
 - **Sanity pressure (2026-11):** a downward band change triggers a madness episode — biome-appropriate
-  phantom mobs that must be fought (no health damage, sanity hits, no drops/XP), a fugue
-  (blindness + involuntary step) or a compulsion (drop held item). Phantoms are not suppressed by
-  companions; a lucid player nearby gets a "shapes without shadows" warning and can tell the
-  afflicted. A lucid companion within 8 blocks restores sanity slowly. Abandoning an Ancient One
-  fight that started inside a city costs sanity once (5 s outside the district, cooldown per
-  player). Killing an Ancient One gives a large sanity reward to the players who actually damaged
-  it and a small one to everyone else online except cultists (any cult at Initiate+). Idea
-  recorded, not implemented: madness as insight (true hidden information at low sanity).
+  phantom mobs that only the afflicted player can see, stage hard hits (sound/animation) but deal no
+  damage, and must be fought (real health, no drops/XP); testing one by taking a hit risks a real
+  mob's damage, plus a fugue (blindness +
+  involuntary step) or a compulsion (drop held item). A lucid companion does **not** see or suppress
+  the phantoms; being near one slowly restores sanity. Abandoning an Ancient One fight that started
+  inside a city costs sanity once (5 s outside the district, cooldown per player). Killing an
+  Ancient One gives a large sanity reward to the players who actually damaged it and a small one to
+  everyone else online except cultists (any cult at Initiate+); an initiated cultist who strikes a
+  boss loses standing, has rites severed and is targeted, but sheds corruption. Idea recorded, not
+  implemented: madness as insight (true hidden information at low sanity).
 - **City decay (2026-11):** cities are authoritative in `world/city/CityLedger` (`SavedData`), not  derived from loaded chunks. `CityDecay` advances taint every 5 s while a player is online, the
   doom clock accelerates it (default 72,000 ticks for 0 → 1, ~33 min to the 0.55 Fallen line), and
   the nine loaded district samples act as a floor. `CityStates` reads the ledger, so a far city no

@@ -17,6 +17,7 @@ import java.util.Map;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -97,6 +98,9 @@ public final class CodexRegistry {
             EntityType<?> type = holder.get();
             Identifier key = holder.getId();
             if (key == null || key.getPath().isEmpty()) {
+                continue;
+            }
+            if (!Mob.class.isAssignableFrom(type.getBaseClass())) {
                 continue;
             }
             String path = key.getPath();

@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.entity;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.sanity.MadnessEpisodes;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import java.util.List;
@@ -316,6 +317,7 @@ public final class BestiarySupport {
         AABB box = player.getBoundingBox().inflate(queryRadius);
         List<T> auras = player.level().getEntitiesOfClass(type, box,
                 aura -> aura.isAlive() && aura.isAuraActive()
+                        && !MadnessEpisodes.isPhantom(aura)
                         && aura.distanceToSqr(player) <= aura.auraRadius() * aura.auraRadius()
                         && (!aura.auraRequiresLineOfSight() || aura.hasLineOfSight(player)));
         if (auras.isEmpty()) {

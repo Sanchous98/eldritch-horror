@@ -2844,6 +2844,11 @@ public final class ModConfig {
             BUILDER.comment("Blocks from an Ancient One at which its boss entry is discovered.")
                     .defineInRange("codexBossRadius", 48, 8, 256);
 
+    /** Radius in which nearby mobs are added to the bestiary on sight. */
+    public static final ModConfigSpec.IntValue CODEX_MOB_RADIUS =
+            BUILDER.comment("Radius in which nearby mobs are added to the bestiary.")
+                    .defineInRange("codexMobRadius", 24, 4, 64);
+
     // --- Towns (design/21) ------------------------------------------------------------------
     // The ~3,000 non-curated settlements are generic towns, not curated cities: small deterministic
     // places (plaza, houses, farm, lamps) built by world/town/Towns during chunk generation.
@@ -3157,25 +3162,15 @@ public final class ModConfig {
             BUILDER.comment("Ticks a phantom mob exists before it fades.")
                     .defineInRange("madnessIllusionLifetime", 600, 100, 6000);
 
-    /** Sanity lost when a phantom hits the player (no health damage). */
-    public static final ModConfigSpec.DoubleValue MADNESS_ILLUSION_SANITY_COST =
-            BUILDER.comment("Sanity lost per phantom hit (health damage is cancelled).")
-                    .defineInRange("madnessIllusionSanityCost", 2.0, 0.0, 20.0);
+    /** Health of a phantom, so destroying it costs real arrows/durability. */
+    public static final ModConfigSpec.IntValue MADNESS_ILLUSION_HEALTH =
+            BUILDER.comment("Phantom health; higher means more arrows/durability to destroy.")
+                    .defineInRange("madnessIllusionHealth", 40, 10, 200);
 
     /** Sanity recovered when the player kills a phantom and realises it was not real. */
     public static final ModConfigSpec.DoubleValue MADNESS_ILLUSION_REWARD =
             BUILDER.comment("Sanity recovered when a phantom is destroyed by the player.")
                     .defineInRange("madnessIllusionReward", 1.0, 0.0, 20.0);
-
-    /** Companions within this radius notice another player's phantoms (they are not suppressed). */
-    public static final ModConfigSpec.IntValue MADNESS_WITNESS_RADIUS =
-            BUILDER.comment("Radius in which a sane player notices someone else's phantom.")
-                    .defineInRange("madnessWitnessRadius", 12, 4, 32);
-
-    /** Minimum sanity fraction for a companion to notice (and be able to warn about) a phantom. */
-    public static final ModConfigSpec.DoubleValue MADNESS_WITNESS_MIN_SANITY =
-            BUILDER.comment("Minimum sanity fraction (0..1) for a companion to notice a phantom.")
-                    .defineInRange("madnessWitnessMinSanity", 0.5, 0.0, 1.0);
 
     // --- Companion recovery (sanity) -------------------------------------------------------
 

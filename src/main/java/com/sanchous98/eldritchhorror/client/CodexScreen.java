@@ -13,6 +13,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The codex (design/22): a category sidebar with discovered/total counts and a scrollable list of
@@ -43,6 +44,7 @@ public final class CodexScreen extends Screen {
 
     private CodexCategory selected = CodexCategory.SITE;
     private List<CodexEntry> entries = List.of();
+    private @Nullable String selectedId;
     private double scroll;
 
     public CodexScreen() {
@@ -80,6 +82,16 @@ public final class CodexScreen extends Screen {
                 }
                 y += SIDEBAR_ROW;
             }
+            int x = listX();
+            int w = listWidth();
+            if (event.x() >= x && event.x() < x + w && event.y() >= TOP
+                    && event.y() < this.height - BOTTOM_MARGIN) {
+                int index = (int) ((event.y() - TOP + this.scroll) / LIST_ROW);
+                if (index >= 0 && index < this.entries.size()) {
+                    this.selectedId = this.entries.get(index).id();
+                    return true;
+                }
+            }
         }
         return super.mouseClicked(event, doubleClick);
     }
@@ -101,7 +113,8 @@ public final class CodexScreen extends Screen {
 
         g.centeredText(this.font, this.title, this.width / 2, 12, TITLE_COLOUR);
         drawSidebar(g, mouseX, mouseY, lore, rites);
-        drawEntries(g, lore, rites);
+        drawEntries(g, mouseX, mouseY, lore, rites);
+        drawDetail(g, lore, rites);
     }
 
     /** The category column: name on the left, {@code discovered/total} on the right. */
@@ -129,9 +142,10 @@ public final class CodexScreen extends Screen {
     }
 
     /** The scrollable entry list for the selected category. */
-    private void drawEntries(GuiGraphicsExtractor g, Set<String> lore, Set<String> rites) {
+    private void drawEntries(GuiGraphicsExtractor g, int mouseX, int mouseY,
+                             Set<String> lore, Set<String> rites) {
         int x = listX();
-        int w = this.width - x - 30;
+        int w = listWidth();
         int bottom = this.height - BOTTOM_MARGIN;
         if (this.entries.isEmpty()) {
             g.text(this.font, Component.translatable("codex.eldritch_horror.empty"), x, TOP,
@@ -141,6 +155,14 @@ public final class CodexScreen extends Screen {
         g.enableScissor(x, TOP, x + w, bottom);
         int y = TOP - (int) this.scroll;
         for (CodexEntry entry : this.entries) {
+            boolean selectedRow = entry.id().equals(this.selectedId);
+            boolean hovered = mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + LIST_ROW
+                    && mouseY >= TOP && mouseY < bottom;
+            if (selectedRow) {
+                g.fill(x - 2, y - 1, x + w, y + LIST_ROW - 2, SELECTED_FILL);
+            } else if (hovered) {
+                g.fill(x - 2, y - 1, x + w, y + LIST_ROW - 2, HOVER_FILL);
+            }
             boolean discovered = discovered(entry, lore, rites);
             Component label = discovered
                     ? entry.name()
@@ -161,6 +183,10 @@ public final class CodexScreen extends Screen {
             }
         }
         this.entries = List.copyOf(out);
+        if (this.selectedId == null || this.entries.stream()
+                .noneMatch(entry -> entry.id().equals(this.selectedId))) {
+            this.selectedId = this.entries.isEmpty() ? null : this.entries.getFirst().id();
+        }
         this.scroll = 0.0;
     }
 
@@ -197,6 +223,60 @@ public final class CodexScreen extends Screen {
 
     private int listX() {
         return SIDEBAR_X + SIDEBAR_WIDTH + 20;
+    }
+
+    private int listWidth() {
+        return Math.max(120, this.width - listX() - 250);
+    }
+
+    /** Detail pane for the selected entry: name, discovery state and lore. */
+    private void drawDetail(GuiGraphicsExtractor g, Set<String> lore, Set<String> rites) {
+        int x = this.width - 230;
+        int w = 200;
+        int y = TOP;
+        if (this.selectedId == null) {
+            g.text(this.font, Component.translatable("codex.eldritch_horror.select"), x, y,
+                    COUNT_COLOUR);
+            return;
+        }
+        CodexEntry entry = CodexRegistry.byId(this.selectedId);
+        if (entry == null) {
+            return;
+        }
+        boolean known = discovered(entry, lore, rites);
+        g.text(this.font, known ? entry.name()
+                : Component.translatable("codex.eldritch_horror.unknown"), x, y, TITLE_COLOUR);
+        y += 16;
+        if (!known) {
+            g.text(this.font, Component.translatable("codex.eldritch_horror.unknown_hint"), x, y,
+                    UNKNOWN_COLOUR);
+            return;
+        }
+        String fallback = Component.translatable("codex.eldritch_horror.no_lore").getString();
+        String text = Component.translatableWithFallback(
+                "bestiary.eldritch_horror." + entry.id() + ".desc", fallback).getString();
+        for (String line : wrap(text, w)) {
+            g.text(this.font, Component.literal(line), x, y, NORMAL_COLOUR);
+            y += 10;
+        }
+    }
+
+    private List<String> wrap(String text, int width) {
+        List<String> out = new ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            String candidate = line.length() == 0 ? word : line + " " + word;
+            if (this.font.width(candidate) > width && line.length() > 0) {
+                out.add(line.toString());
+                line = new StringBuilder(word);
+            } else {
+                line = new StringBuilder(candidate);
+            }
+        }
+        if (line.length() > 0) {
+            out.add(line.toString());
+        }
+        return out;
     }
 
     private double maxScroll() {
