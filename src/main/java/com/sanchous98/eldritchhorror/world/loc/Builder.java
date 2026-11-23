@@ -58,6 +58,19 @@ public class Builder implements StructureBuilder {
 
     // ------------------------------------------------------------------ primitive
     @Override
+    public BlockState getState(int x, int y, int z) {
+        // Outside this chunk (or the build range) the state is not ours to read: report air so a
+        // caller never acts on a neighbour chunk's blocks that worldgen may still be filling.
+        if (x >> 4 != this.chunk.x() || z >> 4 != this.chunk.z()) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        if (y < this.minY || y > this.maxY) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        return this.level.getBlockState(this.pos.set(x, y, z));
+    }
+
+    @Override
     public void put(int x, int y, int z, BlockState state) {
         if (x >> 4 != this.chunk.x() || z >> 4 != this.chunk.z()) {
             return; // outside the chunk currently generating

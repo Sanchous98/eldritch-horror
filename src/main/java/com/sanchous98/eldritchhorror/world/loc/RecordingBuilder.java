@@ -36,6 +36,14 @@ public final class RecordingBuilder extends Builder {
     }
 
     @Override
+    public BlockState getState(int x, int y, int z) {
+        // The recorder never reads the world: only its own recorded writes exist, and anything
+        // unrecorded is air. Used for the plan's authored-vegetation bookkeeping.
+        CityWrite write = this.byPosition.get(BlockPos.asLong(x, y, z));
+        return write == null ? Blocks.AIR.defaultBlockState() : write.state();
+    }
+
+    @Override
     public void chest(int x, int y, int z, ResourceKey<LootTable> lootTable) {
         long seed = this.rng().nextLong();
         add(new CityWrite(new BlockPos(x, y, z), Blocks.CHEST.defaultBlockState(),

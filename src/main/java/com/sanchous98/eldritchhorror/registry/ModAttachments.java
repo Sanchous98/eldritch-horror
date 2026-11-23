@@ -72,6 +72,17 @@ public final class ModAttachments {
                     .build());
 
     /**
+     * Per-chunk marker for the authored-city vegetation safety net ({@code CityVegetation}): the
+     * chunk has been swept once for biome trees that are not part of the plan. Persisted with the
+     * chunk so revisiting a district does not rescan its loaded chunks; never synced.
+     */
+    public static final Supplier<AttachmentType<Boolean>> VEGETATION_SWEPT =
+            ATTACHMENT_TYPES.register("vegetation_swept",
+                    () -> AttachmentType.<Boolean>builder(() -> false)
+                            .serialize(com.mojang.serialization.Codec.BOOL.fieldOf("swept"))
+                            .build());
+
+    /**
      * Per-player reputation with each cult: a map of cult id → value (−100…+100), persisted,
      * copied on death, and synced to the owner so a future cult screen can read it.
      * See {@code design/09-cults.md}.

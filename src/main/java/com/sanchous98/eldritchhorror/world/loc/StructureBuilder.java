@@ -19,6 +19,13 @@ public interface StructureBuilder {
     void put(int x, int y, int z, BlockState state);
 
     /**
+     * Reads the block at {@code (x,y,z)} where it can be read. Outside the generating chunk, or
+     * outside the world's vertical range, this returns air, mirroring {@link #put}'s clipping: a
+     * caller never sees a neighbour chunk's stale state.
+     */
+    BlockState getState(int x, int y, int z);
+
+    /**
      * Places a loot chest at {@code (x,y,z)}, filled from {@code lootTable} with a deterministic
      * seed. Clipped to the current chunk like {@link #put}; a cell already holding a chest is left
      * alone so two overlapping writes cannot double-place.

@@ -3221,6 +3221,25 @@ public final class ModConfig {
             BUILDER.comment("Loaded chunks upgraded to the current ruin stage per tick.")
                     .defineInRange("cityRuinsChunksPerTick", 2, 1, 16);
 
+    /**
+     * Master switch for the authored-city vegetation safety net: sweeps leftover biome logs and
+     * leaves out of plan-city chunks the first time a player brings them into view. Chunks already
+     * swept at worldgen simply cost one empty pass.
+     */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_VEGETATION =
+            BUILDER.comment("Remove leftover biome trees from visited authored-city districts.")
+                    .define("enableCityVegetationCleanup", true);
+
+    /** Loaded plan-city chunks swept per pass; one is enough to stay well under the tick budget. */
+    public static final ModConfigSpec.IntValue CITY_VEGETATION_CHUNKS_PER_TICK =
+            BUILDER.comment("Loaded authored-city chunks swept for leftover vegetation per pass.")
+                    .defineInRange("cityVegetationChunksPerTick", 1, 1, 8);
+
+    /** Hard cap on blocks removed in one pass, so a dense forest chunk cannot stall a tick. */
+    public static final ModConfigSpec.IntValue CITY_VEGETATION_BLOCKS_PER_PASS =
+            BUILDER.comment("Maximum stray logs/leaves removed by the vegetation sweep per pass.")
+                    .defineInRange("cityVegetationBlocksPerPass", 64, 1, 512);
+
     /** Master switch for the fallen-city sanity drain. */
     public static final ModConfigSpec.BooleanValue ENABLE_SANITY_FALLEN_CITY =
             BUILDER.comment("Enable the fallen-city sanity drain (visiting a ruined city hurts).")
