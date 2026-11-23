@@ -162,6 +162,7 @@ public final class Bots {
                 }
             }
             bot.tick();
+            BotWalk.tick(bot);
             bot.doTick();
         }
     }

@@ -178,6 +178,16 @@ public final class BotCommands {
                 .then(Commands.literal("spawnjoinfresh")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::spawnjoinFresh)))
+                .then(Commands.literal("goto")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("x", DoubleArgumentType.doubleArg())
+                                        .then(Commands.argument("z", DoubleArgumentType.doubleArg())
+                                                .executes(ctx -> gotoWalk(ctx, false))
+                                                .then(Commands.literal("sprint")
+                                                        .executes(ctx -> gotoWalk(ctx, true)))))))
+                .then(Commands.literal("stopwalk")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::stopWalk)))
                 .then(Commands.literal("walk")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("x", DoubleArgumentType.doubleArg())
@@ -1062,6 +1072,40 @@ public final class BotCommands {
     /** {@code /eh bot walk <name> <x> <z>}: surface-snapping travel toward a column.
      *  Each step moves up to 8 blocks toward (x,z) and snaps Y to the terrain surface, so a
      *  headless bot neither gets stuck inside stone nor falls into a void while travelling. */
+    /** {@code /eh bot goto <name> <x> <z> [sprint]}: walk there step by step, no teleports. */
+    private static int gotoWalk(CommandContext<CommandSourceStack> ctx, boolean sprint)
+            throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        double x = DoubleArgumentType.getDouble(ctx, "x");
+        double z = DoubleArgumentType.getDouble(ctx, "z");
+        double distance = BotWalk.start(bot, x, z, sprint);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " walking to " + Math.round(x) + ", " + Math.round(z)
+                + " (" + Math.round(distance) + " blocks" + (sprint ? ", sprint" : "") + ")"), true);
+        return Math.round(distance) > 0 ? 1 : 0;
+    }
+
+    /** {@code /eh bot stopwalk <name>}: stop following the current goto target. */
+    private static int stopWalk(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        BotWalk.stop(bot);
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " stopped walking"), true);
+        return 1;
+    }
+
     private static int walk(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
