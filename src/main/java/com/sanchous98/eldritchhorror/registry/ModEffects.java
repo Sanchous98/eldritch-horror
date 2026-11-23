@@ -1,7 +1,16 @@
 package com.sanchous98.eldritchhorror.registry;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -30,6 +39,14 @@ public final class ModEffects {
     /** Marked: applied once sanity reaches zero — the horror has noticed, and you are slower and weaker. */
     public static final DeferredHolder<MobEffect, MarkedEffect> MARKED =
             MOB_EFFECTS.register("marked", MarkedEffect::new);
+
+    /** Stupor: a collapsing mind; the world will not hold still (cured by Smelling Salts). */
+    public static final DeferredHolder<MobEffect, StuporEffect> STUPOR =
+            MOB_EFFECTS.register("stupor", StuporEffect::new);
+
+    /** Waking: instant; removes Stupor and restores a little sanity. */
+    public static final DeferredHolder<MobEffect, WakingEffect> WAKING =
+            MOB_EFFECTS.register("waking", WakingEffect::new);
 
     /** Corrupted: registered now; the corruption batch applies it. Inert on its own. */
     public static final DeferredHolder<MobEffect, CorruptedEffect> CORRUPTED =
@@ -66,6 +83,60 @@ public final class ModEffects {
     public static final class CorruptedEffect extends MobEffect {
         public CorruptedEffect() {
             super(MobEffectCategory.HARMFUL, 0x3A2A4A);
+        }
+    }
+
+    /** {@code stupor}: nausea, pulsing blindness and slowness until the mind is steadied. */
+    public static final class StuporEffect extends MobEffect {
+        public StuporEffect() {
+            super(MobEffectCategory.HARMFUL, 0x3A1A5E);
+        }
+
+        @Override
+        public boolean applyEffectTick(ServerLevel level, LivingEntity mob, int amplifier) {
+            if (mob.tickCount % 40 == 0) {
+                mob.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 60, 0, true, false, false));
+            }
+            if (mob.tickCount % 60 == 0) {
+                mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 0, true, false, false));
+                mob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 0, true, false, false));
+            }
+            return true;
+        }
+    }
+
+    /** {@code waking}: instant cure for Stupor; a splash of Smelling Salts. */
+    public static final class WakingEffect extends MobEffect {
+        public WakingEffect() {
+            super(MobEffectCategory.BENEFICIAL, 0xE0D0A0);
+        }
+
+        @Override
+        public boolean isInstantaneous() {
+            return true;
+        }
+
+        @Override
+        public void onEffectAdded(LivingEntity mob, int amplifier) {
+            cure(mob);
+        }
+
+        @Override
+        public void applyInstantaneousEffect(ServerLevel level, @Nullable Entity source,
+                                             @Nullable Entity owner, LivingEntity mob,
+                                             int amplification, double scale) {
+            cure(mob);
+        }
+
+        /** Idempotent: only a player actually in Stupor is cured and rewarded. */
+        private static void cure(LivingEntity mob) {
+            if (!mob.hasEffect(ModEffects.STUPOR)) {
+                return;
+            }
+            mob.removeEffect(ModEffects.STUPOR);
+            if (mob instanceof ServerPlayer player) {
+                SanityAPI.add(player, ModConfig.SANITY_COLLAPSE_CURE.get());
+            }
         }
     }
 }

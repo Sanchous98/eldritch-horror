@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.registry.ModAttributes;
 import net.minecraft.resources.Identifier;
@@ -42,7 +43,12 @@ public final class SanitySystem {
 
     /** Adds {@code delta} (may be negative). Returns the new value. */
     public static double add(ServerPlayer player, double delta) {
-        return set(player, get(player) + delta);
+        double before = get(player);
+        double after = set(player, before + delta);
+        if (before <= 0.0 && delta <= -ModConfig.SANITY_COLLAPSE_THRESHOLD.get()) {
+            SanityCollapse.trigger(player, -delta);
+        }
+        return after;
     }
 
     /** The meter ceiling for {@code player}: the {@code max_sanity} attribute, or {@link #DEFAULT_MAX}. */

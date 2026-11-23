@@ -15,11 +15,14 @@ import com.sanchous98.eldritchhorror.registry.items.SignatureItems;
 import com.sanchous98.eldritchhorror.registry.items.Tomes;
 import com.sanchous98.eldritchhorror.registry.items.Utility;
 import com.sanchous98.eldritchhorror.registry.items.Weapons;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SplashPotionItem;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -47,6 +50,12 @@ public final class ModItems {
 
     /** Every registered item, in category-init order; drives the creative tab. */
     public static final List<DeferredItem<?>> ALL = new ArrayList<>();
+
+    /** Splash potion of Waking: cures Stupor and restores a little sanity. */
+    public static final DeferredItem<SplashPotionItem> SMELLING_SALTS =
+            addItem("smelling_salts",
+                    p -> new SplashPotionItem(p.component(DataComponents.POTION_CONTENTS,
+                            new PotionContents(ModPotions.WAKING))), 1);
 
     /**
      * Registers one plain item and records it in {@link #ALL}. The canonical helper every category

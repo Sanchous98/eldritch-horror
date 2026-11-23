@@ -11,6 +11,7 @@ import com.sanchous98.eldritchhorror.registry.ModBlocks;
 import com.sanchous98.eldritchhorror.registry.ModEffects;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModItems;
+import com.sanchous98.eldritchhorror.registry.ModPotions;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.registry.ModWorldGen;
 import net.minecraft.resources.Identifier;
@@ -61,6 +62,7 @@ public final class EldritchHorror {
         ModAttributes.ATTRIBUTES.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModEffects.MOB_EFFECTS.register(modEventBus);
+        ModPotions.POTIONS.register(modEventBus);
         ModSounds.SOUND_EVENTS.register(modEventBus);
         ModWorldGen.CHUNK_GENERATORS.register(modEventBus);
         ModWorldGen.BIOME_SOURCES.register(modEventBus);

@@ -140,6 +140,48 @@ public final class ModConfig {
             BUILDER.comment("Sanity fraction below which the state becomes Breaking.")
                     .defineInRange("sanityBreaking", 0.25, 0.0, 1.0);
 
+    // --- Sanity collapse at zero (design/27) ------------------------------------------------
+
+    /** Master switch for the Stupor/health consequence of a large hit at zero sanity. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_COLLAPSE =
+            BUILDER.comment("A large sanity hit at zero collapses into Stupor and a little damage.")
+                    .define("enableSanityCollapse", true);
+
+    /** Minimum single-event loss at zero sanity that triggers a collapse. */
+    public static final ModConfigSpec.DoubleValue SANITY_COLLAPSE_THRESHOLD =
+            BUILDER.comment("Sanity lost in one event (at zero) that triggers Stupor.")
+                    .defineInRange("sanityCollapseThreshold", 10.0, 1.0, 100.0);
+
+    /** Stupor duration; a splash of Smelling Salts cures it early. */
+    public static final ModConfigSpec.IntValue SANITY_COLLAPSE_STUPOR_TICKS =
+            BUILDER.comment("Stupor duration in ticks (Smelling Salts cures it early).")
+                    .defineInRange("sanityCollapseStuporTicks", 1200, 20, 12000);
+
+    /** Loss size above which the collapse also bites health. */
+    public static final ModConfigSpec.DoubleValue SANITY_COLLAPSE_DAMAGE_THRESHOLD =
+            BUILDER.comment("Loss size at which a collapse also deals health damage.")
+                    .defineInRange("sanityCollapseDamageThreshold", 15.0, 1.0, 100.0);
+
+    /** Health damage per point of loss beyond the damage threshold. */
+    public static final ModConfigSpec.DoubleValue SANITY_COLLAPSE_DAMAGE_FACTOR =
+            BUILDER.comment("Health damage per point of loss in a collapsing hit.")
+                    .defineInRange("sanityCollapseDamageFactor", 0.25, 0.0, 2.0);
+
+    /** Hard cap on the health damage of one collapse. */
+    public static final ModConfigSpec.DoubleValue SANITY_COLLAPSE_DAMAGE_CAP =
+            BUILDER.comment("Maximum health damage from one collapse.")
+                    .defineInRange("sanityCollapseDamageCap", 4.0, 0.0, 40.0);
+
+    /** Ticks between collapses for one player. */
+    public static final ModConfigSpec.IntValue SANITY_COLLAPSE_COOLDOWN =
+            BUILDER.comment("Ticks between sanity collapses for one player.")
+                    .defineInRange("sanityCollapseCooldown", 200, 0, 24000);
+
+    /** Sanity restored by a splash of Smelling Salts. */
+    public static final ModConfigSpec.DoubleValue SANITY_COLLAPSE_CURE =
+            BUILDER.comment("Sanity restored when Smelling Salts cures Stupor.")
+                    .defineInRange("sanityCollapseCure", 5.0, 0.0, 50.0);
+
     public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SPREAD =
             BUILDER.comment("Allow the per-chunk taint field to bleed into neighbouring chunks.")
                     .define("enableCorruptionSpread", true);

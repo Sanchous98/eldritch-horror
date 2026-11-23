@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "eldritch_horror:salt_reagent",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "eldritch_horror:smelling_salts",
+    "count": 1
+  }
+}
