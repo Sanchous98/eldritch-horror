@@ -3179,6 +3179,18 @@ public final class ModConfig {
             BUILDER.comment("Offer each curated city's 3-5 step local contract.")
                     .define("enableCityQuests", true);
 
+    /** Optional needle next to the locator-bar dot; off by default so the dot is the guide. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_QUEST_COMPASS =
+            BUILDER.comment("Give each contract a compass item that points at its current objective.",
+                    "Off by default: the gold dot on the locator bar is the primary marker.")
+                    .define("enableCityQuestCompass", false);
+
+    /** Optional soul-fire column over reach objectives. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_QUEST_BEACON =
+            BUILDER.comment("Pulse a small soul-fire column over the current reach objective",
+                    "while the player is within 160 blocks (owner only).")
+                    .define("enableCityQuestBeacon", false);
+
     /** Ticks for a city's abstract taint to travel from 0 to 1 (Fallen at 0.55 by default). */
     public static final ModConfigSpec.IntValue CITY_DECAY_TICKS =
             BUILDER.comment("Ticks for city taint to go 0 -> 1 (Fallen is 0.55 by default).")

@@ -105,6 +105,10 @@ lorekeeper, endgame, `reclaim_the_city`). Everything else falls back to
 `eldritch_horror:quests/<questId>`, so a new quest needs only a matching JSON file. A quest
 without a file is ignored; it never blocks completion or rewards.
 
+City contracts have no board or intermediate advancement node: the chain starts at the contact,
+and only completion awards `cities/<city_key>`. Guidance (locator dot, names, bearings, optional
+beacon/compass) is documented in `docs/CITY-QUESTS.md`.
+
 ## Adding an advancement
 
 1. Put a JSON file under `src/main/resources/data/eldritch_horror/advancement/<chapter>/<name>.json`:

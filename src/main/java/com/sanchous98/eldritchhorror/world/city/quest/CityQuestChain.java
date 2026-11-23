@@ -14,16 +14,16 @@ import org.jspecify.annotations.Nullable;
  * city ({@code design/21-settlements.md}, {@code docs/CITY-PLAN-CONTRACT.md} "Quest chains").
  *
  * <p>The chain is derived from the plan's authored {@link CityPoi} anchors, so it is layout-aware
- * without new per-city data: the notice board, the contact, the hidden place and the coordinates
- * of every objective come from the blocks the city actually placed. A plan without a board or a
- * contact still gets a usable chain (the arrival landmark and the city centre stand in), and the
- * item/threat objectives are chosen deterministically from the city id so two visits to the same
- * city always ask for the same thing.
+ * without new per-city data: the contact (the quest giver), the hidden place and the coordinates
+ * of every objective come from the blocks the city actually placed. A plan without a contact still
+ * gets a usable chain (the notice board stands in as the giver), and the item/threat objectives are
+ * chosen deterministically from the city id so two visits to the same city always ask for the same
+ * thing.
  *
  * <p>Objective kinds:
  * <ul>
- *   <li>{@link Kind#BOARD} — stand at the notice board;</li>
- *   <li>{@link Kind#TALK} — reach the contact;</li>
+ *   <li>{@link Kind#TALK} — reach the contact who gives the contract (the usual first step);</li>
+ *   <li>{@link Kind#BOARD} — stand at the notice board (only when the plan has no NPC);</li>
  *   <li>{@link Kind#GATHER} — carry N of a reagent the district trades in;</li>
  *   <li>{@link Kind#HUNT} — kill N district threats (counted only inside the city);</li>
  *   <li>{@link Kind#SECRET} — reach the authored hidden place, or the far landmark when the plan
@@ -72,18 +72,19 @@ public record CityQuestChain(City city, List<Step> steps) {
         CityPlan plan = CityPlans.forCity(city.name());
         List<CityPoi> pois = plan == null ? List.of() : plan.pois();
         CityPoi board = first(pois, CityPoi.Kind.QUEST_BOARD);
-        CityPoi landmark = first(pois, CityPoi.Kind.LANDMARK);
         CityPoi contact = first(pois, CityPoi.Kind.NPC);
         CityPoi secret = first(pois, CityPoi.Kind.SECRET);
         if (secret == null) {
             secret = farLandmark(pois);
         }
 
-        CityPoi boardAnchor = board != null ? board : landmark;
         List<Step> steps = new ArrayList<>(5);
-        steps.add(reach(Kind.BOARD, "board", boardAnchor, city, "notice_board"));
+        // The contract starts with the person who gives it. A plan without an authored NPC still
+        // gets a usable first step: the notice board stands in as the giver.
         if (contact != null) {
-            steps.add(reach(Kind.TALK, "contact", contact, city, contact.id()));
+            steps.add(reach(Kind.TALK, "contact", contact, city, contact.id(), pois));
+        } else if (board != null) {
+            steps.add(reach(Kind.BOARD, "board", board, city, "notice_board", pois));
         }
 
         int hash = Math.abs(city.id().hashCode());
@@ -95,7 +96,7 @@ public record CityQuestChain(City city, List<Step> steps) {
         int kills = 2 + hash / 11 % 2;
         steps.add(new Step(Kind.HUNT, "hunt", city.x(), city.z(), "", entity, kills, "", ""));
         if (secret != null) {
-            steps.add(reach(Kind.SECRET, "secret", secret, city, secret.id()));
+            steps.add(reach(Kind.SECRET, "secret", secret, city, secret.id(), pois));
         }
         return new CityQuestChain(city, List.copyOf(steps));
     }
@@ -128,19 +129,38 @@ public record CityQuestChain(City city, List<Step> steps) {
     }
 
     /** A reach step at {@code poi}'s authored anchor (1 block = 1 block, relative to the centre). */
-    private static Step reach(Kind kind, String id, @Nullable CityPoi poi, City city, String anchor) {
+    private static Step reach(Kind kind, String id, @Nullable CityPoi poi, City city, String anchor,
+                              List<CityPoi> pois) {
         int x = city.x() + (poi == null ? 0 : poi.dx());
         int z = city.z() + (poi == null ? 0 : poi.dz());
-        return new Step(kind, id, x, z, "", "", 1, poi == null ? "" : placeName(poi),
-                poi == null ? "" : anchor);
+        return new Step(kind, id, x, z, "", "", 1,
+                poi == null ? "" : placeName(poi, pois), poi == null ? "" : anchor);
     }
 
     /**
-     * The human place name of an anchor, for directions in chat: the authored {@code data} hint's
-     * first token when it has one ("bazaar;quests" -> "bazaar", "hotel_keeper" -> "hotel keeper"),
-     * otherwise the id with the generic board/sign/npc suffixes stripped.
+     * A diegetic place name: the authored POI (its {@code data} hint, else its id) anchored to the
+     * nearest authored landmark, e.g. {@code "imam at the Great Mosque"}. A notice board is named
+     * after its own location instead ({@code "bazaar_quest_board"} -> {@code "bazaar"}), because
+     * boards author quest ids in {@code data}, not a place.
      */
-    private static String placeName(CityPoi poi) {
+    private static String placeName(CityPoi poi, List<CityPoi> pois) {
+        String own = poi.kind() == CityPoi.Kind.QUEST_BOARD ? boardName(poi) : ownName(poi);
+        if (poi.kind() != CityPoi.Kind.NPC && poi.kind() != CityPoi.Kind.SECRET) {
+            return own;
+        }
+        CityPoi landmark = nearestLandmark(pois, poi);
+        if (landmark == null) {
+            return own;
+        }
+        String name = titleCase(stripKind(landmark.id()));
+        if (name.isEmpty() || own.equalsIgnoreCase(name) || own.contains(name.toLowerCase(Locale.ROOT))) {
+            return own;
+        }
+        return own + " at the " + name;
+    }
+
+    /** The authored hint of a POI, humanised; falls back to its id with the kind suffix stripped. */
+    private static String ownName(CityPoi poi) {
         String raw = poi.data();
         int semi = raw.indexOf(';');
         if (semi >= 0) {
@@ -148,10 +168,55 @@ public record CityQuestChain(City city, List<Step> steps) {
         }
         raw = raw.trim();
         if (raw.isEmpty()) {
-            raw = poi.id();
+            raw = stripKind(poi.id());
         }
-        raw = raw.replaceAll("(?i)_(quest_board|board|sign|npc)$", "");
-        return raw.replace('_', ' ').toLowerCase(java.util.Locale.ROOT);
+        return raw.replace('_', ' ').toLowerCase(Locale.ROOT);
+    }
+
+    /** A notice board's location, taken from its id ("bazaar_quest_board" -> "bazaar"). */
+    private static String boardName(CityPoi poi) {
+        String raw = stripKind(poi.id()).trim();
+        return raw.isEmpty() ? ownName(poi) : raw.replace('_', ' ').toLowerCase(Locale.ROOT);
+    }
+
+    /** The nearest authored landmark to {@code poi}, by horizontal distance, or {@code null}. */
+    private static @Nullable CityPoi nearestLandmark(List<CityPoi> pois, CityPoi poi) {
+        CityPoi best = null;
+        long bestDistance = Long.MAX_VALUE;
+        for (CityPoi candidate : pois) {
+            if (candidate.kind() != CityPoi.Kind.LANDMARK) {
+                continue;
+            }
+            long dx = candidate.dx() - poi.dx();
+            long dz = candidate.dz() - poi.dz();
+            long distance = dx * dx + dz * dz;
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = candidate;
+            }
+        }
+        return best;
+    }
+
+    /** Humanised landmark name with its words capitalised ("great_mosque" -> "Great Mosque"). */
+    private static String titleCase(String raw) {
+        String[] words = raw.replace('_', ' ').replace('-', ' ').trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            if (!sb.isEmpty()) {
+                sb.append(' ');
+            }
+            sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+        }
+        return sb.toString();
+    }
+
+    /** Removes the generic kind suffix from an authored id. */
+    private static String stripKind(String id) {
+        return id.replaceAll("(?i)_(quest_board|board|sign|npc)$", "");
     }
 
     /** Lowercase registry path without the namespace, for matching inventory/entity output. */

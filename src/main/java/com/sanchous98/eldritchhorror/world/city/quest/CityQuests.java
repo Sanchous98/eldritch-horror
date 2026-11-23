@@ -11,6 +11,8 @@ import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -19,9 +21,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jspecify.annotations.Nullable;
 
@@ -30,11 +34,17 @@ import org.jspecify.annotations.Nullable;
  * city offers, built by {@link CityQuestChain} from the city plan's authored anchors.
  *
  * <p>The chain starts the first time a player is close enough to a city and advances from what the
- * player actually does: standing at the board/contact/hidden place, carrying the reagents, and
- * killing district threats inside the district. Progress lives in
+ * player actually does: reaching the contact who gives it, carrying the reagents, and killing
+ * district threats inside the district. Progress lives in
  * {@link ModAttachments#CITY_QUESTS} ({@code step:}, {@code kills:}, {@code done:} keys) so it
  * survives a restart and a death. Completion pays relic coins and a little Order standing, once
  * per city.
+ *
+ * <p>Guidance is diegetic: the current objective is a gold dot on the vanilla locator bar
+ * ({@link ContractWaypoint}), the chat lines name the place and its bearing, and an optional
+ * column of soul-fire particles peeks over the rooftops near a reach objective
+ * ({@code enableCityQuestBeacon}). A compass item is kept behind {@code enableCityQuestCompass}
+ * (off by default) for players who prefer the old needle.
  *
  * <p>Everything is server-authoritative and bounded: one pass per second over the online players,
  * one nearest-city lookup each, and no chunk loads.
@@ -53,6 +63,10 @@ public final class CityQuests {
 
     /** Kill credit radius: the district plus its outskirts. */
     private static final int HUNT_MARGIN = 32;
+
+    /** Beacon pulse period (2 s) and the distance inside which the objective may pulse. */
+    private static final int BEACON_INTERVAL_TICKS = 40;
+    private static final int BEACON_RANGE = 160;
 
     private static final String STEP = "step:";
     private static final String KILLS = "kills:";
@@ -87,16 +101,28 @@ public final class CityQuests {
             return;
         }
         ServerLevel level = server.overworld();
+        boolean beaconTick = server.getTickCount() % BEACON_INTERVAL_TICKS == 0;
         for (ServerPlayer player : level.players()) {
             City city = nearest(level, player, APPROACH_MARGIN);
             if (city == null) {
                 continue;
             }
             CityQuestChain chain = chain(city);
-            if (!ensureStarted(player, chain)) {
+            if (!ensureStarted(player, level, chain)) {
                 continue;
             }
-            advance(player, chain);
+            advance(player, level, chain);
+            if (beaconTick && ModConfig.ENABLE_CITY_QUEST_BEACON.get()) {
+                beacon(player, level, chain);
+            }
+        }
+    }
+
+    /** Forgets the per-session waypoint cache; the client drops its locator bar on disconnect. */
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            ContractWaypoint.forget(player);
         }
     }
 
@@ -136,13 +162,16 @@ public final class CityQuests {
     }
 
     /** @return whether the chain is running (starts it and announces the first step if new). */
-    private static boolean ensureStarted(ServerPlayer player, CityQuestChain chain) {
+    private static boolean ensureStarted(ServerPlayer player, ServerLevel level,
+                                         CityQuestChain chain) {
         City city = chain.city();
-        if (done(player, city)) {
+        if (done(player, city) || chain.steps().isEmpty()) {
             return false;
         }
         Map<String, Integer> data = new HashMap<>(player.getData(ModAttachments.CITY_QUESTS));
         if (data.containsKey(STEP + city.id())) {
+            int index = Math.min(step(player, city), chain.steps().size() - 1);
+            guide(player, level, city, chain.steps().get(index), index, false);
             return true;
         }
         data.put(STEP + city.id(), 0);
@@ -151,11 +180,26 @@ public final class CityQuests {
                 "cityquest.eldritch_horror.started",
                 "A local contract begins in %s: %s", city.name(),
                 describe(city, chain.steps().get(0))));
+        guide(player, level, city, chain.steps().get(0), 0, true);
         return true;
     }
 
+    /** Puts (or refreshes) the locator dot and the optional compass on the current objective. */
+    private static void guide(ServerPlayer player, ServerLevel level, City city,
+                              CityQuestChain.Step step, int index, boolean fresh) {
+        ContractWaypoint.show(player, city, step, index, level);
+        if (!ModConfig.ENABLE_CITY_QUEST_COMPASS.get()) {
+            return;
+        }
+        if (fresh) {
+            ContractCompass.update(player, city, step, level);
+        } else {
+            ContractCompass.ensure(player, city, step, level);
+        }
+    }
+
     /** Checks the current step and moves the chain on when it is satisfied. */
-    private static void advance(ServerPlayer player, CityQuestChain chain) {
+    private static void advance(ServerPlayer player, ServerLevel level, CityQuestChain chain) {
         City city = chain.city();
         int index = step(player, city);
         if (index >= chain.steps().size()) {
@@ -171,13 +215,68 @@ public final class CityQuests {
         if (next >= chain.steps().size()) {
             data.put(DONE + city.id(), 1);
             player.setData(ModAttachments.CITY_QUESTS, data);
+            ContractWaypoint.hide(player, city);
+            ContractCompass.remove(player);
             reward(player, city);
             return;
         }
         player.setData(ModAttachments.CITY_QUESTS, data);
-        player.sendSystemMessage(Component.translatableWithFallback(
-                "cityquest.eldritch_horror.advanced",
-                "Contract %s: next — %s", city.name(), describe(city, chain.steps().get(next))));
+        if (current.kind() == CityQuestChain.Kind.TALK) {
+            // The giver speaks the next task themselves; the dot already moved.
+            player.sendSystemMessage(contactLine(player, current, city, chain.steps().get(next)));
+        } else {
+            player.sendSystemMessage(Component.translatableWithFallback(
+                    "cityquest.eldritch_horror.advanced",
+                    "Contract %s: next — %s", city.name(), describe(city, chain.steps().get(next))));
+        }
+        guide(player, level, city, chain.steps().get(next), next, true);
+    }
+
+    /** The contact's spoken hand-off: the direction to the next step, in their voice. */
+    private static Component contactLine(ServerPlayer player, CityQuestChain.Step contact, City city,
+                                         CityQuestChain.Step next) {
+        Component hint = isReach(next.kind())
+                ? describe(city, next)
+                : Component.translatableWithFallback("cityquest.eldritch_horror.district_hint",
+                        "%s — the district centre is %s", objective(city, next),
+                        bearing(player, next));
+        return Component.translatableWithFallback("cityquest.eldritch_horror.contact",
+                        "%s says: “%s”", Component.literal(speaker(contact)), hint)
+                .withStyle(ChatFormatting.ITALIC);
+    }
+
+    /** The contact's name from the composed place ("imam at the Great Mosque" -> "imam"). */
+    private static String speaker(CityQuestChain.Step contact) {
+        String place = contact.place();
+        int at = place.indexOf(" at the ");
+        return at > 0 ? place.substring(0, at) : place.isEmpty() ? "the contact" : place;
+    }
+
+    /** A soul-fire column at a reach objective, visible only to its owner and only nearby. */
+    private static void beacon(ServerPlayer player, ServerLevel level, CityQuestChain chain) {
+        int index = step(player, chain.city());
+        if (index >= chain.steps().size()) {
+            return;
+        }
+        CityQuestChain.Step current = chain.steps().get(index);
+        if (!isReach(current.kind())) {
+            return;
+        }
+        double dx = player.getX() - (current.x() + 0.5);
+        double dz = player.getZ() - (current.z() + 0.5);
+        if (dx * dx + dz * dz > (double) BEACON_RANGE * BEACON_RANGE) {
+            return;
+        }
+        int ground = objectiveY(level, current);
+        int count = 2 + player.getRandom().nextInt(3);
+        for (int i = 0; i < count; i++) {
+            var particle = i % 2 == 0
+                    ? ParticleTypes.SOUL_FIRE_FLAME
+                    : ParticleTypes.END_ROD;
+            level.sendParticles(player, particle, true, true,
+                    current.x() + 0.5, ground + 1.1 + i % 3, current.z() + 0.5,
+                    1, 0.05, 0.02, 0.05, 0.0);
+        }
     }
 
     /** @return whether the player has met {@code step}. */
@@ -248,15 +347,24 @@ public final class CityQuests {
         return nearest;
     }
 
-    /** Human-readable objective text with the coordinates the player needs. */
+    /** Human-readable objective text, adding the bearing where the place alone is not enough. */
     public static Component describe(City city, CityQuestChain.Step step) {
+        Component objective = objective(city, step);
+        if (!isReach(step.kind())) {
+            return objective;
+        }
+        return Component.translatableWithFallback("cityquest.eldritch_horror.with_direction",
+                "%s (%s)", objective, direction(city, step));
+    }
+
+    /** The objective on its own (compass lore and the contact's spoken line). */
+    public static Component objective(City city, CityQuestChain.Step step) {
         return switch (step.kind()) {
             case BOARD -> Component.translatableWithFallback(
-                    "cityquest.eldritch_horror.board", "find the notice board in the %s (%s)",
-                    place(step), direction(city, step));
+                    "cityquest.eldritch_horror.board", "find the notice board at the %s",
+                    place(step));
             case TALK -> Component.translatableWithFallback(
-                    "cityquest.eldritch_horror.talk", "ask for %s (%s)",
-                    place(step), direction(city, step));
+                    "cityquest.eldritch_horror.talk", "ask for the %s", place(step));
             case GATHER -> Component.translatableWithFallback(
                     "cityquest.eldritch_horror.gather", "gather %sx %s",
                     step.count(), itemName(step.item()));
@@ -264,14 +372,43 @@ public final class CityQuests {
                     "cityquest.eldritch_horror.hunt", "clear %sx %s from the district",
                     step.count(), entityName(step.entity()));
             case SECRET -> Component.translatableWithFallback(
-                    "cityquest.eldritch_horror.secret", "look for the hidden place at the %s (%s)",
-                    place(step), direction(city, step));
+                    "cityquest.eldritch_horror.secret", "look for the hidden place: the %s",
+                    place(step));
         };
     }
 
+    /** Whether a step asks the player to stand somewhere (the kinds the dot and beacon track). */
+    private static boolean isReach(CityQuestChain.Kind kind) {
+        return kind == CityQuestChain.Kind.BOARD
+                || kind == CityQuestChain.Kind.TALK
+                || kind == CityQuestChain.Kind.SECRET;
+    }
+
     /** The place name, or the city centre when the plan has no anchor for the step. */
-    private static Component place(CityQuestChain.Step step) {
-        return Component.literal(step.place().isEmpty() ? "city centre" : step.place());
+    public static Component place(CityQuestChain.Step step) {
+        return step.place().isEmpty()
+                ? Component.translatableWithFallback(
+                        "cityquest.eldritch_horror.centre", "city centre")
+                : Component.literal(step.place());
+    }
+
+    /** The ground Y of the objective, without loading a chunk the player cannot see. */
+    public static int objectiveY(ServerLevel level, CityQuestChain.Step step) {
+        return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, step.x(), step.z());
+    }
+
+    /** The bearing to the objective from where the player stands now. */
+    public static Component bearing(ServerPlayer player, CityQuestChain.Step step) {
+        int dx = step.x() - (int) Math.floor(player.getX());
+        int dz = step.z() - (int) Math.floor(player.getZ());
+        double distance = Math.hypot(dx, dz);
+        if (distance < 12.0) {
+            return Component.translatableWithFallback(
+                    "cityquest.eldritch_horror.here", "here, in the district");
+        }
+        int rounded = Math.max(10, (int) (Math.round(distance / 10.0) * 10));
+        return Component.translatableWithFallback("cityquest.eldritch_horror.bearing",
+                "%s, about %s blocks from here", word(dx, dz), rounded);
     }
 
     /**
@@ -285,9 +422,13 @@ public final class CityQuests {
         double distance = Math.hypot(dx, dz);
         int rounded = Math.max(10, (int) (Math.round(distance / 10.0) * 10));
         return Component.translatableWithFallback("cityquest.eldritch_horror.direction",
-                "%s, about %s blocks from the centre",
-                Component.translatableWithFallback("cityquest.eldritch_horror.dir."
-                        + compass(dx, dz), compass(dx, dz)), rounded);
+                "%s, about %s blocks from the centre", word(dx, dz), rounded);
+    }
+
+    /** The localised eight-way compass word for a delta, screen-north being -Z. */
+    private static Component word(int dx, int dz) {
+        String dir = compass(dx, dz);
+        return Component.translatableWithFallback("cityquest.eldritch_horror.dir." + dir, dir);
     }
 
     /** Eight-way compass word for a delta, screen-north being -Z. */
