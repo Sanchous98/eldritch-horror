@@ -100,8 +100,9 @@ public final class DelhiPlan implements CityPlan {
                 new CityPoi("fort_gate", CityPoi.Kind.LANDMARK, 160, 0, -80, "lahori_gate"),
                 new CityPoi("guard", CityPoi.Kind.NPC, 154, 0, -58, "guard"),
                 new CityPoi("fort_clerk", CityPoi.Kind.NPC, 240, 0, -120, "delhi_stolen_relic"),
-                new CityPoi("station", CityPoi.Kind.STATION, 220, 0, 120, "railway_station"),
-                new CityPoi("rail_yard", CityPoi.Kind.STATION, 272, 1, 218, "delhi_rail_yard"),
+                new CityPoi("station", CityPoi.Kind.STATION, 262, 0, 120, "railway_station;north_south"),
+                new CityPoi("rail_yard", CityPoi.Kind.STATION, 272, 1, 218,
+                        "delhi_rail_yard;north_south"),
                 new CityPoi("stationmaster", CityPoi.Kind.NPC, 240, 0, 120, "railway_rumours"),
                 new CityPoi("guide", CityPoi.Kind.NPC, 8, 0, 306, "guide"));
     }

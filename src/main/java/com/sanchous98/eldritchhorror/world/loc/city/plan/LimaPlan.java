@@ -139,7 +139,8 @@ public final class LimaPlan implements CityPlan {
                 new CityPoi("fisherman", CityPoi.Kind.NPC, 284, 0, 60, "fisherman"),
                 new CityPoi("harbour_port", CityPoi.Kind.PORT, 300, 0, 0,
                         "callao;deep_water;quay"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 230, 1, -210, "east_west"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 230, 1, -210,
+                        "rail station;east_west"),
                 new CityPoi("rail_sign", CityPoi.Kind.SIGN, 230, 6, -214,
                         "RAIL STATION|CALLAO"),
                 new CityPoi("coastal_tomb", CityPoi.Kind.SECRET, 240, -3, 260,
@@ -1130,8 +1131,8 @@ public final class LimaPlan implements CityPlan {
     private static void port(StructureBuilder b, int cx, int cz, CitySurface s, int quay,
                              Palette p) {
         // The harbour basin and its stone quay.
-        b.fill(cx + 302, quay - 4, cz - 200, cx + 334, quay - 4, cz + 160, SAND);
-        b.fill(cx + 302, quay - 3, cz - 200, cx + 334, quay - 1, cz + 160, WATER);
+        b.fill(cx + 302, quay - 5, cz - 200, cx + 334, quay - 5, cz + 160, SAND);
+        b.fill(cx + 302, quay - 4, cz - 200, cx + 334, quay - 1, cz + 160, WATER);
         b.fill(cx + 300, quay - 4, cz - 240, cx + 301, quay + 2, cz + 160, p.foundation());
         b.fill(cx + 300, quay + 2, cz - 240, cx + 300, quay + 2, cz + 160, p.weathered());
         b.fill(cx + 283, quay - 2, cz - 240, cx + 290, quay, cz + 160, p.ground());
@@ -1350,8 +1351,8 @@ public final class LimaPlan implements CityPlan {
         b.fill(cx + 212, ground, z1 + 1, cx + 252, ground, z1 + 6, p.foundation());
         b.fill(cx + 212, ground + 1, z1 + 6, cx + 252, ground + 1, z1 + 6, p.rail());
         for (int x = cx + 216; x <= cx + 248; x += 8) {
-            b.fill(x, ground + 1, z1 + 2, x, ground + 3, z1 + 2, p.accent());
-            b.put(x, ground + 4, z1 + 2, p.light());
+            b.fill(x, ground + 1, z1 + 1, x, ground + 3, z1 + 1, p.accent());
+            b.put(x, ground + 4, z1 + 1, p.light());
         }
 
         for (int x = cx + 140; x <= cx + 292; x++) {
@@ -1384,8 +1385,8 @@ public final class LimaPlan implements CityPlan {
         path(b, s, cx + 200, cz + 220, cx + 240, cz + 246, 5, p.rubble());
 
         // The cove south of Callao, continuous with the harbour water.
-        b.fill(cx + 302, quay - 4, cz + 160, cx + 334, quay - 4, cz + 300, SAND);
-        b.fill(cx + 302, quay - 3, cz + 160, cx + 334, quay - 1, cz + 300, WATER);
+        b.fill(cx + 302, quay - 5, cz + 160, cx + 334, quay - 5, cz + 300, SAND);
+        b.fill(cx + 302, quay - 4, cz + 160, cx + 334, quay - 1, cz + 300, WATER);
         b.fill(cx + 300, quay - 4, cz + 160, cx + 301, quay + 2, cz + 300, p.foundation());
         b.fill(cx + 300, quay + 2, cz + 160, cx + 300, quay + 2, cz + 300, p.weathered());
         b.fill(cx + 296, quay - 1, cz + 160, cx + 299, quay - 1, cz + 200, SAND);

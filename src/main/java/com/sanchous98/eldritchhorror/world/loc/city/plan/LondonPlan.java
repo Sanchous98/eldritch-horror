@@ -91,7 +91,8 @@ public final class LondonPlan implements CityPlan {
                         "dockworker|london_cursed_mummy"),
                 new CityPoi("dockworker", CityPoi.Kind.NPC, 246, 2, 52, "dockworker"),
                 new CityPoi("docks_quay", CityPoi.Kind.LANDMARK, 250, 1, -60, "cranes"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 160, 1, -250, "goods_depot"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 160, 1, -247,
+                        "goods_depot;east_west"),
                 new CityPoi("dock_port", CityPoi.Kind.PORT, 270, -1, -60, "basin"),
                 new CityPoi("east_end_market", CityPoi.Kind.LANDMARK, 235, 1, 230, "market"),
                 new CityPoi("east_end_chapel", CityPoi.Kind.LANDMARK, 270, 1, 280, "chapel"),
@@ -1075,6 +1076,15 @@ public final class LondonPlan implements CityPlan {
         for (int x = cx + 140; x <= cx + 320; x++) {
             b.put(x, ground + 2, cz - 244, rail);
             b.put(x, ground + 2, cz - 238, rail);
+        }
+
+        // A real platform inside the goods shed, five wide and level with the rails.
+        b.fill(cx + 150, ground + 1, cz - 249, cx + 190, ground + 1, cz - 245,
+                p.foundation());
+        b.fill(cx + 150, ground + 2, cz - 249, cx + 190, ground + 2, cz - 245,
+                p.accent());
+        for (int px = cx + 154; px <= cx + 186; px += 16) {
+            b.put(px, ground + 3, cz - 247, p.light());
         }
 
         // The goods station: a long iron shed on the north side.

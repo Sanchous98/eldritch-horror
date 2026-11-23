@@ -95,7 +95,8 @@ public final class NewYorkPlan implements CityPlan {
                 new CityPoi("subway_warning", CityPoi.Kind.SIGN, 0, -5, 110, "MIND THE GAP"),
                 new CityPoi("docks", CityPoi.Kind.LANDMARK, 240, 1, -120, "piers"),
                 new CityPoi("harbour", CityPoi.Kind.PORT, 300, 0, 0, "pier_basin"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 172, 2, -236, "goods_yard"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 172, 2, -225,
+                        "goods_yard;east_west"),
                 new CityPoi("dock_warning", CityPoi.Kind.SIGN, 240, 2, -124, "NO ENTRY"),
                 new CityPoi("speakeasy", CityPoi.Kind.NPC, 240, 1, 40,
                         "bootlegger|new_york_bootlegger"),
@@ -713,6 +714,12 @@ public final class NewYorkPlan implements CityPlan {
         b.fill(wx0 - 2, ground, wz0 - 2, wx0 - 1, ground, wz1 + 2, p.foundation());
         b.fill(wx0, ground, wz0 - 2, wx1, ground, wz0 - 1, p.foundation());
         b.fill(wx0, ground, wz1 + 1, wx1, ground, wz1 + 2, p.foundation());
+        for (int z = wz0; z <= wz1; z += 8) {
+            b.put(wx0 - 1, ground + 1, z, p.foundation());
+        }
+        for (int z = wz0 + 8; z <= wz1 - 8; z += 32) {
+            b.put(wx0 - 1, ground + 2, z, p.light());
+        }
 
         warehouse(b, cx + 180, cz - 192, 48, 36, 12, ground, p, "WAREHOUSE");
         warehouse(b, cx + 180, cz - 148, 48, 20, 10, ground, p, "TOBACCO");
@@ -748,6 +755,17 @@ public final class NewYorkPlan implements CityPlan {
         }
         goodsShed(b, cx + 148, cz - 260, 48, 18, railY, p);
         boxcar(b, cx + 200, cz - 233, railY);
+
+        // A passenger platform on the south side of the tracks: five wide, level with the rail
+        // head, with six blocks of clearance and a lit canopy.
+        b.fill(cx + 150, Math.min(ground, railY), cz - 227, cx + 210, railY, cz - 223,
+                p.foundation());
+        b.fill(cx + 150, railY + 1, cz - 227, cx + 210, railY + 1, cz - 223, p.accent());
+        for (int px = cx + 150; px <= cx + 210; px += 12) {
+            b.fill(px, railY + 2, cz - 223, px, railY + 6, cz - 223, p.accent());
+            b.put(px + 5, railY + 7, cz - 225, p.light());
+        }
+        b.fill(cx + 148, railY + 7, cz - 228, cx + 212, railY + 7, cz - 222, p.roofSlab());
 
         // Piers and the moored barge.
         for (int pz : new int[]{-70, -20, 80}) {

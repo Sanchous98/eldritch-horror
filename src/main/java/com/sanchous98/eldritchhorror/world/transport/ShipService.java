@@ -212,9 +212,11 @@ public final class ShipService {
             EldritchHorror.LOGGER.warn("transport: could not create a packet for {}", line.id());
             return null;
         }
-        // The harbour water surface is the world sea level. Do not use the heightmap: a structure
-        // or overhang above a port can put it tens of blocks above the water (Lima's cliff).
-        ship.setInitialPos(origin.waterX() + 0.5, level.getSeaLevel() + 0.85,
+        // The berth's own water surface, not the world sea level: an authored inland basin (Mexico
+        // City's canal, Rome's Tiber) sits far above (or below) the ocean, and a coastal basin can
+        // be carved a course lower than the default sea. Do not use the heightmap either: a
+        // structure or overhang above a port can put it tens of blocks above the water (Lima's cliff).
+        ship.setInitialPos(origin.waterX() + 0.5, origin.waterY() + 0.85,
                 origin.waterZ() + 0.5);
         ship.configure(line, direction, countdownTicks, departureAt, speed, chunk);
         if (!level.addFreshEntity(ship)) {

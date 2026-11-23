@@ -136,7 +136,8 @@ public final class MexicoCityPlan implements CityPlan {
                 new CityPoi("canal_port", CityPoi.Kind.PORT, 316, 0, -40, "canal_basin;chinampas"),
                 new CityPoi("port_sign", CityPoi.Kind.SIGN, 312, 1, -20, "port"),
                 new CityPoi("canal_warning", CityPoi.Kind.SIGN, 240, 1, -58, "canal_warning"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 120, 0, 305, "east_west"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 120, 0, 305,
+                        "station;east_west"),
                 new CityPoi("station_sign", CityPoi.Kind.SIGN, 120, 0, 302, "station"),
                 new CityPoi("reforma", CityPoi.Kind.LANDMARK, 230, 0, 240, "boulevard;hotels"),
                 new CityPoi("reforma_sign", CityPoi.Kind.SIGN, 230, 1, 190, "reforma"),
@@ -288,8 +289,8 @@ public final class MexicoCityPlan implements CityPlan {
 
     private static void mainCanal(StructureBuilder b, int x0, int z0, int x1, int z1, int g,
                                   Palette p) {
-        b.fill(x0, g - 3, z0, x1, g - 3, z1, p.foundation());
-        b.fill(x0, g - 2, z0, x1, g - 1, z1, WATER);
+        b.fill(x0, g - 5, z0, x1, g - 5, z1, p.foundation());
+        b.fill(x0, g - 4, z0, x1, g - 1, z1, WATER);
         b.fill(x0, g, z0, x1, g, z1, AIR);
         b.fill(x0 - 2, g - 3, z0, x0 - 1, g, z1, p.foundation());
         b.fill(x1 + 1, g - 3, z0, x1 + 2, g, z1, p.foundation());
@@ -301,16 +302,16 @@ public final class MexicoCityPlan implements CityPlan {
 
     private static void crossCanal(StructureBuilder b, int x0, int z0, int x1, int z1, int g,
                                    Palette p) {
-        b.fill(x0, g - 3, z0, x1, g - 3, z1, p.foundation());
-        b.fill(x0, g - 2, z0, x1, g - 1, z1, WATER);
+        b.fill(x0, g - 5, z0, x1, g - 5, z1, p.foundation());
+        b.fill(x0, g - 4, z0, x1, g - 1, z1, WATER);
         b.fill(x0, g, z0, x1, g, z1, AIR);
         b.fill(x0, g - 3, z0 - 2, x1, g, z0 - 1, p.foundation());
         b.fill(x0, g - 3, z1 + 1, x1, g, z1 + 2, p.foundation());
     }
 
     private static void basin(StructureBuilder b, int x0, int z0, int x1, int z1, int g, Palette p) {
-        b.fill(x0, g - 3, z0, x1, g - 3, z1, p.foundation());
-        b.fill(x0, g - 2, z0, x1, g - 1, z1, WATER);
+        b.fill(x0, g - 5, z0, x1, g - 5, z1, p.foundation());
+        b.fill(x0, g - 4, z0, x1, g - 1, z1, WATER);
         b.fill(x0, g, z0, x1, g, z1, AIR);
         b.fill(x0 - 2, g - 3, z0 - 2, x0 - 1, g, z1 + 2, p.foundation());
         b.fill(x1 + 1, g - 3, z0 - 2, x1 + 2, g, z1 + 2, p.foundation());
@@ -1535,10 +1536,11 @@ public final class MexicoCityPlan implements CityPlan {
         b.fill(cx + 98, trackY + 2, cz + 304, cx + 138, trackY + 2, cz + 306, SMOOTH);
         b.fill(cx + 98, trackY + 2, cz + 303, cx + 138, trackY + 2, cz + 303, p.accent());
         for (int x = cx + 100; x <= cx + 136; x += 12) {
-            b.fill(x, trackY + 2, cz + 307, x, trackY + 5, cz + 307, p.accent());
+            b.fill(x, trackY + 3, cz + 307, x, trackY + 7, cz + 307, p.accent());
+            b.put(x, trackY + 8, cz + 305, p.light());
         }
-        b.fill(cx + 96, trackY + 6, cz + 303, cx + 140, trackY + 6, cz + 307, p.roofSlab());
-        b.fill(cx + 96, trackY + 7, cz + 303, cx + 140, trackY + 7, cz + 307, p.roof());
+        b.fill(cx + 96, trackY + 8, cz + 303, cx + 140, trackY + 8, cz + 307, p.roofSlab());
+        b.fill(cx + 96, trackY + 9, cz + 303, cx + 140, trackY + 9, cz + 307, p.roof());
 
         gradePad(b, surface, cx + 100, cz + 292, cx + 136, cz + 302, trackY + 1, p);
         house(b, cx + 100, cz + 292, cx + 136, cz + 302, trackY + 1, p, 7,

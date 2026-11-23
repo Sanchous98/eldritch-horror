@@ -109,8 +109,8 @@ public final class MumbaiPlan implements CityPlan {
                         "dock_master,mumbai_dock_strike"),
                 new CityPoi("dock_master", CityPoi.Kind.NPC, 218, 0, -2,
                         "dock_master,mumbai_dock_strike"),
-                new CityPoi("docks_station", CityPoi.Kind.STATION, 320, 1, -12,
-                        "docks rail yard"),
+                new CityPoi("docks_station", CityPoi.Kind.STATION, 320, 1, -21,
+                        "docks rail yard;east_west"),
                 new CityPoi("theatre", CityPoi.Kind.NPC, -60, 0, -120,
                         "theatre_manager,mumbai_missing_actor"),
                 new CityPoi("theatre_manager", CityPoi.Kind.NPC, -60, 0, -124,
@@ -440,8 +440,8 @@ public final class MumbaiPlan implements CityPlan {
     /** A boat-shaped cut: sand floor, two courses of water and a foundation ring. */
     private static void basin(StructureBuilder b, int x0, int z0, int x1, int z1, int ground,
                               Palette p) {
-        b.fill(x0, ground - 4, z0, x1, ground - 4, z1, SAND);
-        b.fill(x0, ground - 3, z0, x1, ground - 1, z1, WATER);
+        b.fill(x0, ground - 5, z0, x1, ground - 5, z1, SAND);
+        b.fill(x0, ground - 4, z0, x1, ground - 1, z1, WATER);
         b.fill(x0 - 1, ground - 4, z0 - 1, x1 + 1, ground + 1, z0 - 1, p.foundation());
         b.fill(x0 - 1, ground - 4, z1 + 1, x1 + 1, ground + 1, z1 + 1, p.foundation());
         b.fill(x0 - 1, ground - 4, z0 - 1, x0 - 1, ground + 1, z1 + 1, p.foundation());
@@ -584,13 +584,13 @@ public final class MumbaiPlan implements CityPlan {
         // Ferry pier and its boats.
         ferryDock(b, cx, cz, ground, p);
         // Quay furniture, kept clear of the causeway and the pier.
-        for (int x = -80; x <= 130; x += 10) {
+        for (int x = -80; x <= 130; x += 8) {
             if (Math.abs(x) < 20 || (x >= 54 && x <= 66)) {
                 continue;
             }
             b.put(cx + x, ground + 1, cz + 250, p.accent());
         }
-        for (int x = -80; x <= 130; x += 30) {
+        for (int x = -80; x <= 130; x += 16) {
             if (Math.abs(x) < 20) {
                 continue;
             }

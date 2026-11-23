@@ -70,7 +70,8 @@ public final class JakartaPlan implements CityPlan {
     public List<CityPoi> pois() {
         return List.of(
                 new CityPoi("arrival_gate", CityPoi.Kind.LANDMARK, 0, 0, 320, ""),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 3, 1, -300, "goods_yard"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 3, 1, -300,
+                        "goods_yard;north_south"),
                 new CityPoi("gate_signpost", CityPoi.Kind.SIGN, 10, 1, 328,
                         "TOWN HALL|OLD HARBOUR|GLODOK|KAMPUNG|CANAL"),
                 new CityPoi("city_notices", CityPoi.Kind.SIGN, -12, 1, 331, "CITY NOTICES"),
@@ -383,16 +384,17 @@ public final class JakartaPlan implements CityPlan {
         for (int z = cz - 340; z <= cz - 272; z++) {
             b.put(cx, stationY + 1, z, rail);
         }
-        // Platform east of the track, level with the rail head.
-        seat(b, cx + 1, cz - 320, cx + 6, cz - 284, stationY + 1, p, surface);
-        b.fill(cx + 1, stationY + 1, cz - 320, cx + 6, stationY + 1, cz - 284,
+        // Platform east of the track: five wide, its edge three blocks off the centreline, with
+        // six blocks of shelter and a lantern under the canopy.
+        seat(b, cx + 3, cz - 322, cx + 7, cz - 282, stationY + 1, p, surface);
+        b.fill(cx + 3, stationY + 1, cz - 322, cx + 7, stationY + 1, cz - 282,
                 p.foundation());
-        for (int z = cz - 316; z <= cz - 288; z += 7) {
-            b.fill(cx + 6, stationY + 2, z, cx + 6, stationY + 5, z, p.accent());
+        for (int z = cz - 318; z <= cz - 288; z += 6) {
+            b.fill(cx + 7, stationY + 2, z, cx + 7, stationY + 6, z, p.accent());
+            b.put(cx + 8, stationY + 3, z, p.light());
         }
-        b.fill(cx + 1, stationY + 6, cz - 318, cx + 7, stationY + 6, cz - 286,
+        b.fill(cx + 3, stationY + 7, cz - 322, cx + 8, stationY + 7, cz - 282,
                 p.roofSlab());
-        b.put(cx + 4, stationY + 2, cz - 300, p.light());
         // Station building east of the platform.
         int x0 = cx + 8;
         int x1 = cx + 30;
@@ -678,8 +680,8 @@ public final class JakartaPlan implements CityPlan {
         int x1 = cx + 334;
         int z0 = cz - 250;
         int z1 = cz + 125;
-        b.fill(x0, ground - 4, z0, x1, ground - 4, z1, Blocks.SAND.defaultBlockState());
-        b.fill(x0, ground - 3, z0, x1, ground - 2, z1, Blocks.WATER.defaultBlockState());
+        b.fill(x0, ground - 5, z0, x1, ground - 5, z1, Blocks.SAND.defaultBlockState());
+        b.fill(x0, ground - 4, z0, x1, ground - 1, z1, Blocks.WATER.defaultBlockState());
         b.fill(cx + 256, ground - 4, cz - 250, cx + 257, ground + 1, cz + 77, p.foundation());
         b.fill(cx + 256, ground - 4, cz + 113, cx + 257, ground + 1, cz + 125, p.foundation());
         b.fill(cx + 256, ground - 4, cz - 252, cx + 335, ground + 1, cz - 250, p.foundation());

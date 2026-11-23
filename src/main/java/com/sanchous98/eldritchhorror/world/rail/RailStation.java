@@ -20,9 +20,11 @@ import com.sanchous98.eldritchhorror.world.EarthMap;
  * @param boardZ   boarding-point Z
  * @param dirX     platform long-axis X (-1, 0 or 1)
  * @param dirZ     platform long-axis Z (-1, 0 or 1)
+ * @param outSign  +1 when the partner lies along {@code (dirX, dirZ)}, -1 when opposite; the
+ *                 consist trails behind the station point, so the platform runs the other way
  */
 public record RailStation(String cityId, String cityName, int x, int z, int y,
-                          int boardX, int boardZ, int dirX, int dirZ) {
+                          int boardX, int boardZ, int dirX, int dirZ, int outSign) {
 
     /** @return squared horizontal distance from a world point to the station rail point. */
     public double distanceSqr(double worldX, double worldZ) {

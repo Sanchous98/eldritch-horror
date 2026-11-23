@@ -108,7 +108,8 @@ public final class CairoPlan implements CityPlan {
                 new CityPoi("guard", CityPoi.Kind.NPC, 170, 0, 220, "guard"),
                 new CityPoi("city_of_the_dead", CityPoi.Kind.SECRET, -200, 0, 260, "necropolis"),
                 new CityPoi("secret_tomb", CityPoi.Kind.SECRET, -212, -7, 278, "scribe_tomb"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 136, 0, 316, "rail_station"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 136, 0, 324,
+                        "rail_station;east_west"),
                 new CityPoi("nile_port", CityPoi.Kind.PORT, 252, 0, 60, "feluccas;customs"),
                 new CityPoi("european_square", CityPoi.Kind.LANDMARK, 0, 0, 0, "fountain"),
                 new CityPoi("all_saints_church", CityPoi.Kind.LANDMARK, -75, 0, 118, "church"),
@@ -724,9 +725,9 @@ public final class CairoPlan implements CityPlan {
         int wz1 = cz + 160;
 
         // The river, its bed, the quay wall and the promenade.
-        b.fill(cx + 258, g - 3, wz0, cx + 336, g - 3, wz1, p.foundation());
-        b.fill(cx + 258, g - 2, wz0, cx + 336, g, wz1, WATER);
-        b.fill(cx + 252, g - 3, wz0, cx + 257, g + 1, wz1, p.foundation());
+        b.fill(cx + 258, g - 4, wz0, cx + 336, g - 4, wz1, p.foundation());
+        b.fill(cx + 258, g - 3, wz0, cx + 336, g, wz1, WATER);
+        b.fill(cx + 252, g - 4, wz0, cx + 257, g + 1, wz1, p.foundation());
         b.fill(cx + 240, g, wz0, cx + 251, g, wz1, p.ground());
         b.fill(cx + 231, g, wz0, cx + 239, g, wz1, p.ground());
 
@@ -755,6 +756,13 @@ public final class CairoPlan implements CityPlan {
             b.put(cx + 241, g + 1, z, p.roofSlab());
             b.put(cx + 242, g + 1, z, p.roofSlab());
             b.put(cx + 241, g + 2, z, p.rail());
+        }
+        // Mooring bollards every eight along the quay wall, with a lit lamp every thirty-two.
+        for (int z = wz0; z <= wz1; z += 8) {
+            b.put(cx + 252, g + 2, z, p.accent());
+        }
+        for (int z = wz0 + 8; z <= wz1 - 8; z += 32) {
+            b.put(cx + 252, g + 3, z, p.light());
         }
 
         // The quay square at the Nile landing.
@@ -1020,6 +1028,16 @@ public final class CairoPlan implements CityPlan {
         b.fill(bx0, by + 1, cz + 317, bx0, by + 3, cz + 317, p.accent());
         b.fill(bx1, by + 1, cz + 317, bx1, by + 3, cz + 317, p.accent());
         lamp(b, bx0 + 2, by, cz + 317, p);
+
+        // The main platform south of the tracks: five wide, edge three blocks off the
+        // centreline, five clear blocks and a canopy at rail+6.
+        b.fill(bx0, by, cz + 322, bx1, by, cz + 326, p.foundation());
+        b.fill(bx0, by + 1, cz + 322, bx1, by + 1, cz + 326, p.accent());
+        for (int x = bx0 + 2; x <= bx1 - 2; x += 6) {
+            b.fill(x, by + 2, cz + 326, x, by + 6, cz + 326, p.accent());
+            b.put(x, by + 7, cz + 324, p.light());
+        }
+        b.fill(bx0 - 1, by + 7, cz + 321, bx1 + 1, by + 7, cz + 327, p.roofSlab());
 
         // The goods shed in the yard.
         int sx0 = cx + 128;

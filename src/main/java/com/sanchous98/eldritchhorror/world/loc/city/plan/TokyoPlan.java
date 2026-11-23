@@ -96,8 +96,8 @@ public final class TokyoPlan implements CityPlan {
                 new CityPoi("dockworker", CityPoi.Kind.NPC, 200, 1, 152, "dockworker"),
                 new CityPoi("sumida_canal", CityPoi.Kind.LANDMARK, 220, 1, 133, "boats"),
                 new CityPoi("sumida_port", CityPoi.Kind.PORT, 310, 2, 143, "canal_wharf"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 260, 2, -48,
-                        "tokyo_rail_yard"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 260, 2, -30,
+                        "tokyo_rail_yard;east_west"),
                 new CityPoi("police_box", CityPoi.Kind.NPC, 0, 1, 120, "constable"),
                 new CityPoi("constable", CityPoi.Kind.NPC, 18, 2, 120, "constable"),
                 new CityPoi("pagoda_crypt", CityPoi.Kind.SECRET, PAGODA_X, -8, PAGODA_Z,
@@ -871,8 +871,9 @@ public final class TokyoPlan implements CityPlan {
         int x1 = cx + 320;
         int z0 = cz + 120;
         int z1 = cz + 146;
-        b.fill(x0, ground - 3, z0, x1, ground - 3, z1, p.rubble());
-        b.fill(x0, ground - 2, z0, x1, ground, z1, Blocks.WATER.defaultBlockState());
+        b.fill(x0, ground - 5, z0, x1, ground - 5, z1, p.rubble());
+        b.fill(x0, ground - 4, z0, x1, ground - 1, z1,
+                Blocks.WATER.defaultBlockState());
         // Stone quay walls.
         b.fill(x0, ground - 3, z0 - 1, x1, ground, z0 - 1, p.foundation());
         b.fill(x0, ground - 3, z1 + 1, x1, ground, z1 + 1, p.foundation());

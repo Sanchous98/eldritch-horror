@@ -38,10 +38,14 @@ public final class RailLines {
     private static final int PARTNER_ATTEMPTS = 5;
     /** Partner cap used when the server config is not loaded (bare unit probes). */
     private static final int DEFAULT_MAX_PARTNERS = 3;
-    /** Station platform half-length along the track, in blocks. */
-    private static final int PLATFORM_HALF_LENGTH = 12;
-    /** Station platform half-width across the track, in blocks. */
-    private static final int PLATFORM_HALF_WIDTH = 3;
+    /** First platform column from the rail centreline: the edge sits three blocks out. */
+    private static final int PLATFORM_INNER = 3;
+    /** Last platform column from the rail centreline: five columns, so the platform is 5 wide. */
+    private static final int PLATFORM_OUTER = 7;
+    /** Canopy course above the rail (five clear blocks + the slab). */
+    private static final int PLATFORM_ROOF = 6;
+    /** Spacing of canopy pillars and lamps along the platform. */
+    private static final int PLATFORM_POST_SPACING = 8;
 
     private static volatile @Nullable Network cached;
 
@@ -450,43 +454,101 @@ public final class RailLines {
     }
 
     private static void addStationStamps(Map<Long, List<RailStamp>> index, RailStation station) {
-        List<RailStamp> floors = new ArrayList<>();
-        List<RailStamp> fences = new ArrayList<>();
-        List<RailStamp> lanterns = new ArrayList<>();
+        for (RailStamp stamp : stationStamps(station)) {
+            addStamp(index, stamp);
+        }
+    }
+
+    /**
+     * The station's block plan: a five-wide platform on each side with its edge three blocks from
+     * the rail centreline, five clear blocks above the rail head, a canopy at rail+6, pillars,
+     * hanging lanterns, a sign on the city-side platform and a buffer stop at the rear end. The
+     * buffer stamp is written before the line stamps, so a real line crossing it clears it.
+     *
+     * @param station the station to describe
+     * @return every stamp the station writes, in worldgen order
+     */
+    static List<RailStamp> stationStamps(RailStation station) {
+        List<RailStamp> out = new ArrayList<>();
         int dirX = station.dirX();
         int dirZ = station.dirZ();
         int acrossX = station.acrossX();
         int acrossZ = station.acrossZ();
-        for (int along = -PLATFORM_HALF_LENGTH; along <= PLATFORM_HALF_LENGTH; along++) {
-            for (int across = -PLATFORM_HALF_WIDTH; across <= PLATFORM_HALF_WIDTH; across++) {
-                if (across == 0) {
-                    continue; // keep the track's ballast and rails
-                }
-                int x = station.x() + dirX * along + acrossX * across;
-                int z = station.z() + dirZ * along + acrossZ * across;
-                floors.add(RailStamp.floor(x, station.y() - 1, z));
-                if (Math.abs(across) == PLATFORM_HALF_WIDTH) {
-                    fences.add(RailStamp.fence(x, station.y(), z));
+        int middle = (PLATFORM_INNER + PLATFORM_OUTER) / 2;
+        int side = citySide(station);
+        // The consist spawns nose-first at the station point, so its 64-80 blocks trail behind in
+        // the direction opposite the partner. The platform covers that side (plus a short front
+        // apron) rather than running symmetrically into the terminus building.
+        int outSign = station.outSign();
+        int front = 5 * outSign;
+        int back = -80 * outSign;
+        int first = Math.min(front, back);
+        int last = Math.max(front, back);
+        for (int along = first; along <= last; along++) {
+            int baseX = station.x() + dirX * along;
+            int baseZ = station.z() + dirZ * along;
+            for (int offset = PLATFORM_INNER; offset <= PLATFORM_OUTER; offset++) {
+                int across = side * offset;
+                int x = baseX + acrossX * across;
+                int z = baseZ + acrossZ * across;
+                out.add(RailStamp.floor(x, station.y() - 1, z));
+                out.add(RailStamp.canopy(x, station.y() + PLATFORM_ROOF, z));
+            }
+            // Keep the rail corridor itself open even when no line reaches this station.
+            for (int across = -2; across <= 2; across++) {
+                int x = baseX + acrossX * across;
+                int z = baseZ + acrossZ * across;
+                for (int dy = 1; dy <= PLATFORM_ROOF - 1; dy++) {
+                    out.add(RailStamp.clear(x, station.y() + dy, z));
                 }
             }
         }
-        for (int along = -10; along <= 10; along += 10) {
-            for (int across = -PLATFORM_HALF_WIDTH; across <= PLATFORM_HALF_WIDTH;
-                 across += 2 * PLATFORM_HALF_WIDTH) {
-                int x = station.x() + dirX * along + acrossX * across;
-                int z = station.z() + dirZ * along + acrossZ * across;
-                lanterns.add(RailStamp.lantern(x, station.y() + 1, z));
+        for (int along = first; along <= last; along++) {
+            if (Math.floorMod(along, PLATFORM_POST_SPACING) == 0) {
+                continue;
+            }
+            int across = side * PLATFORM_OUTER;
+            out.add(RailStamp.fence(station.x() + dirX * along + acrossX * across,
+                    station.y(), station.z() + dirZ * along + acrossZ * across));
+        }
+        for (int along = first; along <= last; along += PLATFORM_POST_SPACING) {
+            int across = side * PLATFORM_OUTER;
+            int x = station.x() + dirX * along + acrossX * across;
+            int z = station.z() + dirZ * along + acrossZ * across;
+            for (int dy = 1; dy <= PLATFORM_ROOF - 1; dy++) {
+                out.add(RailStamp.pillar(x, station.y() + dy, z));
+            }
+            // One warm lamp at the canopy course (rail+6), leaving the five-clear volume intact.
+            int lampAcross = side * middle;
+            out.add(RailStamp.lantern(
+                    station.x() + dirX * along + acrossX * lampAcross,
+                    station.y() + PLATFORM_ROOF,
+                    station.z() + dirZ * along + acrossZ * lampAcross));
+        }
+        int signAcross = side * middle;
+        int signAlong = front - 4 * outSign;
+        out.add(RailStamp.sign(
+                station.x() + dirX * signAlong + acrossX * signAcross,
+                station.y() + 1,
+                station.z() + dirZ * signAlong + acrossZ * signAcross,
+                station.cityName()));
+        int bufferAlong = back - outSign * 2;
+        for (int across = -1; across <= 1; across++) {
+            int x = station.x() + dirX * bufferAlong + acrossX * across;
+            int z = station.z() + dirZ * bufferAlong + acrossZ * across;
+            for (int dy = 1; dy <= 2; dy++) {
+                out.add(RailStamp.buffer(x, station.y() + dy, z));
             }
         }
-        for (RailStamp stamp : floors) {
-            addStamp(index, stamp);
-        }
-        for (RailStamp stamp : fences) {
-            addStamp(index, stamp);
-        }
-        for (RailStamp stamp : lanterns) {
-            addStamp(index, stamp);
-        }
+        return out;
+    }
+
+    /** @return -1 or +1: the side of the track the city (and therefore the main platform) is on. */
+    private static int citySide(RailStation station) {
+        int dx = station.boardX() - station.x();
+        int dz = station.boardZ() - station.z();
+        int side = Integer.signum(dx * station.acrossX() + dz * station.acrossZ());
+        return side == 0 ? 1 : side;
     }
 
     private static void addStamp(Map<Long, List<RailStamp>> index, RailStamp stamp) {

@@ -142,7 +142,8 @@ public final class BuenosAiresPlan implements CityPlan {
                 new CityPoi("customs_officer", CityPoi.Kind.NPC, 232, 0, -28, "customs_officer"),
                 new CityPoi("harbour", CityPoi.Kind.PORT, 302, 1, -60, "pier,deep_water"),
                 new CityPoi("docks", CityPoi.Kind.LANDMARK, 292, 0, 60, "piers,cranes"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 228, 1, 150, "east_west"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 228, 1, 155,
+                        "rail station;east_west"),
                 new CityPoi("station_sign", CityPoi.Kind.SIGN, 200, 1, 148, "rail"),
                 new CityPoi("port_warning", CityPoi.Kind.SIGN, 296, 1, 20, "warning"),
                 new CityPoi("port_sign", CityPoi.Kind.SIGN, 140, 1, 10, "port"),
@@ -234,7 +235,9 @@ public final class BuenosAiresPlan implements CityPlan {
                 b.put(x, y, z, AIR);
                 b.put(x, y - 1, z, WATER);
                 b.put(x, y - 2, z, WATER);
-                b.put(x, y - 3, z, p.foundation());
+                b.put(x, y - 3, z, WATER);
+                b.put(x, y - 4, z, WATER);
+                b.put(x, y - 5, z, p.foundation());
             }
         }
     }
@@ -278,10 +281,10 @@ public final class BuenosAiresPlan implements CityPlan {
         // A deliberate harbour channel east of the quay, so the docks always meet water.
         for (int x = cx + 301; x <= cx + 330; x++) {
             for (int z = cz - 200; z <= cz + 145; z++) {
-                b.fill(x, g - 2, z, x, g - 1, z, WATER);
+                b.fill(x, g - 4, z, x, g - 1, z, WATER);
                 b.put(x, g, z, AIR);
                 b.fill(x, g + 1, z, x, g + 10, z, AIR);
-                b.put(x, g - 3, z, p.foundation());
+                b.put(x, g - 5, z, p.foundation());
             }
         }
         // Two timber piers reaching into the channel.
@@ -777,6 +780,15 @@ public final class BuenosAiresPlan implements CityPlan {
         for (int x = xa + 8; x <= xb - 8; x += 24) {
             lamp(b, x, trackZ - 3, base + 1, p);
         }
+        // The main passenger platform on the south side: five wide, edge three blocks off the
+        // centreline, five clear blocks and a canopy at rail+6.
+        b.fill(x0 - 4, base, trackZ + 3, x1 + 4, base, trackZ + 7, STONE);
+        b.fill(x0 - 4, base + 1, trackZ + 3, x1 + 4, base + 1, trackZ + 7, p.accent());
+        for (int x = x0; x <= x1; x += 12) {
+            b.fill(x, base + 2, trackZ + 7, x, base + 6, trackZ + 7, p.accent());
+            b.put(x, base + 7, trackZ + 5, p.light());
+        }
+        b.fill(x0 - 5, base + 7, trackZ + 2, x1 + 5, base + 7, trackZ + 8, p.roofSlab());
 
         signPost(b, p, x0 + 2, z1 + 2, base, Direction.SOUTH,
                 "RAIL STATION", "PLATFORM 1");

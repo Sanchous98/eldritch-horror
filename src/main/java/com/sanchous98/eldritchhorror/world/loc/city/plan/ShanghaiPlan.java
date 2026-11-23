@@ -134,7 +134,7 @@ public final class ShanghaiPlan implements CityPlan {
                         "city notices; quests"),
                 // Transport anchors.
                 new CityPoi("shanghai_station", CityPoi.Kind.STATION, 0, 1, -310,
-                        "rail terminus; straight level track north to the edge"),
+                        "rail terminus; straight level track north to the edge;north_south"),
                 new CityPoi("huangpu_port", CityPoi.Kind.PORT, 190, 1, 120,
                         "Pudong quay water edge; Dock 7")
         );

@@ -102,7 +102,8 @@ public final class IstanbulPlan implements CityPlan {
                 new CityPoi("fish_market", CityPoi.Kind.SHOP, 246, 0, 212, "fishmonger"),
                 new CityPoi("missing_dragoman", CityPoi.Kind.NPC, -12, -9, 44,
                         "istanbul_missing_dragoman"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, -130, 1, 275, "rail_yard"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, -134, 1, 275,
+                        "rail_yard;north_south"),
                 new CityPoi("istanbul_port", CityPoi.Kind.PORT, 240, 0, 220, "bosphorus_quay"));
     }
 
@@ -1249,9 +1250,9 @@ public final class IstanbulPlan implements CityPlan {
                 }
             }
         }
-        b.fill(wx0, harbourY - 4, wz0, wx1, harbourY - 4, wz1, p.rubble());
-        b.fill(wx0, harbourY - 3, wz0, wx1, harbourY - 1, wz1, water);
-        b.fill(cx + 259, harbourY - 4, cz + 160, cx + 259, harbourY, cz + 340,
+        b.fill(wx0, harbourY - 5, wz0, wx1, harbourY - 5, wz1, p.rubble());
+        b.fill(wx0, harbourY - 4, wz0, wx1, harbourY - 1, wz1, water);
+        b.fill(cx + 259, harbourY - 5, cz + 160, cx + 259, harbourY, cz + 340,
                 p.foundation());
 
         for (int z = cz + 160; z <= cz + 340; z += 2) {
