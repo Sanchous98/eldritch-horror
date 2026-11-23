@@ -57,6 +57,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -78,6 +81,16 @@ public final class EldritchCommands {
     private static final java.util.function.Predicate<CommandSourceStack> GAMEMASTER =
             source -> source.permissions().hasPermission(
                     net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER);
+
+    /** Radial width (blocks) of one band in the {@code /eh city lights} histogram. */
+    private static final int LIGHT_BAND = 32;
+    /** A light counts as "ground level" within this many blocks of the caller's Y. */
+    private static final int GROUND_SPAN = 6;
+    /**
+     * Upper bound on chunks examined by {@code /eh city lights}. Only chunks that are already
+     * loaded are ever seen, so this is a safety cap for pathological render distances.
+     */
+    private static final int MAX_SCAN_CHUNKS = 1024;
 
     private EldritchCommands() {
     }
@@ -241,6 +254,7 @@ public final class EldritchCommands {
         // Debug: report the nearest curated city's condition (derived from district taint).
         eh.then(Commands.literal("city")
                 .executes(EldritchCommands::cityState)
+                .then(Commands.literal("lights").executes(EldritchCommands::cityLights))
                 .then(Commands.literal("taint")
                         .requires(GAMEMASTER)
                         .then(Commands.argument("city", StringArgumentType.word())
@@ -753,6 +767,115 @@ public final class EldritchCommands {
         ctx.getSource().sendSuccess(() -> Component.literal(
                 city.name() + ": " + state.name().toLowerCase(java.util.Locale.ROOT)
                         + " (shelter x" + state.recoveryMultiplier() + ")"), false);
+        return 1;
+    }
+
+    /**
+     * {@code /eh city lights}: counts the light-emitting blocks of the nearest curated city's
+     * district, in chunks that are <em>already loaded</em> — never forcing a load or a generation.
+     *
+     * <p>Emission is read from the block state itself, so torches, lanterns, campfires, glowstone
+     * and any modded block with a positive light level all count without a hardcoded block list.
+     * The histogram is split into 32-block radial bands from the city centre; blocks within
+     * {@value #GROUND_SPAN} blocks of the caller's Y are also reported as "ground". The scan is
+     * bounded by {@value #MAX_SCAN_CHUNKS} chunks and is read-only.
+     */
+    private static int cityLights(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        if (!(player.level() instanceof ServerLevel level)) {
+            ctx.getSource().sendFailure(Component.literal("Not in a server level."));
+            return 0;
+        }
+        City city = CityStates.nearestCity(level, player.blockPosition());
+        if (city == null) {
+            ctx.getSource().sendFailure(Component.literal("You are not inside a curated city."));
+            return 0;
+        }
+        int radius = new com.sanchous98.eldritchhorror.world.loc.city.CityLocation(city).radius();
+        int bandCount = (radius + LIGHT_BAND - 1) / LIGHT_BAND;
+        int[] bands = new int[bandCount];
+        int total = 0;
+        int ground = 0;
+        int scanned = 0;
+        boolean capped = false;
+        long radiusSq = (long) radius * radius;
+        int centreX = city.x();
+        int centreZ = city.z();
+        int centreY = player.getBlockY();
+        int centreChunkX = centreX >> 4;
+        int centreChunkZ = centreZ >> 4;
+        int chunkRadius = (radius >> 4) + 1;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        scan:
+        for (int cx = centreChunkX - chunkRadius; cx <= centreChunkX + chunkRadius; cx++) {
+            for (int cz = centreChunkZ - chunkRadius; cz <= centreChunkZ + chunkRadius; cz++) {
+                int minX = cx << 4;
+                int minZ = cz << 4;
+                int nearestX = Math.clamp(centreX, minX, minX + 15);
+                int nearestZ = Math.clamp(centreZ, minZ, minZ + 15);
+                long offX = nearestX - centreX;
+                long offZ = nearestZ - centreZ;
+                if (offX * offX + offZ * offZ > radiusSq) {
+                    continue; // the whole chunk lies outside the district circle
+                }
+                LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
+                if (chunk == null) {
+                    continue; // unloaded: skip rather than force-load
+                }
+                if (++scanned > MAX_SCAN_CHUNKS) {
+                    capped = true;
+                    break scan;
+                }
+                for (int index = 0; index < chunk.getSections().length; index++) {
+                    LevelChunkSection section = chunk.getSection(index);
+                    if (section.hasOnlyAir() || !section.maybeHas(
+                            state -> state.getLightEmission(level, BlockPos.ZERO) > 0)) {
+                        continue;
+                    }
+                    int baseY = chunk.getSectionYFromSectionIndex(index) << 4;
+                    for (int ly = 0; ly < 16; ly++) {
+                        int y = baseY + ly;
+                        boolean atGround = Math.abs(y - centreY) <= GROUND_SPAN;
+                        for (int lx = 0; lx < 16; lx++) {
+                            int x = minX + lx;
+                            long dx = x - centreX;
+                            for (int lz = 0; lz < 16; lz++) {
+                                BlockState state = section.getBlockState(lx, ly, lz);
+                                if (state.getLightEmission(level, cursor.set(x, y, minZ + lz)) <= 0) {
+                                    continue;
+                                }
+                                long dz = minZ + lz - centreZ;
+                                long distanceSq = dx * dx + dz * dz;
+                                if (distanceSq > radiusSq) {
+                                    continue;
+                                }
+                                int band = (int) (Math.sqrt(distanceSq) / LIGHT_BAND);
+                                bands[Math.min(band, bandCount - 1)]++;
+                                total++;
+                                if (atGround) {
+                                    ground++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        CityState state = CityStates.stateOf(level, city);
+        StringBuilder line = new StringBuilder(128);
+        line.append(city.name())
+                .append(": ").append(state.name().toLowerCase(java.util.Locale.ROOT))
+                .append(", r=").append(radius)
+                .append(", lights ").append(total)
+                .append(" (ground +/-").append(GROUND_SPAN).append(' ').append(ground).append(')')
+                .append(", bands");
+        for (int i = 0; i < bands.length; i++) {
+            line.append(' ').append(i * LIGHT_BAND).append('-')
+                    .append(Math.min((i + 1) * LIGHT_BAND, radius)).append(':').append(bands[i]);
+        }
+        line.append(", chunks ").append(scanned).append(capped ? "+ (capped)" : "");
+        String text = line.toString();
+        ctx.getSource().sendSuccess(() -> Component.literal(text), false);
         return 1;
     }
 

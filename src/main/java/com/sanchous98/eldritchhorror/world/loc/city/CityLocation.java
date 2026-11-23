@@ -15,6 +15,7 @@ import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlanContext;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyle;
 import com.sanchous98.eldritchhorror.world.loc.style.CityStyles;
+import com.sanchous98.eldritchhorror.world.loc.style.StyleKit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,19 @@ public final class CityLocation implements Location {
      * RNG draws, so later layout in that chunk is unchanged.
      */
     private static final int LANDMARK_REACH = INNER_CLEAR + PLAZA;
+
+    /** Street-lamp grid pitch (blocks), aligned to the city centre. */
+    static final int LAMP_GRID = 24;
+    /** Radius around the monument kept clear of street lamps (the plaza proper). */
+    private static final int LAMP_CLEAR = 24;
+    /** Height above the local surface searched for rooms to light (blocks). */
+    private static final int INTERIOR_LIGHT_TOP = 48;
+    /** How far below an open cell a solid floor may be (blocks). */
+    private static final int FLOOR_REACH = 3;
+    /** How far above an open cell a solid ceiling may be (blocks). */
+    private static final int CEILING_REACH = 4;
+    /** One hanging light per this many interior columns (power of two; position hash). */
+    private static final int INTERIOR_LIGHT_SPACING = 8;
 
     private final City city;
     /**
@@ -224,6 +238,7 @@ public final class CityLocation implements Location {
             } else {
                 plan.build(b, ctx, p);
             }
+            lightAuthoredCity(b, ctx, p);
             b.marker("city_center", cx, ground + 1, cz);
             return;
         }
@@ -509,6 +524,126 @@ public final class CityLocation implements Location {
                 }
             }
         }
+    }
+
+    /**
+     * Generation-time lighting for an authored city: street lamps on a fixed grid and sparse
+     * hanging lights inside covered rooms and alleys. Runs <b>after</b> the plan has written the
+     * generating chunk (cached replay or direct build), so it sees the real final block states of
+     * that chunk — and reads no other chunk.
+     *
+     * <p>Street lamps stand on a {@link #LAMP_GRID}-block grid aligned to the city centre, at the
+     * graded surface level ({@link CitySurface#at(int, int)}), and only where the column still has
+     * a solid floor and two open cells above it, so a lamp never cuts into a wall or a roof. The
+     * plaza radius ({@link #LAMP_CLEAR}) stays clear.
+     *
+     * <p>Interior lights look for open cells that have a solid floor within {@link #FLOOR_REACH}
+     * below and a solid ceiling within {@link #CEILING_REACH} above (a room or a covered alley),
+     * and hang one lamp just under each such ceiling. One column in
+     * {@link #INTERIOR_LIGHT_SPACING} is lit, chosen by a pure position hash, so a district gets
+     * many small pools of light without a lamp in every cell.
+     *
+     * <p>Every decision is a pure function of the column's absolute position and the chunk's own
+     * final blocks: no rng, no cross-chunk reads. Every write goes through
+     * {@link StructureBuilder#put}, which drops anything outside the generating chunk, so the pass
+     * is deterministic, chunk-order independent and clipped by construction. It runs once per
+     * chunk during worldgen — there is no runtime ticker.
+     */
+    private static void lightAuthoredCity(StructureBuilder b, CityPlanContext ctx, Palette p) {
+        int x0 = b.chunkMinX();
+        int z0 = b.chunkMinZ();
+        int cx = ctx.cx();
+        int cz = ctx.cz();
+        int district = ctx.district();
+        int district2 = district * district;
+        int clear2 = LAMP_CLEAR * LAMP_CLEAR;
+        CitySurface surface = ctx.surface();
+        for (int x = x0; x < x0 + 16; x++) {
+            int dx = x - cx;
+            if (Math.abs(dx) > district) {
+                continue;
+            }
+            for (int z = z0; z < z0 + 16; z++) {
+                int dz = z - cz;
+                int d2 = dx * dx + dz * dz;
+                if (d2 > district2 || !b.isLand(x, z)) {
+                    continue; // outside the city radius, or open water
+                }
+                int s = surface.at(x, z);
+                boolean grid = Math.floorMod(dx, LAMP_GRID) == 0
+                        && Math.floorMod(dz, LAMP_GRID) == 0;
+                if (grid && d2 > clear2 && lampColumnOpen(b, x, s, z)) {
+                    StyleKit.lanternPost(b, x, z, s, p);
+                    continue; // the post fills this column; do not hang a second light in it
+                }
+                interiorLight(b, x, z, s, p);
+            }
+        }
+    }
+
+    /** True when a lantern post fits on {@code y}: a solid floor and two open cells above it. */
+    private static boolean lampColumnOpen(StructureBuilder b, int x, int y, int z) {
+        return !b.isReplaceable(x, y, z)
+                && b.isReplaceable(x, y + 1, z)
+                && b.isReplaceable(x, y + 2, z);
+    }
+
+    /**
+     * Hangs at most one lamp under each covered ceiling in this column (a room, a storey or a
+     * covered alley), for one column in {@link #INTERIOR_LIGHT_SPACING}. The lamp goes in the
+     * topmost open cell under the ceiling, so it never occupies the floor a player walks on. The
+     * column is skipped entirely when it carries no covered interior.
+     */
+    private static void interiorLight(StructureBuilder b, int x, int z, int surfaceY, Palette p) {
+        if ((lightHash(x, surfaceY, z) & (INTERIOR_LIGHT_SPACING - 1)) != 0) {
+            return;
+        }
+        int top = surfaceY + INTERIOR_LIGHT_TOP;
+        for (int y = surfaceY + 1; y <= top; y++) {
+            if (!b.isReplaceable(x, y, z)) {
+                continue; // not an open cell
+            }
+            boolean floor = false;
+            for (int i = 1; i <= FLOOR_REACH && !floor; i++) {
+                floor = !b.isReplaceable(x, y - i, z);
+            }
+            if (!floor) {
+                continue;
+            }
+            int ceiling = 0;
+            for (int i = 1; i <= CEILING_REACH; i++) {
+                if (!b.isReplaceable(x, y + i, z)) {
+                    ceiling = y + i;
+                    break;
+                }
+            }
+            if (ceiling == 0) {
+                continue; // no ceiling within reach: open sky or a tall hall, not a covered room
+            }
+            b.put(x, ceiling - 1, z, hangingLight(p));
+            y = ceiling; // one fixture per covered space in this column; continue in the next
+        }
+    }
+
+    /** The palette light as a hanging fixture, when the block supports hanging (lanterns do). */
+    private static BlockState hangingLight(Palette p) {
+        BlockState light = p.light();
+        if (light.hasProperty(BlockStateProperties.HANGING)) {
+            return light.setValue(BlockStateProperties.HANGING, true);
+        }
+        return light;
+    }
+
+    /**
+     * A stable position hash for city lighting: pure in absolute world coordinates, so the chosen
+     * fixture columns are identical in every chunk and on every regeneration.
+     */
+    private static int lightHash(int x, int y, int z) {
+        int h = x * 0x9E3779B9 ^ y * 0x85EBCA6B ^ z * 0xC2B2AE35;
+        h ^= h >>> 15;
+        h *= 0x2C1B3C6D;
+        h ^= h >>> 12;
+        return h;
     }
 
     /**
