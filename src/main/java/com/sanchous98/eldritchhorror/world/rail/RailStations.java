@@ -3,11 +3,18 @@ package com.sanchous98.eldritchhorror.world.rail;
 import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.loc.Palette;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlan;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlanProbe;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPoi;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.world.level.block.RailBlock;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,6 +41,14 @@ public final class RailStations {
     private static final int SIDES = 24;
     /** Half-size of the flat patch that must be land. */
     private static final int PATCH = 4;
+    /** How far from a STATION anchor its authored rails may be and still be found. */
+    private static final int RAIL_SNAP_RADIUS = 32;
+    /** Platform column the boarding point sits on, measured from the rail centreline. */
+    private static final int BOARD_ACROSS = 5;
+
+    /** Authored rail point per city, so a multi-partner terminal does not rebuild its plan. */
+    private static final Map<String, List<CityPlanProbe.Rail>> AUTHORED_RAILS =
+            new ConcurrentHashMap<>();
 
     private RailStations() {
     }
@@ -94,21 +109,22 @@ public final class RailStations {
         }
         int acrossX = -dirZ;
         int acrossZ = dirX;
-        int boardX = bestX + acrossX * 2;
-        int boardZ = bestZ + acrossZ * 2;
-        if (!map.isLand(boardX, boardZ)) {
-            boardX = bestX;
-            boardZ = bestZ;
+        int side = Integer.signum((city.x() - bestX) * acrossX + (city.z() - bestZ) * acrossZ);
+        if (side == 0) {
+            side = 1;
         }
+        int outSign = Integer.signum((partner.x() - bestX) * dirX
+                + (partner.z() - bestZ) * dirZ);
         return new RailStation(city.id(), city.name(), bestX, bestZ, bestSurface + 1,
-                boardX, boardZ, dirX, dirZ);
+                bestX + acrossX * BOARD_ACROSS * side, bestZ + acrossZ * BOARD_ACROSS * side,
+                dirX, dirZ, outSign == 0 ? 1 : outSign);
     }
 
     /**
-     * Uses the authored {@code STATION} anchor when the city plan has one. The anchor is the rail
-     * point; the platform is offset across the track, and {@code data} may say
-     * {@code north_south}/{@code east_west} to fix the orientation (otherwise the partner bearing
-     * decides, like the terrain scan).
+     * Uses the authored {@code STATION} anchor when the city plan has one. The anchor is the
+     * station site; its nearest authored rail becomes the rail point, so a plan's platform, shed
+     * and track stay aligned. {@code data} must say {@code north_south} or {@code east_west} to
+     * fix the orientation; a rail's own shape is the fallback, then the partner bearing.
      */
     private static @Nullable RailStation authoredStation(EarthMap map, City city, City partner) {
         CityPlan plan = CityPlans.forCity(city.name());
@@ -119,16 +135,27 @@ public final class RailStations {
             if (poi.kind() != CityPoi.Kind.STATION) {
                 continue;
             }
-            int x = city.x() + poi.dx();
-            int z = city.z() + poi.dz();
-            int y = CityLocation.authoredGround(map, city) + poi.dy() + 1;
+            int anchorX = city.x() + poi.dx();
+            int anchorZ = city.z() + poi.dz();
             String data = poi.data().toLowerCase(Locale.ROOT);
+            boolean northSouth = data.contains("north_south") || data.contains("south_north");
+            boolean eastWest = data.contains("east_west") || data.contains("west_east");
+            CityPlanProbe.Rail rail = authoredRailNear(map, city, plan, anchorX, anchorZ);
+            int x = rail == null ? anchorX : rail.x();
+            int z = rail == null ? anchorZ : rail.z();
+            int y = rail == null
+                    ? CityLocation.authoredGround(map, city) + poi.dy() + 1
+                    : rail.y();
             int dirX = 0;
             int dirZ = 0;
-            if (data.contains("north") || data.contains("south")) {
+            if (northSouth) {
                 dirZ = 1;
-            } else if (data.contains("east") || data.contains("west")) {
+            } else if (eastWest) {
                 dirX = 1;
+            } else if (rail != null) {
+                boolean railEastWest = axisX(rail) == 1;
+                dirX = railEastWest ? 1 : 0;
+                dirZ = railEastWest ? 0 : 1;
             } else {
                 double bearing = Math.atan2(partner.z() - (double) city.z(),
                         wrapDelta(city.x(), partner.x(), 2 * EarthMap.HALF_WIDTH));
@@ -141,15 +168,48 @@ public final class RailStations {
             }
             int acrossX = -dirZ;
             int acrossZ = dirX;
-            int boardX = x + acrossX * 2;
-            int boardZ = z + acrossZ * 2;
-            if (!map.isLand(boardX, boardZ)) {
-                boardX = x;
-                boardZ = z;
+            // The authored anchor sits on the platform/apron, so its side of the rail is the side
+            // the station is boarded from. Fall back to the city side when the anchor is on the
+            // centreline itself.
+            int side = Integer.signum((anchorX - x) * acrossX + (anchorZ - z) * acrossZ);
+            if (side == 0) {
+                side = Integer.signum((city.x() - x) * acrossX + (city.z() - z) * acrossZ);
             }
-            return new RailStation(city.id(), city.name(), x, z, y, boardX, boardZ, dirX, dirZ);
+            if (side == 0) {
+                side = 1;
+            }
+            int outSign = Integer.signum((partner.x() - x) * dirX
+                    + (partner.z() - z) * dirZ);
+            return new RailStation(city.id(), city.name(), x, z, y,
+                    x + acrossX * BOARD_ACROSS * side, z + acrossZ * BOARD_ACROSS * side,
+                    dirX, dirZ, outSign == 0 ? 1 : outSign);
         }
         return null;
+    }
+
+    /** @return 1 for an east-west authored rail, 0 otherwise (including no rail). */
+    private static int axisX(CityPlanProbe.@Nullable Rail rail) {
+        if (rail == null) {
+            return 0;
+        }
+        RailShape shape = rail.state().getValue(RailBlock.SHAPE);
+        return shape == RailShape.EAST_WEST || shape == RailShape.ASCENDING_EAST
+                || shape == RailShape.ASCENDING_WEST ? 1 : 0;
+    }
+
+    private static CityPlanProbe.@Nullable Rail authoredRailNear(EarthMap map, City city,
+                                                                CityPlan plan, int x, int z) {
+        List<CityPlanProbe.Rail> cached = AUTHORED_RAILS.get(city.id());
+        if (cached == null) {
+            int ground = CityLocation.authoredGround(map, city);
+            Palette palette = Palette.fromBiome(map.koppenClass(city.x(), city.z()), false);
+            CityPlanProbe probe = CityPlanProbe.record(plan, palette, city.x(), city.z(), ground,
+                    new MapTerrain(map), CityPlanProbe.Bounds.around(x, z, RAIL_SNAP_RADIUS));
+            CityPlanProbe.Rail rail = probe.nearestRail(x, z, RAIL_SNAP_RADIUS);
+            cached = rail == null ? List.of() : List.of(rail);
+            AUTHORED_RAILS.put(city.id(), cached);
+        }
+        return cached.isEmpty() ? null : cached.getFirst();
     }
 
     /** @return the nearest other curated city to a city, or {@code null} when it is the only one. */
@@ -211,5 +271,19 @@ public final class RailStations {
     /** @return the worldgen surface block Y at a block column. */
     public static int surface(EarthMap map, int x, int z) {
         return Math.clamp(ElevationCurve.toY(map.elevationMetres(x, z)), -60, 300);
+    }
+
+    /** The baked map, as the headless plan probe sees it. */
+    private record MapTerrain(EarthMap map) implements CityPlanProbe.Terrain {
+
+        @Override
+        public int surfaceY(int x, int z) {
+            return surface(this.map, x, z);
+        }
+
+        @Override
+        public boolean isLand(int x, int z) {
+            return this.map.isLand(x, z);
+        }
     }
 }

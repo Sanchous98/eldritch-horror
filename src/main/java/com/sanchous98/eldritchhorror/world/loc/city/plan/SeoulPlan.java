@@ -241,7 +241,8 @@ public final class SeoulPlan implements CityPlan {
                 new CityPoi("scholar_house", CityPoi.Kind.NPC, -240, 0, 0,
                         "seoul_missing_scholar"),
                 new CityPoi("police_station", CityPoi.Kind.NPC, 240, 1, 200, "constable"),
-                new CityPoi("seoul_station", CityPoi.Kind.STATION, 220, 1, -199, "east_line"),
+                new CityPoi("seoul_station", CityPoi.Kind.STATION, 220, 1, -199,
+                        "north_south"),
                 new CityPoi("palace_tomb", CityPoi.Kind.SECRET, 60, -6, -20,
                         "seoul_royal_ghost"),
                 new CityPoi("river_ferry", CityPoi.Kind.LANDMARK, 0, 0, 215, "ferryman"),
@@ -1210,15 +1211,16 @@ public final class SeoulPlan implements CityPlan {
         for (int z = cz - 340; z <= cz - 185; z++) {
             b.put(cx + 222, ground, z, RAIL);
         }
-        b.fill(cx + 219, ground + 1, cz - 208, cx + 221, ground + 1, cz - 190, p.foundation());
-        b.fill(cx + 223, ground + 1, cz - 208, cx + 225, ground + 1, cz - 190, p.foundation());
-        stationHall(b, p, ground, cx + 210, cz - 208, 9, 19);
-        goodsShed(b, p, ground, cx + 226, cz - 208, 10, 19);
+        b.fill(cx + 217, ground + 1, cz - 208, cx + 221, ground + 1, cz - 190, p.foundation());
+        b.fill(cx + 223, ground + 1, cz - 208, cx + 227, ground + 1, cz - 190, p.foundation());
+        stationHall(b, p, ground, cx + 204, cz - 208, 9, 19);
+        goodsShed(b, p, ground, cx + 230, cz - 208, 10, 19);
         for (int z = cz - 206; z <= cz - 192; z += 4) {
-            b.fill(cx + 219, ground + 2, z, cx + 219, ground + 5, z, p.accent());
-            b.fill(cx + 225, ground + 2, z, cx + 225, ground + 5, z, p.accent());
+            b.fill(cx + 217, ground + 2, z, cx + 217, ground + 6, z, p.accent());
+            b.fill(cx + 227, ground + 2, z, cx + 227, ground + 6, z, p.accent());
+            b.put(cx + 219, ground + 7, z, p.light());
         }
-        b.fill(cx + 218, ground + 6, cz - 209, cx + 226, ground + 6, cz - 189, p.roofSlab());
+        b.fill(cx + 216, ground + 7, cz - 209, cx + 228, ground + 7, cz - 189, p.roofSlab());
         b.fill(cx + 221, ground + 1, cz - 186, cx + 223, ground + 1, cz - 185, p.foundation());
         b.put(cx + 215, ground + 1, cz - 188, BARREL);
         b.put(cx + 230, ground + 1, cz - 188, BARREL);

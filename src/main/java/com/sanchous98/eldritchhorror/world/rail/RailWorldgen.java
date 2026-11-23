@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.world.rail;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.world.loc.CitySigns;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,8 @@ import org.jspecify.annotations.Nullable;
  * clipped to the current chunk and the network is pre-bucketed by chunk, so a chunk pays one map
  * lookup plus its own few dozen stamps — never a scan of a line. A line crossing water becomes a
  * dark-oak deck with railings at a fixed height; a line through a ridge carves a bounded 3-wide
- * corridor and lines it with stone bricks. Rails are real blocks: walkable, buildable, blockable.
+ * corridor with a rail+6 ceiling and lines it with stone bricks. Five blocks are kept clear above
+ * every rail (the carriage is 3.8 tall). Rails are real blocks: walkable, buildable, blockable.
  */
 public final class RailWorldgen {
     private static final BlockState BALLAST = Blocks.GRAVEL.defaultBlockState();
@@ -30,6 +32,9 @@ public final class RailWorldgen {
     private static final BlockState RAILING = Blocks.DARK_OAK_FENCE.defaultBlockState();
     private static final BlockState LINING = Blocks.STONE_BRICKS.defaultBlockState();
     private static final BlockState PLATFORM = Blocks.STONE_BRICKS.defaultBlockState();
+    private static final BlockState CANOPY = Blocks.STONE_BRICK_SLAB.defaultBlockState();
+    private static final BlockState PILLAR = Blocks.STONE_BRICKS.defaultBlockState();
+    private static final BlockState BUFFER = Blocks.STONE_BRICKS.defaultBlockState();
     private static final BlockState LAMP = Blocks.LANTERN.defaultBlockState();
     private static volatile boolean warned;
 
@@ -66,14 +71,28 @@ public final class RailWorldgen {
                 case TRACK -> track(level, pos, stamp);
                 case STATION_FLOOR -> {
                     put(level, pos, stamp.x(), stamp.y(), stamp.z(), PLATFORM);
+                    // The floor block's top is the rail level, so the space above it starts at
+                    // y; clear six courses (y..y+5) for the platform surface plus five clear.
+                    clear(level, pos, stamp.x(), stamp.y(), stamp.z());
                     clear(level, pos, stamp.x(), stamp.y() + 1, stamp.z());
                     clear(level, pos, stamp.x(), stamp.y() + 2, stamp.z());
                     clear(level, pos, stamp.x(), stamp.y() + 3, stamp.z());
+                    clear(level, pos, stamp.x(), stamp.y() + 4, stamp.z());
+                    clear(level, pos, stamp.x(), stamp.y() + 5, stamp.z());
                 }
                 case STATION_FENCE ->
                         put(level, pos, stamp.x(), stamp.y(), stamp.z(), RAILING);
                 case STATION_LANTERN ->
                         put(level, pos, stamp.x(), stamp.y(), stamp.z(), LAMP);
+                case STATION_CANOPY ->
+                        put(level, pos, stamp.x(), stamp.y(), stamp.z(), CANOPY);
+                case STATION_PILLAR ->
+                        put(level, pos, stamp.x(), stamp.y(), stamp.z(), PILLAR);
+                case STATION_BUFFER ->
+                        put(level, pos, stamp.x(), stamp.y(), stamp.z(), BUFFER);
+                case STATION_SIGN -> sign(level, pos, stamp);
+                case STATION_CLEAR ->
+                        clear(level, pos, stamp.x(), stamp.y(), stamp.z());
             }
         }
     }
@@ -89,15 +108,20 @@ public final class RailWorldgen {
                 clearIfNoRail(level, chunk, x, stamp.y(), z);
                 clearIfNoRail(level, chunk, x, stamp.y() + 1, z);
                 clearIfNoRail(level, chunk, x, stamp.y() + 2, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 3, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 4, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 5, z);
             }
             for (int offset = -2; offset <= 2; offset += 4) {
-                for (int dy = -1; dy <= 2; dy++) {
+                for (int dy = -1; dy <= 5; dy++) {
                     putIfNoRail(level, chunk, stamp.x() + perpX * offset, stamp.y() + dy,
                             stamp.z() + perpZ * offset, LINING);
                 }
             }
+            // A solid tunnel roof at rail+6: the four-tall consist needs a real ceiling, not the
+            // three-block corridor that used to clip its roof.
             for (int offset = -1; offset <= 1; offset++) {
-                putIfNoRail(level, chunk, stamp.x() + perpX * offset, stamp.y() + 3,
+                putIfNoRail(level, chunk, stamp.x() + perpX * offset, stamp.y() + 6,
                         stamp.z() + perpZ * offset, LINING);
             }
         } else if (stamp.bridge()) {
@@ -111,6 +135,8 @@ public final class RailWorldgen {
                 clearIfNoRail(level, chunk, x, stamp.y() + 1, z);
                 clearIfNoRail(level, chunk, x, stamp.y() + 2, z);
                 clearIfNoRail(level, chunk, x, stamp.y() + 3, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 4, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 5, z);
             }
         } else {
             for (int offset = -1; offset <= 1; offset++) {
@@ -120,6 +146,8 @@ public final class RailWorldgen {
                 clearIfNoRail(level, chunk, x, stamp.y() + 1, z);
                 clearIfNoRail(level, chunk, x, stamp.y() + 2, z);
                 clearIfNoRail(level, chunk, x, stamp.y() + 3, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 4, z);
+                clearIfNoRail(level, chunk, x, stamp.y() + 5, z);
             }
         }
         BlockState rail = Blocks.RAIL.defaultBlockState()
@@ -145,6 +173,19 @@ public final class RailWorldgen {
                 && !level.getBlockState(new BlockPos(x, y, z)).is(BlockTags.RAILS)) {
             level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), 2);
         }
+    }
+
+    /**
+     * Places a station sign and queues its text through {@link CitySigns}; writing
+     * {@code SignBlockEntity#setText} during worldgen would wait on the chunk system.
+     */
+    private static void sign(WorldGenLevel level, ChunkPos chunk, RailStamp stamp) {
+        if (!inside(chunk, stamp.x(), stamp.z(), stamp.y(), level)) {
+            return;
+        }
+        BlockPos pos = new BlockPos(stamp.x(), stamp.y(), stamp.z());
+        level.setBlock(pos, Blocks.OAK_SIGN.defaultBlockState(), 2);
+        CitySigns.queue(level.getLevel().dimension(), pos, stamp.label(), "STATION");
     }
 
     private static void put(WorldGenLevel level, ChunkPos chunk, int x, int y, int z,

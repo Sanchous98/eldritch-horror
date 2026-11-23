@@ -203,7 +203,8 @@ public final class RomePlan implements CityPlan {
                         "rome_missing_priest"),
                 new CityPoi("st_peters", CityPoi.Kind.LANDMARK, 0, 1, -200, "basilica"),
                 new CityPoi("forum", CityPoi.Kind.LANDMARK, 220, 1, -120, "ruins"),
-                new CityPoi("termini_station", CityPoi.Kind.STATION, 300, 1, 116, "rail"),
+                new CityPoi("termini_station", CityPoi.Kind.STATION, 300, 1, 124,
+                        "rail;east_west"),
                 new CityPoi("tiber_port", CityPoi.Kind.PORT, 60, 1, 199, "tiber_docks"),
                 new CityPoi("guide", CityPoi.Kind.NPC, 0, 0, 300, "guide"),
                 new CityPoi("carabiniere", CityPoi.Kind.NPC, 18, 0, 310, "carabiniere"),
@@ -283,10 +284,12 @@ public final class RomePlan implements CityPlan {
                 int surface = b.groundY(x, z);
                 if (surface > ground - 1) {
                     b.fill(x, ground, z, x, surface + 2, z, AIR);
-                } else if (surface < ground - 3) {
-                    b.fill(x, surface + 1, z, x, ground - 3, z, p.foundation());
+                } else if (surface < ground - 4) {
+                    b.fill(x, surface + 1, z, x, ground - 4, z, p.foundation());
                 }
-                b.put(x, ground - 3, z, SAND);
+                b.put(x, ground - 5, z, SAND);
+                b.put(x, ground - 4, z, WATER);
+                b.put(x, ground - 3, z, WATER);
                 b.put(x, ground - 2, z, WATER);
                 b.put(x, ground - 1, z, WATER);
             }
@@ -1423,7 +1426,7 @@ public final class RomePlan implements CityPlan {
         // Platforms and the station yard.
         b.fill(cx + 280, base, cz + 116, cx + 336, base, cz + 124, p.foundation());
         b.fill(cx + 280, base + 1, cz + 117, cx + 320, base + 1, cz + 119, p.ground());
-        b.fill(cx + 280, base + 1, cz + 121, cx + 320, base + 1, cz + 124, p.ground());
+        b.fill(cx + 280, base + 1, cz + 121, cx + 320, base + 1, cz + 127, p.ground());
         b.fill(cx + 320, base, cz + 104, cx + 336, base, cz + 116, p.foundation());
         // The terminus building.
         int x0 = cx + 288;
@@ -1444,10 +1447,11 @@ public final class RomePlan implements CityPlan {
         // Platform canopy.
         for (int x = cx + 284; x <= cx + 316; x += 8) {
             b.fill(x, base + 1, cz + 117, x, base + 6, cz + 117, p.accent());
-            b.fill(x, base + 1, cz + 123, x, base + 6, cz + 123, p.accent());
+            b.fill(x, base + 1, cz + 127, x, base + 6, cz + 127, p.accent());
+            b.put(x, base + 7, cz + 125, p.light());
         }
-        b.fill(cx + 282, base + 6, cz + 117, cx + 318, base + 6, cz + 123, p.roofSlab());
-        b.pitchedRoof(cx + 282, cz + 117, cx + 318, cz + 124, base + 7, 3, 0);
+        b.fill(cx + 282, base + 7, cz + 117, cx + 318, base + 7, cz + 127, p.roofSlab());
+        b.pitchedRoof(cx + 282, cz + 117, cx + 318, cz + 128, base + 8, 3, 0);
         // Sign, crates and a lamp in the yard.
         signAt(b, cx + 316, base + 1, cz + 117, Direction.SOUTH, "STAZIONE", "TERMINI");
         b.put(cx + 322, base + 1, cz + 112, BARREL);
@@ -1469,6 +1473,12 @@ public final class RomePlan implements CityPlan {
         b.fill(cx + 68, ground, cz + 199, cx + 68, ground, cz + 218, p.rail());
         b.fill(cx + 58, ground + 1, cz + 198, cx + 68, ground + 2, cz + 199, AIR);
         b.fill(cx + 58, ground, cz + 198, cx + 68, ground, cz + 199, DECK);
+        for (int x = cx + 40; x <= cx + 90; x += 8) {
+            b.put(x, ground + 1, cz + 198, p.accent());
+        }
+        for (int x = cx + 48; x <= cx + 88; x += 16) {
+            b.put(x, ground + 2, cz + 198, p.light());
+        }
         // Warehouses, crane and cargo.
         warehouse(b, cx + 48, cz + 182, ground, p);
         warehouse(b, cx + 78, cz + 182, ground, p);

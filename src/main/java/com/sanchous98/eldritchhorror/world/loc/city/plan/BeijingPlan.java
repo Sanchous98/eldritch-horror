@@ -153,9 +153,10 @@ public final class BeijingPlan implements CityPlan {
                 new CityPoi("silk_merchant", CityPoi.Kind.SHOP, 220, 0, 20, "silk;rumours"),
                 new CityPoi("tea_house", CityPoi.Kind.INN, 220, 0, -40, "keeper"),
                 new CityPoi("tea_keeper", CityPoi.Kind.NPC, 214, 0, -40, "keeper"),
-                new CityPoi("railway_station", CityPoi.Kind.STATION, 220, 0, 250, "stationmaster"),
+                new CityPoi("railway_station", CityPoi.Kind.STATION, 220, 0, 286,
+                        "stationmaster;east_west"),
                 new CityPoi("station_yard", CityPoi.Kind.STATION, 170, 1, 290,
-                        "rail yard; straight level tracks east-west"),
+                        "rail yard; straight level tracks east_west"),
                 new CityPoi("stationmaster", CityPoi.Kind.NPC, 220, 0, 244, "cargo"),
                 new CityPoi("legation", CityPoi.Kind.SECRET, 300, 0, 200, "locked_archive"),
                 new CityPoi("legate", CityPoi.Kind.NPC, 300, 0, 208, "archive"),
@@ -959,8 +960,8 @@ public final class BeijingPlan implements CityPlan {
             c.fill(x, py + 1, 280, x, py + 5, 280, p.rail());
             c.put(x, py + 6, 280, p.light());
         }
-        c.fill(165, stationBase + 6, 277, 265,
-                stationBase + 6, 283, p.roofSlab());
+        c.fill(163, stationBase + 1, 285, 270, stationBase + 1, 289, p.foundation());
+        c.fill(165, stationBase + 7, 277, 265, stationBase + 7, 289, p.roofSlab());
         for (int z : new int[]{290, 298}) {
             for (int x = 164; x <= 330; x++) {
                 int y = stationBase;

@@ -122,8 +122,8 @@ public final class SydneyPlan implements CityPlan {
                         "market,stalls"),
                 new CityPoi("constable", CityPoi.Kind.NPC, -285, 0, -88, "constable"),
                 new CityPoi("rocks_sign", CityPoi.Kind.SIGN, -136, 3, 6, "THE ROCKS"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 210, 1, -40,
-                        "station,clock,tracks_east"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 210, 1, -36,
+                        "station,clock,tracks_east;east_west"),
                 new CityPoi("rail_sign", CityPoi.Kind.SIGN, 136, 3, 146, "RAIL YARDS"),
                 new CityPoi("bondi_pavilion", CityPoi.Kind.LANDMARK, 240, 0, 220,
                         "pavilion,beach"),
@@ -609,10 +609,10 @@ public final class SydneyPlan implements CityPlan {
 
     private static void harbour(StructureBuilder b, int cx, int cz, int ground, Palette p) {
         int g = ground;
-        b.fill(cx - 140, g - 3, cz - 262, cx + 160, g - 3, cz - 216, SAND);
-        b.fill(cx - 140, g - 2, cz - 262, cx + 160, g - 1, cz - 216, WATER);
-        b.fill(cx + 160, g - 3, cz - 220, cx + 250, g - 3, cz - 140, SAND);
-        b.fill(cx + 160, g - 2, cz - 220, cx + 250, g - 1, cz - 140, WATER);
+        b.fill(cx - 140, g - 5, cz - 262, cx + 160, g - 5, cz - 216, SAND);
+        b.fill(cx - 140, g - 4, cz - 262, cx + 160, g - 1, cz - 216, WATER);
+        b.fill(cx + 160, g - 5, cz - 220, cx + 250, g - 5, cz - 140, SAND);
+        b.fill(cx + 160, g - 4, cz - 220, cx + 250, g - 1, cz - 140, WATER);
         b.fill(cx - 141, g - 5, cz - 263, cx + 161, g, cz - 263, p.foundation());
         b.fill(cx + 161, g - 5, cz - 221, cx + 251, g, cz - 221, p.foundation());
         b.fill(cx + 251, g - 5, cz - 221, cx + 251, g, cz - 139, p.foundation());
@@ -1218,20 +1218,20 @@ public final class SydneyPlan implements CityPlan {
         sign(b, p, x0 + 52, ground + 8, z1, Direction.SOUTH, "RAIL YARDS");
         int px0 = x0 - 10;
         int px1 = x1 + 30;
-        b.fill(px0, ground, z1 + 2, px1, ground, z1 + 10, p.foundation());
-        b.fill(px0, ground + 1, z1 + 2, px1, ground + 1, z1 + 10, p.ground());
-        b.fill(x0 + 20, ground + 1, z1, x1 - 20, ground + 1, z1 + 2, p.ground());
+        b.fill(px0, ground, z1 + 4, px1, ground, z1 + 13, p.foundation());
+        b.fill(px0, ground + 1, z1 + 4, px1, ground + 1, z1 + 13, p.ground());
+        b.fill(x0 + 20, ground + 1, z1, x1 - 20, ground + 1, z1 + 4, p.ground());
         for (int x = px0 + 4; x <= px1 - 4; x += 12) {
-            b.fill(x, ground + 2, z1 + 8, x, ground + 6, z1 + 8, p.accent());
-            b.put(x, ground + 7, z1 + 8, p.light());
+            b.fill(x, ground + 2, z1 + 13, x, ground + 6, z1 + 13, p.accent());
+            b.put(x, ground + 7, z1 + 11, p.light());
         }
-        b.fill(px0, ground + 7, z1 + 7, px1, ground + 7, z1 + 9, p.roofSlab());
-        b.fill(px0 + 10, ground + 2, z1 + 4, px0 + 12, ground + 2, z1 + 4, p.roofSlab());
-        b.fill(px0 + 24, ground + 2, z1 + 4, px0 + 26, ground + 2, z1 + 4, p.roofSlab());
-        b.fill(px0 + 38, ground + 2, z1 + 4, px0 + 40, ground + 2, z1 + 4, p.roofSlab());
-        signPost(b, x0 + 30, z1 + 4, ground + 1, p, Direction.NORTH, "TICKETS");
-        b.put(x0 + 60, ground + 1, z1 + 5, p.light());
-        b.put(x0 + 68, ground + 1, z1 + 5, p.light());
+        b.fill(px0, ground + 7, z1 + 4, px1, ground + 7, z1 + 13, p.roofSlab());
+        b.fill(px0 + 10, ground + 2, z1 + 8, px0 + 12, ground + 2, z1 + 8, p.roofSlab());
+        b.fill(px0 + 24, ground + 2, z1 + 8, px0 + 26, ground + 2, z1 + 8, p.roofSlab());
+        b.fill(px0 + 38, ground + 2, z1 + 8, px0 + 40, ground + 2, z1 + 8, p.roofSlab());
+        signPost(b, x0 + 30, z1 + 8, ground + 1, p, Direction.NORTH, "TICKETS");
+        b.put(x0 + 60, ground + 1, z1 + 9, p.light());
+        b.put(x0 + 68, ground + 1, z1 + 9, p.light());
     }
 
     private static void clockTower(StructureBuilder b, int x, int z, int ground, Palette p) {

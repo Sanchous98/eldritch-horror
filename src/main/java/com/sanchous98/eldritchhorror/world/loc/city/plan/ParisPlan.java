@@ -118,7 +118,8 @@ public final class ParisPlan implements CityPlan {
                 // Arrival and notices.
                 new CityPoi("arrival_gate", CityPoi.Kind.SIGN, 8, 1, 306, "districts"),
                 new CityPoi("city_notices", CityPoi.Kind.SIGN, -24, 1, 306, "quests"),
-                new CityPoi("gare_du_nord", CityPoi.Kind.STATION, 56, 1, 300, "rail"),
+                new CityPoi("gare_du_nord", CityPoi.Kind.STATION, 66, 1, 312,
+                        "rail;north_south"),
                 // Landmarks.
                 new CityPoi("notre_dame", CityPoi.Kind.LANDMARK, 0, 0, -200, "cathedral"),
                 new CityPoi("seine_quay", CityPoi.Kind.LANDMARK, 0, 0, -64, "booksellers"),

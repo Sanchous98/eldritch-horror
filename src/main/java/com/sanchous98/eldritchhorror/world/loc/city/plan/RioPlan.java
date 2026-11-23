@@ -123,7 +123,8 @@ public final class RioPlan implements CityPlan {
                 new CityPoi("fisherman", CityPoi.Kind.NPC, 298, 0, 230, "fisherman"),
                 new CityPoi("port_market", CityPoi.Kind.LANDMARK, 220, 0, 282, "market,fish"),
                 new CityPoi("harbour_port", CityPoi.Kind.PORT, 306, 0, 250, "guanabara_bay"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 120, 1, 328, "east_west"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 120, 1, 335,
+                        "rail station;east_west"),
                 new CityPoi("hillside_cave", CityPoi.Kind.SECRET, -240, 0, 222,
                         "chests,lore,missing_dancer,relic"),
                 new CityPoi("botanical_garden", CityPoi.Kind.LANDMARK, -240, 0, 270,
@@ -878,8 +879,8 @@ public final class RioPlan implements CityPlan {
         int sea = at(s, cx, cz, 280, 0) - 1;
         for (int x = 305; x <= 338; x++) {
             for (int z = -240; z <= 318; z++) {
-                b.fill(cx + x, sea - 2, cz + z, cx + x, sea - 1, cz + z, SAND);
-                b.put(cx + x, sea, cz + z, WATER);
+                b.fill(cx + x, sea - 4, cz + z, cx + x, sea - 4, cz + z, SAND);
+                b.fill(cx + x, sea - 4, cz + z, cx + x, sea - 1, cz + z, WATER);
             }
         }
         // Hotels facing the promenade.
@@ -1303,6 +1304,15 @@ public final class RioPlan implements CityPlan {
         }
         b.fill(x0 - 4, base + 6, z1 + 1, x1 + 6, base + 6, z1 + 3, p.roofSlab());
         signPost(b, x0 - 6, z1 + 1, base, p, Direction.NORTH, "TICKETS");
+        // The main passenger platform on the south side: five wide, edge three blocks off the
+        // centreline, five clear blocks and a canopy at rail+6.
+        b.fill(x0 - 4, base, z1 + 7, x1 + 6, base, z1 + 11, p.foundation());
+        b.fill(x0 - 4, base + 1, z1 + 7, x1 + 6, base + 1, z1 + 11, p.accent());
+        for (int x = x0; x <= x1; x += 8) {
+            b.fill(x, base + 2, z1 + 11, x, base + 6, z1 + 11, p.accent());
+            b.put(x, base + 7, z1 + 9, p.light());
+        }
+        b.fill(x0 - 5, base + 7, z1 + 6, x1 + 7, base + 7, z1 + 12, p.roofSlab());
     }
 
     private static void railYard(StructureBuilder b, int cx, int cz, CitySurface s, Palette p) {

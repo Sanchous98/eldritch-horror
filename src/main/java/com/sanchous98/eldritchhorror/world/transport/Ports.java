@@ -3,9 +3,13 @@ package com.sanchous98.eldritchhorror.world.transport;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.EarthMaps;
+import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.loc.Palette;
+import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlan;
+import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlanProbe;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPlans;
 import com.sanchous98.eldritchhorror.world.loc.city.plan.CityPoi;
 import java.util.ArrayList;
@@ -15,23 +19,27 @@ import org.jspecify.annotations.Nullable;
 /**
  * Picks the harbours of the curated cities ({@code design/30-transport.md}).
  *
- * <p>A city is a port when a 32-point ring scan finds ocean within {@value #MAX_OFFSET_BLOCKS}
- * blocks of its centre: at this map's scale a real harbour city (London, Rome) can sit a few hundred
- * blocks inland, while inland cities (Paris, Moscow) are thousands. The harbour point itself is six
- * blocks seaward of the first water sample, far enough out that the packet floats clear of the
- * beach. The scan is read-only over the baked landmask, so it costs no chunks.
+ * <p>An authored {@code PORT} anchor is authoritative: the plan is probed headlessly for the water
+ * body next to the anchor, and that basin's own surface Y becomes the berth level. This is what
+ * makes inland and river ports (Mexico City's canal, Rome's Tiber) reachable at the ship's Y. Only
+ * a city with no authored anchor falls back to the 32-direction ring scan over the baked landmask,
+ * which cannot see a dug basin.
  *
  * <p>Server-side and cached once. Never call from client code.
  */
 public final class Ports {
     /** How far from a city centre ocean may be and still count as its harbour. */
     public static final int MAX_OFFSET_BLOCKS = 320;
+    /** Reach of the map-water fallback for an authored anchor (Bangkok 344, Istanbul 326). */
+    private static final int AUTHORED_REACH = 512;
     /** Directions sampled around a city (22.5 degrees apart). */
     private static final int DIRECTIONS = 32;
     /** Search step in blocks. */
     private static final int STEP = 4;
     /** How far seaward the harbour point sits from the first water sample. */
     private static final int OFFSHORE = 6;
+    /** Region recorded around an authored anchor while probing its plan. */
+    private static final int PROBE_RADIUS = 96;
 
     private static volatile @Nullable List<Port> cached;
 
@@ -105,10 +113,81 @@ public final class Ports {
     }
 
     private static @Nullable Port harbour(EarthMap map, City city) {
-        Port authored = authoredHarbour(map, city);
-        if (authored != null) {
-            return authored;
+        CityPlan plan = CityPlans.forCity(city.name());
+        if (plan != null) {
+            Port authored = authoredHarbour(map, city, plan);
+            if (authored != null) {
+                return authored;
+            }
         }
+        return scannedHarbour(map, city);
+    }
+
+    /**
+     * The authored anchor is authoritative. Its plan is probed for the water body next to it: a
+     * berth point, the berth surface Y, and the anchor as the shore. When the plan authored no
+     * water (an ocean quay whose basin is the baked sea), the map is walked outward from the anchor
+     * instead. The authored reach is not capped at {@link #MAX_OFFSET_BLOCKS}, which used to drop
+     * Bangkok and Istanbul.
+     */
+    private static @Nullable Port authoredHarbour(EarthMap map, City city, CityPlan plan) {
+        for (CityPoi poi : plan.pois()) {
+            if (poi.kind() != CityPoi.Kind.PORT) {
+                continue;
+            }
+            int anchorX = city.x() + poi.dx();
+            int anchorZ = city.z() + poi.dz();
+            int ground = CityLocation.authoredGround(map, city);
+            Palette palette = Palette.fromBiome(map.koppenClass(city.x(), city.z()), true);
+            CityPlanProbe probe = CityPlanProbe.record(plan, palette, city.x(), city.z(), ground,
+                    new MapTerrain(map), CityPlanProbe.Bounds.around(anchorX, anchorZ,
+                            PROBE_RADIUS));
+            CityPlanProbe.Berth berth = probe.waterBerth(anchorX, anchorZ, PROBE_RADIUS);
+            if (berth != null) {
+                int shoreX = map.isLand(anchorX, anchorZ) ? anchorX : city.x();
+                int shoreZ = map.isLand(anchorX, anchorZ) ? anchorZ : city.z();
+                return new Port(city.id(), city.name(), berth.x(), berth.z(), shoreX, shoreZ,
+                        berth.y());
+            }
+            int[] water = mapWaterFrom(map, city, anchorX, anchorZ, AUTHORED_REACH);
+            if (water != null) {
+                return new Port(city.id(), city.name(), water[0], water[1], anchorX, anchorZ,
+                        ElevationCurve.SEA_LEVEL);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The map-water fallback for an authored anchor: walk the city-to-anchor ray outward until the
+     * baked landmask says water.
+     */
+    private static int @Nullable [] mapWaterFrom(EarthMap map, City city, int anchorX, int anchorZ,
+                                                 int reach) {
+        if (!map.isLand(anchorX, anchorZ)) {
+            return new int[]{anchorX, anchorZ};
+        }
+        double dx = anchorX - (double) city.x();
+        double dz = anchorZ - (double) city.z();
+        double length = Math.hypot(dx, dz);
+        if (length < 1.0) {
+            return null;
+        }
+        for (int distance = (int) Math.ceil(length); distance <= reach; distance += STEP) {
+            int x = city.x() + (int) Math.round(dx / length * distance);
+            int z = city.z() + (int) Math.round(dz / length * distance);
+            if (!map.isLand(x, z)) {
+                return new int[]{x, z};
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The ring scan over the baked landmask. Used only for a city whose plan authors no PORT
+     * anchor: it cannot see a dug basin, but it is still the right fallback for a plain coastline.
+     */
+    private static @Nullable Port scannedHarbour(EarthMap map, City city) {
         int radius = city.radius();
         int bestDistance = Integer.MAX_VALUE;
         double bestAngle = 0.0;
@@ -142,68 +221,8 @@ public final class Ports {
                 break;
             }
         }
-        return new Port(city.id(), city.name(), waterX, waterZ, shoreX, shoreZ);
-    }
-
-    /**
-     * Uses the authored {@code PORT} anchor when the city plan has one: the anchor is the quay
-     * point, the water is found outward along the city-to-quay ray, and the shore is the anchor
-     * itself (or the nearest land toward the centre when the anchor is already water).
-     */
-    private static @Nullable Port authoredHarbour(EarthMap map, City city) {
-        CityPlan plan = CityPlans.forCity(city.name());
-        if (plan == null) {
-            return null;
-        }
-        for (CityPoi poi : plan.pois()) {
-            if (poi.kind() != CityPoi.Kind.PORT) {
-                continue;
-            }
-            int px = city.x() + poi.dx();
-            int pz = city.z() + poi.dz();
-            if (map.isLand(px, pz)) {
-                int waterX = Integer.MIN_VALUE;
-                int waterZ = Integer.MIN_VALUE;
-                double dx = px - (double) city.x();
-                double dz = pz - (double) city.z();
-                double length = Math.hypot(dx, dz);
-                if (length < 1.0) {
-                    continue;
-                }
-                for (int distance = (int) Math.ceil(length); distance <= MAX_OFFSET_BLOCKS;
-                        distance += STEP) {
-                    int x = city.x() + (int) Math.round(dx / length * distance);
-                    int z = city.z() + (int) Math.round(dz / length * distance);
-                    if (!map.isLand(x, z)) {
-                        waterX = x;
-                        waterZ = z;
-                        break;
-                    }
-                }
-                if (waterX == Integer.MIN_VALUE) {
-                    continue;
-                }
-                return new Port(city.id(), city.name(), waterX, waterZ, px, pz);
-            }
-            int shoreX = city.x();
-            int shoreZ = city.z();
-            double dx = city.x() - (double) px;
-            double dz = city.z() - (double) pz;
-            double length = Math.hypot(dx, dz);
-            if (length >= 1.0) {
-                for (int distance = STEP; distance <= MAX_OFFSET_BLOCKS; distance += STEP) {
-                    int x = px + (int) Math.round(dx / length * distance);
-                    int z = pz + (int) Math.round(dz / length * distance);
-                    if (map.isLand(x, z)) {
-                        shoreX = x;
-                        shoreZ = z;
-                        break;
-                    }
-                }
-            }
-            return new Port(city.id(), city.name(), px, pz, shoreX, shoreZ);
-        }
-        return null;
+        return new Port(city.id(), city.name(), waterX, waterZ, shoreX, shoreZ,
+                ElevationCurve.SEA_LEVEL);
     }
 
     /**
@@ -230,5 +249,19 @@ public final class Ports {
             }
         }
         return Integer.MAX_VALUE;
+    }
+
+    /** The baked map, as the headless plan probe sees it. */
+    private record MapTerrain(EarthMap map) implements CityPlanProbe.Terrain {
+
+        @Override
+        public int surfaceY(int x, int z) {
+            return Math.clamp(ElevationCurve.toY(this.map.elevationMetres(x, z)), -60, 300);
+        }
+
+        @Override
+        public boolean isLand(int x, int z) {
+            return this.map.isLand(x, z);
+        }
     }
 }

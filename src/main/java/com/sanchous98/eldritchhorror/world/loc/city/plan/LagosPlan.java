@@ -117,8 +117,8 @@ public final class LagosPlan implements CityPlan {
                 new CityPoi("oil_clerk", CityPoi.Kind.NPC, 218, 0, -118, "lagos_oil_ledger"),
                 new CityPoi("marina_quay", CityPoi.Kind.LANDMARK, 220, 0, 40, "fish market"),
                 new CityPoi("lagos_port", CityPoi.Kind.PORT, 254, 0, 40, "marina_basin"),
-                new CityPoi("lagos_station", CityPoi.Kind.STATION, -106, 1, 305,
-                        "lagos_junction"),
+                new CityPoi("lagos_station", CityPoi.Kind.STATION, -116, 1, 305,
+                        "lagos_junction;north_south"),
                 new CityPoi("fishmonger", CityPoi.Kind.NPC, 240, 0, 40, "fish market"),
                 new CityPoi("fisherman", CityPoi.Kind.NPC, 240, 0, 120,
                         "lagos_missing_fisherman"),
@@ -141,13 +141,19 @@ public final class LagosPlan implements CityPlan {
         basin(b, cx + 150, cz + 230, cx + 332, cz + 326, g);
         // Stone quay wall along the marina basin's city side.
         b.fill(cx + 254, g - 4, cz - 245, cx + 255, g + 1, cz + 197, p.foundation());
+        for (int z = cz - 240; z <= cz + 190; z += 8) {
+            b.put(cx + 254, g + 2, z, p.accent());
+        }
+        for (int z = cz - 232; z <= cz + 184; z += 32) {
+            b.put(cx + 254, g + 3, z, p.light());
+        }
         canal(b, cx, cz, g, p);
     }
 
     /** One water body: a sand bed under two courses of water. */
     private static void basin(StructureBuilder b, int x0, int z0, int x1, int z1, int g) {
-        b.fill(x0, g - 3, z0, x1, g - 3, z1, SAND);
-        b.fill(x0, g - 2, z0, x1, g - 1, z1, WATER);
+        b.fill(x0, g - 5, z0, x1, g - 5, z1, SAND);
+        b.fill(x0, g - 4, z0, x1, g - 1, z1, WATER);
     }
 
     /** A north-south market drain: stone banks, two courses of water, lilies and reeds. */

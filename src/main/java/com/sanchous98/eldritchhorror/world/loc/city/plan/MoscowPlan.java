@@ -189,8 +189,8 @@ public final class MoscowPlan implements CityPlan {
                         "moscow_stolen_icon"),
                 new CityPoi("kremlin_gate", CityPoi.Kind.LANDMARK, 150, 0, -160, "guards"),
                 new CityPoi("factory", CityPoi.Kind.LANDMARK, 240, 0, 240, "chimneys"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 200, 0, 285,
-                        "moscow_rail"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 200, 0, 288,
+                        "moscow_rail;east_west"),
                 new CityPoi("hotel_keeper", CityPoi.Kind.NPC, -86, 0, -114, "hotel_keeper"),
                 new CityPoi("merchant", CityPoi.Kind.NPC, -228, 0, -66, "merchant"),
                 new CityPoi("herbalist_keeper", CityPoi.Kind.NPC, -228, 0, 114, "herbalist"),
@@ -1338,6 +1338,15 @@ public final class MoscowPlan implements CityPlan {
         // Buffer stops at both ends.
         b.fill(x0, ground + 1, cz - 1, x0, ground + 2, cz + 1, IRON);
         b.fill(x1, ground + 1, cz - 1, x1, ground + 2, cz + 1, IRON);
+        // A five-wide platform north of the rail: its edge three blocks off the centreline, with
+        // five clear blocks and a canopy high enough for the four-tall carriage.
+        b.fill(x0 + 10, ground, cz - 7, x1 - 10, ground, cz - 3, p.foundation());
+        b.fill(x0 + 10, ground + 1, cz - 7, x1 - 10, ground + 1, cz - 3, p.accent());
+        for (int px = x0 + 10; px <= x1 - 10; px += 16) {
+            b.fill(px, ground + 2, cz - 3, px, ground + 6, cz - 3, p.accent());
+            b.put(px, ground + 7, cz - 5, p.light());
+        }
+        b.fill(x0 + 8, ground + 7, cz - 8, x1 - 8, ground + 7, cz - 2, p.roofSlab());
     }
 
     private static void platform(StructureBuilder b, Palette p, int ground, int x0, int z0,

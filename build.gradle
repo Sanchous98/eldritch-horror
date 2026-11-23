@@ -68,6 +68,13 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    // The geometry gate reads authored plans, which build real BlockStates: JUnit needs the
+    // Minecraft classes and a bootstrapped registry on its classpath.
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 // 'localRuntime' is a dependency present at runtime for testing but not propagated
@@ -83,8 +90,15 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+def repoRoot = rootProject.projectDir
 tasks.named('test') {
     useJUnitPlatform()
+    // The NeoForge unit-test fixture normally runs Gradle tests from build/minecraft-junit.
+    // Keep the project root instead: the existing suites read repository-relative resources,
+    // and the station/harbour report is written under build/.
+    doFirst {
+        workingDir = repoRoot
+    }
 }
 
 // Expands ${...} placeholders in the neoforge.mods.toml template from gradle.properties.

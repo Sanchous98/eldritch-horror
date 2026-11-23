@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.RailShape;
 
 /**
  * Cape Town under the Company: the long whitewashed manor and its stepped gable behind a walled
@@ -80,8 +81,8 @@ public final class CapeTownPlan implements CityPlan {
     public List<CityPoi> pois() {
         return List.of(
                 new CityPoi("arrival_gate", CityPoi.Kind.LANDMARK, 0, 0, 320, "gate"),
-                new CityPoi("rail_station", CityPoi.Kind.STATION, 196, 1, 318,
-                        "cape_town_rail"),
+                new CityPoi("rail_station", CityPoi.Kind.STATION, 196, 1, 326,
+                        "cape_town_rail;east_west"),
                 new CityPoi("gate_signpost", CityPoi.Kind.SIGN, -10, 1, 328,
                         "CAPE MANOR|HARBOUR|BO-KAAP|GARDEN|DISTRICT SIX"),
                 new CityPoi("city_notices", CityPoi.Kind.SIGN, -20, 1, 334, "CITY NOTICES"),
@@ -596,13 +597,19 @@ public final class CapeTownPlan implements CityPlan {
     private static void harbour(StructureBuilder b, int cx, int cz, CitySurface s, Palette p) {
         int ground = s.at(cx + 294, cz);
         // Table Bay: water, sand, and a stone quay wall.
-        b.fill(cx + 302, ground - 4, cz - 244, cx + 336, ground - 4, cz + 184,
+        b.fill(cx + 302, ground - 5, cz - 244, cx + 336, ground - 5, cz + 184,
                 Blocks.SAND.defaultBlockState());
-        b.fill(cx + 302, ground - 3, cz - 244, cx + 336, ground - 1, cz + 184, WATER);
-        b.fill(cx + 300, ground - 4, cz - 244, cx + 301, ground + 1, cz + 184,
+        b.fill(cx + 302, ground - 4, cz - 244, cx + 336, ground - 1, cz + 184, WATER);
+        b.fill(cx + 300, ground - 5, cz - 244, cx + 301, ground + 1, cz + 184,
                 p.foundation());
         b.fill(cx + 300, ground + 2, cz - 244, cx + 300, ground + 2, cz + 184,
                 p.weathered());
+        for (int z = cz - 240; z <= cz + 180; z += 8) {
+            b.put(cx + 300, ground + 3, z, p.accent());
+        }
+        for (int z = cz - 232; z <= cz + 176; z += 32) {
+            b.put(cx + 300, ground + 4, z, p.light());
+        }
 
         ship(b, cx + 318, cz - 120, ground, p, false);
         ship(b, cx + 320, cz + 90, ground, p, false);
@@ -1237,6 +1244,11 @@ public final class CapeTownPlan implements CityPlan {
         // A straight, level track bed running east to the district edge.
         b.fill(cx + 180, trackY, cz + 320, cx + 336, trackY, cz + 322, p.foundation());
         b.fill(cx + 180, trackY, cz + 321, cx + 336, trackY, cz + 321, p.rubble());
+        BlockState rail = Blocks.RAIL.defaultBlockState()
+                .setValue(BlockStateProperties.RAIL_SHAPE, RailShape.EAST_WEST);
+        for (int x = cx + 180; x <= cx + 336; x++) {
+            b.put(x, trackY + 1, cz + 321, rail);
+        }
 
         // Raised platform along the house.
         b.fill(cx + 178, trackY + 1, cz + 317, cx + 222, trackY + 1, cz + 319,
@@ -1244,6 +1256,16 @@ public final class CapeTownPlan implements CityPlan {
         b.fill(cx + 178, trackY, cz + 317, cx + 222, trackY, cz + 319, p.foundation());
         b.put(cx + 178, trackY + 2, cz + 318, p.light());
         b.put(cx + 222, trackY + 2, cz + 318, p.light());
+
+        // The main passenger platform on the harbour side: five wide, its edge three blocks off
+        // the centreline, with five clear blocks and a canopy at rail+6.
+        b.fill(cx + 178, trackY, cz + 324, cx + 238, trackY, cz + 328, p.foundation());
+        b.fill(cx + 178, trackY + 1, cz + 324, cx + 238, trackY + 1, cz + 328, p.accent());
+        for (int x = cx + 182; x <= cx + 234; x += 10) {
+            b.fill(x, trackY + 2, cz + 328, x, trackY + 6, cz + 328, p.accent());
+            b.put(x, trackY + 7, cz + 326, p.light());
+        }
+        b.fill(cx + 176, trackY + 7, cz + 323, cx + 240, trackY + 7, cz + 329, p.roofSlab());
 
         // Station house.
         b.room(x0, trackY + 1, z0, x1, trackY + 7, z1);

@@ -98,7 +98,7 @@ public final class BangkokPlan implements CityPlan {
                         "bangkok_river_spirit"),
                 new CityPoi("warehouse", CityPoi.Kind.SECRET, 260, 1, 40, "smuggled_cargo"),
                 new CityPoi("rail_station", CityPoi.Kind.STATION, 315, 1, 75,
-                        "rail_yard;track_east"),
+                        "rail_yard;track_east;east_west"),
                 new CityPoi("river_port", CityPoi.Kind.PORT, 280, 1, 200,
                         "chao_phraya;cargo_quay"),
                 new CityPoi("temple_crypt", CityPoi.Kind.SECRET, 60, 4, -20, "crypt_lore"),
@@ -127,10 +127,10 @@ public final class BangkokPlan implements CityPlan {
         int x1 = cx + 330;
         int z0 = cz + 200;
         int z1 = cz + 230;
-        b.fill(x0, g - 2, z0, x1, g - 2, z1, p.foundation());
-        b.fill(x0, g - 1, z0, x1, g, z1, WATER);
-        b.fill(x0, g - 2, z0 - 1, x1, g + 1, z0 - 1, p.foundation());
-        b.fill(x0, g - 2, z1 + 1, x1, g + 1, z1 + 1, p.foundation());
+        b.fill(x0, g - 5, z0, x1, g - 5, z1, p.foundation());
+        b.fill(x0, g - 4, z0, x1, g - 1, z1, WATER);
+        b.fill(x0, g - 5, z0 - 1, x1, g + 1, z0 - 1, p.foundation());
+        b.fill(x0, g - 5, z1 + 1, x1, g + 1, z1 + 1, p.foundation());
     }
 
     /** The klong market's canals: one long north-south lane and two side lanes. */
@@ -1458,6 +1458,13 @@ public final class BangkokPlan implements CityPlan {
         b.put(cx + 280, g + 1, cz + 196, p.frame());
         CityPlanSupport.sign(b, cx + 280, g + 2, cz + 196, Direction.NORTH,
                 "RIVER PORT", "CARGO QUAY");
+        // The quay edge is lit and moored: bollards every eight, lanterns every twenty-four.
+        for (int x = cx + 252; x <= cx + 318; x += 8) {
+            b.put(x, g + 1, cz + 198, p.accent());
+        }
+        for (int x = cx + 256; x <= cx + 316; x += 24) {
+            b.put(x, g + 2, cz + 198, p.light());
+        }
     }
 
     /**
@@ -1536,13 +1543,13 @@ public final class BangkokPlan implements CityPlan {
         b.fill(cx + 300, ty + 1, cz + 78, cx + 330, ty + 1, cz + 78, p.rail());
         for (int x = cx + 304; x <= cx + 328; x += 8) {
             b.fill(x, ty + 1, cz + 76, x, ty + 3, cz + 76, p.rail());
-            b.put(x, ty + 4, cz + 76, p.light());
+            b.put(x, ty + 6, cz + 76, p.light());
         }
         b.put(cx + 300, ty + 1, cz + 75, p.frame());
         CityPlanSupport.sign(b, cx + 300, ty + 2, cz + 75, Direction.WEST,
                 "RAILWAY", "STATION", "PLATFORM 1");
 
-        b.fill(cx + 300, ty + 5, cz + 69, cx + 330, ty + 5, cz + 80, p.roofSlab());
+        b.fill(cx + 300, ty + 7, cz + 69, cx + 330, ty + 7, cz + 80, p.roofSlab());
         for (int x = cx + 302; x <= cx + 328; x += 6) {
             b.fill(x, ty - 1, cz + 69, x, ty + 4, cz + 69, p.accent());
             b.fill(x, ty - 1, cz + 80, x, ty + 4, cz + 80, p.accent());

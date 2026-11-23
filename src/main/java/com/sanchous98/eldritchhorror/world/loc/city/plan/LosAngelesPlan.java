@@ -130,7 +130,7 @@ public final class LosAngelesPlan implements CityPlan {
                         "oilman,los_angeles_cult_studio"),
                 new CityPoi("oilman", CityPoi.Kind.NPC, 250, 0, -6, "oil_office"),
                 new CityPoi("oil_station", CityPoi.Kind.STATION, 175, 0, -265,
-                        "rail station, oil fields"),
+                        "rail station, oil fields;east_west"),
                 new CityPoi("derrick_field", CityPoi.Kind.LANDMARK, 240, 0, -120,
                         "derricks,tanks,sheds"),
                 new CityPoi("beach_pier", CityPoi.Kind.LANDMARK, 240, 0, 240,
@@ -1520,10 +1520,10 @@ public final class LosAngelesPlan implements CityPlan {
         b.fill(cx + 145, y - 1, cz - 268, cx + 205, y - 1, cz - 262, p.foundation());
         b.fill(cx + 145, y, cz - 268, cx + 205, y, cz - 268, p.accent());
         for (int dx = 150; dx <= 200; dx += 10) {
-            b.fill(cx + dx, y + 1, cz - 268, cx + dx, y + 4, cz - 268, p.accent());
-            b.put(cx + dx, y + 5, cz - 268, p.roofSlab());
+            b.fill(cx + dx, y + 1, cz - 268, cx + dx, y + 5, cz - 268, p.accent());
+            b.put(cx + dx, y + 6, cz - 268, p.roofSlab());
         }
-        b.fill(cx + 148, y + 5, cz - 270, cx + 202, y + 5, cz - 264, p.roof());
+        b.fill(cx + 148, y + 6, cz - 270, cx + 202, y + 6, cz - 264, p.roof());
         for (int dx = 152; dx <= 198; dx += 12) {
             bench(b, cx + dx, cz - 265, y, p, Direction.NORTH);
         }
@@ -1759,6 +1759,11 @@ public final class LosAngelesPlan implements CityPlan {
         int pierDeck = surface.applyAsInt(cx + 240, cz + 240) + 2;
         pier(b, cx + 240, cz + 240, cz + 330, pierDeck, p, surface);
         pavilion(b, cx + 240, cz + 274, pierDeck, p);
+        // The berth: a 25x27 pool four courses deep at the pier head, so the packet floats at a
+        // real water surface instead of the pier deck.
+        b.fill(cx + 227, pierDeck - 5, cz + 330, cx + 252, pierDeck - 5, cz + 357,
+                p.foundation());
+        b.fill(cx + 227, pierDeck - 4, cz + 330, cx + 252, pierDeck - 1, cz + 357, WATER);
         beachHut(b, cx + 170, cz + 220, p, 0, surface);
         beachHut(b, cx + 205, cz + 215, p, 1, surface);
         beachHut(b, cx + 260, cz + 195, p, 2, surface);

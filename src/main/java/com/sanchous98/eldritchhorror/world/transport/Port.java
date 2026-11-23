@@ -12,8 +12,10 @@ import com.sanchous98.eldritchhorror.world.EarthMap;
  * @param waterZ   harbour water point Z
  * @param shoreX   nearest walkable land X
  * @param shoreZ   nearest walkable land Z
+ * @param waterY   the water surface Y the hull floats at; {@code waterY + 0.85} is its spawn height
  */
-public record Port(String cityId, String cityName, int waterX, int waterZ, int shoreX, int shoreZ) {
+public record Port(String cityId, String cityName, int waterX, int waterZ, int shoreX, int shoreZ,
+                   int waterY) {
 
     /** @return squared horizontal distance from a world point to the harbour water point. */
     public double distanceSqr(double x, double z) {
