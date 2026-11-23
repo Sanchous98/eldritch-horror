@@ -1049,5 +1049,14 @@
   "quest.eldritch_horror.reward.kit": "Полевой набор выдан (%s).",
   "quest.eldritch_horror.reward.signature": "Фирменный предмет выдан (%s).",
   "investigator.eldritch_horror.kit_earned": "Полевой набор пока не выдан: два задания ждут в журнале (J).",
-  "investigator.eldritch_horror.preview_tasks": "Набор не выдают сразу: выполните полевые задания этого исследователя (журнал, J)."
+  "investigator.eldritch_horror.preview_tasks": "Набор не выдают сразу: выполните полевые задания этого исследователя (журнал, J).",
+  "cityquest.eldritch_horror.started": "В городе %s начинается местный контракт: %s",
+  "cityquest.eldritch_horror.advanced": "Контракт %s: дальше — %s",
+  "cityquest.eldritch_horror.progress": "Контракт %s: %s/%s",
+  "cityquest.eldritch_horror.completed": "Контракт выполнен: %s. Орден платит пять реликтовых монет.",
+  "cityquest.eldritch_horror.board": "прочитайте доску объявлений в %s, %s",
+  "cityquest.eldritch_horror.talk": "найдите связного в %s, %s",
+  "cityquest.eldritch_horror.gather": "соберите %sx %s",
+  "cityquest.eldritch_horror.hunt": "очистите район от %sx %s",
+  "cityquest.eldritch_horror.secret": "найдите скрытое место в %s, %s"
 }

@@ -246,6 +246,8 @@ public final class EldritchCommands {
                         .then(Commands.argument("city", StringArgumentType.word())
                                 .then(Commands.argument("value", DoubleArgumentType.doubleArg(0.0, 1.0))
                                         .executes(EldritchCommands::setCityTaint)))));
+        // The player's local contract in the nearest curated city (design/21).
+        eh.then(Commands.literal("cityquest").executes(EldritchCommands::cityQuest));
         // Debug: reset the one-time prologue and return to the Threshold.
         eh.then(Commands.literal("prologue")
                 .then(Commands.literal("reset").requires(GAMEMASTER)
@@ -715,6 +717,25 @@ public final class EldritchCommands {
         }
         ctx.getSource().sendSuccess(() -> Component.literal(
                 city.name() + ": taint " + value + " -> " + state), true);
+        return 1;
+    }
+
+    /** {@code /eh cityquest}: the caller's contract in the nearest curated city. */
+    private static int cityQuest(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        if (!(player.level() instanceof ServerLevel level)) {
+            ctx.getSource().sendFailure(Component.literal("Not in a server level."));
+            return 0;
+        }
+        var city = com.sanchous98.eldritchhorror.world.city.quest.CityQuests
+                .nearestCity(level, player, 48);
+        if (city == null) {
+            ctx.getSource().sendFailure(Component.literal("No curated city nearby."));
+            return 0;
+        }
+        String line = com.sanchous98.eldritchhorror.world.city.quest.CityQuests
+                .summary(player, city);
+        ctx.getSource().sendSuccess(() -> Component.literal(line), false);
         return 1;
     }
 

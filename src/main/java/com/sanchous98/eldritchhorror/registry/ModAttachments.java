@@ -287,6 +287,28 @@ public final class ModAttachments {
      * repeatable's progress to 0 on completion; without the timestamp the entry would render as
      * ready while it is still cooling down (see {@code client.JournalScreen}).
      */
+    /**
+     * Per-player progress through each city's local contract (design/21): a flat map with
+     * {@code step:<cityId>}, {@code kills:<cityId>} and {@code done:<cityId>} keys. Persisted,
+     * copied on death and synced to the owner. Written only through
+     * {@link com.sanchous98.eldritchhorror.world.city.quest.CityQuests}.
+     */
+    public static final Supplier<AttachmentType<Map<String, Integer>>> CITY_QUESTS =
+            ATTACHMENT_TYPES.register("city_quests",
+                    () -> AttachmentType.<Map<String, Integer>>builder(Map::of)
+                            .serialize(com.mojang.serialization.Codec
+                                    .unboundedMap(com.mojang.serialization.Codec.STRING,
+                                            com.mojang.serialization.Codec.INT)
+                                    .fieldOf("progress"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.<RegistryFriendlyByteBuf, String, Integer,
+                                                    Map<String, Integer>>map(
+                                                    java.util.HashMap::new,
+                                                    ByteBufCodecs.STRING_UTF8,
+                                                    ByteBufCodecs.VAR_INT))
+                            .copyOnDeath()
+                            .build());
+
     public static final Supplier<AttachmentType<Map<String, Long>>> QUEST_COMPLETIONS =
             ATTACHMENT_TYPES.register("quest_completions",
                     () -> AttachmentType.<Map<String, Long>>builder(Map::of)

@@ -3174,6 +3174,11 @@ public final class ModConfig {
             BUILDER.comment("Advance city decay in the background while players are online.")
                     .define("enableCityDecay", true);
 
+    /** Master switch for the per-city local contracts (design/21). */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_QUESTS =
+            BUILDER.comment("Offer each curated city's 3-5 step local contract.")
+                    .define("enableCityQuests", true);
+
     /** Ticks for a city's abstract taint to travel from 0 to 1 (Fallen at 0.55 by default). */
     public static final ModConfigSpec.IntValue CITY_DECAY_TICKS =
             BUILDER.comment("Ticks for city taint to go 0 -> 1 (Fallen is 0.55 by default).")

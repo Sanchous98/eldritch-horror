@@ -15,7 +15,11 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -51,6 +55,18 @@ public final class Bots {
      * already tracked, so a repeated {@code /eh bot spawn} is idempotent.
      */
     public static BotPlayer spawn(ServerLevel level, String name) {
+        return spawn(level, name, true);
+    }
+
+    /**
+     * Spawns a bot, optionally loading its saved player data.
+     *
+     * <p>A bot is a real {@link ServerPlayer}, but nothing calls the login path that restores a
+     * player's {@code .dat}; without this a bot forgot its inventory, attachments and quest progress
+     * on every server restart, which makes an honest multi-hour run impossible. {@code load=false}
+     * is for a genuinely fresh run (see {@link #resetData}).
+     */
+    public static BotPlayer spawn(ServerLevel level, String name, boolean load) {
         UUID uuid = uuidFor(name);
         BotPlayer existing = BOTS.get(uuid);
         if (existing != null) {
@@ -59,6 +75,14 @@ public final class Bots {
         MinecraftServer server = level.getServer();
         GameProfile profile = new GameProfile(uuid, name);
         BotPlayer bot = new BotPlayer(server, level, profile);
+        if (load) {
+            try (ProblemReporter.ScopedCollector reporter =
+                         new ProblemReporter.ScopedCollector(bot.problemPath(), EldritchHorror.LOGGER)) {
+                server.getPlayerList().loadPlayerData(new NameAndId(uuid, name))
+                        .map(tag -> TagValueInput.create(reporter, server.registryAccess(), tag))
+                        .ifPresent(bot::load);
+            }
+        }
         // In the Threshold, spawn at the hub (the prologue's teleport target); the city street ring
         // exists only in the overworld. Outside it, spawn on a curated city's street ring (the
         // world spawn is open ocean, where a bot would drown); fall back to the respawn point.
@@ -185,6 +209,19 @@ public final class Bots {
         Item item = BuiltInRegistries.ITEM.getValue(EldritchHorror.id(id));
         if (item != null && item != Items.AIR) {
             bot.getInventory().add(new ItemStack(item, count));
+        }
+    }
+
+    /** Deletes a bot's saved player data so the next spawn starts bare (a fresh honest run). */
+    public static boolean resetData(MinecraftServer server, String name) {
+        try {
+            java.nio.file.Path dir = server.getWorldPath(LevelResource.PLAYER_DATA_DIR);
+            boolean deleted = java.nio.file.Files.deleteIfExists(dir.resolve(uuidFor(name) + ".dat"));
+            java.nio.file.Files.deleteIfExists(dir.resolve(uuidFor(name) + ".dat_old"));
+            return deleted;
+        } catch (java.io.IOException e) {
+            EldritchHorror.LOGGER.warn("bot: could not reset player data for {}", name, e);
+            return false;
         }
     }
 

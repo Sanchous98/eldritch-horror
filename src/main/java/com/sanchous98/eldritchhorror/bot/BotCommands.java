@@ -130,6 +130,12 @@ public final class BotCommands {
                 .then(Commands.literal("inventory")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::inventory)))
+                .then(Commands.literal("drop")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .then(Commands.argument("item", StringArgumentType.string())
+                                        .then(Commands.argument("count",
+                                                        com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
+                                                .executes(BotCommands::drop)))))
                 .then(Commands.literal("quality")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::quality)))
@@ -169,6 +175,9 @@ public final class BotCommands {
                 .then(Commands.literal("spawnjoinbare")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .executes(BotCommands::spawnjoinBare)))
+                .then(Commands.literal("spawnjoinfresh")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(BotCommands::spawnjoinFresh)))
                 .then(Commands.literal("walk")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .then(Commands.argument("x", DoubleArgumentType.doubleArg())
@@ -472,6 +481,53 @@ public final class BotCommands {
         ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
                 + " inventory: " + line), false);
         return 1;
+    }
+
+    /**
+     * {@code /eh bot drop <name> <item> <count>}: drops carried items (0 = the whole stack).
+     *
+     * <p>Long play sessions accumulate junk (chest blocks from broken strongroom chests, rotten
+     * flesh, seeds); a full inventory silently turns mined logs and picked-up reagents into
+     * ground items, which then look like a crafting failure. Dropping is what a player would do.
+     */
+    private static int drop(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        BotPlayer bot = require(ctx, StringArgumentType.getString(ctx, "name"));
+        if (bot == null) {
+            return 0;
+        }
+        String wanted = StringArgumentType.getString(ctx, "item");
+        int count = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "count");
+        int left = count == 0 ? Integer.MAX_VALUE : count;
+        int dropped = 0;
+        var inv = bot.getInventory();
+        for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            String hover = stack.getHoverName().getString();
+            String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (!hover.equalsIgnoreCase(wanted) && !id.equalsIgnoreCase(wanted)
+                    && !id.endsWith(":" + wanted.toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+            int take = Math.min(stack.getCount(), left);
+            ItemStack out = stack.copyWithCount(take);
+            stack.shrink(take);
+            if (stack.isEmpty()) {
+                inv.setItem(i, ItemStack.EMPTY);
+            }
+            bot.drop(out, false, Prediction.SERVER_ONLY);
+            left -= take;
+            dropped += take;
+        }
+        int total = dropped;
+        ctx.getSource().sendSuccess(() -> Component.literal("bot " + bot.getGameProfile().name()
+                + " dropped " + total + "x " + wanted), true);
+        return dropped > 0 ? 1 : 0;
     }
 
     /** {@code /eh bot placeat <name> <item> <x> <y> <z>}: places a block from the inventory. */
@@ -962,6 +1018,27 @@ public final class BotCommands {
         return join(ctx, true);
     }
 
+    /**
+     * {@code /eh bot spawnjoinfresh <name>}: delete the bot's saved player data and spawn bare.
+     * Use this once at the start of a new honest run; a resumed run uses {@code spawnjoinbare},
+     * which keeps the saved inventory and attachments.
+     */
+    private static int spawnjoinFresh(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!gate(ctx)) {
+            return 0;
+        }
+        String name = StringArgumentType.getString(ctx, "name");
+        if (Bots.get(name) != null) {
+            ctx.getSource().sendFailure(Component.literal("Bot already exists: " + name));
+            return 0;
+        }
+        boolean deleted = Bots.resetData(ctx.getSource().getServer(), name);
+        int result = join(ctx, true);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "Fresh bot " + name + " (saved data " + (deleted ? "deleted" : "absent") + ")"), true);
+        return result;
+    }
+
     private static int join(CommandContext<CommandSourceStack> ctx, boolean bare) throws CommandSyntaxException {
         if (!gate(ctx)) {
             return 0;
@@ -973,10 +1050,7 @@ public final class BotCommands {
         }
         ServerLevel level = ctx.getSource().getLevel();
         BotPlayer bot = Bots.spawn(level, name);
-        if (bare) {
-            // Safety net only: spawn no longer grants a kit, so the bare path starts truly empty.
-            bot.getInventory().clearContent();
-        } else {
+        if (!bare) {
             Bots.giveStarterKit(bot);
         }
         NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(bot));

@@ -1049,5 +1049,14 @@
   "quest.eldritch_horror.reward.kit": "Field kit issued (%s).",
   "quest.eldritch_horror.reward.signature": "Signature item issued (%s).",
   "investigator.eldritch_horror.kit_earned": "Your field kit is not issued yet: two tasks await in your journal (J).",
-  "investigator.eldritch_horror.preview_tasks": "The kit is not issued up front: complete this investigator's field tasks (journal, J) to earn it."
+  "investigator.eldritch_horror.preview_tasks": "The kit is not issued up front: complete this investigator's field tasks (journal, J) to earn it.",
+  "cityquest.eldritch_horror.started": "A local contract begins in %s: %s",
+  "cityquest.eldritch_horror.advanced": "Contract %s: next — %s",
+  "cityquest.eldritch_horror.progress": "Contract %s: %s/%s",
+  "cityquest.eldritch_horror.completed": "Contract complete: %s. The Order pays five relic coins.",
+  "cityquest.eldritch_horror.board": "read the notice board at %s, %s",
+  "cityquest.eldritch_horror.talk": "find the contact at %s, %s",
+  "cityquest.eldritch_horror.gather": "gather %sx %s",
+  "cityquest.eldritch_horror.hunt": "clear %sx %s from the district",
+  "cityquest.eldritch_horror.secret": "find the hidden place at %s, %s"
 }
