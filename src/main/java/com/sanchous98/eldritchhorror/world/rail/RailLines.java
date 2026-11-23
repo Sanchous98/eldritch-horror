@@ -518,11 +518,11 @@ public final class RailLines {
             for (int dy = 1; dy <= PLATFORM_ROOF - 1; dy++) {
                 out.add(RailStamp.pillar(x, station.y() + dy, z));
             }
-            // One warm lamp under the canopy on the platform.
+            // One warm lamp at the canopy course (rail+6), leaving the five-clear volume intact.
             int lampAcross = side * middle;
             out.add(RailStamp.lantern(
                     station.x() + dirX * along + acrossX * lampAcross,
-                    station.y() + PLATFORM_ROOF - 1,
+                    station.y() + PLATFORM_ROOF,
                     station.z() + dirZ * along + acrossZ * lampAcross));
         }
         int signAcross = side * middle;

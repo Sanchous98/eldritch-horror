@@ -26,7 +26,7 @@ therefore **64 blocks** nose-to-tail (16 + 3 × 16); the four-wagon maximum is *
   below the floor — riders step up onto the sill. A slab would put the teleport point (rail level)
   inside the slab, so the full-block floor is deliberate.
 * **Canopy at rail+6** over the platform, with pillars every 8 blocks on the outer edge and a warm
-  `minecraft:lantern` under the canopy.
+  `minecraft:lantern` at the canopy course.
 * A **sign** (`CITY STATION`) at the front of the platform and a **buffer stop** at the rear end.
   The buffer is stamped before the line, so a real line crossing it clears it.
 * The platform is built **on the platform side of the station point**, i.e. the side of the
