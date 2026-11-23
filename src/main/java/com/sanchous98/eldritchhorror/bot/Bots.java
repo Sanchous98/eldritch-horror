@@ -59,12 +59,18 @@ public final class Bots {
         MinecraftServer server = level.getServer();
         GameProfile profile = new GameProfile(uuid, name);
         BotPlayer bot = new BotPlayer(server, level, profile);
-        // Spawn on a curated city's street ring (the world spawn is open ocean, where a bot would
-        // drown); fall back to the respawn point if no city is registered.
-        City city = Cities.all().stream().findFirst().orElse(null);
-        BlockPos spawn = city == null
-                ? level.getRespawnData().globalPos().pos()
-                : new BlockPos(city.x() + 48, 0, city.z());
+        // In the Threshold, spawn at the hub (the prologue's teleport target); the city street ring
+        // exists only in the overworld. Outside it, spawn on a curated city's street ring (the
+        // world spawn is open ocean, where a bot would drown); fall back to the respawn point.
+        BlockPos spawn;
+        if (level.dimension().equals(com.sanchous98.eldritchhorror.world.threshold.Threshold.DIMENSION)) {
+            spawn = com.sanchous98.eldritchhorror.world.threshold.Threshold.spawn();
+        } else {
+            City city = Cities.all().stream().findFirst().orElse(null);
+            spawn = city == null
+                    ? level.getRespawnData().globalPos().pos()
+                    : new BlockPos(city.x() + 48, 0, city.z());
+        }
         // Force the spawn chunk so the heightmap reflects generated terrain (an unloaded chunk
         // reports min build height and would drop the bot into the bedrock).
         level.getChunk(spawn.getX() >> 4, spawn.getZ() >> 4);

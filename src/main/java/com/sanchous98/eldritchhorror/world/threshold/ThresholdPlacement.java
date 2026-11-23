@@ -96,8 +96,14 @@ public final class ThresholdPlacement {
                     Threshold.DIMENSION.identifier());
             return;
         }
+        // A bot (or any non-prologue join) spawns at the dimension's respawn point, not at the
+        // Prologue's teleport target; point it at the hub so the gate ring is reachable.
+        level.setRespawnData(net.minecraft.world.level.storage.LevelData.RespawnData.of(
+                Threshold.DIMENSION, Threshold.spawn(), 0.0F, 0.0F));
         if (isStamped(level)) {
-            return;
+            // A previous stamp may have been interrupted after the marker was placed (the gates or
+            // pedestals missing). The stamp is idempotent, so always run it as a repair.
+            EldritchHorror.LOGGER.info("threshold: hub present; repairing any missing parts");
         }
         stamp(level);
         EldritchHorror.LOGGER.info("threshold: stamped hub at {}", Threshold.spawn());

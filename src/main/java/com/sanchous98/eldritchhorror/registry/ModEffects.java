@@ -3,6 +3,7 @@ package com.sanchous98.eldritchhorror.registry;
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
+import com.sanchous98.eldritchhorror.sanity.SixthSense;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,6 +48,10 @@ public final class ModEffects {
     /** Waking: instant; removes Stupor and restores a little sanity. */
     public static final DeferredHolder<MobEffect, WakingEffect> WAKING =
             MOB_EFFECTS.register("waking", WakingEffect::new);
+
+    /** Sixth Sense: at zero sanity the whispers become useful (and the dark becomes readable). */
+    public static final DeferredHolder<MobEffect, SixthSenseEffect> SIXTH_SENSE =
+            MOB_EFFECTS.register("sixth_sense", SixthSenseEffect::new);
 
     /** Corrupted: registered now; the corruption batch applies it. Inert on its own. */
     public static final DeferredHolder<MobEffect, CorruptedEffect> CORRUPTED =
@@ -100,6 +105,32 @@ public final class ModEffects {
             if (mob.tickCount % 60 == 0) {
                 mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 0, true, false, false));
                 mob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 0, true, false, false));
+            }
+            return true;
+        }
+    }
+
+    /** {@code sixth_sense}: night vision and periodic whispered gifts while sanity is zero. */
+    public static final class SixthSenseEffect extends MobEffect {
+        public SixthSenseEffect() {
+            super(MobEffectCategory.BENEFICIAL, 0x9A7FD0);
+        }
+
+        @Override
+        public void onEffectAdded(LivingEntity mob, int amplifier) {
+            if (mob instanceof ServerPlayer player) {
+                SixthSense.grant(player);
+            }
+        }
+
+        @Override
+        public boolean applyEffectTick(ServerLevel level, LivingEntity mob, int amplifier) {
+            if (mob.tickCount % 20 == 0) {
+                mob.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 0,
+                        true, false, false));
+                if (mob instanceof ServerPlayer player) {
+                    SixthSense.tick(player);
+                }
             }
             return true;
         }

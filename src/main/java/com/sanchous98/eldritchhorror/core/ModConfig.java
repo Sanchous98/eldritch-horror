@@ -182,6 +182,33 @@ public final class ModConfig {
             BUILDER.comment("Sanity restored when Smelling Salts cures Stupor.")
                     .defineInRange("sanityCollapseCure", 5.0, 0.0, 50.0);
 
+    // --- Sixth Sense at zero sanity (design/27) ----------------------------------------------
+
+    /** Master switch for the zero-sanity buff and its whispered gifts. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SIXTH_SENSE =
+            BUILDER.comment("At zero sanity, grant night vision and periodic whispered gifts.")
+                    .define("enableSixthSense", true);
+
+    /** Base ticks between gifts (jittered between 0.5x and 1.5x). */
+    public static final ModConfigSpec.IntValue SIXTH_SENSE_GIFT_TICKS =
+            BUILDER.comment("Base ticks between whispered gifts (jittered).")
+                    .defineInRange("sixthSenseGiftTicks", 1200, 200, 12000);
+
+    /** Chance a gift is a clue to a site instead of an item. */
+    public static final ModConfigSpec.DoubleValue SIXTH_SENSE_CLUE_CHANCE =
+            BUILDER.comment("Chance a whisper gift is a clue (0..1).")
+                    .defineInRange("sixthSenseClueChance", 0.15, 0.0, 1.0);
+
+    /** Chance a gift is a useful item (junk is the remainder). */
+    public static final ModConfigSpec.DoubleValue SIXTH_SENSE_USEFUL_CHANCE =
+            BUILDER.comment("Chance a whisper gift is a useful item (0..1).")
+                    .defineInRange("sixthSenseUsefulChance", 0.30, 0.0, 1.0);
+
+    /** Radius for the nearest artefact-site clue; outside it a random site is used. */
+    public static final ModConfigSpec.IntValue SIXTH_SENSE_CLUE_RADIUS =
+            BUILDER.comment("Radius for the nearest site clue (blocks).")
+                    .defineInRange("sixthSenseClueRadius", 10000, 1000, 60000);
+
     public static final ModConfigSpec.BooleanValue ENABLE_CORRUPTION_SPREAD =
             BUILDER.comment("Allow the per-chunk taint field to bleed into neighbouring chunks.")
                     .define("enableCorruptionSpread", true);

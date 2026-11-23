@@ -137,6 +137,7 @@ public final class SanityTicker {
     private static void applyState(ServerPlayer player, SanityState state) {
         clear(player, ModEffects.MADNESS);
         clear(player, ModEffects.MARKED);
+        clear(player, ModEffects.SIXTH_SENSE);
         switch (state) {
             case COMPOSED, UNEASY -> {
             }
@@ -145,6 +146,7 @@ public final class SanityTicker {
             case MARKED -> {
                 effect(player, ModEffects.MADNESS, 2);
                 effect(player, ModEffects.MARKED, 0);
+                effect(player, ModEffects.SIXTH_SENSE, 0);
             }
         }
     }
@@ -156,7 +158,8 @@ public final class SanityTicker {
             case FRAYING -> holds(player, ModEffects.MADNESS, 0);
             case BREAKING -> holds(player, ModEffects.MADNESS, 1);
             case MARKED -> holds(player, ModEffects.MADNESS, 2)
-                    && holds(player, ModEffects.MARKED, 0);
+                    && holds(player, ModEffects.MARKED, 0)
+                    && holds(player, ModEffects.SIXTH_SENSE, 0);
         };
     }
 
