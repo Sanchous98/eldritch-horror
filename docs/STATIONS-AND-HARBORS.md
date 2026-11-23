@@ -74,9 +74,9 @@ no `PORT` (or whose plan authored no water and whose map has no reachable sea). 
 `MAX_OFFSET_BLOCKS = 320` cap still applies only to that fallback; the authored anchor path reaches
 512 blocks, which is what brings Bangkok (344) and Istanbul (326) in.
 
-`ShipService` spawns at `origin.waterY() + 0.85` instead of `level.getSeaLevel() + 0.85`. This is
-what puts Mexico City's canal basin at its authored Y (~119, not 63) and keeps a coastal basin that
-is dug below sea level at its own surface.
+`ShipService` spawns at `origin.waterY() + 0.85` instead of `level.getSeaLevel() + 0.85`.  This is
+what puts Mexico City's canal basin at its authored Y (~124 in the probe, not 63) and keeps a
+coastal basin that is dug below sea level at its own surface.
 
 ## Per-city numbers
 
