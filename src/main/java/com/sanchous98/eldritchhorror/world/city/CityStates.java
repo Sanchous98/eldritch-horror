@@ -10,13 +10,13 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Server-side, derived city states: the condition of each curated city, from the corruption that
- * has settled on its district ({@code design/21-settlements.md}). No state is stored — it is
- * recomputed on demand from the per-chunk taint field, so it can never drift from the world.
+ * Server-side city condition, from the corruption that has settled on a curated city's district
+ * ({@code design/21-settlements.md}).
  *
- * <p>Bounded like every other world query here: only already-loaded chunks are sampled
- * ({@code ServerChunkCache.getChunkNow}), so asking for a city's state never generates a chunk. A
- * city with no loaded chunks reports {@link CityState#THRIVING} (nothing is known to be wrong).
+ * <p>The authoritative value is the world-level {@link CityLedger}, which keeps decaying even when
+ * no chunk is loaded; {@link #sampledTaint} reads the physical per-chunk taint of the nine district
+ * samples and is folded into the ledger by {@code CityDecay}. Sampling stays bounded: only
+ * already-loaded chunks ({@code ServerChunkCache.getChunkNow}), never a load or a generation.
  */
 public final class CityStates {
 
@@ -30,8 +30,17 @@ public final class CityStates {
     private CityStates() {
     }
 
-    /** @return {@code city}'s current state (recomputed from loaded-chunk taint; never force-loads). */
+    /** @return {@code city}'s current state from the authoritative ledger (never force-loads). */
     public static CityState stateOf(ServerLevel level, City city) {
+        return CityLedger.of(level).state(city.id());
+    }
+
+    /**
+     * Average taint of the district's loaded sample chunks.
+     *
+     * @return {@code 0..1}, or {@code -1} when none of the nine samples is loaded
+     */
+    public static double sampledTaint(ServerLevel level, City city) {
         int radius = new CityLocation(city).radius();
         int centreChunkX = city.x() >> 4;
         int centreChunkZ = city.z() >> 4;
@@ -47,7 +56,7 @@ public final class CityStates {
                 samples++;
             }
         }
-        return samples == 0 ? CityState.THRIVING : CityState.of(sum / samples);
+        return samples == 0 ? -1.0 : sum / samples;
     }
 
     /**

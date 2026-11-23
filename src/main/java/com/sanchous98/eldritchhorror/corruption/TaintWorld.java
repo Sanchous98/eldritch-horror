@@ -158,6 +158,16 @@ public final class TaintWorld {
     }
 
     /**
+     * Public view of the conversion allow-list for other decay systems (city ruins): natural soil →
+     * {@code tainted_soil}, natural rock → {@code corrupt_stone}; anything else returns {@code null}
+     * and is left alone.
+     */
+    public static @Nullable BlockState corruptVariant(BlockState state) {
+        ensureBlocks();
+        return corruptFor(state);
+    }
+
+    /**
      * The conversion allow-list: natural soil → {@code tainted_soil}, natural rock →
      * {@code corrupt_stone}. Anything else (logs, leaves, ores, our blocks, builds) returns
      * {@code null} and is left alone.

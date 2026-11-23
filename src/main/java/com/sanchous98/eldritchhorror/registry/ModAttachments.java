@@ -7,6 +7,7 @@ import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -58,6 +59,16 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<Double>> TAINT =
             ATTACHMENT_TYPES.register("taint", () -> AttachmentType.<Double>builder(() -> 0.0)
                     .serialize(com.mojang.serialization.Codec.DOUBLE.fieldOf("value"))
+                    .build());
+
+    /**
+     * Per-chunk ruin stage already applied by {@code CityRuins}, 0..3 (state ordinal). Lets a
+     * loaded chunk be upgraded once per stage instead of rescanned on every visit. Persisted with
+     * the chunk; never synced to clients.
+     */
+    public static final Supplier<AttachmentType<Integer>> RUIN_STAGE =
+            ATTACHMENT_TYPES.register("ruin_stage", () -> AttachmentType.<Integer>builder(() -> 0)
+                    .serialize(com.mojang.serialization.Codec.INT.fieldOf("stage"))
                     .build());
 
     /**
@@ -202,6 +213,23 @@ public final class ModAttachments {
                                             java.util.HashSet<String>::new, ByteBufCodecs.STRING_UTF8)
                                             .map(java.util.Set::copyOf, java.util.HashSet::new))
                             .copyOnDeath()
+                            .build());
+
+    /**
+     * Per-player mirror of the currently running world events, {@code id@elapsedSeconds} strings,
+     * synced to the owner so the active-events journal can render without a custom packet
+     * (design/19). Refreshed once a second by {@code EventTicker}; cleared on logout by the ticker.
+     */
+    public static final Supplier<AttachmentType<List<String>>> ACTIVE_EVENTS =
+            ATTACHMENT_TYPES.register("active_events",
+                    () -> AttachmentType.<List<String>>builder(() -> List.of())
+                            .serialize(com.mojang.serialization.Codec.STRING.listOf()
+                                    .fieldOf("events"))
+                            .sync((holder, to) -> holder == to,
+                                    ByteBufCodecs.collection(
+                                            java.util.ArrayList<String>::new,
+                                            ByteBufCodecs.STRING_UTF8)
+                                            .map(List::copyOf, java.util.ArrayList::new))
                             .build());
 
     /**

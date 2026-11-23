@@ -4,6 +4,8 @@ import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.CityState;
+import com.sanchous98.eldritchhorror.world.city.CityStates;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,6 +118,9 @@ public final class CityPopulation {
                     continue;
                 }
                 done.add(city);
+                if (CityStates.stateOf(level, city) == CityState.FALLEN) {
+                    continue;
+                }
                 populate(level, cache, city, perPass, density, tick);
             }
         }

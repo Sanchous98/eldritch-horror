@@ -117,6 +117,9 @@ public final class SanityTicker {
 
         SanityState after = SanitySystem.state(player);
         SanityState before = PREVIOUS.put(player.getUUID(), after);
+        if (before != null && after.ordinal() > before.ordinal()) {
+            MadnessEpisodes.onBandWorsened(player, after);
+        }
         // Re-assert a band whose infinite effect has gone missing even when the band itself did not
         // change (Sedate removes MADNESS/MARKED inside the same band; a dimension change can drop
         // the effect). The check is read-only, so a present effect is never re-applied every tick.

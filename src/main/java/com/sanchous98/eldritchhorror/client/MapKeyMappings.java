@@ -33,6 +33,8 @@ public final class MapKeyMappings {
     static @Nullable KeyMapping openCodex;
     /** The skill-tree key; {@code null} until {@link #onRegisterKeyMappings} runs. */
     static @Nullable KeyMapping openSkills;
+    /** The active-events key; {@code null} until {@link #onRegisterKeyMappings} runs. */
+    static @Nullable KeyMapping openEvents;
 
     private MapKeyMappings() {
     }
@@ -44,6 +46,7 @@ public final class MapKeyMappings {
         openJournal = register(event, "key.eldritch_horror.journal", InputConstants.KEY_J);
         openCodex = register(event, "key.eldritch_horror.codex", InputConstants.KEY_C);
         openSkills = register(event, "key.eldritch_horror.skills", InputConstants.KEY_K);
+        openEvents = register(event, "key.eldritch_horror.events", InputConstants.KEY_V);
     }
 
     /** Creates and registers one keyboard binding under {@link #CATEGORY}. */

@@ -291,6 +291,24 @@ Repo: <https://github.com/Sanchous98/eldritch-horror> (branch `main`).
   chunks (~2.6 GiB, ~4 h), 2,000 ≈ 1.5M (~10–13 GiB, ~17 h), 4,096 ≈ 6.3M (~44 GiB, ~3 days).
   `/eh pregen world` is resumable (cursor in `SavedData`, no 33M-entry set) but refuses to start
   below `-Deh.pregen.min-free-gib` (default 40 GiB) and stops if free space drops under it.
+- **Sanity pressure (2026-11):** a downward band change triggers a madness episode — biome-appropriate
+  phantom mobs that must be fought (no health damage, sanity hits, no drops/XP), a fugue
+  (blindness + involuntary step) or a compulsion (drop held item). Phantoms are not suppressed by
+  companions; a lucid player nearby gets a "shapes without shadows" warning and can tell the
+  afflicted. A lucid companion within 8 blocks restores sanity slowly. Abandoning an Ancient One
+  fight that started inside a city costs sanity once (5 s outside the district, cooldown per
+  player). Killing an Ancient One gives a large sanity reward to the players who actually damaged
+  it and a small one to everyone else online except cultists (any cult at Initiate+). Idea
+  recorded, not implemented: madness as insight (true hidden information at low sanity).
+- **City decay (2026-11):** cities are authoritative in `world/city/CityLedger` (`SavedData`), not  derived from loaded chunks. `CityDecay` advances taint every 5 s while a player is online, the
+  doom clock accelerates it (default 72,000 ticks for 0 → 1, ~33 min to the 0.55 Fallen line), and
+  the nine loaded district samples act as a floor. `CityStates` reads the ledger, so a far city no
+  longer reports `THRIVING` when unloaded. A Fallen city is a **devastated place** (board game
+  `Cities in Ruin`, not an Ancient One lair): `CityRuins` upgrades loaded chunks to at most ~30%
+  natural-surface conversion plus rubble (authored buildings/roads survive), `CityPopulation` stops,
+  the Hollow Choir takes over, and standing in the district drains sanity (default −0.12/s, stronger
+  near the centre). No Ancient One is spawned into or parked in a city. Reclaim drops the ledger to
+  the sampled taint and starts a grace period. Test hook: `/eh city taint <id> <0..1>`.
 - **Oracle server:** `eh-oracle` runs `--restart unless-stopped` from the bind-mounted source
   (`~/eldritch-horror`) with `~/eh-run`, `~/eh-build` and `~/eh-gradle` volumes, heap 6 G, container
   limit 8 G, 2 CPUs. `pause-when-empty-seconds=0` is required — at the default 60 s an empty server

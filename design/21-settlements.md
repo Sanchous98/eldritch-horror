@@ -74,15 +74,28 @@ A settlement's state tracks the local corruption:
 A **Fallen** city is a loss — a hub gone, a quest line cut, a marker on the world map turned
 black. This is the horror made *geographic*, and it gives the session its stakes.
 
-State is **derived** from the district's per-chunk corruption (no stored value): `world/city/CityStates`
-averages the taint of a sampling of already-loaded district chunks and maps it, via config
-thresholds, to `CityState` (Thriving → Uneasy → Besieged → Fallen). The wired effects so far are the
-city sanity-recovery source, whose shelter scales with the state (`Fallen` gives none), and the
-**world-map marker**: `CityStateDiscovery` records the state of the city a player stands in to the
-owner-synced `CITY_STATES` attachment (written only on change), and the map colours city markers
-(green/amber/orange/grey). `/eh city` reports the nearest city. A Fallen city is **taken over**: every
-10s it is topped up towards a small Hollow Choir presence (`world/city/CityFall`), bounded and
-loaded-chunks-only. Fallen-city block conversion and quest effects remain future.
+State is **authoritative in a world-level ledger** (`world/city/CityLedger`, a `SavedData` map
+`settlementId → taint`), not derived from whichever chunks happen to be loaded. `CityDecay` advances
+it every 5 s while at least one player is online: taint grows towards `Fallen` (default 72,000 ticks
+for 0 → 1, i.e. ~33 min to the 0.55 fall line), the doom clock accelerates it, and the physical taint
+of the nine loaded district samples is folded in as a floor. `CityStates.stateOf` therefore answers
+for a city nobody is near, and a fallen city no longer reports `THRIVING` just because its chunks are
+unloaded. The ledger never loads a chunk.
+
+Following the board game (`Cities in Ruin`), a **Fallen** city is a **devastated place**, not a
+lair: it keeps its ruins, loses its services, drains sanity and is taken over by the Hollow Choir.
+Ancient Ones stay world-level threats — they are not spawned into or parked in a city. The physical
+layer is materialised lazily in loaded chunks by `CityRuins`: each chunk records the stage it has
+been upgraded to, and at most ~30% of its natural surface columns are converted to
+`tainted_soil`/`corrupt_stone` (plus rubble at the fallen stage). Authored buildings, roads and walls
+are not in the allow-list, so they survive — the city is damaged, never erased to air. A player
+standing in a Fallen district takes `sanityFallenCityRate` (default −0.12/s, stronger near the
+centre), and `CityPopulation` stops topping up villagers there.
+
+The `reclaim_city` rite cleans the loaded district, drops the ledger to the freshly sampled taint and
+starts a grace period (`cityReclaimGraceTicks`) before decay resumes. `CityStateDiscovery` still
+records the state for the world map. Card-style Devastation Encounters are future; the sanity drain
+and the Choir presence are their current stand-in.
 
 ## Relation to factions
 
@@ -142,4 +155,5 @@ structure itself does not need to change unless it Falls (then it is corrupted/a
 
 - Whether the ~3,000 non-curated real places become **generic towns, ruins, or nothing**.
 - Whether a **city can be reclaimed** after it Falls (an expensive rite / quest).
-- Whether towns far from a player's travel ever simulate, or only when visited.
+- Whether towns far from a player's travel ever simulate, or only when visited. (Cities now do: the
+  `CityLedger` advances them abstractly; towns still do not.)

@@ -39,7 +39,10 @@ import com.sanchous98.eldritchhorror.rite.RiteEngine;
 import com.sanchous98.eldritchhorror.rite.RiteKnowledge;
 import com.sanchous98.eldritchhorror.rite.Rites;
 import com.sanchous98.eldritchhorror.sanity.SanitySystem;
+import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.CityFallShock;
+import com.sanchous98.eldritchhorror.world.city.CityLedger;
 import com.sanchous98.eldritchhorror.world.city.CityState;
 import com.sanchous98.eldritchhorror.world.city.CityStates;
 import com.sanchous98.eldritchhorror.world.ward.WardLedger;
@@ -236,7 +239,13 @@ public final class EldritchCommands {
         // Debug travel to the starting city (respawn handles the normal case).
         eh.then(Commands.literal("home").requires(GAMEMASTER).executes(EldritchCommands::goHome));
         // Debug: report the nearest curated city's condition (derived from district taint).
-        eh.then(Commands.literal("city").executes(EldritchCommands::cityState));
+        eh.then(Commands.literal("city")
+                .executes(EldritchCommands::cityState)
+                .then(Commands.literal("taint")
+                        .requires(GAMEMASTER)
+                        .then(Commands.argument("city", StringArgumentType.word())
+                                .then(Commands.argument("value", DoubleArgumentType.doubleArg(0.0, 1.0))
+                                        .executes(EldritchCommands::setCityTaint)))));
         // Debug: reset the one-time prologue and return to the Threshold.
         eh.then(Commands.literal("prologue")
                 .then(Commands.literal("reset").requires(GAMEMASTER)
@@ -681,8 +690,35 @@ public final class EldritchCommands {
     }
 
     /** {@code /eh city}: report the nearest curated city and its corruption-driven state. */
-    private static int cityState(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
+    /** {@code /eh city taint <id> <0..1>}: test/admin override of the authoritative city taint. */
+    private static int setCityTaint(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "city");
+        double value = DoubleArgumentType.getDouble(ctx, "value");
+        City found = null;
+        for (City candidate : Cities.all()) {
+            if (candidate.id().equalsIgnoreCase(name) || candidate.name().equalsIgnoreCase(name)) {
+                found = candidate;
+                break;
+            }
+        }
+        if (found == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown city: " + name));
+            return 0;
+        }
+        City city = found;
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        CityState before = CityStates.stateOf(level, city);
+        CityLedger.of(level).setTaint(city, value, level.getGameTime());
+        CityState state = CityStates.stateOf(level, city);
+        if (before != CityState.FALLEN && state == CityState.FALLEN) {
+            CityFallShock.apply(level, city);
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                city.name() + ": taint " + value + " -> " + state), true);
+        return 1;
+    }
+
+    private static int cityState(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {        ServerPlayer player = ctx.getSource().getPlayerOrException();
         if (!(player.level() instanceof ServerLevel level)) {
             ctx.getSource().sendFailure(Component.literal("Not in a server level."));
             return 0;

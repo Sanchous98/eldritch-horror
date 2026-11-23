@@ -26,8 +26,21 @@ public class BotPlayer extends ServerPlayer {
     private final BotConnection botConnection = new BotConnection();
 
     public BotPlayer(MinecraftServer server, ServerLevel level, GameProfile profile) {
-        super(server, level, profile, ClientInformation.createDefault());
+        super(server, level, profile, makeClientInformation());
         this.connection = new BotListener(server, this, this.botConnection);
+    }
+
+    /**
+     * Bots start with the vanilla default ({@code viewDistance=2}), which makes them load almost no
+     * chunks and understates the real player load. {@code -Deh.bot.view-distance=<2..32>} lets a
+     * load test make them request the same radius as a real client (32 is the client maximum).
+     */
+    private static ClientInformation makeClientInformation() {
+        ClientInformation base = ClientInformation.createDefault();
+        int view = Math.clamp(Integer.getInteger("eh.bot.view-distance", 2), 2, 32);
+        return new ClientInformation(base.language(), view, base.chatVisibility(), base.chatColors(),
+                base.modelCustomisation(), base.mainHand(), base.textFilteringEnabled(),
+                base.allowsListing(), base.particleStatus());
     }
 
     /** The discarding connection this bot's server listener is bound to. */

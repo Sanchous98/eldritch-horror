@@ -67,6 +67,8 @@ public final class CityReclaim {
         int radius = new CityLocation(city).radius();
         int chunks = cleanseDistrict(level, city, radius);
         int purged = purgeChoir(level, city, radius);
+        CityLedger.of(level).onReclaim(city, CityStates.sampledTaint(level, city),
+                level.getGameTime());
         CityState after = CityStates.stateOf(level, city);
 
         level.playSound(null, city.x(), level.getSeaLevel(), city.z(), ModSounds.RITUAL_HUM.get(),

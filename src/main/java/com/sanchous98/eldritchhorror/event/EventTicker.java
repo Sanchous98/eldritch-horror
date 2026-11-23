@@ -5,6 +5,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
 import com.sanchous98.eldritchhorror.corruption.CorruptionState;
 import com.sanchous98.eldritchhorror.corruption.CorruptionSystem;
+import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,6 +98,30 @@ public final class EventTicker {
         if (tick % interval == 0) {
             evaluate(event.getServer(), tick);
         }
+        // Keep the journal mirror fresh once a second (elapsed labels change every second).
+        if (tick % 20 == 0) {
+            for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+                refreshActive(player, tick);
+            }
+        }
+    }
+
+    /** Mirrors this player's running events to the owner-synced attachment (active-events journal). */
+    private static void refreshActive(ServerPlayer player, int tick) {
+        Map<String, Active> map = ACTIVE.get(player.getUUID());
+        List<String> active;
+        if (map == null || map.isEmpty()) {
+            active = List.of();
+        } else {
+            active = new ArrayList<>();
+            for (Active running : map.values()) {
+                int remaining = Math.max(0, (running.endTick - tick + 19) / 20);
+                active.add(running.event.id() + "@" + remaining + "s");
+            }
+        }
+        if (!active.equals(player.getData(ModAttachments.ACTIVE_EVENTS.get()))) {
+            player.setData(ModAttachments.ACTIVE_EVENTS.get(), List.copyOf(active));
+        }
     }
 
     /** Drop all state when a player leaves, so a rejoin starts clean. */
@@ -105,6 +130,7 @@ public final class EventTicker {
         if (event.getEntity() instanceof ServerPlayer player) {
             ACTIVE.remove(player.getUUID());
             COOLDOWN.remove(player.getUUID());
+            player.setData(ModAttachments.ACTIVE_EVENTS.get(), List.of());
         }
     }
 

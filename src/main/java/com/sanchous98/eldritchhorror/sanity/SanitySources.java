@@ -5,6 +5,7 @@ import com.sanchous98.eldritchhorror.registry.items.CarriedItems;
 import com.sanchous98.eldritchhorror.world.BoundaryTravel;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.CityState;
 import com.sanchous98.eldritchhorror.world.city.CityStates;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
 import com.sanchous98.eldritchhorror.world.town.Town;
@@ -58,6 +59,7 @@ public final class SanitySources {
             register(new DarknessSource());
             register(new CitySource());
             register(new TownSource());
+            register(new CompanionSource());
             register(new MorokSource());
             initialised = true;
         }
@@ -200,8 +202,58 @@ public final class SanitySources {
             // A corrupted city shelters the mind less: scale recovery by the city's state
             // (Thriving → Fallen; design/21). Derived from loaded-chunk taint, never force-loaded.
             City city = CityStates.nearestCity(ctx.level(), player.blockPosition());
-            double shelter = city == null ? 1.0 : CityStates.stateOf(ctx.level(), city).recoveryMultiplier();
-            return ModConfig.SANITY_CITY_RATE.get() * shelter;
+            if (city == null) {
+                return 0.0;
+            }
+            CityState state = CityStates.stateOf(ctx.level(), city);
+            if (state == CityState.FALLEN && ModConfig.ENABLE_SANITY_FALLEN_CITY.get()) {
+                double radius = Math.max(1.0, new CityLocation(city).radius());
+                double dx = player.getX() - city.x();
+                double dz = player.getZ() - city.z();
+                double closeness = 1.0
+                        - 0.5 * Math.min(1.0, Math.sqrt(dx * dx + dz * dz) / radius);
+                return ModConfig.SANITY_FALLEN_CITY_RATE.get() * closeness;
+            }
+            return ModConfig.SANITY_CITY_RATE.get() * state.recoveryMultiplier();
+        }
+    }
+
+    /**
+     * <b>Companion</b>: a lucid friend steadies the mind. While another player within
+     * {@code sanityCompanionRadius} has at least {@code sanityCompanionMinSanity} of their meter,
+     * the player recovers {@code sanityCompanionRate} per second. Two fraying players cannot steady
+     * each other (both sit below the threshold). This is not an anchor: phantoms still spawn, the
+     * companion only sees the warning and can tell the player.
+     */
+    private static final class CompanionSource implements SanitySource {
+        @Override
+        public String id() {
+            return "companion";
+        }
+
+        @Override
+        public double deltaPerSecond(ServerPlayer player, SanityContext ctx) {
+            if (!ModConfig.ENABLE_SANITY_COMPANION.get()) {
+                return 0.0;
+            }
+            if (!ctx.level().dimension().equals(Level.OVERWORLD)) {
+                return 0.0;
+            }
+            double radius = ModConfig.SANITY_COMPANION_RADIUS.get();
+            double minimum = ModConfig.SANITY_COMPANION_MIN_SANITY.get();
+            for (ServerPlayer other : ctx.level().players()) {
+                if (other == player || other.level() != player.level()) {
+                    continue;
+                }
+                if (other.distanceToSqr(player) > radius * radius) {
+                    continue;
+                }
+                double max = SanitySystem.max(other);
+                if (max > 0.0 && SanitySystem.get(other) / max >= minimum) {
+                    return ModConfig.SANITY_COMPANION_RATE.get();
+                }
+            }
+            return 0.0;
         }
     }
 

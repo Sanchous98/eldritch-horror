@@ -3089,6 +3089,155 @@ public final class ModConfig {
             BUILDER.comment("Maximum simultaneously active consists.")
                     .defineInRange("maxTrains", 8, 1, 16);
 
+    // --- City decay, ruins and occupation (design/21) ---------------------------------------
+    // A curated city no longer needs a player standing in it to get worse. The world-level
+    // CityLedger advances every 5 s while at least one player is online; doom accelerates it, and
+    // a reclaim buys a grace period. The physical layer (taint, ruins) is materialised only in
+    // loaded chunks, so nothing is force-loaded.
+
+    /** Master switch for the abstract city decay. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_DECAY =
+            BUILDER.comment("Advance city decay in the background while players are online.")
+                    .define("enableCityDecay", true);
+
+    /** Ticks for a city's abstract taint to travel from 0 to 1 (Fallen at 0.55 by default). */
+    public static final ModConfigSpec.IntValue CITY_DECAY_TICKS =
+            BUILDER.comment("Ticks for city taint to go 0 -> 1 (Fallen is 0.55 by default).")
+                    .defineInRange("cityDecayTicks", 72000, 1200, 2000000);
+
+    /** Extra multiplier at doom 100: {@code 1 + boost}. */
+    public static final ModConfigSpec.DoubleValue CITY_DECAY_DOOM_BOOST =
+            BUILDER.comment("Additional decay speed at doom 100 (1.0 = twice as fast).")
+                    .defineInRange("cityDecayDoomBoost", 2.0, 0.0, 10.0);
+
+    /** After a reclaim, no abstract decay for this long. */
+    public static final ModConfigSpec.IntValue CITY_RECLAIM_GRACE_TICKS =
+            BUILDER.comment("Ticks of quiet after a reclaim before decay resumes.")
+                    .defineInRange("cityReclaimGraceTicks", 12000, 0, 240000);
+
+    /** Master switch for ruin materialisation in loaded chunks. */
+    public static final ModConfigSpec.BooleanValue ENABLE_CITY_RUINS =
+            BUILDER.comment("Turn districts into partial ruins as their state worsens.")
+                    .define("enableCityRuins", true);
+
+    /** Chunks upgraded per tick per pass; keeps the block work off the tick budget. */
+    public static final ModConfigSpec.IntValue CITY_RUINS_CHUNKS_PER_TICK =
+            BUILDER.comment("Loaded chunks upgraded to the current ruin stage per tick.")
+                    .defineInRange("cityRuinsChunksPerTick", 2, 1, 16);
+
+    /** Master switch for the fallen-city sanity drain. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_FALLEN_CITY =
+            BUILDER.comment("Enable the fallen-city sanity drain (visiting a ruined city hurts).")
+                    .define("enableSanityFallenCity", true);
+
+    /** Sanity change per second inside a fallen city; negative drains. */
+    public static final ModConfigSpec.DoubleValue SANITY_FALLEN_CITY_RATE =
+            BUILDER.comment("Sanity change per second inside a Fallen city (negative drains).")
+                    .defineInRange("sanityFallenCityRate", -0.12, -10.0, 0.0);
+
+    // --- Madness episodes (design/27: effects on the band transition) ------------------------
+
+    /** Master switch for hallucinations/fugue/compulsion episodes. */
+    public static final ModConfigSpec.BooleanValue ENABLE_MADNESS_EPISODES =
+            BUILDER.comment("Worsening a sanity band triggers a madness episode.")
+                    .define("enableMadnessEpisodes", true);
+
+    /** Minimum ticks between episodes for one player (a multi-band drop still triggers one). */
+    public static final ModConfigSpec.IntValue MADNESS_EPISODE_COOLDOWN =
+            BUILDER.comment("Ticks between madness episodes for one player.")
+                    .defineInRange("madnessEpisodeCooldown", 1200, 0, 24000);
+
+    /** At Marked, hallucinations recur this often until sanity is restored. */
+    public static final ModConfigSpec.IntValue MADNESS_MARKED_INTERVAL =
+            BUILDER.comment("Ticks between recurring hallucinations at zero sanity.")
+                    .defineInRange("madnessMarkedInterval", 2400, 200, 24000);
+
+    /** How long a phantom mob stays before fading on its own. */
+    public static final ModConfigSpec.IntValue MADNESS_ILLUSION_LIFETIME =
+            BUILDER.comment("Ticks a phantom mob exists before it fades.")
+                    .defineInRange("madnessIllusionLifetime", 600, 100, 6000);
+
+    /** Sanity lost when a phantom hits the player (no health damage). */
+    public static final ModConfigSpec.DoubleValue MADNESS_ILLUSION_SANITY_COST =
+            BUILDER.comment("Sanity lost per phantom hit (health damage is cancelled).")
+                    .defineInRange("madnessIllusionSanityCost", 2.0, 0.0, 20.0);
+
+    /** Sanity recovered when the player kills a phantom and realises it was not real. */
+    public static final ModConfigSpec.DoubleValue MADNESS_ILLUSION_REWARD =
+            BUILDER.comment("Sanity recovered when a phantom is destroyed by the player.")
+                    .defineInRange("madnessIllusionReward", 1.0, 0.0, 20.0);
+
+    /** Companions within this radius notice another player's phantoms (they are not suppressed). */
+    public static final ModConfigSpec.IntValue MADNESS_WITNESS_RADIUS =
+            BUILDER.comment("Radius in which a sane player notices someone else's phantom.")
+                    .defineInRange("madnessWitnessRadius", 12, 4, 32);
+
+    /** Minimum sanity fraction for a companion to notice (and be able to warn about) a phantom. */
+    public static final ModConfigSpec.DoubleValue MADNESS_WITNESS_MIN_SANITY =
+            BUILDER.comment("Minimum sanity fraction (0..1) for a companion to notice a phantom.")
+                    .defineInRange("madnessWitnessMinSanity", 0.5, 0.0, 1.0);
+
+    // --- Companion recovery (sanity) -------------------------------------------------------
+
+    /** Master switch for sanity recovery near a lucid companion. */
+    public static final ModConfigSpec.BooleanValue ENABLE_SANITY_COMPANION =
+            BUILDER.comment("A lucid companion nearby slowly restores sanity.")
+                    .define("enableSanityCompanion", true);
+
+    /** Sanity per second recovered near a lucid companion. */
+    public static final ModConfigSpec.DoubleValue SANITY_COMPANION_RATE =
+            BUILDER.comment("Sanity recovered per second near a lucid companion (positive recovers).")
+                    .defineInRange("sanityCompanionRate", 0.05, 0.0, 10.0);
+
+    /** Radius in which a companion can steady another player. */
+    public static final ModConfigSpec.IntValue SANITY_COMPANION_RADIUS =
+            BUILDER.comment("Radius in which a lucid companion steadies another player.")
+                    .defineInRange("sanityCompanionRadius", 8, 2, 32);
+
+    /** Minimum sanity fraction for a companion to steady another player. */
+    public static final ModConfigSpec.DoubleValue SANITY_COMPANION_MIN_SANITY =
+            BUILDER.comment("Minimum sanity fraction (0..1) for a companion to steady another player.")
+                    .defineInRange("sanityCompanionMinSanity", 0.5, 0.0, 1.0);
+
+    /** One-time sanity hit for players inside the district at the moment it falls. */
+    public static final ModConfigSpec.DoubleValue CITY_FALL_SANITY_SHOCK =
+            BUILDER.comment("Sanity lost once when a city falls while the player is inside it.")
+                    .defineInRange("cityFallSanityShock", 25.0, 0.0, 100.0);
+
+    // --- Boss escape (design/21) ------------------------------------------------------------
+
+    /** Master switch for the sanity penalty on abandoning a city boss fight. */
+    public static final ModConfigSpec.BooleanValue ENABLE_BOSS_ESCAPE_PENALTY =
+            BUILDER.comment("Leaving a city district during an Ancient One fight costs sanity.")
+                    .define("enableBossEscapePenalty", true);
+
+    /** Sanity lost when a city boss fight is abandoned. */
+    public static final ModConfigSpec.DoubleValue BOSS_ESCAPE_SANITY =
+            BUILDER.comment("Sanity lost when the player abandons a city boss fight.")
+                    .defineInRange("bossEscapeSanity", 15.0, 0.0, 100.0);
+
+    /** Ticks before the same player can be penalised for abandoning again. */
+    public static final ModConfigSpec.IntValue BOSS_ESCAPE_COOLDOWN =
+            BUILDER.comment("Ticks before another boss-escape penalty can trigger for one player.")
+                    .defineInRange("bossEscapeCooldown", 6000, 0, 240000);
+
+    // --- Boss reward (design/27) ------------------------------------------------------------
+
+    /** Sanity recovered by players who actually damaged the Ancient One when it dies. */
+    public static final ModConfigSpec.DoubleValue BOSS_KILL_SANITY_REWARD =
+            BUILDER.comment("Sanity recovered by direct combatants when an Ancient One is killed.")
+                    .defineInRange("bossKillSanityReward", 25.0, 0.0, 100.0);
+
+    /** Sanity recovered by everyone else (cultists get nothing) when an Ancient One dies. */
+    public static final ModConfigSpec.DoubleValue BOSS_KILL_AMBIENT_SANITY =
+            BUILDER.comment("Sanity recovered by non-combatants (except cultists) on a boss kill.")
+                    .defineInRange("bossKillAmbientSanity", 5.0, 0.0, 100.0);
+
+    /** Ticks within which damage counts as participation in the kill. */
+    public static final ModConfigSpec.IntValue BOSS_CONTRIBUTION_WINDOW =
+            BUILDER.comment("Ticks within which damage to a boss counts as participation.")
+                    .defineInRange("bossContributionWindow", 12000, 200, 240000);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ModConfig() {

@@ -48,6 +48,28 @@ Horror, not a port**: no rounds, dice, decks or tokens.
   tome-burst, rite-cost, **Morok**.
 - Recovery: daylight, settlement aura, sleep, wards, Order services.
 - **Corruption suppresses recovery** (read via `CorruptionAPI`).
+- **Madness episodes (2026-11):** a downward band change triggers one episode (per-player cooldown).
+  *Hallucination* spawns one or two phantom mobs drawn from the biome's own monster spawn list;
+  they look real, chase, and must be fought (real health, no drops/XP), but their hits are cancelled
+  into a sanity cost instead of health damage; killing one pops it with a small relief. *Fugue* is
+  blindness/nausea plus an 8–16 block involuntary step. *Compulsion* drops the held stack and adds
+  weakness/mining fatigue. At `Marked`, hallucinations recur until sanity recovers. A nearby
+  companion with a high sanity fraction acts as an **anchor**: no new phantoms, existing ones
+  dissolve, and both players are slowed while the afflicted stays below Fraying — the squad pays in
+  pace for clarity. No state is persisted across restarts.
+- **Active-events journal (2026-11):** the running events are mirrored to the owner-synced
+  `ACTIVE_EVENTS` attachment once a second and shown in `ActiveEventsScreen` (key V), with name,
+  flavour line and time remaining.
+- **Idea — madness as insight (not implemented, 2026-11):** give low sanity a deliberate upside so
+  it becomes a choice rather than only a penalty. At Fraying+ the player occasionally receives
+  *true* hidden information (nearest rift/site, a city's real state, which nearby shape is a
+  phantom, an Ancient One's weakness), more often at Marked, with a chance the whisper lies. Pairs
+  with the sane-companion role: the companion sees reality, the mad see what is hidden. Keep
+  hallucinations and the resource cost so the trade stays dangerous.
+- **Boss kill reward (2026-11):** an Ancient One's death restores sanity — the full amount to every
+  player who damaged it within `bossContributionWindow`, a small amount to everyone else online,
+  and nothing to cultists (any cult at `INITIATE`+). Counterweight to the madness cost and the
+  boss-escape penalty.
 
 ## Corruption (`03b`, `24`)
 

@@ -26,8 +26,9 @@ public final class UiKeyHandler {
         KeyMapping journal = MapKeyMappings.openJournal;
         KeyMapping codex = MapKeyMappings.openCodex;
         KeyMapping skills = MapKeyMappings.openSkills;
+        KeyMapping events = MapKeyMappings.openEvents;
         if (minecraft.player == null || minecraft.gui.screen() != null
-                || journal == null || codex == null || skills == null) {
+                || journal == null || codex == null || skills == null || events == null) {
             return;
         }
         if (journal.consumeClick()) {
@@ -36,6 +37,8 @@ public final class UiKeyHandler {
             minecraft.gui.setScreen(new CodexScreen());
         } else if (skills.consumeClick()) {
             minecraft.gui.setScreen(new SkillScreen());
+        } else if (events.consumeClick()) {
+            minecraft.gui.setScreen(new ActiveEventsScreen());
         }
     }
 }
