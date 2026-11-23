@@ -1,14 +1,21 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -136,6 +143,44 @@ public final class Hydra extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("acid_spit")
+                        .cooldown(120)
+                        .telegraph(20)
+                        .range(24.0)
+                        .warning("Acid spit — move!")
+                        .sound(SoundEvents.SHULKER_SHOOT)
+                        .onlyWhen((boss, level, target) -> boss.hasLineOfSight(target))
+                        .onTelegraph((boss, level, target, ticksLeft) -> BossAbilities.line(level,
+                                boss.getEyePosition(), target.getEyePosition(), ParticleTypes.ITEM_SLIME, 8))
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.line(level, boss.getEyePosition(), target.getEyePosition(),
+                                    ParticleTypes.ITEM_SLIME, 10);
+                            BossAbilities.hit(boss, level, target, 7.0F);
+                            BossAbilities.venom(target, 80, 0);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("many_heads")
+                        .cooldown(160)
+                        .telegraph(22)
+                        .range(10.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Heads strike from every side!")
+                        .sound(SoundEvents.SPIDER_HURT)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.CRIT, 5))
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 8.0, 75.0, player -> {
+                            BossAbilities.hit(boss, level, player, 8.0F);
+                            BossAbilities.effect(player, MobEffects.WEAKNESS, 60, 0);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -156,11 +201,5 @@ public final class Hydra extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 90;
-    }
-
-    /** Escalates at low health only; the world state is the heads it has budded. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

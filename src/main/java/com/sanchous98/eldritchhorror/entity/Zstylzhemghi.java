@@ -1,12 +1,19 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -77,6 +84,42 @@ public final class Zstylzhemghi extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("erosion")
+                        .cooldown(140)
+                        .telegraph(20)
+                        .range(12.0)
+                        .warning("The world erodes — move!")
+                        .sound(SoundEvents.ENDERMAN_SCREAM)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.WARPED_SPORE, 4);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.INFESTED, 3, 0.9);
+                        })
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
+                            BossAbilities.effect(player, MobEffects.WITHER, 80, 0);
+                            BossAbilities.effect(player, MobEffects.WEAKNESS, 100, 0);
+                            BossAbilities.hit(boss, level, player, 4.0F);
+                        }))
+                        .build(),
+                SimpleBossAbility.builder("vermin_call")
+                        .cooldown(160)
+                        .telegraph(22)
+                        .range(20.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Vermin answer the name — clear them out!")
+                        .sound(SoundEvents.ENDERMAN_SCREAM)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.INFESTED, 5))
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.LESSER_SWARM.get(), 2, target))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -103,10 +146,5 @@ public final class Zstylzhemghi extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 180;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

@@ -1,7 +1,12 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,6 +14,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -96,6 +102,45 @@ public final class IthaqualShade extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("killing_frost")
+                        .cooldown(130)
+                        .telegraph(20)
+                        .range(12.0)
+                        .warning("Killing frost — keep moving!")
+                        .sound(SoundEvents.SNOW_GOLEM_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 4, 1.0);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SNOWFLAKE, 3);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.freeze(target, 100);
+                            BossAbilities.effect(target, MobEffects.WEAKNESS, 80, 0);
+                            BossAbilities.hit(boss, level, target, 4.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("whiteout")
+                        .cooldown(150)
+                        .telegraph(22)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Whiteout — get out of the wind!")
+                        .sound(SoundEvents.WARDEN_SONIC_CHARGE)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.SNOWFLAKE, 5))
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 10.0, 70.0, player -> {
+                            BossAbilities.knockAway(boss, player, 0.9, 0.3);
+                            BossAbilities.effect(player, MobEffects.BLINDNESS, 80, 0);
+                            BossAbilities.hit(boss, level, player, 4.0F);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence --------------------------------------------------------------------------------
 
     @Override
@@ -123,12 +168,6 @@ public final class IthaqualShade extends AncientOne {
     public int getAmbientSoundInterval() {
         return 90;
     }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
-    }
-
     @Override
     protected void onPhaseChanged(ServerLevel level, Phase previous, Phase now) {
         if (now == Phase.ENRAGED) {

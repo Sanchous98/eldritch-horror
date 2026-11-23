@@ -1,14 +1,21 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -136,6 +143,47 @@ public final class Yig extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("serpents_curse")
+                        .cooldown(160)
+                        .telegraph(22)
+                        .range(14.0)
+                        .warning("Yig's curse coils around you — break the line!")
+                        .sound(SoundEvents.SPIDER_HURT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.ITEM_SLIME, 3, 0.9);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.WITCH, 3);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.venom(target, 160, 1);
+                            BossAbilities.hit(boss, level, target, 4.0F);
+                            boss.bossCombat().summon(level, ModEntities.RISEN_HUSK.get(), 1, target);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("ash_cloud")
+                        .cooldown(180)
+                        .telegraph(24)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("An ash cloud rises — move!")
+                        .sound(SoundEvents.BLAZE_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.ASH, 5, 1.3);
+                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.ASH, 12);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.WITHER, 100, 0);
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 4.0F);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -156,11 +204,5 @@ public final class Yig extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 100;
-    }
-
-    /** Escalates at low health only; the world state is the swarm it has drawn. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

@@ -1,14 +1,20 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -21,8 +27,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * ({@code design/28-ancient-ones.md}, roster ★2). It is fast and ambush-minded and, per the design,
  * <b>heard before it is seen</b>: a very loud, frequent ambient roar is its tell (its sound volume
  * is set high and it is near-continuous). Standing near it adds corruption and drains sanity; it
- * uses the fewer two-phase ladder (no middle band) — the "settlement it is eating" escalates at
- * low health only.
+ * uses the shared three-band phase ladder, so its ambush kit escalates at half health and again at
+ * the enrage threshold.
  *
  * <p>Bounded spawns near players in dark/tainted loaded terrain are in {@link AncientOneSpawner};
  * model reuse is the vanilla ravager.
@@ -47,16 +53,6 @@ public final class DunwichHorror extends AncientOne {
                 .add(Attributes.ARMOR, 2.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.5);
     }
-
-    /**
-     * Fewer phases: only the enrage band matters. Above the shared enrage threshold it stays
-     * DORMANT (never STIRRING), so the horror has a single escalation at low health.
-     */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
-    }
-
     @Override
     protected void onPhaseChanged(ServerLevel level, Phase previous, Phase now) {
         if (now == Phase.ENRAGED) {
@@ -70,6 +66,47 @@ public final class DunwichHorror extends AncientOne {
         if (kind == Solve.BANISHED) {
             this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 0.4F);
         }
+    }
+
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("unnatural_speed")
+                        .cooldown(150)
+                        .telegraph(24)
+                        .range(18.0)
+                        .warning("The Horror moves wrong — watch your back!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SMOKE, 5);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.CRIT, 3, 0.8);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.teleportBehind(boss, level, target);
+                            BossAbilities.effect(target, MobEffects.NAUSEA, 100, 0);
+                            BossAbilities.hit(boss, level, target, 9.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("wind_of_the_whateley")
+                        .cooldown(180)
+                        .telegraph(28)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The Whateley wind hits — brace!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.GUST, 4);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMOKE, 2, 1.0);
+                        })
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
+                            BossAbilities.knockAway(boss, player, 0.8, 0.3);
+                            BossAbilities.effect(player, MobEffects.NAUSEA, 120, 0);
+                            BossAbilities.hit(boss, level, player, 5.0F);
+                        }))
+                        .build()
+        );
     }
 
     // --- Corruption vector + presence -----------------------------------------------------------

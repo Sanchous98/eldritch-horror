@@ -1,12 +1,19 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -82,6 +89,45 @@ public final class Abhoth extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("birthing_filth")
+                        .cooldown(160)
+                        .telegraph(20)
+                        .range(20.0)
+                        .warning("The pool births filth — keep moving!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.ITEM_SLIME, 4);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 2, 1.0);
+                        })
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.SHAMBLER_OOZE.get(), 2, target))
+                        .build(),
+                SimpleBossAbility.builder("pool_surge")
+                        .cooldown(150)
+                        .telegraph(22)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The pool surges — step back!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SQUID_INK, 4, 1.0);
+                            BossAbilities.ring(level, target.position(), 3.0, ParticleTypes.BUBBLE, 10);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.pull(boss, target, 0.8, 0.15);
+                            BossAbilities.venom(target, 100, 0);
+                            BossAbilities.effect(target, MobEffects.NAUSEA, 120, 0);
+                            BossAbilities.hit(boss, level, target, 5.0F);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -108,10 +154,5 @@ public final class Abhoth extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 140;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

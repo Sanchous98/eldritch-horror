@@ -1,8 +1,13 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -11,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -217,6 +223,42 @@ public final class ChoirLeviathan extends AncientOne {
             husk.setPersistenceRequired();
             return;
         }
+    }
+
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("tide_sweep")
+                        .cooldown(160)
+                        .telegraph(26)
+                        .range(12.0)
+                        .warning("The tide sweeps — brace!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SPLASH, 4);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 3, 1.1);
+                        })
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
+                            BossAbilities.knockAway(boss, player, 1.0, 0.3);
+                            BossAbilities.effect(player, MobEffects.SLOWNESS, 100, 1);
+                            BossAbilities.hit(boss, level, player, 6.0F);
+                        }))
+                        .build(),
+                SimpleBossAbility.builder("choirs_answer")
+                        .cooldown(200)
+                        .telegraph(30)
+                        .range(24.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The Choir answers — the mourners rise!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.SOUL, 6))
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.WAIL_HUSK.get(), 1, target))
+                        .build()
+        );
     }
 
     // --- Aura: SANITY (the tide-song) ------------------------------------------------------------

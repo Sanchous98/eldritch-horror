@@ -1,12 +1,18 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -76,6 +82,46 @@ public final class Tulzscha extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("green_flare")
+                        .cooldown(130)
+                        .telegraph(20)
+                        .range(14.0)
+                        .warning("The green flame flares — step out!")
+                        .sound(SoundEvents.BLAZE_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SOUL_FIRE_FLAME, 4);
+                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SMALL_FLAME, 12);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 6.0F);
+                            for (var player : BossAbilities.playersAround(level, target.position(), 5.0)) {
+                                BossAbilities.burn(player, 4.0F);
+                            }
+                        })
+                        .build(),
+                SimpleBossAbility.builder("memory_burn")
+                        .cooldown(150)
+                        .telegraph(22)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Memory burns — look away!")
+                        .sound(SoundEvents.BLAZE_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphAt(level, target, ParticleTypes.SOUL_FIRE_FLAME, 4, 1.0))
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.NAUSEA, 120, 0);
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 4.0F);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -102,10 +148,5 @@ public final class Tulzscha extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 145;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

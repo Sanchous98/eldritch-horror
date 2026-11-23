@@ -1,12 +1,19 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -75,6 +82,48 @@ public final class Ithaqua extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("walking_wind")
+                        .cooldown(140)
+                        .telegraph(26)
+                        .range(14.0)
+                        .warning("The wind walks — get out of its path!")
+                        .sound(SoundEvents.WARDEN_SONIC_CHARGE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.GUST, 3);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 3, 0.8);
+                        })
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 65.0, player -> {
+                            BossAbilities.knockAway(boss, player, 0.9, 0.35);
+                            BossAbilities.effect(player, MobEffects.LEVITATION, 40, 0);
+                            BossAbilities.effect(player, MobEffects.SLOW_FALLING, 100, 0);
+                            BossAbilities.hit(boss, level, player, 6.0F);
+                        }))
+                        .build(),
+                SimpleBossAbility.builder("bitter_cold")
+                        .cooldown(170)
+                        .telegraph(28)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The cold takes your hands — move!")
+                        .sound(SoundEvents.SNOW_GOLEM_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 5, 1.4);
+                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SNOWFLAKE, 12);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.freezeAround(level, target.position(), 5.0, 140);
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.WEAKNESS, 120, 0);
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 5.0F);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -102,12 +151,6 @@ public final class Ithaqua extends AncientOne {
     public int getAmbientSoundInterval() {
         return 70;
     }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
-    }
-
     @Override
     protected void onPhaseChanged(ServerLevel level, Phase previous, Phase now) {
         if (now == Phase.ENRAGED) {

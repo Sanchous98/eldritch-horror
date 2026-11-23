@@ -1,12 +1,18 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -49,6 +55,12 @@ public final class YogSothoth extends AncientOne {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 
+    /** A major presence: the gate is an endgame-scale encounter. */
+    @Override
+    public boolean majorPresence() {
+        return true;
+    }
+
     // --- Aura: SANITY (a wide, patient drain) ---------------------------------------------------
 
     @Override
@@ -80,6 +92,64 @@ public final class YogSothoth extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("gate_step")
+                        .cooldown(190)
+                        .telegraph(30)
+                        .range(20.0)
+                        .warning("The gate opens beside you — move!")
+                        .sound(SoundEvents.ENDERMAN_SCREAM)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.PORTAL, 5, 1.2);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.REVERSE_PORTAL, 4);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.teleportBeside(boss, level, target);
+                            BossAbilities.hit(boss, level, target, 7.0F);
+                            BossAbilities.effect(target, MobEffects.SLOWNESS, 80, 1);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("key_and_gate")
+                        .cooldown(200)
+                        .telegraph(34)
+                        .range(18.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The gate draws you in — break away!")
+                        .sound(SoundEvents.ENDERMAN_SCREAM)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.END_ROD, 4, 1.2);
+                            BossAbilities.ring(level, target.position(), 3.0, ParticleTypes.PORTAL, 12);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.pull(boss, target, 0.9, 0.2);
+                            BossAbilities.effect(target, MobEffects.LEVITATION, 60, 0);
+                            BossAbilities.hit(boss, level, target, 6.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("the_gate_opens")
+                        .cooldown(260)
+                        .telegraph(44)
+                        .range(16.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("Yog-Sothoth opens — get clear!")
+                        .sound(SoundEvents.WARDEN_SONIC_BOOM)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.ring(level, target.position(), 7.0, ParticleTypes.REVERSE_PORTAL, 20);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.END_ROD, 6);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 7.0, 10.0F);
+                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.WITHER, 120, 0);
+                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.BLINDNESS, 100, 0);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -105,11 +175,5 @@ public final class YogSothoth extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 180;
-    }
-
-    /** The gate endures; it does not gain a world-driven phase. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return Phase.DORMANT;
     }
 }

@@ -1,12 +1,18 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -75,6 +81,46 @@ public final class Nyogtha extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("tendrils_from_below")
+                        .cooldown(160)
+                        .telegraph(28)
+                        .range(14.0)
+                        .warning("Tendrils rise from below — move!")
+                        .sound(SoundEvents.WARDEN_SONIC_CHARGE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SQUID_INK, 4, 1.0);
+                            BossAbilities.ring(level, target.position(), 2.5, ParticleTypes.SCULK_SOUL, 10);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            target.push(0.0, -0.8, 0.0);
+                            BossAbilities.effect(target, MobEffects.DARKNESS, 100, 0);
+                            BossAbilities.effect(target, MobEffects.SLOWNESS, 100, 1);
+                            BossAbilities.hit(boss, level, target, 5.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("black_ichor")
+                        .cooldown(180)
+                        .telegraph(30)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Black ichor sprays — get out of the cone!")
+                        .sound(SoundEvents.WARDEN_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.SQUID_INK, 5))
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
+                            BossAbilities.venom(player, 120, 0);
+                            BossAbilities.effect(player, MobEffects.WITHER, 100, 0);
+                            BossAbilities.hit(boss, level, player, 5.0F);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -101,10 +147,5 @@ public final class Nyogtha extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 60;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

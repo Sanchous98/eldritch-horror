@@ -1,12 +1,19 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -76,6 +83,41 @@ public final class AtlachNacha extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("web_snare")
+                        .cooldown(150)
+                        .telegraph(24)
+                        .range(14.0)
+                        .warning("The web tightens — cut free!")
+                        .sound(SoundEvents.SPIDER_HURT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.ITEM_COBWEB, 4, 1.0);
+                            BossAbilities.ring(level, target.position(), 2.5, ParticleTypes.ITEM_COBWEB, 10);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effect(target, MobEffects.SLOWNESS, 100, 3);
+                            BossAbilities.hit(boss, level, target, 5.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("brood_call")
+                        .cooldown(190)
+                        .telegraph(26)
+                        .range(20.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The brood descends — watch the ceiling!")
+                        .sound(SoundEvents.SPIDER_HURT)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.ITEM_COBWEB, 5))
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.WEAVER_SPAWN.get(), 2, target))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -96,11 +138,5 @@ public final class AtlachNacha extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 90;
-    }
-
-    /** Skitters about the scar; it does not gain a world-driven phase. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

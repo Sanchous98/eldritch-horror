@@ -24,6 +24,7 @@ import com.sanchous98.eldritchhorror.endgame.EndgameState;
 import com.sanchous98.eldritchhorror.endgame.DoomClock;
 import com.sanchous98.eldritchhorror.endgame.RiftLedger;
 import com.sanchous98.eldritchhorror.cult.Cults;
+import com.sanchous98.eldritchhorror.entity.AncientOne;
 import com.sanchous98.eldritchhorror.entity.BestiarySupport;
 import com.sanchous98.eldritchhorror.entity.Worshipper;
 import com.sanchous98.eldritchhorror.event.EldritchEvent;
@@ -49,7 +50,10 @@ import com.sanchous98.eldritchhorror.world.ward.WardLedger;
 import com.sanchous98.eldritchhorror.world.ward.WardMath;
 import com.sanchous98.eldritchhorror.world.rift.GateLinks;
 import com.sanchous98.eldritchhorror.world.rift.RiftGates;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -61,6 +65,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -91,6 +96,41 @@ public final class EldritchCommands {
      * loaded are ever seen, so this is a safety cap for pathological render distances.
      */
     private static final int MAX_SCAN_CHUNKS = 1024;
+
+    /**
+     * The boss ids accepted by {@code /eh boss}. Values are registry suppliers: the command tree
+     * never dereferences a holder (AGENTS: no {@code DeferredHolder.get()} in static init).
+     */
+    private static final Map<String, Supplier<? extends EntityType<? extends AncientOne>>> BOSSES =
+            bossTypes();
+
+    private static Map<String, Supplier<? extends EntityType<? extends AncientOne>>> bossTypes() {
+        Map<String, Supplier<? extends EntityType<? extends AncientOne>>> map = new LinkedHashMap<>();
+        map.put("abhoth", ModEntities.ABHOTH);
+        map.put("atlach_nacha", ModEntities.ATLACH_NACHA);
+        map.put("azathoth", ModEntities.AZATHOTH);
+        map.put("chaugnar_faugn", ModEntities.CHAUGNAR_FAUGN);
+        map.put("choir_leviathan", ModEntities.CHOIR_LEVIATHAN);
+        map.put("cthugha", ModEntities.CTHUGHA);
+        map.put("cthulhu", ModEntities.CTHULHU);
+        map.put("dunwich_horror", ModEntities.DUNWICH_HORROR);
+        map.put("glaaki", ModEntities.GLAAKI);
+        map.put("hastur", ModEntities.HASTUR);
+        map.put("hydra", ModEntities.HYDRA);
+        map.put("ithaqua", ModEntities.ITHAQUA);
+        map.put("ithaqual_shade", ModEntities.ITHAQUAL_SHADE);
+        map.put("nephren_ka", ModEntities.NEPHREN_KA);
+        map.put("nyarlathotep", ModEntities.NYARLATHOTEP);
+        map.put("nyogtha", ModEntities.NYOGTHA);
+        map.put("rhan_tegoth", ModEntities.RHAN_TEGOTH);
+        map.put("shub_niggurath", ModEntities.SHUB_NIGGURATH);
+        map.put("the_horror", ModEntities.THE_HORROR);
+        map.put("tulzscha", ModEntities.TULZSCHA);
+        map.put("yig", ModEntities.YIG);
+        map.put("yog_sothoth", ModEntities.YOG_SOTHOTH);
+        map.put("zstylzhemghi", ModEntities.ZSTYLZHEMGHI);
+        return java.util.Collections.unmodifiableMap(map);
+    }
 
     private EldritchCommands() {
     }
@@ -317,6 +357,13 @@ public final class EldritchCommands {
                                 .executes(EldritchCommands::spawnCultists))));
         // Server-side bot players for automated playtesting (dev-mode gated inside the handlers).
         eh.then(com.sanchous98.eldritchhorror.bot.BotCommands.node());
+        // Boss combat probe: list every Ancient One id, or summon one at the caller and print its
+        // telegraphed abilities (`docs/BOSS-COMBAT.md`).
+        eh.then(Commands.literal("boss")
+                .requires(GAMEMASTER)
+                .then(Commands.literal("list").executes(EldritchCommands::listBosses))
+                .then(Commands.argument("id", StringArgumentType.word())
+                        .executes(EldritchCommands::summonBoss)));
         dispatcher.register(eh);
     }
 
@@ -1260,6 +1307,46 @@ public final class EldritchCommands {
                                     () -> Component.literal(label + " = " + fmt(now)), true);
                             return 1;
                         }));
+    }
+
+    /** {@code /eh boss list}: every Ancient One the probe can summon. */
+    private static int listBosses(CommandContext<CommandSourceStack> ctx) {
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "boss ids: " + String.join(", ", BOSSES.keySet())), false);
+        return BOSSES.size();
+    }
+
+    /**
+     * {@code /eh boss <id>}: summons that Ancient One at the caller and prints its ability ids, so
+     * the telegraph/interrupt loop can be exercised without waiting for a spawn roll.
+     */
+    private static int summonBoss(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!ctx.getSource().permissions().hasPermission(
+                net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) {
+            ctx.getSource().sendFailure(Component.literal("Requires gamemaster permissions."));
+            return 0;
+        }
+        String id = StringArgumentType.getString(ctx, "id").toLowerCase(java.util.Locale.ROOT);
+        Supplier<? extends EntityType<? extends AncientOne>> holder = BOSSES.get(id);
+        if (holder == null) {
+            ctx.getSource().sendFailure(Component.literal(
+                    "Unknown boss '" + id + "'. Ids: " + String.join(", ", BOSSES.keySet())));
+            return 0;
+        }
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ServerLevel level = player.level();
+        AncientOne boss = holder.get().spawn(level, player.blockPosition(), EntitySpawnReason.COMMAND);
+        if (boss == null) {
+            ctx.getSource().sendFailure(Component.literal("Could not summon " + id + " here (no room)."));
+            return 0;
+        }
+        boss.setPersistenceRequired();
+        boss.setTarget(player);
+        List<String> abilities = boss.bossCombat().abilityIds();
+        ctx.getSource().sendSuccess(() -> Component.literal("Summoned " + id + " ("
+                + Math.round(boss.getMaxHealth()) + " HP). Telegraphed abilities: "
+                + String.join(", ", abilities)), true);
+        return 1;
     }
 
     private static String fmt(double v) {

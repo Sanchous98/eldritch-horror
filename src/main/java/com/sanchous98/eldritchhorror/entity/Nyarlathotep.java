@@ -1,13 +1,20 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -47,6 +54,12 @@ public final class Nyarlathotep extends AncientOne {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.4);
     }
 
+    /** A major presence: the thousand masks are a central encounter. */
+    @Override
+    public boolean majorPresence() {
+        return true;
+    }
+
     // --- Aura: SANITY (the betrayal lands when you look away) -----------------------------------
 
     @Override
@@ -84,6 +97,59 @@ public final class Nyarlathotep extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("false_face")
+                        .cooldown(170)
+                        .telegraph(26)
+                        .range(18.0)
+                        .warning("A trusted face turns — watch your back!")
+                        .sound(SoundEvents.ILLUSIONER_CAST_SPELL)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.PORTAL, 4, 1.0);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.WITCH, 3);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.teleportBehind(boss, level, target);
+                            BossAbilities.effect(target, MobEffects.NAUSEA, 100, 0);
+                            BossAbilities.hit(boss, level, target, 8.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("thousand_masks")
+                        .cooldown(200)
+                        .telegraph(30)
+                        .range(24.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("A thousand masks — do not trust them!")
+                        .sound(SoundEvents.ILLUSIONER_CAST_SPELL)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.PORTAL, 6))
+                        .onExecute((boss, level, target) -> {
+                            boss.bossCombat().summon(level, ModEntities.NIGHT_HAG.get(), 2, target);
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("betrayal")
+                        .cooldown(240)
+                        .telegraph(38)
+                        .range(14.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("The betrayal lands — get clear!")
+                        .sound(SoundEvents.ILLUSIONER_CAST_SPELL)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.ENCHANT, 6))
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 14.0, 70.0, player -> {
+                            BossAbilities.hit(boss, level, player, 9.0F);
+                            BossAbilities.effect(player, MobEffects.GLOWING, 200, 0);
+                            BossAbilities.effect(player, MobEffects.WEAKNESS, 100, 0);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -110,11 +176,5 @@ public final class Nyarlathotep extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 80;
-    }
-
-    /** Fewer bands: it betrays at low health only. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

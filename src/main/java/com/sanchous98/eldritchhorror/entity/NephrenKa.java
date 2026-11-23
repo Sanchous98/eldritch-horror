@@ -1,12 +1,18 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -76,6 +82,47 @@ public final class NephrenKa extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("pharaohs_curse")
+                        .cooldown(160)
+                        .telegraph(26)
+                        .range(14.0)
+                        .warning("The king remembers — break his gaze!")
+                        .sound(SoundEvents.HUSK_AMBIENT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.ASH, 4, 0.9);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SOUL, 4);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effect(target, MobEffects.WITHER, 100, 0);
+                            BossAbilities.effect(target, MobEffects.WEAKNESS, 120, 0);
+                            BossAbilities.hit(boss, level, target, 5.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("sandstorm")
+                        .cooldown(170)
+                        .telegraph(28)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("A sandstorm rises — move!")
+                        .sound(SoundEvents.HUSK_AMBIENT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.ASH, 6);
+                            BossAbilities.ring(level, boss.position(), 6.0, ParticleTypes.ASH, 14);
+                        })
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
+                            BossAbilities.knockAway(boss, player, 0.9, 0.3);
+                            BossAbilities.effect(player, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.hit(boss, level, player, 4.0F);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -102,10 +149,5 @@ public final class NephrenKa extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 150;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

@@ -2,10 +2,16 @@ package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.CorruptionAPI;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
 import com.sanchous98.eldritchhorror.sanity.SanityAPI;
 import com.sanchous98.eldritchhorror.world.ward.WardLedger;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +19,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -52,6 +59,12 @@ public final class ShubNiggurath extends AncientOne {
                 .add(Attributes.FOLLOW_RANGE, 48.0)
                 .add(Attributes.ARMOR, 10.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    /** A major presence: the Black Goat is a biome-scale encounter. */
+    @Override
+    public boolean majorPresence() {
+        return true;
     }
 
     // --- Aura (both axes; see class doc) --------------------------------------------------------
@@ -120,6 +133,60 @@ public final class ShubNiggurath extends AncientOne {
                 SanityAPI.add(player, ModConfig.SANITY_SHUB_NIGGURATH_STILL_RATE.get());
             }
         }
+    }
+
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("thousand_young")
+                        .cooldown(200)
+                        .telegraph(30)
+                        .range(24.0)
+                        .warning("The Black Goat's young are born — clear them out!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SPORE_BLOSSOM_AIR, 5);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.CRIMSON_SPORE, 3, 1.1);
+                        })
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.LESSER_SWARM.get(), 3, target))
+                        .build(),
+                SimpleBossAbility.builder("entangling_roots")
+                        .cooldown(190)
+                        .telegraph(32)
+                        .range(16.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Roots take your feet — break free!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SPORE_BLOSSOM_AIR, 14);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.WARPED_SPORE, 3, 0.9);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.SLOWNESS, 120, 3);
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 6.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("the_woods_breathe")
+                        .cooldown(240)
+                        .telegraph(38)
+                        .range(18.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("The woods breathe in — get clear!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.ring(level, target.position(), 6.5, ParticleTypes.SPORE_BLOSSOM_AIR, 18);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.ASH, 4, 1.4);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 7.0, 8.0F);
+                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.POISON, 120, 0);
+                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.NAUSEA, 140, 0);
+                        })
+                        .build()
+        );
     }
 
     // --- Presence -------------------------------------------------------------------------------

@@ -1,10 +1,17 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -92,6 +99,60 @@ public final class Glaaki extends AncientOne {
         return hurt;
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("drowned_grip")
+                        .cooldown(160)
+                        .telegraph(28)
+                        .range(16.0)
+                        .warning("Glaaki's servitors reach for you — move!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 3, 0.9);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SQUID_INK, 2);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.pull(boss, target, 0.9, 0.15);
+                            BossAbilities.brine(target, 100);
+                            BossAbilities.hit(boss, level, target, 6.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("servitors_call")
+                        .cooldown(220)
+                        .telegraph(30)
+                        .range(24.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The lake stirs — servitors are rising!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.BUBBLE, 5))
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.DROWNED_THRALL.get(), 2, target))
+                        .build(),
+                SimpleBossAbility.builder("lake_dream")
+                        .cooldown(240)
+                        .telegraph(36)
+                        .range(20.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("The dream closes over your eyes — break away!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.WITCH, 2, 1.2);
+                            BossAbilities.ring(level, target.position(), 3.0, ParticleTypes.SQUID_INK, 10);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 4.0, 5.0F);
+                            BossAbilities.effectAround(level, target.position(), 4.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(level, target.position(), 4.0, MobEffects.DARKNESS, 80, 0);
+                            BossAbilities.effectAround(level, target.position(), 4.0, MobEffects.NAUSEA, 160, 0);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -118,10 +179,5 @@ public final class Glaaki extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 120;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

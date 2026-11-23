@@ -1,11 +1,17 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
+import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -85,6 +91,48 @@ public final class Cthugha extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("flame_burst")
+                        .cooldown(140)
+                        .telegraph(20)
+                        .range(12.0)
+                        .warning("Cthugha flares — step out of the ring!")
+                        .sound(SoundEvents.BLAZE_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.FLAME, 4);
+                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SMALL_FLAME, 12);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 6.0F);
+                            for (var player : BossAbilities.playersAround(level, target.position(), 5.0)) {
+                                BossAbilities.burn(player, 4.0F);
+                            }
+                        })
+                        .build(),
+                SimpleBossAbility.builder("living_flame")
+                        .cooldown(180)
+                        .telegraph(22)
+                        .range(20.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Living flame spills from the fire!")
+                        .sound(SoundEvents.BLAZE_SHOOT)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.FLAME, 5);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMALL_FLAME, 3, 1.0);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            boss.bossCombat().summon(level, ModEntities.ASHEN_WISP.get(), 2, target);
+                            BossAbilities.burn(target, 3.0F);
+                            BossAbilities.hit(boss, level, target, 4.0F);
+                        })
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -111,11 +159,5 @@ public final class Cthugha extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 90;
-    }
-
-    /** It watches at low health only. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

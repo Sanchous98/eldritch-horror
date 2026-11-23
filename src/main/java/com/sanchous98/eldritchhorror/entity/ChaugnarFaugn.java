@@ -1,12 +1,18 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -77,6 +83,44 @@ public final class ChaugnarFaugn extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("feeding_trunk")
+                        .cooldown(140)
+                        .telegraph(20)
+                        .range(14.0)
+                        .warning("The trunk reaches for you — move!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMOKE, 3, 0.9);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.ITEM_SLIME, 3);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.pull(boss, target, 0.85, 0.1);
+                            BossAbilities.effect(target, MobEffects.HUNGER, 100, 0);
+                            BossAbilities.hit(boss, level, target, 5.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("gorging_slam")
+                        .cooldown(160)
+                        .telegraph(22)
+                        .range(12.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Chaugnar feeds — get out of reach!")
+                        .sound(SoundEvents.RAVAGER_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.LARGE_SMOKE, 5))
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 10.0, 70.0, player -> {
+                            BossAbilities.hit(boss, level, player, 7.0F);
+                            BossAbilities.effect(player, MobEffects.NAUSEA, 100, 0);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -103,10 +147,5 @@ public final class ChaugnarFaugn extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 160;
-    }
-
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }

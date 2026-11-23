@@ -3,13 +3,19 @@ package com.sanchous98.eldritchhorror.entity;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.corruption.TaintAPI;
 import com.sanchous98.eldritchhorror.endgame.Endgame;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModEntities;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -87,6 +93,12 @@ public final class TheHorror extends AncientOne {
                 .add(Attributes.FOLLOW_RANGE, 64.0)
                 .add(Attributes.ARMOR, 12.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    /** A major presence: the endgame itself. */
+    @Override
+    public boolean majorPresence() {
+        return true;
     }
 
     /**
@@ -172,6 +184,19 @@ public final class TheHorror extends AncientOne {
         return this.stage;
     }
 
+    /**
+     * The ability layer's phase gate rides the escalation, not health (the Horror is invulnerable):
+     * ATTENTION is DORMANT and NoAI, APPROACH is STIRRING, GRASP and DECISION are ENRAGED.
+     */
+    @Override
+    public Phase phaseFor(ServerLevel level, float healthFraction) {
+        return switch (this.stage) {
+            case ATTENTION -> Phase.DORMANT;
+            case APPROACH -> Phase.STIRRING;
+            case GRASP, DECISION -> Phase.ENRAGED;
+        };
+    }
+
     /** Attention: short nausea pulses for players inside the aura, on a slow cadence. */
     private void distort(ServerLevel level) {
         if (this.ageTicks % 100 != 0) {
@@ -232,6 +257,60 @@ public final class TheHorror extends AncientOne {
             }
         }
         return null;
+    }
+
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("reality_tear")
+                        .cooldown(200)
+                        .telegraph(32)
+                        .range(20.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Reality tears — move!")
+                        .sound(SoundEvents.WARDEN_SONIC_CHARGE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.ring(level, target.position(), 5.5, ParticleTypes.SCULK_SOUL, 16);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMOKE, 4, 1.2);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 6.0, 7.0F);
+                            BossAbilities.effectAround(level, target.position(), 6.0, MobEffects.DARKNESS, 100, 0);
+                            BossAbilities.effectAround(level, target.position(), 6.0, MobEffects.NAUSEA, 140, 0);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("answering_swarm")
+                        .cooldown(220)
+                        .telegraph(34)
+                        .range(24.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("Something answers — it is behind you!")
+                        .sound(SoundEvents.WARDEN_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.SCULK_SOUL, 6))
+                        .onExecute((boss, level, target) ->
+                                boss.bossCombat().summon(level, ModEntities.LESSER_SWARM.get(), 2, target))
+                        .build(),
+                SimpleBossAbility.builder("grasp")
+                        .cooldown(240)
+                        .telegraph(40)
+                        .range(16.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("It reaches for you — break away!")
+                        .sound(SoundEvents.WARDEN_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SCULK_SOUL, 5, 1.0);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SONIC_BOOM, 1);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.pull(boss, target, 1.0, 0.1);
+                            BossAbilities.hit(boss, level, target, 10.0F);
+                            BossAbilities.effect(target, MobEffects.SLOWNESS, 80, 3);
+                        })
+                        .build()
+        );
     }
 
     // --- Presence -------------------------------------------------------------------------------

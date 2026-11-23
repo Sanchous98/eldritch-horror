@@ -1,14 +1,20 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossCombat;
+import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -88,6 +94,8 @@ public abstract class AncientOne extends Monster implements DreadAura {
     private static final String TAG_SOLVE_UNTIL = "AncientOneSolveUntil";
 
     private final ServerBossEvent bossEvent;
+    /** The ability controller: wind-up -> interrupt -> execute -> recovery. See {@link BossCombat}. */
+    private final BossCombat combat;
     private Phase phase = Phase.DORMANT;
     /** How this presence has been solved without a kill; see {@link #solve}. */
     private Solve solve = Solve.NONE;
@@ -101,6 +109,44 @@ public abstract class AncientOne extends Monster implements DreadAura {
         // a bar, and the player's own display name when one is set.
         this.bossEvent = new ServerBossEvent(Mth.createInsecureUUID(this.random), title, color,
                 BossEvent.BossBarOverlay.PROGRESS);
+        this.combat = new BossCombat(this);
+    }
+
+    /** The ability controller; used by abilities that summon tracked minions. */
+    public final BossCombat bossCombat() {
+        return this.combat;
+    }
+
+    /**
+     * The abilities this boss can use, in declaration order. The default is none; every boss in the
+     * mod overrides it with two (three for the major presences).
+     */
+    protected List<BossAbility> abilities() {
+        return List.of();
+    }
+
+    /** Package-boundary bridge for {@link BossCombat}; keeps the subclass-facing method protected. */
+    public final List<BossAbility> abilityList() {
+        return this.abilities();
+    }
+
+    /**
+     * Whether this is a major presence (Cthulhu, Azathoth, Yog-Sothoth, Hastur, Nyarlathotep,
+     * Shub-Niggurath, The Horror). Major presences get the brief nausea sting on first sighting and
+     * the low-health dread pulse; the roaming and farm bosses only get the whisper and Darkness.
+     */
+    public boolean majorPresence() {
+        return false;
+    }
+
+    /** The deep sting used by the dread layer: the ambient, falling back to the hurt sound. */
+    public SoundEvent dreadSound() {
+        SoundEvent ambient = this.getAmbientSound();
+        if (ambient != null) {
+            return ambient;
+        }
+        SoundEvent hurt = this.getHurtSound(this.damageSources().generic());
+        return hurt != null ? hurt : SoundEvents.WARDEN_ROAR;
     }
 
     /** The bar, for subclasses that want to restyle it (colour/overlay set at construction). */
@@ -135,6 +181,9 @@ public abstract class AncientOne extends Monster implements DreadAura {
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
         this.updatePhase(level);
         super.customServerAiStep(level);
+        // Ability selection needs AI, so it lives in the AI step; stagger/summon maintenance lives in
+        // tick() because a staggered boss is deliberately NoAI for 40 ticks.
+        this.combat.tickAbilities(level);
     }
 
     @Override
@@ -143,8 +192,25 @@ public abstract class AncientOne extends Monster implements DreadAura {
         // Solve maintenance must run even while NoAI is set (which skips customServerAiStep), so it
         // lives here, server-side. A solved presence keeps its state until it lapses or is reloaded.
         if (!this.level().isClientSide()) {
-            this.tickSolve((ServerLevel) this.level());
+            ServerLevel level = (ServerLevel) this.level();
+            this.tickSolve(level);
+            this.combat.tickMaintenance(level);
         }
+    }
+
+    /**
+     * The interrupt loop: an in-progress wind-up is cancelled by enough player damage, and the
+     * stagger sets a short +25% vulnerability window. Applied before {@code super} so the extra
+     * damage is what the boss actually loses.
+     */
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+        float adjusted = damage * this.combat.damageTakenMultiplier();
+        boolean hurt = super.hurtServer(level, source, adjusted);
+        if (hurt) {
+            this.combat.onDamaged(level, source, adjusted);
+        }
+        return hurt;
     }
 
     /**

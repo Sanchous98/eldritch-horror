@@ -1,8 +1,13 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -10,6 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -51,6 +57,12 @@ public final class Cthulhu extends AncientOne {
                 .add(Attributes.FOLLOW_RANGE, 40.0)
                 .add(Attributes.ARMOR, 6.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8);
+    }
+
+    /** A major presence: the dream-leak is one of the mod's central encounters. */
+    @Override
+    public boolean majorPresence() {
+        return true;
     }
 
     /** Aquatic-strong: it does not drown in the flooded hall it owns. */
@@ -112,6 +124,65 @@ public final class Cthulhu extends AncientOne {
     @Override
     public double auraRadius() {
         return ModConfig.SANITY_CTHULHU_RADIUS.get();
+    }
+
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("brine_surge")
+                        .cooldown(180)
+                        .telegraph(30)
+                        .range(14.0)
+                        .warning("Brine surges — get out of the water's reach!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.SPLASH, 5);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 3, 1.1);
+                        })
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 14.0, 70.0, player -> {
+                            BossAbilities.knockAway(boss, player, 0.9, 0.25);
+                            BossAbilities.effect(player, MobEffects.SLOWNESS, 100, 1);
+                            BossAbilities.hit(boss, level, player, 6.0F);
+                        }))
+                        .build(),
+                SimpleBossAbility.builder("dream_grip")
+                        .cooldown(190)
+                        .telegraph(32)
+                        .range(16.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The dream grips you — move!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.SQUID_INK, 4, 1.0);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.BUBBLE, 3);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.pull(boss, target, 0.9, 0.15);
+                            BossAbilities.effect(target, MobEffects.NAUSEA, 160, 0);
+                            BossAbilities.effect(target, MobEffects.BLINDNESS, 80, 0);
+                            BossAbilities.hit(boss, level, target, 5.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("the_dreamer_wakes")
+                        .cooldown(240)
+                        .telegraph(40)
+                        .range(18.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("Cthulhu wakes — get clear of the dream!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.ring(level, target.position(), 6.0, ParticleTypes.SQUID_INK, 18);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.WITCH, 4, 1.4);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.damageAround(boss, level, target.position(), 7.0, 9.0F);
+                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.DARKNESS, 120, 0);
+                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.NAUSEA, 160, 0);
+                        })
+                        .build()
+        );
     }
 
     // --- Presence: fewer, louder sounds ---------------------------------------------------------

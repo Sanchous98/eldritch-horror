@@ -1,12 +1,18 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
+import com.sanchous98.eldritchhorror.entity.combat.SimpleBossAbility;
 import com.sanchous98.eldritchhorror.registry.ModSounds;
+import java.util.List;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -44,6 +50,12 @@ public final class Hastur extends AncientOne {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.5);
     }
 
+    /** A major presence: the spoken name is a court-scale encounter. */
+    @Override
+    public boolean majorPresence() {
+        return true;
+    }
+
     // --- Aura: SANITY (the name wants to be spoken) ---------------------------------------------
 
     @Override
@@ -77,6 +89,62 @@ public final class Hastur extends AncientOne {
         }
     }
 
+    // --- Abilities (BossCombat) -----------------------------------------------------------------
+
+    @Override
+    protected List<BossAbility> abilities() {
+        return List.of(
+                SimpleBossAbility.builder("the_name")
+                        .cooldown(190)
+                        .telegraph(32)
+                        .range(18.0)
+                        .warning("Do not say the name — look away!")
+                        .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.NOTE, 4, 1.0);
+                            BossAbilities.telegraphBurst(level, boss, ParticleTypes.ENCHANT, 4);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.NAUSEA, 120, 0);
+                            BossAbilities.damageAround(boss, level, target.position(), 5.0, 4.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("yellow_sign")
+                        .cooldown(200)
+                        .telegraph(34)
+                        .range(16.0)
+                        .minPhase(Phase.STIRRING)
+                        .warning("The Yellow Sign is shown — move!")
+                        .sound(SoundEvents.EVOKER_CAST_SPELL)
+                        .onTelegraph((boss, level, target, ticksLeft) -> {
+                            BossAbilities.ring(level, target.position(), 3.5, ParticleTypes.ENCHANT, 12);
+                            BossAbilities.telegraphAt(level, target, ParticleTypes.WITCH, 3, 1.0);
+                        })
+                        .onExecute((boss, level, target) -> {
+                            BossAbilities.effect(target, MobEffects.GLOWING, 160, 0);
+                            BossAbilities.effect(target, MobEffects.WEAKNESS, 120, 0);
+                            BossAbilities.hit(boss, level, target, 6.0F);
+                        })
+                        .build(),
+                SimpleBossAbility.builder("king_in_yellow")
+                        .cooldown(250)
+                        .telegraph(42)
+                        .range(14.0)
+                        .minPhase(Phase.ENRAGED)
+                        .warning("The King in Yellow speaks — get out of the court!")
+                        .sound(SoundEvents.WARDEN_ROAR)
+                        .onTelegraph((boss, level, target, ticksLeft) ->
+                                BossAbilities.telegraphBurst(level, boss, ParticleTypes.NOTE, 6))
+                        .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 14.0, 70.0, player -> {
+                            BossAbilities.hit(boss, level, player, 9.0F);
+                            BossAbilities.effect(player, MobEffects.WITHER, 120, 0);
+                            BossAbilities.effect(player, MobEffects.BLINDNESS, 60, 0);
+                        }))
+                        .build()
+        );
+    }
+
     // --- Presence -------------------------------------------------------------------------------
 
     @Override
@@ -104,11 +172,5 @@ public final class Hastur extends AncientOne {
     @Override
     public int getAmbientSoundInterval() {
         return 170;
-    }
-
-    /** The court stills to a two-band ladder: present, then the worst of it. */
-    @Override
-    public Phase phaseFor(ServerLevel level, float healthFraction) {
-        return healthFraction <= ModConfig.BOSS_ENRAGE_HEALTH.get() ? Phase.ENRAGED : Phase.DORMANT;
     }
 }
