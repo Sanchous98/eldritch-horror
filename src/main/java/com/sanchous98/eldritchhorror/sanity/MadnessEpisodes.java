@@ -263,9 +263,14 @@ public final class MadnessEpisodes {
             }
         }
         if (spawned > 0) {
+            EldritchHorror.LOGGER.info("madness: {} phantom(s) for {} at {}", spawned,
+                    player.getName().getString(), player.blockPosition());
             player.sendSystemMessage(Component.translatable("madness.eldritch_horror.hallucination"));
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     ModSounds.AMBIENT_WHISPER.get(), SoundSource.AMBIENT, 0.7F, 1.0F);
+        } else {
+            EldritchHorror.LOGGER.info("madness: no open spot for a phantom near {}",
+                    player.blockPosition());
         }
     }
 
@@ -276,32 +281,45 @@ public final class MadnessEpisodes {
             int x = player.getBlockX() + (int) Math.round(Math.cos(angle) * distance);
             int z = player.getBlockZ() + (int) Math.round(Math.sin(angle) * distance);
             BlockPos spot = BestiarySupport.surfaceSpot(level, x, z, false);
-            if (spot == null) {
-                continue;
+            if (spot != null && spawnAt(level, player, spot, now)) {
+                return true;
             }
-            EntityType<?> type = phantomType(level, spot);
-            Entity entity = type.spawn(level, spot, EntitySpawnReason.EVENT);
-            if (entity == null) {
-                continue;
+        }
+        // Indoors or under a roof there is no open-sky spot; a phantom can still appear in the room.
+        for (int attempt = 0; attempt < 8; attempt++) {
+            int x = player.getBlockX() + level.getRandom().nextInt(7) - 3;
+            int z = player.getBlockZ() + level.getRandom().nextInt(7) - 3;
+            BlockPos feet = new BlockPos(x, player.getBlockY(), z);
+            if (level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir()
+                    && spawnAt(level, player, feet, now)) {
+                return true;
             }
-            entity.getPersistentData().putBoolean(ILLUSION_TAG, true);
-            if (entity instanceof LivingEntity living) {
-                double health = ModConfig.MADNESS_ILLUSION_HEALTH.get();
-                var maxHealth = living.getAttribute(Attributes.MAX_HEALTH);
-                if (maxHealth != null) {
-                    maxHealth.setBaseValue(health);
-                    living.setHealth((float) health);
-                }
-            }
-            if (entity instanceof Mob mob) {
-                mob.setTarget(player);
-            }
-            ILLUSIONS.put(entity.getUUID(),
-                    new Illusion(player.getUUID(), now + ModConfig.MADNESS_ILLUSION_LIFETIME.get()));
-            HIDE.add(entity.getUUID());
-            return true;
         }
         return false;
+    }
+
+    private static boolean spawnAt(ServerLevel level, ServerPlayer player, BlockPos spot, long now) {
+        EntityType<?> type = phantomType(level, spot);
+        Entity entity = type.spawn(level, spot, EntitySpawnReason.EVENT);
+        if (entity == null) {
+            return false;
+        }
+        entity.getPersistentData().putBoolean(ILLUSION_TAG, true);
+        if (entity instanceof LivingEntity living) {
+            double health = ModConfig.MADNESS_ILLUSION_HEALTH.get();
+            var maxHealth = living.getAttribute(Attributes.MAX_HEALTH);
+            if (maxHealth != null) {
+                maxHealth.setBaseValue(health);
+                living.setHealth((float) health);
+            }
+        }
+        if (entity instanceof Mob mob) {
+            mob.setTarget(player);
+        }
+        ILLUSIONS.put(entity.getUUID(),
+                new Illusion(player.getUUID(), now + ModConfig.MADNESS_ILLUSION_LIFETIME.get()));
+        HIDE.add(entity.getUUID());
+        return true;
     }
 
     /** A hostile mob from this mod that plausibly lives here (no vanilla-role creeper exists). */

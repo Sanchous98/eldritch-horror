@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.sanity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
 import com.sanchous98.eldritchhorror.core.ModConfig;
+import com.sanchous98.eldritchhorror.cult.CultBetrayal;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.entity.AncientOne;
 import java.util.HashSet;
@@ -67,13 +68,13 @@ public final class BossSanityReward {
                     continue;
                 }
                 ServerPlayer player = server.getPlayerList().getPlayer(hit.getKey());
-                if (player != null && !CultSystem.isInitiated(player)) {
+                if (player != null && !excluded(player)) {
                     full.add(player);
                 }
             }
         }
         if (event.getSource().getEntity() instanceof ServerPlayer killer
-                && !CultSystem.isInitiated(killer)) {
+                && !excluded(killer)) {
             full.add(killer);
         }
         for (ServerPlayer player : full) {
@@ -82,7 +83,7 @@ public final class BossSanityReward {
         double ambient = ModConfig.BOSS_KILL_AMBIENT_SANITY.get();
         if (ambient > 0.0) {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (!full.contains(player) && !CultSystem.isInitiated(player)) {
+                if (!full.contains(player) && !excluded(player)) {
                     reward(player, boss, ambient, false);
                 }
             }
@@ -105,6 +106,11 @@ public final class BossSanityReward {
                 bosses.remove();
             }
         }
+    }
+
+    /** Cultists and the recently severed get no relief from a boss kill. */
+    private static boolean excluded(ServerPlayer player) {
+        return CultSystem.isInitiated(player) || CultBetrayal.isSevered(player);
     }
 
     private static void reward(ServerPlayer player, AncientOne boss, double amount, boolean direct) {
