@@ -1,0 +1,39 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:pearl_reagent"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.cult.rank.title",
+      "with": [
+        {
+          "translate": "rank.eldritch_horror.drowned_choir.2"
+        },
+        {
+          "translate": "cult.eldritch_horror.drowned_choir"
+        }
+      ]
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.cult.rank.description",
+      "with": [
+        {
+          "translate": "cult.eldritch_horror.drowned_choir"
+        },
+        {
+          "translate": "rank.eldritch_horror.drowned_choir.2"
+        }
+      ]
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cults/drowned_choir/member"
+}

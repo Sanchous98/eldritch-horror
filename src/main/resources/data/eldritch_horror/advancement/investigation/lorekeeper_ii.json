@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:star_codex"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.lorekeeper_ii"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.lorekeeper_ii.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:investigation/lorekeeper"
+}

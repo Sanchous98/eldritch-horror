@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:dog_tags"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_tom_line"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_tom_line.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:investigation/starter_tom_kit"
+}

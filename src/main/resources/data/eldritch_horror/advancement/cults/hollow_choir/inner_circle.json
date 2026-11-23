@@ -1,0 +1,39 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:blood_offering"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.cult.rank.title",
+      "with": [
+        {
+          "translate": "rank.eldritch_horror.hollow_choir.3"
+        },
+        {
+          "translate": "cult.eldritch_horror.hollow_choir"
+        }
+      ]
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.cult.rank.description",
+      "with": [
+        {
+          "translate": "cult.eldritch_horror.hollow_choir"
+        },
+        {
+          "translate": "rank.eldritch_horror.hollow_choir.3"
+        }
+      ]
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cults/hollow_choir/devoted"
+}

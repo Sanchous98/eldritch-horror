@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:dog_tags"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_tom_kit"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_tom_kit.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_steps"
+}

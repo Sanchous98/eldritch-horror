@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:world_atlas"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.cities.all.title"
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.cities.all.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cities/london"
+}

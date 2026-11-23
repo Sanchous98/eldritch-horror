@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:press_pass"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_hazel_story"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_hazel_story.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:investigation/starter_hazel_quill"
+}

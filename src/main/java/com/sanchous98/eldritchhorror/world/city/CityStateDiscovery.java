@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.world.city;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.advancement.Advancements;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,7 +42,9 @@ public final class CityStateDiscovery {
         for (ServerPlayer player : overworld.players()) {
             @Nullable City city = CityStates.nearestCity(overworld, player.blockPosition());
             if (city != null) {
-                CityStateKnowledge.record(player, city, CityStates.stateOf(overworld, city));
+                CityState state = CityStates.stateOf(overworld, city);
+                CityStateKnowledge.record(player, city, state);
+                Advancements.onCityState(player, city, state);
             }
         }
     }

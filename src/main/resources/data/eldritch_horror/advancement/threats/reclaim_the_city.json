@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:order_sigil"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.reclaim_the_city"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.reclaim_the_city.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:threats/fallen_city"
+}

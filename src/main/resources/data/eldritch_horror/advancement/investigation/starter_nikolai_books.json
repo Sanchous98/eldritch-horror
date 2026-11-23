@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:forbidden_grimoire"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_nikolai_books"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_nikolai_books.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_steps"
+}

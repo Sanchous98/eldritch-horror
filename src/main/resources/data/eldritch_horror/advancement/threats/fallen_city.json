@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:cursed_charm"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.threats.fallen_city.title"
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.threats.fallen_city.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_steps"
+}

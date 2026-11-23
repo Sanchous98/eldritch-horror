@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:tome_of_the_eye"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.lorekeeper"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.lorekeeper.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_rite"
+}

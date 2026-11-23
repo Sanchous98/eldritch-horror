@@ -54,7 +54,7 @@ public record CityQuestChain(City city, List<Step> steps) {
      * @param anchor authored POI id this step was derived from, else {@code ""}
      */
     public record Step(Kind kind, String id, int x, int z, String item, String entity, int count,
-                       String anchor) {
+                       String place, String anchor) {
     }
 
     /** Reagents a city contract may ask for; all are common chest/mob finds, none are boss-only. */
@@ -90,10 +90,10 @@ public record CityQuestChain(City city, List<Step> steps) {
         String item = GATHER_POOL[hash % GATHER_POOL.length];
         // 2..4: enough to make the player look, small enough for one ruin chest to cover it.
         int itemCount = 2 + hash / 7 % 3;
-        steps.add(new Step(Kind.GATHER, "gather", city.x(), city.z(), item, "", itemCount, ""));
+        steps.add(new Step(Kind.GATHER, "gather", city.x(), city.z(), item, "", itemCount, "", ""));
         String entity = HUNT_POOL[hash / 3 % HUNT_POOL.length];
         int kills = 2 + hash / 11 % 2;
-        steps.add(new Step(Kind.HUNT, "hunt", city.x(), city.z(), "", entity, kills, ""));
+        steps.add(new Step(Kind.HUNT, "hunt", city.x(), city.z(), "", entity, kills, "", ""));
         if (secret != null) {
             steps.add(reach(Kind.SECRET, "secret", secret, city, secret.id()));
         }
@@ -131,7 +131,27 @@ public record CityQuestChain(City city, List<Step> steps) {
     private static Step reach(Kind kind, String id, @Nullable CityPoi poi, City city, String anchor) {
         int x = city.x() + (poi == null ? 0 : poi.dx());
         int z = city.z() + (poi == null ? 0 : poi.dz());
-        return new Step(kind, id, x, z, "", "", 1, poi == null ? "" : anchor);
+        return new Step(kind, id, x, z, "", "", 1, poi == null ? "" : placeName(poi),
+                poi == null ? "" : anchor);
+    }
+
+    /**
+     * The human place name of an anchor, for directions in chat: the authored {@code data} hint's
+     * first token when it has one ("bazaar;quests" -> "bazaar", "hotel_keeper" -> "hotel keeper"),
+     * otherwise the id with the generic board/sign/npc suffixes stripped.
+     */
+    private static String placeName(CityPoi poi) {
+        String raw = poi.data();
+        int semi = raw.indexOf(';');
+        if (semi >= 0) {
+            raw = raw.substring(0, semi);
+        }
+        raw = raw.trim();
+        if (raw.isEmpty()) {
+            raw = poi.id();
+        }
+        raw = raw.replaceAll("(?i)_(quest_board|board|sign|npc)$", "");
+        return raw.replace('_', ' ').toLowerCase(java.util.Locale.ROOT);
     }
 
     /** Lowercase registry path without the namespace, for matching inventory/entity output. */

@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:gate_fragment"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.first_steps"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.first_steps.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/choose_investigator"
+}

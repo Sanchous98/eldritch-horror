@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:ritual_knife"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.open_the_way"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.open_the_way.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cults/sworn_ally"
+}

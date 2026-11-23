@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:void_reagent"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.awaken_the_horror"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.awaken_the_horror.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cults/open_the_way"
+}

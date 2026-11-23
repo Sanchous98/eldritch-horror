@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:chalk_reagent"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.first_rite"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.first_rite.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_steps"
+}

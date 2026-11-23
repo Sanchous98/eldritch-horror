@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:planchette"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_marion_circle"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_marion_circle.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_steps"
+}

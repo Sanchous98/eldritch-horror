@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.world.city.quest;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.advancement.Advancements;
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
@@ -149,7 +150,7 @@ public final class CityQuests {
         player.sendSystemMessage(Component.translatableWithFallback(
                 "cityquest.eldritch_horror.started",
                 "A local contract begins in %s: %s", city.name(),
-                describe(chain.steps().get(0))));
+                describe(city, chain.steps().get(0))));
         return true;
     }
 
@@ -176,7 +177,7 @@ public final class CityQuests {
         player.setData(ModAttachments.CITY_QUESTS, data);
         player.sendSystemMessage(Component.translatableWithFallback(
                 "cityquest.eldritch_horror.advanced",
-                "Contract %s: next — %s", city.name(), describe(chain.steps().get(next))));
+                "Contract %s: next — %s", city.name(), describe(city, chain.steps().get(next))));
     }
 
     /** @return whether the player has met {@code step}. */
@@ -219,6 +220,8 @@ public final class CityQuests {
             player.getInventory().add(new ItemStack(coin, 5));
         }
         CultSystem.add(player, "unblinking_eye", 5);
+        // The city contract is also a node on the guided advancement tree (docs/ADVANCEMENTS.md).
+        Advancements.awardCityContract(player, city);
         player.sendSystemMessage(Component.translatableWithFallback(
                 "cityquest.eldritch_horror.completed",
                 "Contract complete: %s. The Order pays five relic coins.", city.name()));
@@ -246,14 +249,14 @@ public final class CityQuests {
     }
 
     /** Human-readable objective text with the coordinates the player needs. */
-    public static Component describe(CityQuestChain.Step step) {
+    public static Component describe(City city, CityQuestChain.Step step) {
         return switch (step.kind()) {
             case BOARD -> Component.translatableWithFallback(
-                    "cityquest.eldritch_horror.board", "read the notice board at %s, %s",
-                    step.x(), step.z());
+                    "cityquest.eldritch_horror.board", "find the notice board in the %s (%s)",
+                    place(step), direction(city, step));
             case TALK -> Component.translatableWithFallback(
-                    "cityquest.eldritch_horror.talk", "find the contact at %s, %s",
-                    step.x(), step.z());
+                    "cityquest.eldritch_horror.talk", "ask for %s (%s)",
+                    place(step), direction(city, step));
             case GATHER -> Component.translatableWithFallback(
                     "cityquest.eldritch_horror.gather", "gather %sx %s",
                     step.count(), itemName(step.item()));
@@ -261,8 +264,45 @@ public final class CityQuests {
                     "cityquest.eldritch_horror.hunt", "clear %sx %s from the district",
                     step.count(), entityName(step.entity()));
             case SECRET -> Component.translatableWithFallback(
-                    "cityquest.eldritch_horror.secret", "find the hidden place at %s, %s",
-                    step.x(), step.z());
+                    "cityquest.eldritch_horror.secret", "look for the hidden place at the %s (%s)",
+                    place(step), direction(city, step));
+        };
+    }
+
+    /** The place name, or the city centre when the plan has no anchor for the step. */
+    private static Component place(CityQuestChain.Step step) {
+        return Component.literal(step.place().isEmpty() ? "city centre" : step.place());
+    }
+
+    /**
+     * An immersive direction: the compass bearing from the city centre and a rounded distance.
+     * No raw coordinates in chat; the place name and the bearing match what a player can see in
+     * the streets.
+     */
+    public static Component direction(City city, CityQuestChain.Step step) {
+        int dx = step.x() - city.x();
+        int dz = step.z() - city.z();
+        double distance = Math.hypot(dx, dz);
+        int rounded = Math.max(10, (int) (Math.round(distance / 10.0) * 10));
+        return Component.translatableWithFallback("cityquest.eldritch_horror.direction",
+                "%s, about %s blocks from the centre",
+                Component.translatableWithFallback("cityquest.eldritch_horror.dir."
+                        + compass(dx, dz), compass(dx, dz)), rounded);
+    }
+
+    /** Eight-way compass word for a delta, screen-north being -Z. */
+    private static String compass(int dx, int dz) {
+        double angle = Math.toDegrees(Math.atan2(dx, -dz));
+        int sector = (int) Math.floorMod(Math.round(angle / 45.0), 8L);
+        return switch (sector) {
+            case 0 -> "north";
+            case 1 -> "north_east";
+            case 2 -> "east";
+            case 3 -> "south_east";
+            case 4 -> "south";
+            case 5 -> "south_west";
+            case 6 -> "west";
+            default -> "north_west";
         };
     }
 
@@ -301,7 +341,7 @@ public final class CityQuests {
         StringBuilder sb = new StringBuilder(city.name()).append(": step ")
                 .append(Math.min(index + 1, chain.steps().size())).append('/')
                 .append(chain.steps().size()).append(" — ")
-                .append(describe(chain.steps().get(Math.min(index, chain.steps().size() - 1)))
+                .append(describe(city, chain.steps().get(Math.min(index, chain.steps().size() - 1)))
                         .getString());
         if (index < chain.steps().size() && chain.steps().get(index).kind()
                 == CityQuestChain.Kind.HUNT) {

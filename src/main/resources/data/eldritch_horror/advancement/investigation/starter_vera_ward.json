@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:blood_chalice"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_vera_ward"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_vera_ward.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:investigation/starter_vera_chalk"
+}

@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:eye_of_the_watcher"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.threats.first_ancient_one.title"
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.threats.first_ancient_one.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_rite"
+}

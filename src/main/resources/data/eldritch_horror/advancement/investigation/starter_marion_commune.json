@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:planchette"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_marion_commune"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_marion_commune.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:investigation/starter_marion_circle"
+}

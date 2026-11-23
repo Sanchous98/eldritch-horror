@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:family_signet"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.starter_evelyn_patron"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.starter_evelyn_patron.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:investigation/starter_evelyn_credit"
+}

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.quest;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.advancement.Advancements;
 import com.sanchous98.eldritchhorror.cult.CultDefinition;
 import com.sanchous98.eldritchhorror.cult.CultSystem;
 import com.sanchous98.eldritchhorror.cult.Cults;
@@ -122,6 +123,8 @@ public final class QuestJournal {
             // Finishing a quest earns a skill point and, when the data says so, an item gift.
             com.sanchous98.eldritchhorror.skill.SkillTree.addPoints(player, 1);
             grantReward(player, quest);
+            // The journal stays authoritative; the advancement tab is a read-only guide mirroring it.
+            Advancements.awardQuest(player, quest.id());
             if (quest.repeat().repeatable()) {
                 restartCycle(player, quest, now);
             }

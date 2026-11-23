@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:effigy_doll"
+    },
+    "title": {
+      "translate": "quest.eldritch_horror.the_decision"
+    },
+    "description": {
+      "translate": "quest.eldritch_horror.the_decision.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cults/awaken_the_horror"
+}

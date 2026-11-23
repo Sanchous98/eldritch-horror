@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:city_map"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.cities.paris.title"
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.cities.description",
+      "with": [
+        {
+          "translate": "advancement.eldritch_horror.cities.paris.title"
+        }
+      ]
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:prologue/first_steps"
+}

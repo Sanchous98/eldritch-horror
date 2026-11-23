@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:investigators_badge"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.prologue.choose.title"
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.prologue.choose.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:root"
+}

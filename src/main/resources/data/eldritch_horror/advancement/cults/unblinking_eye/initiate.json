@@ -1,0 +1,39 @@
+{
+  "display": {
+    "icon": {
+      "id": "eldritch_horror:order_sigil"
+    },
+    "title": {
+      "translate": "advancement.eldritch_horror.cult.rank.title",
+      "with": [
+        {
+          "translate": "rank.eldritch_horror.unblinking_eye.0"
+        },
+        {
+          "translate": "cult.eldritch_horror.unblinking_eye"
+        }
+      ]
+    },
+    "description": {
+      "translate": "advancement.eldritch_horror.cult.rank.description",
+      "with": [
+        {
+          "translate": "cult.eldritch_horror.unblinking_eye"
+        },
+        {
+          "translate": "rank.eldritch_horror.unblinking_eye.0"
+        }
+      ]
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "eldritch_horror:cults/sworn_ally"
+}

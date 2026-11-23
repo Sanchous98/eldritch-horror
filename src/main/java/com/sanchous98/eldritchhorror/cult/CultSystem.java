@@ -1,5 +1,6 @@
 package com.sanchous98.eldritchhorror.cult;
 
+import com.sanchous98.eldritchhorror.advancement.Advancements;
 import com.sanchous98.eldritchhorror.quest.QuestJournal;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import net.minecraft.network.chat.Component;
@@ -93,9 +94,11 @@ public final class CultSystem {
      * Idempotent: the quest caps at its target, so repeated rank changes are harmless.
      */
     private static void notifyRank(ServerPlayer player, String cultId, int value) {
-        if (CultRank.of(value).atLeast(CultRank.INITIATE)) {
+        CultRank rank = CultRank.of(value);
+        if (rank.atLeast(CultRank.INITIATE)) {
             QuestJournal.add(player, "sworn_ally", 1);
         }
+        Advancements.awardCultMilestones(player, cultId, rank);
     }
 
     /**

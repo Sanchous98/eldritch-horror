@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.investigator;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.advancement.Advancements;
 import com.sanchous98.eldritchhorror.codex.CodexAPI;
 import com.sanchous98.eldritchhorror.quest.Quests;
 import com.sanchous98.eldritchhorror.registry.ModAttachments;
@@ -130,6 +131,7 @@ public final class InvestigatorAPI {
             CodexAPI.learn(player, riteId);
         }
         applyMaxSanity(player, id);
+        Advancements.award(player, "prologue/choose_investigator");
         player.sendSystemMessage(Component.translatableWithFallback(
                 "investigator.eldritch_horror.chosen", "You are now %s.", id.displayName()));
     }
