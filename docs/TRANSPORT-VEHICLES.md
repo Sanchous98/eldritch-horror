@@ -22,6 +22,12 @@ body cannot be represented by `EntityDimensions`, so `TrainCar.renderBounds` inf
 interpolated box by the car's half length and `TrainCarRenderer.getBoundingBoxForCulling` uses it;
 the whole carriage is culled as one object instead of popping out at its ends.
 
+Chunk loading follows the same length. The service's spawn ticket is a 9×9 entity-ticking square
+(72 blocks each way), enough for the last wagon at 64 blocks behind the station; once the consist
+is ticking, the locomotive moves a 5×5 ticket to the chunk under the middle carriage. That is one
+ticket, not one per car, and it changes no schedule or speed — only the coverage needed by a
+16-block locomotive plus 14-block wagons.
+
 Interior (local frame, rail at y = 0):
 
 | Feature | Height |

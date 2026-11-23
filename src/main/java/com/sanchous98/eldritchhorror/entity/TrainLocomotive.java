@@ -30,15 +30,24 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>It owns the line, the timetable and the consist: the server drives it along a cached
  * {@link RailLine} at {@code trainSpeed} blocks per tick, and the coupled {@link TrainWagon}s sample
- * its recent trail at fixed spacing. It carries one chunk ticket (5×5 entity-ticking) around itself
- * and nothing else, so the line ahead loads and the line behind unloads.
+ * its recent trail at fixed spacing. Chunk tickets follow the consist: a wide 9×9 ticket covers the
+ * whole train while it is spawned/docked (the rear wagon of a four-carriage train is 64 blocks
+ * behind the station chunk), then a 5×5 ticket centred on the middle carriage keeps the line under
+ * the train entity-ticking while it runs. Nothing else is kept loaded per car.
  *
  * <p>Physical rule: before each step it checks the rail under it and {@value #LOOKAHEAD} blocks
  * ahead. A missing rail or a block in the corridor stops the train and announces once; it waits
  * where it is, lets riders dismount, and resumes when the track is clear. It never clips through.
  */
 public class TrainLocomotive extends TrainCar {
-    private static final int TICKET_RADIUS = 2;
+    /**
+     * Ticket radius used by {@link #holdChunks}/{@link #releaseChunks} (the service's spawn ticket
+     * and the locomotive's initial ownership). A four-carriage consist is 64 blocks long, so the
+     * 9×9 square is the smallest one that covers the wagons spawned behind the station.
+     */
+    private static final int SPAWN_TICKET_RADIUS = 4;
+    /** Ticket radius that follows the consist in service, centred on the middle carriage. */
+    private static final int CRUISE_TICKET_RADIUS = 2;
     /** Blocks checked ahead of the locomotive each step. */
     private static final int LOOKAHEAD = 3;
     /** Distance over which the train slows into a station, in blocks. */
@@ -68,6 +77,7 @@ public class TrainLocomotive extends TrainCar {
     private double travelled;
     private int wagonCount;
     private @Nullable ChunkPos ticketCenter;
+    private int ticketRadius = SPAWN_TICKET_RADIUS;
     private final TrainTrail trail = new TrainTrail();
     private final List<TrainWagon> wagons = new ArrayList<>();
 
@@ -102,6 +112,7 @@ public class TrainLocomotive extends TrainCar {
         this.speed = Math.max(0.1, blocksPerTick);
         this.wagonCount = TrainTimetable.wagons(wagonCount);
         this.ticketCenter = initialTicket;
+        this.ticketRadius = SPAWN_TICKET_RADIUS;
         this.travelled = 0.0;
         this.configure(this, 0);
         this.seedTrail();
@@ -223,14 +234,22 @@ public class TrainLocomotive extends TrainCar {
         return this.trail.sampleBehind(behind);
     }
 
-    /** Holds the 5×5 chunk ticket around a chunk (used by the service before spawning). */
+    /** Holds the wide spawn ticket around a chunk (used by the service before spawning). */
     public static void holdChunks(ServerLevel level, ChunkPos pos) {
-        level.getChunkSource().addTicketWithRadius(TRAIN_TICKET, pos, TICKET_RADIUS);
+        holdChunks(level, pos, SPAWN_TICKET_RADIUS);
     }
 
     /** Releases the ticket {@link #holdChunks} placed. */
     public static void releaseChunks(ServerLevel level, ChunkPos pos) {
-        level.getChunkSource().removeTicketWithRadius(TRAIN_TICKET, pos, TICKET_RADIUS);
+        releaseChunks(level, pos, SPAWN_TICKET_RADIUS);
+    }
+
+    private static void holdChunks(ServerLevel level, ChunkPos pos, int radius) {
+        level.getChunkSource().addTicketWithRadius(TRAIN_TICKET, pos, radius);
+    }
+
+    private static void releaseChunks(ServerLevel level, ChunkPos pos, int radius) {
+        level.getChunkSource().removeTicketWithRadius(TRAIN_TICKET, pos, radius);
     }
 
     /** Resolves a due boarding window: an empty consist despawns, one with riders departs. */
@@ -490,26 +509,40 @@ public class TrainLocomotive extends TrainCar {
 
     /** Re-adds the entity-ticking ticket after a stalled service check. */
     public void reassertTickets(ServerLevel level) {
+        if (this.ticketCenter != null) {
+            releaseChunks(level, this.ticketCenter, this.ticketRadius);
+        }
         this.ticketCenter = null;
         this.updateTickets(level);
     }
 
     private void updateTickets(ServerLevel level) {
-        ChunkPos current = this.chunkPosition();
+        ChunkPos current = this.consistCenter();
         if (current.equals(this.ticketCenter)) {
             return;
         }
         if (this.ticketCenter != null) {
-            releaseChunks(level, this.ticketCenter);
+            releaseChunks(level, this.ticketCenter, this.ticketRadius);
         }
-        holdChunks(level, current);
+        holdChunks(level, current, CRUISE_TICKET_RADIUS);
         this.ticketCenter = current;
+        this.ticketRadius = CRUISE_TICKET_RADIUS;
+    }
+
+    /** @return the chunk under the middle carriage, which is where the cruise ticket belongs. */
+    private ChunkPos consistCenter() {
+        RailSample middle = this.trail.sampleBehind(
+                TrainTimetable.consistLength(this.wagonCount) * 0.5);
+        if (middle == null) {
+            return this.chunkPosition();
+        }
+        return ChunkPos.containing(BlockPos.containing(middle.x(), middle.y(), middle.z()));
     }
 
     @Override
     public void remove(Entity.RemovalReason reason) {
         if (this.level() instanceof ServerLevel serverLevel && this.ticketCenter != null) {
-            releaseChunks(serverLevel, this.ticketCenter);
+            releaseChunks(serverLevel, this.ticketCenter, this.ticketRadius);
             this.ticketCenter = null;
         }
         List<TrainWagon> copy = new ArrayList<>(this.wagons);
