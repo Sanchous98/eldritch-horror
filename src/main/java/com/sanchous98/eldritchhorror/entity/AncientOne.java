@@ -151,7 +151,10 @@ public abstract class AncientOne extends Monster implements DreadAura {
 
     /** Scales a designed distance (ability range, AoE radius, telegraph spread). */
     public final double scaled(double designed) {
-        return designed * this.abilityScale();
+        double value = designed * this.abilityScale();
+        // A city-scale body must fight in its plaza, not across the district: every ability range
+        // is capped here, so a 96-block presence cannot kill a player a hundred blocks away.
+        return this.isCityScale() ? Math.min(value, 40.0) : value;
     }
 
     /** Melee reach from the centre: about half the body height. */
