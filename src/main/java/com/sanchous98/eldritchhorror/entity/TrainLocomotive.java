@@ -421,6 +421,13 @@ public class TrainLocomotive extends TrainCar {
             if (rail.getCollisionShape(level, pos).isEmpty()) {
                 return null;
             }
+            if (rail.is(BlockTags.LEAVES) || rail.is(BlockTags.LOGS)
+                    || rail.is(BlockTags.REPLACEABLE_BY_TREES)) {
+                // A tree that grew over a finished line leaves its canopy in the rail's own block,
+                // not only above it. The crew clears it like any other foliage.
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                return null;
+            }
             return "blocked by " + rail.getBlock().getName().getString();
         }
         for (int dy = 1; dy <= 2; dy++) {
