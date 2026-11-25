@@ -44,7 +44,7 @@ public final class RailStations {
     /** How far from a STATION anchor its authored rails may be and still be found. */
     private static final int RAIL_SNAP_RADIUS = 32;
     /** Platform column the boarding point sits on, measured from the rail centreline. */
-    private static final int BOARD_ACROSS = 5;
+    private static final int BOARD_ACROSS = 2;
 
     /** Authored rail point per city, so a multi-partner terminal does not rebuild its plan. */
     private static final Map<String, List<CityPlanProbe.Rail>> AUTHORED_RAILS =
