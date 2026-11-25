@@ -16,16 +16,28 @@ import org.jspecify.annotations.Nullable;
 public final class TrainTrail {
     /** Enough history for the longest consist at the slowest configured speed. */
     private static final int CAPACITY = 512;
+    /** The legacy Earth cylinder's circumference in blocks. */
+    private static final int EARTH_WRAP = 2 * EarthMap.HALF_WIDTH;
 
     /** One recorded position. */
     public record TrailPoint(double x, double y, double z, float yaw, double distance) {
     }
 
     private final List<TrailPoint> points = new ArrayList<>();
+    private int wrapWidth = EARTH_WRAP;
 
     /** Forgets all history (a fresh service). */
     public void clear() {
         this.points.clear();
+    }
+
+    /**
+     * Sets the horizontal geometry of the line this trail belongs to.
+     *
+     * @param width cylinder circumference in blocks, or {@code 0} for a 1:1 map plane
+     */
+    public void setWrapWidth(int width) {
+        this.wrapWidth = Math.max(0, width);
     }
 
     /**
@@ -78,9 +90,10 @@ public final class TrainTrail {
             if (target >= earlier.distance() && target <= later.distance()) {
                 double span = later.distance() - earlier.distance();
                 double t = span <= 0.0 ? 0.0 : (target - earlier.distance()) / span;
-                double dx = EarthMap.wrapDelta(earlier.x(), later.x());
+                double dx = deltaX(earlier.x(), later.x());
                 return new RailSample(
-                        EarthMap.wrapBlockX(earlier.x() + dx * t),
+                        this.wrapWidth == 0 ? earlier.x() + dx * t
+                                : EarthMap.wrapBlockX(earlier.x() + dx * t),
                         earlier.y() + (later.y() - earlier.y()) * t,
                         earlier.z() + (later.z() - earlier.z()) * t,
                         lerpYaw(earlier.yaw(), later.yaw(), t));
@@ -90,8 +103,16 @@ public final class TrainTrail {
         return new RailSample(oldest.x(), oldest.y(), oldest.z(), oldest.yaw());
     }
 
-    private static float lerpYaw(float from, float to, double t) {
-        float delta = (to - from) % 360.0F;
+    private double deltaX(double from, double to) {
+        if (this.wrapWidth == 0) {
+            return to - from;
+        }
+        double width = this.wrapWidth;
+        double delta = to - from;
+        return delta - width * Math.floor(delta / width + 0.5);
+    }
+
+    private static float lerpYaw(float from, float to, double t) {        float delta = (to - from) % 360.0F;
         if (delta > 180.0F) {
             delta -= 360.0F;
         } else if (delta < -180.0F) {

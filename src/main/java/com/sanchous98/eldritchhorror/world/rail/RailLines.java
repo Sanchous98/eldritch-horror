@@ -21,23 +21,35 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The stage-2 rail network ({@code design/30-transport.md}): a small, curated set of station pairs,
- * each with a real A* route over the baked landmask and a finished block-level track.
+ * each with a real route over the terrain and a finished line.
  *
- * <p>Selection is nearest-reachable: for each curated city, up to {@code maxPartnersPerCity} of the
- * closest other cities whose coarse route fits inside {@code trainMaxLineBlocks} become partners,
- * one line per partner. Duplicate pairs collapse, so the result is still a sparse graph rather than
- * every city pair. A city gets one station per partner (a major city's authored terminal can serve
- * several directions); a city with no reachable partner still gets a (dormant) station platform.
+ * <p>Selection is nearest-first: for each curated city, up to {@code maxPartnersPerCity} of the
+ * closest other cities inside {@code trainMaxLineBlocks} become partners, one line per partner.
+ * Duplicate pairs collapse, so the result is still a sparse graph rather than every city pair. A
+ * city gets one station per partner (a major city's authored terminal can serve several
+ * directions); a city with no partner still gets a (dormant) station platform.
+ *
+ * <p>The route is planned in two levels by {@link RailPlanner}: a coarse 512-block intercity board
+ * for the long middle and a fine 64-block board for the last few kilometres around each station.
+ * This keeps a 180 km route at a few hundred A* cells instead of thousands.
+ *
+ * <p>A line longer than {@code trainMaxCorridorBlocks} is still a line — stations, timetable and
+ * consist — but its worldgen corridor is <b>not</b> stamped: a 180 km corridor is about 11,000
+ * chunks, and a train ride would generate them all. The consist travels the planned polyline and
+ * the ground is whatever the generator produced.
  *
  * <p>Routes are computed once on first use and cached for the server's lifetime; a tick never
- * pathfinds. The finished line is bucket-indexed by chunk, so worldgen pays a map lookup and a tiny
- * list per chunk. Server-side only: the builder reads {@link EarthMaps} and samples the world map.
+ * pathfinds. The finished corridor is bucket-indexed by chunk, so worldgen pays a map lookup and a
+ * tiny list per chunk. Server-side only: the builder reads {@link EarthMaps} and samples the world
+ * map.
  */
 public final class RailLines {
-    /** How many nearest cities are tried per wanted partner when looking for a reachable one. */
-    private static final int PARTNER_ATTEMPTS = 5;
     /** Partner cap used when the server config is not loaded (bare unit probes). */
     private static final int DEFAULT_MAX_PARTNERS = 3;
+    /** Line cap used when the server config is not loaded (the 1:1 map's longest pair). */
+    private static final int DEFAULT_MAX_LINE_BLOCKS = 400_000;
+    /** Corridor cap used when the server config is not loaded. */
+    private static final int DEFAULT_MAX_CORRIDOR_BLOCKS = 40_000;
     /** First platform column from the rail centreline: the edge sits three blocks out. */
     private static final int PLATFORM_INNER = 3;
     /** Last platform column from the rail centreline: five columns, so the platform is 5 wide. */
@@ -50,6 +62,11 @@ public final class RailLines {
     private static volatile @Nullable Network cached;
 
     private RailLines() {
+    }
+
+    /** Forgets the cached network (a new world or a test that installs another city table). */
+    public static void clear() {
+        cached = null;
     }
 
     /** @return every line whose route exists (built on first call). */
@@ -125,20 +142,20 @@ public final class RailLines {
         long started = System.nanoTime();
         int maxBlocks = ModConfig.loaded()
                 ? Math.clamp(ModConfig.TRAIN_MAX_LINE_BLOCKS.get(), 500, 400_000)
-                : 25_000;
+                : DEFAULT_MAX_LINE_BLOCKS;
+        int maxCorridor = ModConfig.loaded()
+                ? Math.clamp(ModConfig.TRAIN_MAX_CORRIDOR_BLOCKS.get(), 0, 400_000)
+                : DEFAULT_MAX_CORRIDOR_BLOCKS;
         int maxPartners = ModConfig.loaded()
                 ? Math.clamp(ModConfig.MAX_PARTNERS_PER_CITY.get(), 1, 8)
                 : DEFAULT_MAX_PARTNERS;
-        RailRouteFinder.Options options = RailRouteFinder.Options.forLine(maxBlocks);
-        RailGrid grid = grid(map);
-        RailRouteFinder.Scratch scratch = new RailRouteFinder.Scratch();
+        RailPlanner planner = new RailPlanner(map, cities, maxBlocks);
 
         Map<String, City> byId = new HashMap<>();
         for (City city : cities) {
             byId.put(city.id(), city);
         }
-        Map<String, List<City>> partners = choosePartners(cities, grid, options, maxBlocks,
-                maxPartners, scratch);
+        Map<String, List<City>> partners = choosePartners(cities, maxBlocks, maxPartners);
 
         TreeMap<String, City[]> edges = new TreeMap<>();
         for (Map.Entry<String, List<City>> entry : partners.entrySet()) {
@@ -170,18 +187,23 @@ public final class RailLines {
         }
 
         List<RailLine> lines = new ArrayList<>();
+        int corridors = 0;
         for (City[] edge : edges.values()) {
-            RailLine line = buildLine(map, grid, options, maxBlocks, stationMap, edge[0], edge[1],
-                    scratch);
+            RailLine line = buildLine(map, planner, maxBlocks, maxCorridor, stationMap,
+                    edge[0], edge[1]);
             if (line != null) {
                 lines.add(line);
+                if (line.hasCorridor()) {
+                    corridors++;
+                }
             }
         }
         RailStation[] stationArray = new LinkedHashSet<>(stationMap.values())
                 .toArray(new RailStation[0]);
         Map<Long, List<RailStamp>> stamps = buildStamps(lines, stationArray, map);
-        EldritchHorror.LOGGER.info("rail: {} lines from {} pairs, {} stations in {} ms",
-                lines.size(), edges.size(), stationArray.length,
+        EldritchHorror.LOGGER.info("rail: {} lines ({} with a stamped corridor) from {} pairs, "
+                        + "{} stations in {} ms",
+                lines.size(), corridors, edges.size(), stationArray.length,
                 (System.nanoTime() - started) / 1_000_000L);
         return new Network(List.copyOf(lines), List.of(stationArray), stamps);
     }
@@ -204,17 +226,14 @@ public final class RailLines {
     }
 
     /**
-     * For each city, tries its nearest candidates on the coarse grid and keeps up to
-     * {@code maxPartners} whose route fits. The returned map is keyed by the selecting city, so two
-     * cities can select each other (the pair is deduplicated later). A pair's reachability is
-     * checked once and reused when the other city tries the same candidate.
+     * For each city, keeps up to {@code maxPartners} nearest candidates whose straight-line distance
+     * fits {@code maxBlocks}. The route itself is planned once when the line is built, so selection
+     * never runs A* and cannot be aborted by a path budget. A relaxed route always reaches its goal,
+     * which is what lets every curated city of a 1:1 map keep a partner.
      */
-    private static Map<String, List<City>> choosePartners(List<City> cities, RailGrid grid,
-                                                          RailRouteFinder.Options options,
-                                                          int maxBlocks, int maxPartners,
-                                                          RailRouteFinder.Scratch scratch) {
+    private static Map<String, List<City>> choosePartners(List<City> cities, int maxBlocks,
+                                                          int maxPartners) {
         Map<String, List<City>> partners = new HashMap<>();
-        Map<String, Boolean> reachable = new HashMap<>();
         for (City city : cities) {
             List<City> candidates = new ArrayList<>(cities);
             candidates.removeIf(other -> other.id().equals(city.id()));
@@ -224,42 +243,22 @@ public final class RailLines {
                 return byDistance != 0 ? (int) Math.signum(byDistance)
                         : left.id().compareTo(right.id());
             });
-            int attempts = Math.min(PARTNER_ATTEMPTS * maxPartners, candidates.size());
             List<City> chosen = new ArrayList<>(maxPartners);
-            for (int i = 0; i < attempts && chosen.size() < maxPartners; i++) {
-                City candidate = candidates.get(i);
+            for (City candidate : candidates) {
+                if (chosen.size() >= maxPartners) {
+                    break;
+                }
                 // Candidates are sorted by distance, so every later one is also out of range.
                 if (Math.sqrt(RailStations.distanceSqr(city, candidate)) > maxBlocks) {
                     break;
                 }
-                String key = pairKey(city.id(), candidate.id());
-                Boolean fits = reachable.get(key);
-                if (fits == null) {
-                    fits = routeFits(grid, options, maxBlocks, city, candidate, scratch);
-                    reachable.put(key, fits);
-                }
-                if (fits) {
-                    chosen.add(candidate);
-                }
+                chosen.add(candidate);
             }
             if (!chosen.isEmpty()) {
                 partners.put(city.id(), List.copyOf(chosen));
             }
         }
         return partners;
-    }
-
-    private static boolean routeFits(RailGrid grid, RailRouteFinder.Options options, int maxBlocks,
-                                     City from, City to, RailRouteFinder.Scratch scratch) {
-        RailCell start = anchor(grid, from.x(), from.z());
-        RailCell goal = anchor(grid, to.x(), to.z());
-        if (start == null || goal == null) {
-            return false;
-        }
-        List<RailCell> route = RailRouteFinder.find(grid, start, goal, options, scratch);
-        return route != null
-                && RailRouteFinder.pathLength(route, grid.width()) * RailGrid.CELL_BLOCKS
-                <= maxBlocks;
     }
 
     /** @return the undirected pair key, in stable id order. */
@@ -274,36 +273,75 @@ public final class RailLines {
                 : new City[]{byId.get(cityB), byId.get(cityA)};
     }
 
-    private static @Nullable RailLine buildLine(EarthMap map, RailGrid grid,
-                                                RailRouteFinder.Options options, int maxBlocks,
+    private static @Nullable RailLine buildLine(EarthMap map, RailPlanner planner, int maxBlocks,
+                                                int maxCorridor,
                                                 Map<String, RailStation> stations,
-                                                City cityA, City cityB,
-                                                RailRouteFinder.Scratch scratch) {
+                                                City cityA, City cityB) {
         RailStation a = stations.get(cityA.id() + "|" + cityB.id());
         RailStation b = stations.get(cityB.id() + "|" + cityA.id());
         if (a == null || b == null) {
             return null;
         }
-        RailCell start = anchor(grid, a.x(), a.z());
-        RailCell goal = anchor(grid, b.x(), b.z());
-        if (start == null || goal == null) {
-            return null;
-        }
-        List<RailCell> route = RailRouteFinder.find(grid, start, goal, options, scratch);
-        if (route == null) {
+        List<RailPathMath.RailPoint> waypoints = planner.route(a, b);
+        if (waypoints == null) {
             EldritchHorror.LOGGER.info("rail: no route {} -> {}", a.cityId(), b.cityId());
             return null;
         }
-        List<RailPathMath.RailPoint> waypoints = new ArrayList<>();
-        waypoints.add(new RailPathMath.RailPoint(a.x(), a.z()));
-        for (RailCell cell : route) {
-            waypoints.add(new RailPathMath.RailPoint(centreX(cell.x()), centreZ(cell.z())));
+        double length = planner.length(waypoints);
+        if (length > maxBlocks) {
+            EldritchHorror.LOGGER.info("rail: route {} -> {} is {} blocks, over the {} cap",
+                    a.cityId(), b.cityId(), Math.round(length), maxBlocks);
+            return null;
         }
-        waypoints.add(new RailPathMath.RailPoint(b.x(), b.z()));
-        List<RailPathMath.RailPoint> points =
-                RailPathMath.orthogonalize(waypoints, RailPathMath.DEFAULT_RUN);
-        int[] heights = RailProfile.build(points, surface(map), ElevationCurve.SEA_LEVEL,
-                a.y(), b.y());
+        boolean corridor = length <= maxCorridor;
+        List<RailPathMath.RailPoint> points = corridor
+                ? RailPathMath.orthogonalize(waypoints, RailPathMath.DEFAULT_RUN,
+                        planner.wrapWidth())
+                : waypoints;
+        RailProfile.Surface surface = surface(map);
+        int[] heights = corridor
+                ? RailProfile.build(points, surface, ElevationCurve.SEA_LEVEL, a.y(), b.y())
+                : RailProfile.buildWaypoints(points, surface, ElevationCurve.SEA_LEVEL,
+                        a.y(), b.y());
+        if (corridor) {
+            levelledSelfCrossings(a, b, points, heights);
+        }
+        List<RailNode> nodes = new ArrayList<>(points.size());
+        RailNode firstBridge = null;
+        RailNode firstTunnel = null;
+        for (int i = 0; i < points.size(); i++) {
+            RailPathMath.RailPoint point = points.get(i);
+            RailNode node = new RailNode(point.x(), heights[i], point.z());
+            nodes.add(node);
+            boolean water = surface.water(point.x(), point.z());
+            if (water && firstBridge == null) {
+                firstBridge = node;
+            }
+            if (!water && surface.surfaceY(point.x(), point.z()) > heights[i] + 1
+                    && firstTunnel == null) {
+                firstTunnel = node;
+            }
+        }
+        RailLine line = new RailLine(a.cityId() + "-" + b.cityId(), a, b, nodes,
+                firstBridge, firstTunnel, corridor, planner.wrapWidth());
+        EldritchHorror.LOGGER.info("rail: line {} ({} blocks, {} nodes, corridor {}, "
+                        + "bridge {}, tunnel {})",
+                line.id(), Math.round(line.length()), nodes.size(), corridor ? "yes" : "no",
+                firstBridge == null ? "none" : firstBridge.x() + " " + firstBridge.y() + " "
+                        + firstBridge.z(),
+                firstTunnel == null ? "none" : firstTunnel.x() + " " + firstTunnel.y() + " "
+                        + firstTunnel.z());
+        return line;
+    }
+
+    /**
+     * A rasterised diagonal can cross its own earlier segment. Both passes share one rail block;
+     * giving both the higher profile prevents a lower rail being buried in ballast. Only a stamped
+     * corridor is rasterised, so this runs only for short lines.
+     */
+    private static void levelledSelfCrossings(RailStation a, RailStation b,
+                                              List<RailPathMath.RailPoint> points,
+                                              int[] heights) {
         Map<Long, Integer> highest = new HashMap<>();
         for (int i = 0; i < points.size(); i++) {
             RailPathMath.RailPoint point = points.get(i);
@@ -319,96 +357,56 @@ public final class RailLines {
             }
         }
         if (crossings > 0) {
-            // A rasterised diagonal can cross its own earlier segment. Both passes share one rail
-            // block; giving both the higher profile prevents a lower rail being buried in ballast.
             EldritchHorror.LOGGER.info("rail: {} has {} self-crossing blocks, levelled",
                     a.cityId() + "-" + b.cityId(), crossings);
         }
-        List<RailNode> nodes = new ArrayList<>(points.size());
-        RailNode firstBridge = null;
-        RailNode firstTunnel = null;
-        for (int i = 0; i < points.size(); i++) {
-            RailPathMath.RailPoint point = points.get(i);
-            RailNode node = new RailNode(point.x(), heights[i], point.z());
-            nodes.add(node);
-            boolean water = isWater(map, point.x(), point.z());
-            if (water && firstBridge == null) {
-                firstBridge = node;
-            }
-            if (!water && RailStations.surface(map, point.x(), point.z()) > heights[i] + 1
-                    && firstTunnel == null) {
-                firstTunnel = node;
-            }
-        }
-        double length = RailPathMath.length(points);
-        if (length > maxBlocks) {
-            EldritchHorror.LOGGER.info("rail: route {} -> {} is {} blocks, over the {} cap",
-                    a.cityId(), b.cityId(), Math.round(length), maxBlocks);
-            return null;
-        }
-        RailLine line = new RailLine(a.cityId() + "-" + b.cityId(), a, b, nodes,
-                firstBridge, firstTunnel);
-        EldritchHorror.LOGGER.info("rail: line {} ({} blocks, {} nodes, bridge {}, tunnel {})",
-                line.id(), Math.round(length), nodes.size(),
-                firstBridge == null ? "none" : firstBridge.x() + " " + firstBridge.y() + " "
-                        + firstBridge.z(),
-                firstTunnel == null ? "none" : firstTunnel.x() + " " + firstTunnel.y() + " "
-                        + firstTunnel.z());
-        return line;
-    }
-
-    private static RailGrid grid(EarthMap map) {
-        int width = 2 * EarthMap.HALF_WIDTH / RailGrid.CELL_BLOCKS;
-        int height = 2 * EarthMap.HALF_HEIGHT / RailGrid.CELL_BLOCKS;
-        return RailGrid.of(width, height, new RailGrid.Terrain() {
-            @Override
-            public boolean isLand(int cellX, int cellZ) {
-                return map.isLand(centreX(cellX), centreZ(cellZ));
-            }
-
-            @Override
-            public int surfaceY(int cellX, int cellZ) {
-                return RailStations.surface(map, centreX(cellX), centreZ(cellZ));
-            }
-        });
-    }
-
-    private static @Nullable RailCell anchor(RailGrid grid, int blockX, int blockZ) {
-        int baseX = Math.floorDiv(blockX + EarthMap.HALF_WIDTH, RailGrid.CELL_BLOCKS);
-        int baseZ = Math.floorDiv(blockZ + EarthMap.HALF_HEIGHT, RailGrid.CELL_BLOCKS);
-        for (int ring = 0; ring <= 8; ring++) {
-            for (int dz = -ring; dz <= ring; dz++) {
-                for (int dx = -ring; dx <= ring; dx++) {
-                    if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) {
-                        continue;
-                    }
-                    int x = grid.wrapX(baseX + dx);
-                    int z = baseZ + dz;
-                    if (z >= 0 && z < grid.height() && grid.land(x, z)) {
-                        return new RailCell(x, z);
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     private static RailProfile.Surface surface(EarthMap map) {
-        return new RailProfile.Surface() {
-            @Override
-            public boolean water(int x, int z) {
-                return isWater(map, x, z);
-            }
-
-            @Override
-            public int surfaceY(int x, int z) {
-                return RailStations.surface(map, x, z);
-            }
-        };
+        return new SurfaceCache(map);
     }
 
-    private static boolean isWater(EarthMap map, int x, int z) {
-        return !map.isLand(x, z);
+    /**
+     * A block-level view of the baked map with a one-pixel cache. Corridor stamps are laid one
+     * block at a time, and eight consecutive blocks share one 8-block map pixel; without the cache
+     * the network build samples the same pixel ~8× (and the elevation layer four times per sample).
+     */
+    private static final class SurfaceCache implements RailProfile.Surface {
+        private final EarthMap map;
+        private int pixelX = Integer.MIN_VALUE;
+        private int pixelZ = Integer.MIN_VALUE;
+        private boolean water;
+        private int surfaceY;
+
+        private SurfaceCache(EarthMap map) {
+            this.map = map;
+        }
+
+        @Override
+        public boolean water(int x, int z) {
+            sample(x, z);
+            return this.water;
+        }
+
+        @Override
+        public int surfaceY(int x, int z) {
+            sample(x, z);
+            return this.surfaceY;
+        }
+
+        private void sample(int x, int z) {
+            int px = Math.floorMod(Math.floorDiv(x + EarthMap.HALF_WIDTH,
+                    EarthMap.BLOCKS_PER_PIXEL), this.map.pixelWidth());
+            int pz = Math.clamp(Math.floorDiv(z + EarthMap.HALF_HEIGHT,
+                    EarthMap.BLOCKS_PER_PIXEL), 0, this.map.pixelHeight() - 1);
+            if (px == this.pixelX && pz == this.pixelZ) {
+                return;
+            }
+            this.pixelX = px;
+            this.pixelZ = pz;
+            this.water = !this.map.isLand(x, z);
+            this.surfaceY = RailStations.surface(this.map, x, z);
+        }
     }
 
     private static Map<Long, List<RailStamp>> buildStamps(List<RailLine> lines,
@@ -421,7 +419,9 @@ public final class RailLines {
             addStationStamps(index, station);
         }
         for (RailLine line : lines) {
-            addLineStamps(index, line, map);
+            if (line.hasCorridor()) {
+                addLineStamps(index, line, map);
+            }
         }
         Map<Long, List<RailStamp>> sealed = new HashMap<>();
         for (Map.Entry<Long, List<RailStamp>> entry : index.entrySet()) {
@@ -433,20 +433,21 @@ public final class RailLines {
     private static void addLineStamps(Map<Long, List<RailStamp>> index, RailLine line,
                                       EarthMap map) {
         List<RailNode> nodes = line.nodes();
+        RailProfile.Surface surface = surface(map);
         for (int i = 0; i < nodes.size(); i++) {
             RailNode previous = nodes.get(Math.max(0, i - 1));
             RailNode current = nodes.get(i);
             RailNode next = nodes.get(Math.min(nodes.size() - 1, i + 1));
-            int dirX = Integer.signum(EarthMap.wrapDelta(current.x(), next.x()));
+            int dirX = (int) Math.signum(line.wrapDelta(current.x(), next.x()));
             int dirZ = Integer.signum(next.z() - current.z());
             if (dirX == 0 && dirZ == 0) {
-                dirX = Integer.signum(EarthMap.wrapDelta(previous.x(), current.x()));
+                dirX = (int) Math.signum(line.wrapDelta(previous.x(), current.x()));
                 dirZ = Integer.signum(current.z() - previous.z());
             }
-            RailShape shape = shape(previous, current, next);
-            boolean bridge = isWater(map, current.x(), current.z());
+            RailShape shape = shape(previous, current, next, line);
+            boolean bridge = surface.water(current.x(), current.z());
             boolean tunnel = !bridge
-                    && RailStations.surface(map, current.x(), current.z()) > current.y() + 1;
+                    && surface.surfaceY(current.x(), current.z()) > current.y() + 1;
             RailStamp stamp = RailStamp.track(current.x(), current.y(), current.z(), shape,
                     bridge, tunnel, dirX, dirZ);
             addStamp(index, stamp);
@@ -556,10 +557,11 @@ public final class RailLines {
         index.computeIfAbsent(key, ignored -> new ArrayList<>()).add(stamp);
     }
 
-    private static RailShape shape(RailNode previous, RailNode current, RailNode next) {
-        int inX = Integer.signum(EarthMap.wrapDelta(previous.x(), current.x()));
+    private static RailShape shape(RailNode previous, RailNode current, RailNode next,
+                                   RailLine line) {
+        int inX = (int) Math.signum(line.wrapDelta(previous.x(), current.x()));
         int inZ = Integer.signum(current.z() - previous.z());
-        int outX = Integer.signum(EarthMap.wrapDelta(current.x(), next.x()));
+        int outX = (int) Math.signum(line.wrapDelta(current.x(), next.x()));
         int outZ = Integer.signum(next.z() - current.z());
         int toPrevX = -inX;
         int toPrevZ = -inZ;
@@ -621,13 +623,6 @@ public final class RailLines {
 
     private static long blockKey(int x, int z) {
         return ((long) x << 32) ^ (z & 0xFFFFFFFFL);
-    }
-
-    private static int centreX(int cellX) {        return -EarthMap.HALF_WIDTH + cellX * RailGrid.CELL_BLOCKS + RailGrid.CELL_BLOCKS / 2;
-    }
-
-    private static int centreZ(int cellZ) {
-        return -EarthMap.HALF_HEIGHT + cellZ * RailGrid.CELL_BLOCKS + RailGrid.CELL_BLOCKS / 2;
     }
 
     /** Immutable init snapshot: stations, lines and the chunk index. */

@@ -73,7 +73,7 @@ public final class RailStations {
         int district = Math.min(new CityLocation(city).renderRadius(), 380);
         int ring = Math.max(MIN_RING, district + RING_CLEARANCE);
         double bearing = Math.atan2(partner.z() - (double) city.z(),
-                wrapDelta(city.x(), partner.x(), 2 * EarthMap.HALF_WIDTH));
+                RailGeometry.deltaX(city.x(), partner.x()));
         int bestX = city.x();
         int bestZ = city.z();
         int bestSurface = surface(map, city.x(), city.z());
@@ -117,8 +117,9 @@ public final class RailStations {
         if (side == 0) {
             side = 1;
         }
-        int outSign = Integer.signum((partner.x() - bestX) * dirX
-                + (partner.z() - bestZ) * dirZ);
+        int outSign = Integer.signum((int) Math.round(
+                RailGeometry.deltaX(bestX, partner.x()) * dirX
+                        + (partner.z() - (double) bestZ) * dirZ));
         return new RailStation(city.id(), city.name(), bestX, bestZ, bestSurface + 1,
                 bestX + acrossX * BOARD_ACROSS * side, bestZ + acrossZ * BOARD_ACROSS * side,
                 dirX, dirZ, outSign == 0 ? 1 : outSign);
@@ -136,7 +137,7 @@ public final class RailStations {
         if (entry == null || entry.stations().isEmpty()) {
             return null;
         }
-        double toX = EarthMap.wrapDelta(city.x(), partner.x());
+        double toX = RailGeometry.deltaX(city.x(), partner.x());
         double toZ = partner.z() - (double) city.z();
         double length = Math.max(1.0, Math.hypot(toX, toZ));
         double ux = toX / length;
@@ -197,7 +198,7 @@ public final class RailStations {
                 dirZ = railEastWest ? 0 : 1;
             } else {
                 double bearing = Math.atan2(partner.z() - (double) city.z(),
-                        wrapDelta(city.x(), partner.x(), 2 * EarthMap.HALF_WIDTH));
+                        RailGeometry.deltaX(city.x(), partner.x()));
                 dirX = Math.abs(Math.cos(bearing)) >= Math.abs(Math.sin(bearing))
                         ? (int) Math.signum(Math.round(Math.cos(bearing))) : 0;
                 dirZ = dirX == 0 ? (int) Math.signum(Math.round(Math.sin(bearing))) : 0;
@@ -217,8 +218,9 @@ public final class RailStations {
             if (side == 0) {
                 side = 1;
             }
-            int outSign = Integer.signum((partner.x() - x) * dirX
-                    + (partner.z() - z) * dirZ);
+            int outSign = Integer.signum((int) Math.round(
+                    RailGeometry.deltaX(x, partner.x()) * dirX
+                            + (partner.z() - (double) z) * dirZ));
             return new RailStation(city.id(), city.name(), x, z, y,
                     x + acrossX * BOARD_ACROSS * side, z + acrossZ * BOARD_ACROSS * side,
                     dirX, dirZ, outSign == 0 ? 1 : outSign);
@@ -270,9 +272,9 @@ public final class RailStations {
         return best;
     }
 
-    /** @return squared cylinder distance between two city centres. */
+    /** @return squared cylinder/plane distance between two city centres. */
     public static double distanceSqr(City a, City b) {
-        double dx = wrapDelta(a.x(), b.x(), 2 * EarthMap.HALF_WIDTH);
+        double dx = RailGeometry.deltaX(a.x(), b.x());
         double dz = b.z() - (double) a.z();
         return dx * dx + dz * dz;
     }

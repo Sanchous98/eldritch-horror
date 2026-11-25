@@ -19,7 +19,9 @@ import org.jspecify.annotations.Nullable;
  * Stamps the cached rail network into the chunk being generated ({@code design/30-transport.md},
  * stage 2).
  *
- * <p>Called from {@code EarthChunkGenerator.applyBiomeDecoration} after the towns. Every write is
+ * <p>Called from {@code EarthChunkGenerator.applyBiomeDecoration} after the towns. Only lines with
+ * a stamped corridor are in the index (see {@code trainMaxCorridorBlocks}); a long intercity line
+ * has no entries and its train travels the planned polyline over generated ground. Every write is
  * clipped to the current chunk and the network is pre-bucketed by chunk, so a chunk pays one map
  * lookup plus its own few dozen stamps — never a scan of a line. A line crossing water becomes a
  * dark-oak deck with railings at a fixed height; a line through a ridge carves a bounded 3-wide

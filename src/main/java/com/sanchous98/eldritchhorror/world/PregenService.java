@@ -36,8 +36,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  *
  * <ul>
  *   <li><b>content</b> ({@code cities}, {@code rail}, {@code all}) — a bounded in-memory queue of
- *       the 24 city districts plus a 3x3 chunk corridor around every rail node (73k chunks on the
- *       current world). One-shot, minutes.</li>
+ *       the 24 city districts plus a 3x3 chunk corridor around every <em>stamped</em> rail node
+ *       (long intercity lines have no worldgen corridor, so they are skipped). One-shot, minutes.</li>
  *   <li><b>world</b> — the whole playable cylinder: {@code 8192 * 4096 = 33,554,432} chunks. This
  *       cannot be queued in memory, so it is a cursor job: the next chunk position and the count
  *       live in {@link State} and are flushed every {@value #CURSOR_SAVE_EVERY} chunks, which makes
@@ -424,6 +424,10 @@ public final class PregenService {
 
     private static void queueRail() {
         for (RailLine line : RailLines.all()) {
+            if (!line.hasCorridor()) {
+                // A long intercity line has no stamped blocks, so there is no corridor to pregen.
+                continue;
+            }
             for (RailNode node : line.nodes()) {
                 int cx = node.x() >> 4;
                 int cz = node.z() >> 4;

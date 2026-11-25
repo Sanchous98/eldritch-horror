@@ -91,4 +91,39 @@ public final class RailProfile {
         }
         return (int) Math.round((double) sum / (to - from + 1));
     }
+
+    /**
+     * Builds a height for each waypoint of a <b>sparse</b> planned line (a long intercity line whose
+     * corridor is not stamped). There is no one-block-per-step ramp to respect: consecutive
+     * waypoints can be hundreds of blocks apart, and the locomotive interpolates the height along
+     * the segment. Heights follow the terrain at the waypoints, water is lifted to bridge height, and
+     * only the two station heights are pinned.
+     *
+     * @param points   sparse waypoint chain
+     * @param surface  block-level terrain
+     * @param seaLevel worldgen sea level
+     * @param startY   rail Y at the first station (pinned)
+     * @param endY     rail Y at the last station (pinned)
+     * @return one rail-block Y per waypoint
+     */
+    public static int[] buildWaypoints(List<RailPathMath.RailPoint> points, Surface surface,
+                                       int seaLevel, int startY, int endY) {
+        if (points.isEmpty()) {
+            throw new IllegalArgumentException("a rail profile needs at least one point");
+        }
+        int size = points.size();
+        int[] y = new int[size];
+        for (int i = 0; i < size; i++) {
+            RailPathMath.RailPoint point = points.get(i);
+            y[i] = surface.water(point.x(), point.z())
+                    ? seaLevel + BRIDGE_HEIGHT
+                    : surface.surfaceY(point.x(), point.z()) + 1;
+        }
+        y[0] = startY;
+        y[size - 1] = endY;
+        for (int i = 0; i < size; i++) {
+            y[i] = Math.clamp(y[i], -60, 300);
+        }
+        return y;
+    }
 }

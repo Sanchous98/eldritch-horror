@@ -57,12 +57,13 @@ public final class RailRouteFinder {
      * @param maxLengthCells maximum geometric path length in cells
      * @param waterCost      cost of one water cell (land costs one)
      * @param slopeCost      cost per block of surface-height change between adjacent land cells
+     * @param maxExpansions  safety cap on expanded cells; scaled with the route, not a fixed count
      */
     public record Options(int maxWaterCells, int maxLengthCells, double waterCost,
-                          double slopeCost) {
+                          double slopeCost, int maxExpansions) {
         /** Validates the ranges. */
         public Options {
-            if (maxWaterCells < 0 || maxLengthCells < 1) {
+            if (maxWaterCells < 0 || maxLengthCells < 1 || maxExpansions < 1) {
                 throw new IllegalArgumentException("invalid rail search bounds");
             }
             if (waterCost < 1.0 || slopeCost < 0.0) {
@@ -71,7 +72,20 @@ public final class RailRouteFinder {
         }
 
         /**
-         * The production tuning for a line at most {@code maxBlocks} long.
+         * Legacy four-argument tuning: keeps the historical fixed expansion safety cap.
+         *
+         * @param maxWaterCells  longest consecutive run of water cells a bridge may span
+         * @param maxLengthCells maximum geometric path length in cells
+         * @param waterCost      cost of one water cell (land costs one)
+         * @param slopeCost      cost per block of surface-height change between adjacent land cells
+         */
+        public Options(int maxWaterCells, int maxLengthCells, double waterCost,
+                       double slopeCost) {
+            this(maxWaterCells, maxLengthCells, waterCost, slopeCost, MAX_EXPANSIONS);
+        }
+
+        /**
+         * The legacy tuning for a fine line at most {@code maxBlocks} long.
          *
          * <p>Up to six water cells (384 blocks at the 64-block grid) may be bridged: enough for a
          * channel or estuary at this compressed map scale, not enough for an open-sea shortcut.
@@ -82,7 +96,40 @@ public final class RailRouteFinder {
          */
         public static Options forLine(double maxBlocks) {
             int cells = (int) Math.ceil(Math.max(1.0, maxBlocks) / RailGrid.CELL_BLOCKS) + 2;
-            return new Options(6, cells, 18.0, 0.05);
+            return of(cells, 6, 0.05);
+        }
+
+        /**
+         * Bounds for a route of {@code maxLengthCells} cells whose water allowance is explicit.
+         *
+         * <p>The expansion cap grows with the square of the route, so a 180 km intercity search is
+         * not aborted by a budget that was tuned for a one-kilometre hop; the board itself remains
+         * the hard stop, because a closed cell is never expanded twice.
+         *
+         * @param maxLengthCells maximum path length in cells
+         * @param maxWaterCells  longest bridge, in cells
+         * @param slopeCost      cost per block of height change
+         * @return the options
+         */
+        public static Options of(int maxLengthCells, int maxWaterCells, double slopeCost) {
+            return of(maxLengthCells, maxWaterCells, 18.0, slopeCost);
+        }
+
+        /**
+         * Bounds with an explicit water cost. The relaxed intercity attempt uses a low water cost
+         * because a 1:1 map's ground is prebuilt/unknown: a route should not tour a continent to
+         * avoid a bay whose real banks the baked layers do not describe.
+         *
+         * @param maxLengthCells maximum path length in cells
+         * @param maxWaterCells  longest bridge, in cells
+         * @param waterCost      cost of one water cell (land costs one)
+         * @param slopeCost      cost per block of height change
+         * @return the options
+         */
+        public static Options of(int maxLengthCells, int maxWaterCells, double waterCost,
+                                 double slopeCost) {
+            int expansions = Math.max(MAX_EXPANSIONS, maxLengthCells * 4_000);
+            return new Options(maxWaterCells, maxLengthCells, waterCost, slopeCost, expansions);
         }
     }
 
@@ -112,9 +159,6 @@ public final class RailRouteFinder {
      */
     public static @Nullable List<RailCell> find(RailGrid grid, RailCell start, RailCell goal,
                                                 Options options, Scratch scratch) {
-        if (!grid.land(start.x(), start.z()) || !grid.land(goal.x(), goal.z())) {
-            return null;
-        }
         int width = grid.width();
         int size = width * grid.height();
         scratch.ensure(size);
@@ -129,11 +173,15 @@ public final class RailRouteFinder {
 
         int startIndex = indexOf(grid, start.x(), start.z(), width);
         int goalIndex = indexOf(grid, goal.x(), goal.z(), width);
+        if (startIndex < 0 || goalIndex < 0) {
+            return null;
+        }
         cost[startIndex] = 0.0F;
         along[startIndex] = 0.0F;
         PriorityQueue<Open> open = new PriorityQueue<>();
         open.add(new Open(heuristic(grid, start.x(), start.z(), goal), startIndex));
         int expanded = 0;
+        boolean unlimitedWater = options.maxWaterCells() >= options.maxLengthCells();
 
         while (!open.isEmpty()) {
             Open current = open.poll();
@@ -145,7 +193,7 @@ public final class RailRouteFinder {
             if (index == goalIndex) {
                 return smooth(grid, rebuild(cameFrom, goalIndex, width));
             }
-            if (++expanded > MAX_EXPANSIONS) {
+            if (++expanded > options.maxExpansions()) {
                 return null;
             }
             int x = index % width;
@@ -157,7 +205,7 @@ public final class RailRouteFinder {
                     }
                     int nx = grid.wrapX(x + dx);
                     int nz = z + dz;
-                    if (nz < 0 || nz >= grid.height()) {
+                    if (nz < 0 || nz >= grid.height() || nx < 0 || nx >= width) {
                         continue;
                     }
                     boolean diagonal = dx != 0 && dz != 0;
@@ -166,7 +214,7 @@ public final class RailRouteFinder {
                     if (diagonal && (!nextLand || !grid.land(x, z))) {
                         continue;
                     }
-                    if (!nextLand && !waterRunAllowed(grid, cameFrom, index,
+                    if (!nextLand && !unlimitedWater && !waterRunAllowed(grid, cameFrom, index,
                             options.maxWaterCells())) {
                         continue;
                     }
@@ -219,6 +267,24 @@ public final class RailRouteFinder {
         return total;
     }
 
+    /**
+     * @param path cell path
+     * @param grid the board the path was found on (cylinder or plane)
+     * @return the geometric length of a cell path in cells
+     */
+    public static double pathLength(List<RailCell> path, RailGrid grid) {
+        double total = 0.0;
+        for (int i = 1; i < path.size(); i++) {
+            RailCell from = path.get(i - 1);
+            RailCell to = path.get(i);
+            int dx = Math.abs(grid.wrapDelta(from.x(), to.x()));
+            int dz = Math.abs(to.z() - from.z());
+            int min = Math.min(dx, dz);
+            total += Math.max(dx, dz) + (SQRT2 - 1.0) * min;
+        }
+        return total;
+    }
+
     /** @return the shortest signed column delta, in cells, on a cylinder of {@code width} columns. */
     private static int wrapDeltaCells(int fromX, int toX, int width) {
         int delta = Math.floorMod(toX - fromX, width);
@@ -245,7 +311,11 @@ public final class RailRouteFinder {
     }
 
     private static int indexOf(RailGrid grid, int x, int z, int width) {
-        return z * width + grid.wrapX(x);
+        int column = grid.wrapX(x);
+        if (column < 0 || column >= width || z < 0 || z >= grid.height()) {
+            return -1;
+        }
+        return z * width + column;
     }
 
     private static float heuristic(RailGrid grid, int x, int z, RailCell goal) {

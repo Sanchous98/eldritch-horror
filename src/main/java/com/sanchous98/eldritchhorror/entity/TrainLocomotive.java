@@ -1,7 +1,6 @@
 package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
-import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.rail.RailLine;
 import com.sanchous98.eldritchhorror.world.rail.RailNode;
 import com.sanchous98.eldritchhorror.world.rail.RailSample;
@@ -107,6 +106,7 @@ public class TrainLocomotive extends TrainCar {
                           double blocksPerTick, int wagonCount, ChunkPos initialTicket) {
         this.line = line;
         this.direction = direction == 0 ? 0 : 1;
+        this.trail.setWrapWidth(line.wrapWidth());
         this.ticksUntilDeparture = Math.max(0, countdownTicks);
         this.departureClock = departureAt;
         this.speed = Math.max(0.1, blocksPerTick);
@@ -315,7 +315,7 @@ public class TrainLocomotive extends TrainCar {
         this.trail.clear();
         RailSample start = rail.sample(this.direction, 0.0);
         RailSample ahead = rail.sample(this.direction, Math.min(1.0, rail.length()));
-        double dx = EarthMap.wrapDelta(start.x(), ahead.x());
+        double dx = rail.wrapDelta(start.x(), ahead.x());
         double dz = ahead.z() - start.z();
         double length = Math.sqrt(dx * dx + dz * dz);
         if (length < 1.0E-6) {
@@ -345,22 +345,31 @@ public class TrainLocomotive extends TrainCar {
             this.arrive(level);
             return;
         }
-        RailNode current = rail.nodeAt(this.direction, this.travelled);
-        RailNode ahead = rail.nodeAt(this.direction,
-                Math.min(rail.length(), this.travelled + LOOKAHEAD));
-        if (!level.isLoaded(new BlockPos(current.x(), current.y(), current.z()))) {
-            return; // the ticket is still settling; wait without accusing the line
-        }
-        String obstruction = obstruction(level, current);
-        if (obstruction == null) {
-            obstruction = obstruction(level, ahead);
-        }
-        if (obstruction != null) {
-            if ("unloaded".equals(obstruction)) {
+        if (!rail.hasCorridor()) {
+            // No stamped corridor: a sparse planned polyline has no rail block at every node, and
+            // the ground is whatever the generator produced. Only wait for the ticket to settle.
+            BlockPos here = BlockPos.containing(this.getX(), this.getY(), this.getZ());
+            if (!level.isLoaded(here)) {
                 return;
             }
-            this.stop(obstruction);
-            return;
+        } else {
+            RailNode current = rail.nodeAt(this.direction, this.travelled);
+            RailNode ahead = rail.nodeAt(this.direction,
+                    Math.min(rail.length(), this.travelled + LOOKAHEAD));
+            if (!level.isLoaded(new BlockPos(current.x(), current.y(), current.z()))) {
+                return; // the ticket is still settling; wait without accusing the line
+            }
+            String obstruction = obstruction(level, current);
+            if (obstruction == null) {
+                obstruction = obstruction(level, ahead);
+            }
+            if (obstruction != null) {
+                if ("unloaded".equals(obstruction)) {
+                    return;
+                }
+                this.stop(obstruction);
+                return;
+            }
         }
         if (this.stopped) {
             this.stopped = false;
@@ -553,9 +562,16 @@ public class TrainLocomotive extends TrainCar {
         super.remove(reason);
     }
 
-    /** @return the block under the locomotive as {@code rail} or {@code blocked (...)}. */
+    /** @return the block under the locomotive as {@code rail}/{@code planned} or {@code blocked (...)}. */
     public String railStateLabel(ServerLevel level) {
+        RailLine rail = this.line;
         RailNode node = this.currentRail();
+        if (rail == null) {
+            return "no line";
+        }
+        if (!rail.hasCorridor()) {
+            return "planned (no corridor)";
+        }
         if (node == null) {
             return "no line";
         }

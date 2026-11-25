@@ -3158,10 +3158,25 @@ public final class ModConfig {
             BUILDER.comment("Boarding window before departure, in in-game minutes (60 = 1 hour).")
                     .defineInRange("trainBoardingMinutes", 60, 1, 720);
 
-    /** Longest generated rail line, in blocks (also the nearest-partner search bound). */
+    /**
+     * Longest generated rail line, in blocks (also the nearest-partner search bound).
+     *
+     * <p>A 1:1 map package places curated cities up to ~280 km apart, so the default is the whole
+     * useful range of that layout; the legacy compressed map simply never selects a pair that far
+     * away because partner selection is nearest-first.
+     */
     public static final ModConfigSpec.IntValue TRAIN_MAX_LINE_BLOCKS =
             BUILDER.comment("Longest generated rail line, in blocks (also the partner search bound).")
-                    .defineInRange("trainMaxLineBlocks", 25000, 500, 60000);
+                    .defineInRange("trainMaxLineBlocks", 400_000, 500, 400_000);
+
+    /**
+     * Lines longer than this are planned and timetabled but their worldgen corridor is not stamped.
+     * A 1:1 corridor of 180 km is about 11,000 chunks; stamping it would make a train ride generate
+     * them all. The consist travels the planned line over whatever the world generator produced.
+     */
+    public static final ModConfigSpec.IntValue TRAIN_MAX_CORRIDOR_BLOCKS =
+            BUILDER.comment("Longest rail line whose blocks are stamped into worldgen (0 = none).")
+                    .defineInRange("trainMaxCorridorBlocks", 40_000, 0, 400_000);
 
     /** Hard cap on simultaneously live consists. */
     public static final ModConfigSpec.IntValue MAX_TRAINS =

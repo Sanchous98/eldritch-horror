@@ -1,0 +1,731 @@
+{
+  "version": 1,
+  "name": "earth-1to1",
+  "cities": [
+    {
+      "id": "bangkok",
+      "name": "Bangkok",
+      "x": 97602,
+      "z": -33378,
+      "radius": 5600,
+      "station": {
+        "dx": 1622,
+        "dz": 2101,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "beijing",
+      "name": "Beijing",
+      "x": 70287,
+      "z": -51972,
+      "radius": 5600,
+      "station": {
+        "dx": 1674,
+        "dz": 155,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "buenos_aires",
+      "name": "Buenos Aires",
+      "x": -108617,
+      "z": 28562,
+      "radius": 5600,
+      "station": {
+        "dx": 651,
+        "dz": -1570,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "cairo",
+      "name": "Cairo",
+      "x": 31197,
+      "z": 17504,
+      "radius": 5600,
+      "station": {
+        "dx": 1002,
+        "dz": -2012,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "cape_town",
+      "name": "Cape Town",
+      "x": -3958,
+      "z": 95255,
+      "radius": 5600,
+      "station": {
+        "dx": 176,
+        "dz": 11,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "delhi",
+      "name": "Delhi",
+      "x": 65880,
+      "z": -14430,
+      "radius": 5600,
+      "station": {
+        "dx": 1046,
+        "dz": -3218,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "istanbul",
+      "name": "Istanbul",
+      "x": 23838,
+      "z": 2994,
+      "radius": 5600,
+      "station": {
+        "dx": -151,
+        "dz": -774,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "jakarta",
+      "name": "Jakarta",
+      "x": 117300,
+      "z": -15744,
+      "radius": 5600,
+      "station": {
+        "dx": -1671,
+        "dz": -3549,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "lagos",
+      "name": "Lagos",
+      "x": -11077,
+      "z": 46024,
+      "radius": 5600,
+      "station": {
+        "dx": 88,
+        "dz": 4800,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "lima",
+      "name": "Lima",
+      "x": -105547,
+      "z": -12922,
+      "radius": 5600,
+      "station": {
+        "dx": 1067,
+        "dz": -44,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "london",
+      "name": "London",
+      "x": -3322,
+      "z": -15651,
+      "radius": 5600,
+      "station": {
+        "dx": 263,
+        "dz": -2610,
+        "axis": "north_south"
+      },
+      "landmarks": [
+        {
+          "name": "Big Ben",
+          "dx": 208,
+          "dz": 719
+        },
+        {
+          "name": "Tower Bridge",
+          "dx": 3617,
+          "dz": 188
+        },
+        {
+          "name": "Buckingham Palace",
+          "dx": -991,
+          "dz": 641
+        }
+      ],
+      "stations": [
+        {
+          "name": "King's Cross",
+          "dx": 263,
+          "dz": -2610,
+          "axis": "north_south"
+        },
+        {
+          "name": "Liverpool Street",
+          "dx": 3139,
+          "dz": -1172,
+          "axis": "east_west"
+        },
+        {
+          "name": "Waterloo",
+          "dx": 998,
+          "dz": 453,
+          "axis": "east_west"
+        },
+        {
+          "name": "Paddington",
+          "dx": -3319,
+          "dz": -907,
+          "axis": "east_west"
+        }
+      ],
+      "places": [
+        {
+          "name": "Borough Market",
+          "dx": 2536,
+          "dz": 188,
+          "type": "market"
+        },
+        {
+          "name": "the British Museum",
+          "dx": 42,
+          "dz": -1349,
+          "type": "museum"
+        },
+        {
+          "name": "Westminster Abbey",
+          "dx": 21,
+          "dz": 874,
+          "type": "temple"
+        },
+        {
+          "name": "the Underground at King's Cross",
+          "dx": 263,
+          "dz": -2610,
+          "type": "underground"
+        },
+        {
+          "name": "the Monument",
+          "dx": 2882,
+          "dz": -332,
+          "type": "vantage"
+        }
+      ]
+    },
+    {
+      "id": "los_angeles",
+      "name": "Los Angeles",
+      "x": -54148,
+      "z": -86945,
+      "radius": 5600,
+      "station": {
+        "dx": 664,
+        "dz": -442,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "mexico_city",
+      "name": "Mexico City",
+      "x": -78299,
+      "z": -64135,
+      "radius": 5600,
+      "station": {
+        "dx": -1974,
+        "dz": -1625,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "moscow",
+      "name": "Moscow",
+      "x": 21945,
+      "z": -14467,
+      "radius": 5600,
+      "station": {
+        "dx": -2318,
+        "dz": -2289,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "mumbai",
+      "name": "Mumbai",
+      "x": 72698,
+      "z": 101,
+      "radius": 5600,
+      "station": {
+        "dx": -4440,
+        "dz": 4800,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "nairobi",
+      "name": "Nairobi",
+      "x": 46750,
+      "z": 51963,
+      "radius": 5600,
+      "station": {
+        "dx": 122,
+        "dz": -11,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "new_york",
+      "name": "New York",
+      "x": -53426,
+      "z": -40029,
+      "radius": 5600,
+      "station": {
+        "dx": 2430,
+        "dz": -4412,
+        "axis": "east_west"
+      },
+      "landmarks": [
+        {
+          "name": "Empire State",
+          "dx": 1713,
+          "dz": -3936
+        }
+      ],
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        },
+        {
+          "name": "Empire State",
+          "dx": 1713,
+          "dz": -3936,
+          "type": "vantage"
+        }
+      ]
+    },
+    {
+      "id": "paris",
+      "name": "Paris",
+      "x": 0,
+      "z": 0,
+      "radius": 5600,
+      "station": {
+        "dx": 227,
+        "dz": -2687,
+        "axis": "north_south"
+      },
+      "landmarks": [
+        {
+          "name": "Eiffel Tower",
+          "dx": -4226,
+          "dz": -199
+        },
+        {
+          "name": "Notre-Dame",
+          "dx": -168,
+          "dz": 398
+        },
+        {
+          "name": "Louvre",
+          "dx": -1069,
+          "dz": -442
+        },
+        {
+          "name": "Arc de Triomphe",
+          "dx": -4189,
+          "dz": -1902
+        },
+        {
+          "name": "Sacre-Coeur",
+          "dx": -667,
+          "dz": -3328
+        }
+      ],
+      "stations": [
+        {
+          "name": "Gare du Nord",
+          "dx": 227,
+          "dz": -2687,
+          "axis": "north_south"
+        },
+        {
+          "name": "Gare de l'Est",
+          "dx": 498,
+          "dz": -2178,
+          "axis": "north_south"
+        },
+        {
+          "name": "Gare de Lyon",
+          "dx": 1619,
+          "dz": 1360,
+          "axis": "north_south"
+        },
+        {
+          "name": "Montparnasse",
+          "dx": -2285,
+          "dz": 1725,
+          "axis": "north_south"
+        },
+        {
+          "name": "Saint-Lazare",
+          "dx": -1992,
+          "dz": -2145,
+          "axis": "north_south"
+        }
+      ],
+      "places": [
+        {
+          "name": "Les Halles",
+          "dx": -417,
+          "dz": -597,
+          "type": "market"
+        },
+        {
+          "name": "the Louvre",
+          "dx": -1069,
+          "dz": -442,
+          "type": "museum"
+        },
+        {
+          "name": "Notre-Dame",
+          "dx": -168,
+          "dz": 398,
+          "type": "temple"
+        },
+        {
+          "name": "the Catacombs",
+          "dx": -1450,
+          "dz": 2510,
+          "type": "underground"
+        },
+        {
+          "name": "the Eiffel Tower",
+          "dx": -4226,
+          "dz": -199,
+          "type": "vantage"
+        }
+      ]
+    },
+    {
+      "id": "rio_de_janeiro",
+      "name": "Rio De Janeiro",
+      "x": -86635,
+      "z": 37581,
+      "radius": 5600,
+      "station": {
+        "dx": -1856,
+        "dz": -365,
+        "axis": "east_west"
+      },
+      "landmarks": [
+        {
+          "name": "Christ the Redeemer",
+          "dx": -3856,
+          "dz": 4987
+        }
+      ],
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        },
+        {
+          "name": "Christ the Redeemer",
+          "dx": -3856,
+          "dz": 4987,
+          "type": "vantage"
+        }
+      ]
+    },
+    {
+      "id": "rome",
+      "name": "Rome",
+      "x": 10599,
+      "z": 11985,
+      "radius": 5600,
+      "station": {
+        "dx": 456,
+        "dz": 254,
+        "axis": "east_west"
+      },
+      "landmarks": [
+        {
+          "name": "Colosseum",
+          "dx": -348,
+          "dz": 1393
+        },
+        {
+          "name": "St Peter's",
+          "dx": -3521,
+          "dz": 66
+        }
+      ],
+      "stations": [
+        {
+          "name": "Termini",
+          "dx": 456,
+          "dz": 254,
+          "axis": "east_west"
+        },
+        {
+          "name": "Tiburtina",
+          "dx": 2361,
+          "dz": -896,
+          "axis": "east_west"
+        },
+        {
+          "name": "Ostiense",
+          "dx": -994,
+          "dz": 3361,
+          "axis": "east_west"
+        }
+      ],
+      "places": [
+        {
+          "name": "Campo de' Fiori",
+          "dx": -2022,
+          "dz": 807,
+          "type": "market"
+        },
+        {
+          "name": "the Vatican Museums",
+          "dx": -3546,
+          "dz": -409,
+          "type": "museum"
+        },
+        {
+          "name": "St Peter's",
+          "dx": -3521,
+          "dz": 66,
+          "type": "temple"
+        },
+        {
+          "name": "the Catacombs of San Callisto",
+          "dx": 1127,
+          "dz": 4843,
+          "type": "underground"
+        },
+        {
+          "name": "the Altar of the Fatherland",
+          "dx": -1036,
+          "dz": 896,
+          "type": "vantage"
+        }
+      ]
+    },
+    {
+      "id": "seoul",
+      "name": "Seoul",
+      "x": 72624,
+      "z": -67800,
+      "radius": 5600,
+      "station": {
+        "dx": -644,
+        "dz": 1305,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "shanghai",
+      "name": "Shanghai",
+      "x": 88623,
+      "z": -67949,
+      "radius": 5600,
+      "station": {
+        "dx": -1780,
+        "dz": -2134,
+        "axis": "north_south"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    },
+    {
+      "id": "sydney",
+      "name": "Sydney",
+      "x": 32915,
+      "z": -181681,
+      "radius": 5600,
+      "station": {
+        "dx": -259,
+        "dz": 1592,
+        "axis": "north_south"
+      },
+      "landmarks": [
+        {
+          "name": "Opera House",
+          "dx": 555,
+          "dz": -1327
+        }
+      ],
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        },
+        {
+          "name": "Opera House",
+          "dx": 555,
+          "dz": -1327,
+          "type": "vantage"
+        }
+      ]
+    },
+    {
+      "id": "tokyo",
+      "name": "Tokyo",
+      "x": 65006,
+      "z": -82491,
+      "radius": 5600,
+      "station": {
+        "dx": 4800,
+        "dz": -553,
+        "axis": "east_west"
+      },
+      "places": [
+        {
+          "name": "the station",
+          "dx": 0,
+          "dz": 0,
+          "type": "station"
+        }
+      ]
+    }
+  ]
+}

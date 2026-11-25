@@ -82,6 +82,7 @@ public final class ServerStateReset {
         SanityTicker.clear();
         CorruptionTicker.clear();
         TrainService.clear();
+        com.sanchous98.eldritchhorror.world.rail.RailLines.clear();
         com.sanchous98.eldritchhorror.world.city.quest.CityQuests.clear();
         RiftGates.clear();
         CitySigns.clear();

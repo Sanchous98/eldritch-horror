@@ -1,14 +1,20 @@
 package com.sanchous98.eldritchhorror.world.rail;
 
+import com.sanchous98.eldritchhorror.world.EarthMap;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One bidirectional rail service: two stations and the finished block-level line between them.
+ * One bidirectional rail service: two stations and the finished block-level (or planned) line.
  *
  * <p>Direction {@code 0} runs {@link #a()} to {@link #b()}, direction {@code 1} the reverse. The
  * schedule lives in the train service, not here, because it comes from config. The line can be
  * sampled by travelled distance; a locomotive never walks waypoint by waypoint.
+ *
+ * <p>A line carries a <b>corridor</b> only when it is short enough to stamp into worldgen (see
+ * {@link #hasCorridor()}). A long intercity line still has stations, a timetable and a consist, but
+ * its ground is whatever the world generator produced, so its node list is a sparse planned
+ * polyline and the locomotive does not demand a rail block under it.
  */
 public final class RailLine {
     private final String id;
@@ -18,24 +24,29 @@ public final class RailLine {
     private final RailSampler sampler;
     private final @Nullable RailNode firstBridge;
     private final @Nullable RailNode firstTunnel;
+    private final boolean corridor;
 
     /**
      * @param id          stable id, {@code <cityA>-<cityB>} in {@code a}/{@code b} order
      * @param a           first station
      * @param b           second station
-     * @param nodes       finished block path from {@code a} to {@code b}
+     * @param nodes       finished block path (dense for a corridor, sparse for a planned line)
      * @param firstBridge first bridge node, or {@code null}
      * @param firstTunnel first tunnel node, or {@code null}
+     * @param corridor    true when this line's rails are stamped into generated chunks
+     * @param wrapWidth   cylinder circumference in blocks, or {@code 0} for a 1:1 map plane
      */
     public RailLine(String id, RailStation a, RailStation b, List<RailNode> nodes,
-                    @Nullable RailNode firstBridge, @Nullable RailNode firstTunnel) {
+                    @Nullable RailNode firstBridge, @Nullable RailNode firstTunnel,
+                    boolean corridor, int wrapWidth) {
         this.id = id;
         this.a = a;
         this.b = b;
         this.nodes = List.copyOf(nodes);
-        this.sampler = new RailSampler(this.nodes);
+        this.sampler = new RailSampler(this.nodes, wrapWidth);
         this.firstBridge = firstBridge;
         this.firstTunnel = firstTunnel;
+        this.corridor = corridor;
     }
 
     /** @return the stable line id. */
@@ -61,6 +72,31 @@ public final class RailLine {
     /** @return the line length in blocks. */
     public double length() {
         return this.sampler.length();
+    }
+
+    /** @return true when this line's corridor is stamped into worldgen. */
+    public boolean hasCorridor() {
+        return this.corridor;
+    }
+
+    /** @return true when the horizontal axis wraps (the legacy Earth cylinder). */
+    public boolean wrapped() {
+        return this.sampler.wrapWidth() > 0;
+    }
+
+    /**
+     * @param fromX source block X
+     * @param toX   target block X
+     * @return the signed horizontal delta on this line's geometry
+     */
+    public double wrapDelta(double fromX, double toX) {
+        return this.sampler.wrapWidth() == 0 ? toX - fromX
+                : EarthMap.wrapDelta(fromX, toX);
+    }
+
+    /** @return the wrap width in blocks ({@code 0} on a 1:1 map plane). */
+    public int wrapWidth() {
+        return this.sampler.wrapWidth();
     }
 
     /** @return the first bridge node, for the debug probe. */
@@ -107,7 +143,7 @@ public final class RailLine {
         return this.sampler.nodeAt(along);
     }
 
-    /** @return the number of rail blocks. */
+    /** @return the number of rail blocks (or planned waypoints on an unstamped line). */
     public int size() {
         return this.nodes.size();
     }
