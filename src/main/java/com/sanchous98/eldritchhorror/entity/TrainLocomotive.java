@@ -67,7 +67,7 @@ public class TrainLocomotive extends TrainCar {
      * single structure block on the planned line would strand a consist (and its riders) forever;
      * the railway's own right-of-way is cleared instead.
      */
-    private static final int BLOCKED_BREAK_TICKS = 600;
+    private static final int BLOCKED_BREAK_TICKS = 200;
 
     /**
      * The 5×5 ticket uses vanilla's {@code DRAGON} type for the same reason the ship does: it is
@@ -303,7 +303,9 @@ public class TrainLocomotive extends TrainCar {
             }
         } else if (this.sailing) {
             if (this.riderCount() == 0) {
-                if (++this.emptyTicks > EMPTY_GRACE_TICKS) {
+                if (this.stopped) {
+                    this.emptyTicks = 0;
+                } else if (++this.emptyTicks > EMPTY_GRACE_TICKS) {
                     this.discard();
                     return;
                 }
@@ -367,6 +369,7 @@ public class TrainLocomotive extends TrainCar {
             this.arrive(level);
             return;
         }
+        clearNaturalAhead(level, rail);
         if (!rail.hasCorridor()) {
             // No stamped corridor: a sparse planned polyline has no rail block at every node, and
             // the ground is whatever the generator produced. Only wait for the ticket to settle.
@@ -423,6 +426,57 @@ public class TrainLocomotive extends TrainCar {
      * @return {@code null} when the rail and the space above it are clear, otherwise a short
      *         description of the obstruction
      */
+    /**
+     * Cuts the railway's own right-of-way through natural ground as the consist reaches it. The
+     * profile is planned from the baked map, so in new chunks it can sit inside a hill by a few
+     * blocks; waiting for the 10-second emergency break then ejected riders and despawned the
+     * empty consist. Player-built blocks are left alone (they still stop the train).
+     */
+    private void clearNaturalAhead(ServerLevel level, RailLine rail) {
+        RailNode current = rail.nodeAt(this.direction, this.travelled);
+        RailNode ahead = rail.nodeAt(this.direction,
+                Math.min(rail.length(), this.travelled + LOOKAHEAD));
+        for (RailNode node : new RailNode[]{current, ahead}) {
+            if (node == null) {
+                continue;
+            }
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    if (Math.abs(dx) + Math.abs(dz) > 1) {
+                        continue;
+                    }
+                    for (int dy = 0; dy <= 4; dy++) {
+                        BlockPos pos = new BlockPos(node.x() + dx, node.y() + dy, node.z() + dz);
+                        if (!level.isLoaded(pos)) {
+                            continue;
+                        }
+                        BlockState state = level.getBlockState(pos);
+                        if (state.is(BlockTags.RAILS) || state.isAir()
+                                || state.getCollisionShape(level, pos).isEmpty()) {
+                            continue;
+                        }
+                        if (naturalGround(state)) {
+                            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** @return true for terrain the crew may cut, false for anything a player built. */
+    private static boolean naturalGround(BlockState state) {
+        return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND)
+                || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.SNOW)
+                || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS)
+                || state.is(BlockTags.REPLACEABLE_BY_TREES)
+                || state.is(net.minecraft.world.level.block.Blocks.GRAVEL)
+                || state.is(net.minecraft.world.level.block.Blocks.CLAY)
+                || state.is(net.minecraft.world.level.block.Blocks.SNOW_BLOCK)
+                || state.is(net.minecraft.world.level.block.Blocks.MUD)
+                || state.is(net.minecraft.world.level.block.Blocks.PACKED_MUD);
+    }
+
     private static @Nullable String obstruction(ServerLevel level, RailNode node) {
         BlockPos pos = new BlockPos(node.x(), node.y(), node.z());
         if (!level.isLoaded(pos)) {
