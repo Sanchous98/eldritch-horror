@@ -54,6 +54,7 @@ import com.sanchous98.eldritchhorror.entity.RiteBinder;
 import com.sanchous98.eldritchhorror.entity.ShamblerOoze;
 import com.sanchous98.eldritchhorror.entity.ShoggothMass;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
+import com.sanchous98.eldritchhorror.entity.ShipCollisionPart;
 import com.sanchous98.eldritchhorror.entity.SporeBee;
 import com.sanchous98.eldritchhorror.entity.StarSpawn;
 import com.sanchous98.eldritchhorror.entity.StoneSentinel;
@@ -845,18 +846,36 @@ public final class ModEntities {
                                     EldritchHorror.id("tear_gas"))));
 
     /**
-     * The coastal packet ({@code design/30-transport.md}, stage 1): a large scheduled passenger hull.
-     * No spawn egg: it is spawned by {@code world/transport/ShipService} at its harbour, and boarding
-     * happens only through the fare interaction.
+     * The liner ({@code design/30-transport.md}, stage 1): a 91-block scheduled passenger vessel.
+     * No spawn egg: it is spawned by {@code world/transport/ShipService} at its harbour, and
+     * boarding happens only through the fare interaction. The registered size is the deck-planking
+     * slab; {@code CoastalPacket.makeBoundingBox} expands it to the rotated deck footprint.
      */
     public static final DeferredHolder<EntityType<?>, EntityType<CoastalPacket>> COASTAL_PACKET =
             ENTITY_TYPES.register("coastal_packet", () ->
                     EntityType.Builder.<CoastalPacket>of(CoastalPacket::new, MobCategory.MISC)
-                            .sized(5.5F, 3.6F)
-                            .eyeHeight(3.5F)
+                            .sized(18.0F, 1.0F)
+                            .eyeHeight(6.4F)
                             .clientTrackingRange(10)
                             .build(ResourceKey.create(Registries.ENTITY_TYPE,
                                     EldritchHorror.id("coastal_packet"))));
+
+    /**
+     * One invisible superstructure box carried by the liner ({@code entity/ShipCollisionPart}).
+     * No renderer, no spawn egg, no saves: it exists only to make the cabin block solid.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<ShipCollisionPart>>
+            SHIP_COLLISION_PART =
+            ENTITY_TYPES.register("ship_collision_part", () ->
+                    EntityType.Builder.<ShipCollisionPart>of(ShipCollisionPart::new,
+                                    MobCategory.MISC)
+                            .noLootTable()
+                            .sized(1.0F, 1.0F)
+                            .clientTrackingRange(10)
+                            .updateInterval(1)
+                            .dontTrackDeltas()
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE,
+                                    EldritchHorror.id("ship_collision_part"))));
 
     /**
      * The scheduled train's locomotive ({@code design/30-transport.md}, stage 2). No spawn egg: it
