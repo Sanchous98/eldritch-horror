@@ -124,7 +124,7 @@ public final class RailLines {
         }
         long started = System.nanoTime();
         int maxBlocks = ModConfig.loaded()
-                ? Math.clamp(ModConfig.TRAIN_MAX_LINE_BLOCKS.get(), 500, 60_000)
+                ? Math.clamp(ModConfig.TRAIN_MAX_LINE_BLOCKS.get(), 500, 400_000)
                 : 25_000;
         int maxPartners = ModConfig.loaded()
                 ? Math.clamp(ModConfig.MAX_PARTNERS_PER_CITY.get(), 1, 8)
