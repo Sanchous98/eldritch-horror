@@ -550,19 +550,25 @@ public final class EldritchCommands {
             ctx.getSource().sendFailure(Component.literal(cityId + " has no station anchor"));
             return 0;
         }
-        int built = 0;
+        // Stations are points in the existing city, not structures cut into it: report the real
+        // street-level stop for each anchor and place no blocks.
+        var level = ctx.getSource().getServer().overworld();
+        int found = 0;
         for (var station : stations) {
             int sx = entry.city().x() + Math.clamp(station.dx(), -4800, 4800);
             int sz = entry.city().z() + Math.clamp(station.dz(), -4800, 4800);
-            boolean axisX = station.axis().contains("east_west");
-            int laid = buildStation(ctx.getSource().getServer().overworld(), sx, sz, axisX, 120);
-            if (laid > 0) {
-                built++;
+            int[] spot = com.sanchous98.eldritchhorror.world.rail.RailStations
+                    .stopPoint(level, sx, sz);
+            if (spot != null) {
+                found++;
+                ctx.getSource().sendSuccess(() -> Component.literal(
+                        cityId + ": stop at " + spot[0] + " " + spot[2] + " " + spot[1]
+                                + " (existing city, nothing built)"), false);
             }
         }
-        int total = built;
+        int total = found;
         ctx.getSource().sendSuccess(() -> Component.literal(
-                cityId + ": " + total + " station(s) built."), false);
+                cityId + ": " + total + " usable stop(s), no blocks placed."), false);
         return 1;
     }
 

@@ -131,6 +131,54 @@ public final class RailStations {
      * and track stay aligned. {@code data} must say {@code north_south} or {@code east_west} to
      * fix the orientation; a rail's own shape is the fallback, then the partner bearing.
      */
+    /** The live overworld, used to put stops on real ground instead of package heights. */
+    private static volatile net.minecraft.server.level.@org.jspecify.annotations.Nullable ServerLevel surfaceLevel;
+
+    /** Sets the level used to resolve real stop surfaces; call before the network is built. */
+    public static void useSurface(net.minecraft.server.level.ServerLevel level) {
+        surfaceLevel = level;
+    }
+
+    /**
+     * Finds the nearest street-level column around an anchor: loaded chunk, surface above the sea,
+     * a solid block below and two blocks of air above. Returns {@code {x, z, y}} or {@code null}.
+     */
+    public static int @org.jspecify.annotations.Nullable [] stopPoint(
+            net.minecraft.server.level.ServerLevel level, int x, int z) {
+        int sea = level.getSeaLevel();
+        for (int radius = 0; radius <= 96; radius += 6) {
+            int samples = radius == 0 ? 1 : 16;
+            for (int i = 0; i < samples; i++) {
+                double angle = i * (2.0 * Math.PI / samples);
+                int px = x + (int) Math.round(radius * Math.cos(angle));
+                int pz = z + (int) Math.round(radius * Math.sin(angle));
+                level.getChunk(px >> 4, pz >> 4,
+                        net.minecraft.world.level.chunk.status.ChunkStatus.FULL, true);
+                int top = level.getHeight(
+                        net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                        px, pz);
+                if (top <= sea) {
+                    continue; // void or water column: not a place to stand
+                }
+                var below = new net.minecraft.core.BlockPos(px, top - 1, pz);
+                var at = new net.minecraft.core.BlockPos(px, top, pz);
+                var above = new net.minecraft.core.BlockPos(px, top + 1, pz);
+                if (!level.getBlockState(below).isSolid()) {
+                    continue;
+                }
+                if (!level.getBlockState(at).isAir() || !level.getBlockState(above).isAir()) {
+                    continue;
+                }
+                if (level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.END_PORTAL)
+                        || level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.NETHER_PORTAL)) {
+                    continue;
+                }
+                return new int[]{px, pz, top};
+            }
+        }
+        return null;
+    }
+
     /** The package station facing {@code partner}, or {@code null} when the city has none. */
     private static @Nullable RailStation packageStation(City city, City partner) {
         var entry = com.sanchous98.eldritchhorror.world.city.MapPackage.entry(city.id());
@@ -156,13 +204,26 @@ public final class RailStations {
         }
         int x = city.x() + Math.clamp(best.dx(), -4800, 4800);
         int z = city.z() + Math.clamp(best.dz(), -4800, 4800);
+        int y = best.y() == null ? 64 : best.y();
+        // The package anchor is often the real terminal, whose OSM rail yard the city generator
+        // left empty. Put the stop on the nearest real street surface instead of hovering over the
+        // void or sinking below the pavement. Nothing is built: the city is used as it is.
+        var level = surfaceLevel;
+        if (level != null) {
+            int[] spot = stopPoint(level, x, z);
+            if (spot != null) {
+                x = spot[0];
+                z = spot[1];
+                y = spot[2];
+            }
+        }
         boolean alongX = best.axis().contains("east_west");
         int dirX = alongX ? 1 : 0;
         int dirZ = alongX ? 0 : 1;
         int boardX = x - dirZ * BOARD_ACROSS;
         int boardZ = z + dirX * BOARD_ACROSS;
         int sign = Integer.signum((int) Math.round(ux * dirX + uz * dirZ));
-        return new RailStation(city.id(), city.name(), x, z, best.y() == null ? 64 : best.y(),
+        return new RailStation(city.id(), city.name(), x, z, y,
                 boardX, boardZ, dirX, dirZ, sign == 0 ? 1 : sign);
     }
 

@@ -196,6 +196,18 @@ public final class Prologue {
      * the modal (most common) height wins — streets and paving outnumber roofs and monuments, so
      * that level is the city's ground. Returns {@code null} if no safe surface can be found.
      */
+    /** @return true when a spot is open ground a player can stand on, not a portal or a void. */
+    private static boolean safeArrival(ServerLevel level, BlockPos spot) {
+        if (spot.getY() <= level.getSeaLevel()) {
+            return false;
+        }
+        return level.getBlockState(spot.below()).isSolid()
+                && level.getBlockState(spot).isAir()
+                && level.getBlockState(spot.above()).isAir()
+                && !level.getBlockState(spot).is(net.minecraft.world.level.block.Blocks.END_PORTAL)
+                && !level.getBlockState(spot).is(net.minecraft.world.level.block.Blocks.NETHER_PORTAL);
+    }
+
     private static @Nullable BlockPos citySpot(ServerLevel level, City city) {
         // Sample rings of street-level candidates and keep the most frequent height: streets and
         // paving outnumber roofs and monuments, so the modal Y is the city's ground level. This
@@ -209,6 +221,10 @@ public final class Prologue {
                 int z = city.z() + (int) Math.round(radius * Math.sin(angle));
                 level.getChunk(x >> 4, z >> 4, ChunkStatus.FULL, true);
                 BlockPos spot = BestiarySupport.surfaceSpot(level, x, z, false);
+                if (spot != null && !safeArrival(level, spot)) {
+                    // A void column, a roof or an End portal is not an arrival point.
+                    spot = null;
+                }
                 if (spot != null) {
                     byY.putIfAbsent(spot.getY(), spot);
                     countY.merge(spot.getY(), 1, Integer::sum);

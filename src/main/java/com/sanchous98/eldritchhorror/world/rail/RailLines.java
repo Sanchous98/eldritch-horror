@@ -129,6 +129,12 @@ public final class RailLines {
     }
 
     private static Network build() {
+        // Whichever path builds the network first (startup event or the first chunk stamp), give
+        // the station resolver the live level so stops land on real streets, not package heights.
+        var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server != null && server.overworld() != null) {
+            RailStations.useSurface(server.overworld());
+        }
         EarthMap map = EarthMaps.getOrNull();
         if (map == null) {
             EldritchHorror.LOGGER.warn("rail: earth map missing, no lines");

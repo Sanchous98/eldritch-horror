@@ -114,6 +114,10 @@ public final class TrainService {
             return;
         }
         try {
+            var level = event.getServer().getLevel(net.minecraft.world.level.Level.OVERWORLD);
+            if (level != null) {
+                RailStations.useSurface(level);
+            }
             RailLines.all();
         } catch (RuntimeException error) {
             EldritchHorror.LOGGER.error("rail: network build failed at startup", error);
