@@ -117,6 +117,11 @@ public final class ShipService {
                     return;
                 }
                 Port origin = line.origin(direction);
+                // A hull is only spawned where somebody waits on the quay; an empty port otherwise
+                // fills the ship cap with hulls nobody can board (and whose chunks may not tick).
+                if (!playerWaiting(level, origin)) {
+                    continue;
+                }
                 if (dockedAt(level, origin)) {
                     continue;
                 }
@@ -129,6 +134,16 @@ public final class ShipService {
                 callBoarding(level, line, direction, departure);
             }
         }
+    }
+
+    /** @return true when a player is close enough to the port to board a hull there. */
+    private static boolean playerWaiting(ServerLevel level, Port port) {
+        for (ServerPlayer player : level.players()) {
+            if (port.distanceSqr(player.getX(), player.getZ()) <= 384.0 * 384.0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** @return the next departure for one line/direction, with its stable stagger applied. */
@@ -157,7 +172,7 @@ public final class ShipService {
                 // A moving hull can miss a check while a chunk ticket settles; re-assert the
                 // entity-ticking ticket line and only drop it after three silent seconds.
                 ship.reassertTickets(level);
-                if (stuck >= 3) {
+                if (stuck >= 15) {
                     EldritchHorror.LOGGER.warn("transport: hull {} not ticking for {} checks, "
                             + "discarded", key, stuck);
                     ship.discard();
