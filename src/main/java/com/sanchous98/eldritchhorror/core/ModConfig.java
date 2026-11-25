@@ -3122,8 +3122,11 @@ public final class ModConfig {
 
     /** Train speed in blocks per tick (1.2 = 24 blocks/second). */
     public static final ModConfigSpec.DoubleValue TRAIN_SPEED =
-            BUILDER.comment("Train speed in blocks per tick (1.2 = 24 blocks/second).")
-                    .defineInRange("trainSpeed", 1.2, 0.1, 20.0);
+            BUILDER.comment("Train speed in blocks per tick (3.0 = 60 blocks/second).",
+                    "A 1:1 city map is 16-280 km wide. At 3.0 a 23 km Paris-Rome run takes about",
+                    "6.5 minutes and a 113 km Sydney-Tokyo run about 31 minutes - close help arrives",
+                    "before a city falls to dread, a far one may be lost by the time you get there.")
+                    .defineInRange("trainSpeed", 3.0, 0.1, 20.0);
 
     /** Number of wagons behind the locomotive (the design allows 2-4). */
     public static final ModConfigSpec.IntValue TRAIN_CARS =

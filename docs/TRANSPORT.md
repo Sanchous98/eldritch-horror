@@ -111,6 +111,29 @@ reference-counting them**. Two consequences shaped this code:
   a chunk is entity-ticking only when its ticket level is at most 31, and a radius-2 ticket ticked
   the middle chunk alone, leaving the locomotive and wagons frozen in the neighbouring chunks.
 
+### Speed
+
+`trainSpeed` defaults to **3.0 blocks/tick** (60 blocks/second). That number is chosen against the
+two clocks a 1:1 world already has:
+
+| Run | Blocks | At 3.0 |
+|---|---|---|
+| Paris – London | 15 675 | 4.4 min |
+| Paris – Rome | 23 380 | 6.5 min |
+| Paris – Moscow | 35 112 | 9.8 min |
+| Paris – Lagos | 57 867 | 16 min |
+| Sydney – Tokyo | 112 705 | 31 min |
+
+Dread in a city with a risen Ancient One drains a full sanity bar in roughly 8–36 minutes depending
+on distance, and a roaming cosmic presence demolishes a district in minutes. So help one or two
+cities away still arrives in time, while a crossing to the far side of the world costs more than
+the city has: the timetable stays a real decision, not decoration. 1.2 (the old compressed-map
+default) made every intercity run feel scripted; the 20-block test setting crossed the world in
+minutes.
+
+A consist that is blocked for 30 seconds clears the obstruction from its right-of-way (the crew
+breaks it), so a structure on the planned line can delay a service but never strand it.
+
 ### Stagger
 
 Each line **and direction** shifts its hour list by a stable phase derived from

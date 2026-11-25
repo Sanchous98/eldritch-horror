@@ -62,6 +62,12 @@ public class TrainLocomotive extends TrainCar {
     private static final int LINGER_TICKS = 200;
     /** How long a moving consist with no riders may run before it is removed. */
     private static final int EMPTY_GRACE_TICKS = 200;
+    /**
+     * A blocked consist waits this long, then the crew breaks the obstruction. Without this a
+     * single structure block on the planned line would strand a consist (and its riders) forever;
+     * the railway's own right-of-way is cleared instead.
+     */
+    private static final int BLOCKED_BREAK_TICKS = 600;
 
     /**
      * The 5×5 ticket uses vanilla's {@code DRAGON} type for the same reason the ship does: it is
@@ -74,6 +80,8 @@ public class TrainLocomotive extends TrainCar {
     private boolean sailing;
     private boolean arrived;
     private boolean stopped;
+    /** Ticks spent blocked; after {@value #BLOCKED_BREAK_TICKS} the crew clears the obstruction. */
+    private int blockedTicks;
     private int ticksUntilDeparture;
     private long departureClock;
     private int lingerTicks;
@@ -380,8 +388,13 @@ public class TrainLocomotive extends TrainCar {
                     return;
                 }
                 this.stop(obstruction);
+                if (++this.blockedTicks >= BLOCKED_BREAK_TICKS) {
+                    this.blockedTicks = 0;
+                    this.clearAhead(level, current, ahead);
+                }
                 return;
             }
+            this.blockedTicks = 0;
         }
         if (this.stopped) {
             this.stopped = false;
@@ -446,6 +459,31 @@ public class TrainLocomotive extends TrainCar {
             return "blocked by " + state.getBlock().getName().getString();
         }
         return null;
+    }
+
+    /**
+     * Breaks the solid block that has held the consist for too long, so the service never deadlocks.
+     *
+     * @param level  overworld
+     * @param current node under the locomotive
+     * @param ahead   node just ahead
+     */
+    private void clearAhead(ServerLevel level, RailNode current, RailNode ahead) {
+        for (RailNode node : new RailNode[]{current, ahead}) {
+            for (int dy = 0; dy <= 2; dy++) {
+                BlockPos pos = new BlockPos(node.x(), node.y() + dy, node.z());
+                if (!level.isLoaded(pos)) {
+                    continue;
+                }
+                BlockState state = level.getBlockState(pos);
+                if (state.getCollisionShape(level, pos).isEmpty() || state.is(BlockTags.RAILS)) {
+                    continue;
+                }
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+        EldritchHorror.LOGGER.info("rail: consist {} cleared the blocked right-of-way",
+                this.serviceKey());
     }
 
     private void stop(String reason) {
