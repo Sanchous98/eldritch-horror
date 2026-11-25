@@ -59,6 +59,48 @@ if they are the same world for everyone. Instances are therefore additive, quest
 - Loot from instances is the reward for the random layer; it must not be required for world
   progression, so a bad roll never soft-locks a chain.
 
+## Dungeons instead of underground world content
+
+A dungeon is a **separate dimension**, not a hole under the city. The world keeps its real
+underground only where the city has one (metro, catacombs, cellars) and those become *entrances*,
+not the dungeon itself:
+
+- The real catacombs door in Paris stays a real place in the city; behind it is a generated
+  instance, so the layout is new every session.
+- The world never needs a hand-built 1:1 maze, and a dungeon cannot leak into city blocks, taint or
+  the map.
+- An instance dungeon is optional content: no quest chain may *require* a specific dungeon roll.
+
+### Whispers
+
+The sanity system already plays `AMBIENT_WHISPER` at the MARKED band. That becomes the diegetic
+hint channel:
+
+- A player below the FRAYING band starts hearing **actionable** whispers: a place name and a
+  direction to a dungeon entrance ("the door under the church at Les Halles…"), shown as the usual
+  locator-bar dot, never coordinates.
+- Whispers are **unreliable by design**: a share of them are true, some are stale, some point at a
+  hazard. The lower the sanity, the more whispers and the higher the chance one is true — madness
+  makes you useful and dangerous at the same time.
+- A sane player can still find an entrance by exploring; whispers are a shortcut with a price, not
+  the only path.
+- Whisper text is generated from the dungeon seed, so within a session the same whisper always
+  names the same door.
+
+### Risk and reward
+
+Dungeons are the "dubious reward" layer:
+
+| | |
+|---|---|
+| Danger | generated traps and enemies scaled to the city tier; a local dread that drains sanity inside the instance |
+| Reward | rare reagents/artefacts and lore, rolled from a table with a real chance of a poor or empty haul |
+| Cost | the trip costs sanity and supplies; leaving early is always allowed |
+| Guardrail | nothing required for world/quest progression is dungeon-only, and no Ancient One spawns inside |
+
+The deal the whisper offers is deliberately bad on average and excellent occasionally: the player
+gambles time, sanity and gear for a chance at something the city cannot give.
+
 ## Constraints
 
 - No permanent block edits in the world from instance content.
