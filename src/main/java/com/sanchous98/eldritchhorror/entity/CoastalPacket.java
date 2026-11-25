@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -530,6 +531,17 @@ public class CoastalPacket extends AbstractBoat {
             this.ticketCenter = null;
         }
         super.remove(reason);
+    }
+
+    /**
+     * A scheduled packet is public transport, not a boat item: a player punching it, an explosion
+     * or fire must not sink it mid-voyage. Vanilla {@code VehicleEntity.hurtServer} destroys the
+     * hull after about 4 HP of hits (instantly in creative); this override acknowledges the hit and
+     * applies no damage, exactly like a consist's {@code TrainCar}.
+     */
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+        return true;
     }
 
     @Override
