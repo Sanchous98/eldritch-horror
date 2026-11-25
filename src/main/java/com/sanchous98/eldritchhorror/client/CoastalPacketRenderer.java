@@ -17,30 +17,24 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 
 /**
- * Draws the coastal packet with its own model ({@link CoastalPacketModel}) instead of a scaled
- * vanilla boat.
+ * Draws the liner with its own 91-block model ({@link CoastalPacketModel}).
  *
- * <p>The transform mirrors {@code AbstractBoatRenderer}: a half turn plus the entity yaw, the
+ * <p>The transform mirrors the vanilla boat renderer: a half turn plus the entity yaw, the
  * model-space Y flip, then a quarter turn so the model's bow axis lands on the entity's forward
- * axis. A vertical offset lifts the model to the boat's buoyancy waterline (see
- * {@link #WATERLINE_LIFT}). Lanterns are a separate baked part drawn with the eyes render type,
- * which keeps them lit at night without making the whole ship full-bright.
+ * axis. There is no buoyancy lift any more: the model's origin is the entity origin, so the deck
+ * that is drawn is exactly the deck the hull AABB exposes to players. Lanterns are a separate
+ * baked part drawn with the eyes render type, which keeps them lit at night without making the
+ * whole ship full-bright.
  *
- * <p>Client-only, registered from {@link ClientEntityRenderers} (a {@code Dist.CLIENT}
- * subscriber); the dedicated server never loads this class.
+ * <p>The culling box is inflated vertically for the masts and funnels (the entity box only reaches
+ * the deck) and horizontally for the hulls of the lifeboats, so the whole vessel is frustum-culled
+ * as one object. The model is static: extraction copies the yaw and submit allocates nothing.
  */
 public final class CoastalPacketRenderer
         extends EntityRenderer<CoastalPacket, CoastalPacketRenderState> {
 
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
             EldritchHorror.MODID, "textures/entity/coastal_packet.png");
-    /**
-     * The packet is an {@code AbstractBoat}: its equilibrium is 65% of the hitbox height below the
-     * water surface. With the 3.6-block hitbox that is 2.34 blocks, so the model and the seat
-     * heights are lifted by that much (plus a little freeboard) to keep the deck out of the sea
-     * instead of awash.
-     */
-    private static final float WATERLINE_LIFT = 2.9F;
 
     private final CoastalPacketModel model;
     private final ModelPart lanterns;
@@ -49,7 +43,7 @@ public final class CoastalPacketRenderer
         super(context);
         this.model = new CoastalPacketModel(context.bakeLayer(CoastalPacketModel.LAYER));
         this.lanterns = context.bakeLayer(CoastalPacketModel.LANTERN_LAYER).getChild("lanterns");
-        this.shadowRadius = 2.6F;
+        this.shadowRadius = 7.0F;
     }
 
     @Override
@@ -68,7 +62,6 @@ public final class CoastalPacketRenderer
     public void submit(CoastalPacketRenderState state, PoseStack poseStack,
                        SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
         poseStack.pushPose();
-        poseStack.translate(0.0F, WATERLINE_LIFT, 0.0F);
         poseStack.rotateDegrees(Axis.YP, 180.0F - state.yRot);
         poseStack.scale(-1.0F, -1.0F, 1.0F);
         poseStack.rotateDegrees(Axis.YP, 90.0F);
@@ -81,11 +74,12 @@ public final class CoastalPacketRenderer
     }
 
     /**
-     * The entity hitbox is only as wide as the beam; the model is much longer. Inflate the culling
-     * box so the bow and stern do not pop out while the hull centre is off screen.
+     * The entity hitbox is the deck, 6.4 blocks tall; the model rises to the masthead (about 21
+     * blocks) and the lifeboats hang a little past the deck sides. Inflate vertically for the
+     * rig and horizontally for the overhangs so nothing pops out at the screen edge.
      */
     @Override
     protected AABB getBoundingBoxForCulling(CoastalPacket entity, float partialTicks) {
-        return super.getBoundingBoxForCulling(entity, partialTicks).inflate(8.0);
+        return super.getBoundingBoxForCulling(entity, partialTicks).inflate(2.0, 20.0, 2.0);
     }
 }
