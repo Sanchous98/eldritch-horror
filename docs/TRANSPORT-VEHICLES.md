@@ -49,9 +49,10 @@ The solid cabin block and bridge are carried by nine invisible `ShipCollisionPar
 2 x 4 tiling of the 16 x 44 deckhouse plus one bridge). Each part is the axis-aligned enclosure of
 its rotated local box; the chunks overlap so the cabin wall has no seam at a diagonal heading, and
 the narrow beam strips keep the invisible enclosure from swallowing the open decks. Parts
-never save, never take damage, are not pickable, are not pushable, and are moved by the hull after
-it moves itself, so they are never a tick behind. There is exactly one vessel entity; the parts
-are collision-only and have no renderer.
+never save, never take damage and are never pushable. They are pickable only so a right-click on
+the white cabin forwards to the hull's boarding interaction; a `NoopRenderer` keeps them invisible.
+The hull moves them after it moves itself, so they are never a tick behind. There is exactly one
+vessel entity; the parts exist for collision and boarding only.
 
 ### Walkable deck while moving
 
@@ -83,7 +84,7 @@ on the deck.
 `CoastalPacket.SEATS = 32`, sixteen on the foredeck and sixteen on the aft deck, four across on
 each of four rows per side. Seat offsets are entity-local `{x, attachmentY, z}` with +Z toward the
 bow; the attachment is `deck - 0.3 + 0.6` so the rider's feet sit 0.3 blocks into the planking
-and the eye clears the bulwark by about one block.
+and the eye just clears the bulwark.
 
 | Seats | Where | Local `{x, z}` |
 |---|---|---|
@@ -102,7 +103,7 @@ stanchions and a cap rail, a 44 x 16 white deckhouse with two window bands and f
 bays, a promenade deck with rail, a bridge with wrap-around windows and wings, three funnels with
 red bands and steam pipes, two masts with yards and stays, eight lifeboats on davits, 48 portholes,
 32 deck chairs, a striped canvas awning over the aft deck, cargo cranes, ventilators, a binnacle,
-hawse pipes and the gangway. Eight lanterns are a separate baked layer drawn with the eyes render
+hawse pipes and the gangways. Eight lanterns are a separate baked layer drawn with the eyes render
 type, so they stay lit at night without making the whole ship full-bright.
 
 ## Train
