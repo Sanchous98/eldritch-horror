@@ -50,15 +50,18 @@ Current host (2 vCPU / 12 GB / 200 GB, Ampere A1 free tier):
 
 | Copies | Disk | RAM at 2 sessions | Verdict |
 |---|---|---|---|
-| template + 2 sessions | 138 GB | ~10 GB | **fits, this is the ceiling** |
-| template + 3 sessions | 184 GB | >12 GB | does not fit |
+| template + 2 sessions, reflink | ~46 GB + deltas | ~10 GB | **fits, this is the ceiling** |
+| template + 2 sessions, plain copies | 138 GB | ~10 GB | fits, tight |
+| template + 3 sessions, plain copies | 184 GB | >12 GB | does not fit |
 
 So the free-tier host runs **two** concurrent sessions. More sessions need more RAM and disk (a paid
 shape or a second host); the mod does not change.
 
 ## Provisioning a session
 
-1. `cp -a world-template worlds/<name>` (46 GB, minutes).
+1. `cp -a --reflink=auto world-template worlds/<name>`. On the current XFS volume reflinks are
+   supported, so a fresh session costs kilobytes and only diverging chunks take space; on a
+   non-reflink filesystem the same command makes a plain 46 GB copy.
 2. Write `server.properties`: unique `port`, `max-players`, `view-distance=8`,
    `simulation-distance=6`, same `level-name`.
 3. Same `eh-map.json` and mod config; the session seed is per process.
