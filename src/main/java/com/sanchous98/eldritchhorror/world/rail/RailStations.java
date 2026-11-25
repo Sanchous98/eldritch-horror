@@ -62,6 +62,10 @@ public final class RailStations {
      * @return the station (never {@code null}; a fallback points at the city centre)
      */
     public static RailStation place(EarthMap map, City city, City partner) {
+        RailStation packaged = packageStation(city, partner);
+        if (packaged != null) {
+            return packaged;
+        }
         RailStation authored = authoredStation(map, city, partner);
         if (authored != null) {
             return authored;
@@ -126,6 +130,41 @@ public final class RailStations {
      * and track stay aligned. {@code data} must say {@code north_south} or {@code east_west} to
      * fix the orientation; a rail's own shape is the fallback, then the partner bearing.
      */
+    /** The package station facing {@code partner}, or {@code null} when the city has none. */
+    private static @Nullable RailStation packageStation(City city, City partner) {
+        var entry = com.sanchous98.eldritchhorror.world.city.MapPackage.entry(city.id());
+        if (entry == null || entry.stations().isEmpty()) {
+            return null;
+        }
+        double toX = EarthMap.wrapDelta(city.x(), partner.x());
+        double toZ = partner.z() - (double) city.z();
+        double length = Math.max(1.0, Math.hypot(toX, toZ));
+        double ux = toX / length;
+        double uz = toZ / length;
+        var best = entry.stations().get(0);
+        double bestScore = -Double.MAX_VALUE;
+        for (var station : entry.stations()) {
+            double dx = Math.clamp(station.dx(), -4800, 4800);
+            double dz = Math.clamp(station.dz(), -4800, 4800);
+            double distance = Math.max(1.0, Math.hypot(dx, dz));
+            double score = dx / distance * ux + dz / distance * uz;
+            if (score > bestScore) {
+                bestScore = score;
+                best = station;
+            }
+        }
+        int x = city.x() + Math.clamp(best.dx(), -4800, 4800);
+        int z = city.z() + Math.clamp(best.dz(), -4800, 4800);
+        boolean alongX = best.axis().contains("east_west");
+        int dirX = alongX ? 1 : 0;
+        int dirZ = alongX ? 0 : 1;
+        int boardX = x - dirZ * BOARD_ACROSS;
+        int boardZ = z + dirX * BOARD_ACROSS;
+        int sign = Integer.signum((int) Math.round(ux * dirX + uz * dirZ));
+        return new RailStation(city.id(), city.name(), x, z, best.y() == null ? 64 : best.y(),
+                boardX, boardZ, dirX, dirZ, sign == 0 ? 1 : sign);
+    }
+
     private static @Nullable RailStation authoredStation(EarthMap map, City city, City partner) {
         CityPlan plan = CityPlans.forCity(city.name());
         if (plan == null) {

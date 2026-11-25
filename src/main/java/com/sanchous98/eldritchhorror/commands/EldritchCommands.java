@@ -529,23 +529,27 @@ public final class EldritchCommands {
             ctx.getSource().sendFailure(Component.literal("no such city in the map package: " + cityId));
             return 0;
         }
-        com.sanchous98.eldritchhorror.world.city.MapPackage.Anchor station = entry.station();
-        if (station == null) {
+        java.util.List<com.sanchous98.eldritchhorror.world.city.MapPackage.Anchor> stations =
+                entry.stations().isEmpty()
+                        ? (entry.station() == null ? java.util.List.of() : java.util.List.of(entry.station()))
+                        : entry.stations();
+        if (stations.isEmpty()) {
             ctx.getSource().sendFailure(Component.literal(cityId + " has no station anchor"));
             return 0;
         }
-        // A sprawled city (Tokyo, Mumbai, Lagos) can have its main station outside the 11 km
-        // box that was generated; clamp to the edge in the station's direction instead of
-        // building on wilderness a dozen kilometres away.
-        int dx = Math.clamp(station.dx(), -4800, 4800);
-        int dz = Math.clamp(station.dz(), -4800, 4800);
-        int x = entry.city().x() + dx;
-        int z = entry.city().z() + dz;
-        boolean alongX = station.axis().contains("east_west");
-        ServerLevel level = ctx.getSource().getServer().overworld();
-        int laid = buildStation(level, x, z, alongX, 120);
+        int built = 0;
+        for (var station : stations) {
+            int sx = entry.city().x() + Math.clamp(station.dx(), -4800, 4800);
+            int sz = entry.city().z() + Math.clamp(station.dz(), -4800, 4800);
+            boolean axisX = station.axis().contains("east_west");
+            int laid = buildStation(ctx.getSource().getServer().overworld(), sx, sz, axisX, 120);
+            if (laid > 0) {
+                built++;
+            }
+        }
+        int total = built;
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "Station of " + cityId + " at " + x + ", " + z + ": " + laid + " blocks."), false);
+                cityId + ": " + total + " station(s) built."), false);
         return 1;
     }
 

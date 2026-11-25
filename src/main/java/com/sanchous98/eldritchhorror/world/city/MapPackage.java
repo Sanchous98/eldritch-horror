@@ -45,7 +45,8 @@ public final class MapPackage {
 
     /** One city of the package with its anchors. */
     public record Entry(City city, @Nullable Anchor station, @Nullable Anchor port,
-                        List<Landmark> landmarks, List<Place> places) {
+                        List<Landmark> landmarks, List<Place> places,
+                        List<Anchor> stations) {
     }
 
     /**
@@ -178,8 +179,17 @@ public final class MapPackage {
                                 m.has("type") ? m.get("type").getAsString() : "place"));
                     }
                 }
+                List<Anchor> stations = new ArrayList<>();
+                if (o.has("stations")) {
+                    for (JsonElement mark : o.getAsJsonArray("stations")) {
+                        stations.add(anchor(mark.getAsJsonObject(), true));
+                    }
+                }
+                if (stations.isEmpty() && station != null) {
+                    stations.add(station);
+                }
                 parsed.add(new Entry(city, station, port, List.copyOf(landmarks),
-                        List.copyOf(places)));
+                        List.copyOf(places), List.copyOf(stations)));
             }
             List<QuestSpec> parsedQuests = new ArrayList<>();
             if (root.has("quests")) {
