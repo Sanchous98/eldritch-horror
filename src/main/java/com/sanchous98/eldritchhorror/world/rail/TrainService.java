@@ -47,12 +47,26 @@ public final class TrainService {
     private static final double BOARDING_CALL_RADIUS = 192.0;
     /** Don't spawn a second consist on top of a lingering one at the same station. */
     private static final double STATION_CLEARANCE = 32.0;
+    /**
+     * The station chunk is held one ticket level above the consist's own 5x5 ticket. Vanilla
+     * ticket storage deduplicates identical tickets instead of reference-counting them, so two
+     * roles that share a radius would delete each other's chunk: the service releasing its pending
+     * hold would stop an already-parked consist from ticking. A distinct radius keeps the two
+     * tickets independent.
+     */
+    private static final int STATION_TICKET_RADIUS = TrainLocomotive.SPAWN_TICKET_RADIUS + 1;
 
     private static final Map<String, TrainLocomotive> ACTIVE = new HashMap<>();
     /** Chunk tickets held for a consist that is about to be spawned (two-phase spawn). */
     private static final Map<String, ChunkPos> PENDING = new HashMap<>();
     /** Service checks a pending spawn has waited for. */
     private static final Map<String, Integer> PENDING_AGE = new HashMap<>();
+    /**
+     * How many lines currently need each station chunk held. Several lines can leave from the same
+     * terminal, and vanilla ticket storage has no reference count: the first release would drop the
+     * chunk for every other line, so ownership is counted here.
+     */
+    private static final Map<ChunkPos, Integer> HELD = new HashMap<>();
     /** Last seen {@code trainTicks} per consist, for the stuck-consist watchdog. */
     private static final Map<String, Integer> LAST_TICK = new HashMap<>();
     /** Consecutive no-progress service checks per consist. */
@@ -80,6 +94,7 @@ public final class TrainService {
         ACTIVE.clear();
         PENDING.clear();
         PENDING_AGE.clear();
+        HELD.clear();
         LAST_TICK.clear();
         STUCK.clear();
     }
@@ -143,7 +158,7 @@ public final class TrainService {
                 ChunkPos held = PENDING.get(key);
                 if (held == null) {
                     ChunkPos chunk = new ChunkPos(origin.x() >> 4, origin.z() >> 4);
-                    TrainLocomotive.holdChunks(level, chunk);
+                    hold(level, chunk);
                     level.getChunk(chunk.x(), chunk.z());
                     PENDING.put(key, chunk);
                     PENDING_AGE.put(key, 0);
@@ -158,12 +173,11 @@ public final class TrainService {
                 }
                 TrainLocomotive train = spawn(level, line, direction, departure,
                         (int) Math.clamp(departure - now, 1L, (long) TransportMath.DAY_TICKS),
-                        speed, wagons, held);
+                        speed, wagons);
                 if (train == null) {
                     continue;
                 }
-                PENDING.remove(key);
-                PENDING_AGE.remove(key);
+                releasePending(level, key);
                 ACTIVE.put(key, train);
                 callBoarding(level, line, direction, departure);
             }
@@ -211,7 +225,41 @@ public final class TrainService {
         ChunkPos held = PENDING.remove(key);
         PENDING_AGE.remove(key);
         if (held != null) {
-            TrainLocomotive.releaseChunks(level, held);
+            release(level, held);
+        }
+    }
+
+    /**
+     * Takes a counted hold on a station chunk. The ticket is added only for the first holder, so
+     * every line sharing a terminal does not re-add (and later remove) the same virtual ticket.
+     *
+     * @param level overworld
+     * @param chunk station chunk
+     */
+    private static void hold(ServerLevel level, ChunkPos chunk) {
+        if (HELD.merge(chunk, 1, Integer::sum) == 1) {
+            level.getChunkSource().addTicketWithRadius(
+                    net.minecraft.server.level.TicketType.DRAGON, chunk, STATION_TICKET_RADIUS);
+        }
+    }
+
+    /**
+     * Releases one counted hold; the ticket goes away with the last line that needed it.
+     *
+     * @param level overworld
+     * @param chunk station chunk
+     */
+    private static void release(ServerLevel level, ChunkPos chunk) {
+        Integer count = HELD.get(chunk);
+        if (count == null) {
+            return;
+        }
+        if (count <= 1) {
+            HELD.remove(chunk);
+            level.getChunkSource().removeTicketWithRadius(
+                    net.minecraft.server.level.TicketType.DRAGON, chunk, STATION_TICKET_RADIUS);
+        } else {
+            HELD.put(chunk, count - 1);
         }
     }
 
@@ -231,7 +279,7 @@ public final class TrainService {
 
     private static @Nullable TrainLocomotive spawn(ServerLevel level, RailLine line, int direction,
                                                    long departureAt, int countdownTicks,
-                                                   double speed, int wagonCount, ChunkPos chunk) {
+                                                   double speed, int wagonCount) {
         RailStation origin = line.origin(direction);
         TrainLocomotive locomotive = ModEntities.TRAIN_LOCOMOTIVE.get().create(level,
                 EntitySpawnReason.EVENT);
@@ -240,8 +288,7 @@ public final class TrainService {
             return null;
         }
         RailSample start = line.sample(direction, 0.0);
-        locomotive.configure(line, direction, countdownTicks, departureAt, speed, wagonCount,
-                chunk);
+        locomotive.configure(line, direction, countdownTicks, departureAt, speed, wagonCount);
         locomotive.setPos(start.x(), start.y() + 0.1, start.z());
         if (!level.addFreshEntity(locomotive)) {
             return null;

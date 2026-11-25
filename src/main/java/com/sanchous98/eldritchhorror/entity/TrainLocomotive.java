@@ -44,9 +44,16 @@ public class TrainLocomotive extends TrainCar {
      * and the locomotive's initial ownership). A four-carriage consist is 64 blocks long, so the
      * 9×9 square is the smallest one that covers the wagons spawned behind the station.
      */
-    private static final int SPAWN_TICKET_RADIUS = 4;
-    /** Ticket radius that follows the consist in service, centred on the middle carriage. */
-    private static final int CRUISE_TICKET_RADIUS = 2;
+    public static final int SPAWN_TICKET_RADIUS = 4;
+    /**
+     * Ticket radius that follows the consist in service, centred on the middle carriage.
+     *
+     * <p>It must equal the spawn radius: a chunk is entity-ticking only when its ticket level is
+     * at most 31, and a radius-{@code r} ticket ticks chunks up to {@code r - 2} away from its
+     * centre. A radius of 2 therefore ticked only the middle chunk itself and left the locomotive
+     * and the wagons in the neighbouring chunks frozen.
+     */
+    private static final int CRUISE_TICKET_RADIUS = SPAWN_TICKET_RADIUS;
     /** Blocks checked ahead of the locomotive each step. */
     private static final int LOOKAHEAD = 3;
     /** Distance over which the train slows into a station, in blocks. */
@@ -100,10 +107,9 @@ public class TrainLocomotive extends TrainCar {
      * @param departureAt    absolute clock tick this voyage was scheduled to leave
      * @param blocksPerTick  configured speed
      * @param wagonCount     number of coupled wagons (for the spawn-time trail seed)
-     * @param initialTicket  chunk ticketed by the service
      */
     public void configure(RailLine line, int direction, int countdownTicks, long departureAt,
-                          double blocksPerTick, int wagonCount, ChunkPos initialTicket) {
+                          double blocksPerTick, int wagonCount) {
         this.line = line;
         this.direction = direction == 0 ? 0 : 1;
         this.trail.setWrapWidth(line.wrapWidth());
@@ -111,14 +117,20 @@ public class TrainLocomotive extends TrainCar {
         this.departureClock = departureAt;
         this.speed = Math.max(0.1, blocksPerTick);
         this.wagonCount = TrainTimetable.wagons(wagonCount);
-        this.ticketCenter = initialTicket;
-        this.ticketRadius = SPAWN_TICKET_RADIUS;
         this.travelled = 0.0;
         this.configure(this, 0);
         this.seedTrail();
         RailSample start = line.sample(this.direction, 0.0);
         this.setPos(start.x(), start.y() + 0.1, start.z());
         this.setYRot(start.yaw());
+        // Own the consist's 5x5 ticket from the first tick instead of adopting the service's
+        // station ticket: the service releases that hold as soon as the consist is spawned, and a
+        // shared ticket would take the chunk (and the consist) with it.
+        this.ticketCenter = null;
+        this.ticketRadius = SPAWN_TICKET_RADIUS;
+        if (this.level() instanceof ServerLevel serverLevel) {
+            this.updateTickets(serverLevel);
+        }
     }
 
     /** @return whether the boarding window is still open. */
