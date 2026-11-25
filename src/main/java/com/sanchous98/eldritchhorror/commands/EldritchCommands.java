@@ -717,11 +717,13 @@ public final class EldritchCommands {
         }
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         com.sanchous98.eldritchhorror.entity.CoastalPacket best = null;
-        double bestDistance = 16.0 * 16.0;
+        double bestDistance = 48.0 * 48.0;
         for (com.sanchous98.eldritchhorror.entity.CoastalPacket ship
                 : player.level().getEntitiesOfClass(
                         com.sanchous98.eldritchhorror.entity.CoastalPacket.class,
-                        player.getBoundingBox().inflate(16.0))) {
+                        player.getBoundingBox().inflate(48.0))) {
+            // A 91-block hull has its deck plate well above the quay, so the search box must be
+            // generous; the nearest packet still wins.
             double distance = ship.distanceToSqr(player);
             if (distance < bestDistance) {
                 bestDistance = distance;

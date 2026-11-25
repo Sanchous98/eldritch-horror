@@ -212,7 +212,9 @@ public final class TrainService {
             if (previous != null && previous == tick) {
                 int stuck = STUCK.merge(key, 1, Integer::sum);
                 train.reassertTickets(level);
-                if (stuck >= 3) {
+                // Chunk generation ahead of a fast consist can stall its ticks for several seconds;
+                // the entity is re-ticketed on every check, so give it a real chance to recover.
+                if (stuck >= 15) {
                     EldritchHorror.LOGGER.warn("rail: consist {} not ticking for {} checks, "
                             + "discarded", key, stuck);
                     if (train.riderCount() > 0) {

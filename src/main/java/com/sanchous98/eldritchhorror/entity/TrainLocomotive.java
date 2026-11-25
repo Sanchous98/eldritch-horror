@@ -92,6 +92,8 @@ public class TrainLocomotive extends TrainCar {
     private int wagonCount;
     private @Nullable ChunkPos ticketCenter;
     private int ticketRadius = SPAWN_TICKET_RADIUS;
+    /** The locomotive's own chunk, kept entity-ticking while it moves. */
+    private @Nullable ChunkPos frontTicket;
     private final TrainTrail trail = new TrainTrail();
     private final List<TrainWagon> wagons = new ArrayList<>();
 
@@ -541,7 +543,11 @@ public class TrainLocomotive extends TrainCar {
                     continue;
                 }
                 if (station != null) {
-                    player.teleportTo(level, station.boardX() + 0.5, station.y(),
+                    int safeY = level.getHeight(
+                            net.minecraft.world.level.levelgen.Heightmap.Types
+                                    .MOTION_BLOCKING_NO_LEAVES,
+                            station.boardX(), station.boardZ()) + 1;
+                    player.teleportTo(level, station.boardX() + 0.5, safeY,
                             station.boardZ() + 0.5, java.util.Set.of(), player.getYRot(),
                             player.getXRot(), false);
                     int fare = Math.max(0, com.sanchous98.eldritchhorror.core.ModConfig
@@ -590,15 +596,26 @@ public class TrainLocomotive extends TrainCar {
 
     private void updateTickets(ServerLevel level) {
         ChunkPos current = this.consistCenter();
-        if (current.equals(this.ticketCenter)) {
-            return;
+        if (!current.equals(this.ticketCenter)) {
+            if (this.ticketCenter != null) {
+                releaseChunks(level, this.ticketCenter, this.ticketRadius);
+            }
+            holdChunks(level, current, CRUISE_TICKET_RADIUS);
+            this.ticketCenter = current;
+            this.ticketRadius = CRUISE_TICKET_RADIUS;
         }
-        if (this.ticketCenter != null) {
-            releaseChunks(level, this.ticketCenter, this.ticketRadius);
+        // The centre ticket covers the carriages, but the locomotive leads them by up to two
+        // chunks; a chunk-generation stall on the leading edge could then leave the engine in a
+        // status that is loaded but not entity-ticking, and the service watchdog discarded a live
+        // consist. Its own chunk is therefore ticketed explicitly.
+        ChunkPos front = this.chunkPosition();
+        if (!front.equals(this.frontTicket)) {
+            if (this.frontTicket != null) {
+                releaseChunks(level, this.frontTicket, SPAWN_TICKET_RADIUS);
+            }
+            holdChunks(level, front, SPAWN_TICKET_RADIUS);
+            this.frontTicket = front;
         }
-        holdChunks(level, current, CRUISE_TICKET_RADIUS);
-        this.ticketCenter = current;
-        this.ticketRadius = CRUISE_TICKET_RADIUS;
     }
 
     /** @return the chunk under the middle carriage, which is where the cruise ticket belongs. */
@@ -613,9 +630,15 @@ public class TrainLocomotive extends TrainCar {
 
     @Override
     public void remove(Entity.RemovalReason reason) {
-        if (this.level() instanceof ServerLevel serverLevel && this.ticketCenter != null) {
-            releaseChunks(serverLevel, this.ticketCenter, this.ticketRadius);
-            this.ticketCenter = null;
+        if (this.level() instanceof ServerLevel serverLevel) {
+            if (this.ticketCenter != null) {
+                releaseChunks(serverLevel, this.ticketCenter, this.ticketRadius);
+                this.ticketCenter = null;
+            }
+            if (this.frontTicket != null) {
+                releaseChunks(serverLevel, this.frontTicket, SPAWN_TICKET_RADIUS);
+                this.frontTicket = null;
+            }
         }
         List<TrainWagon> copy = new ArrayList<>(this.wagons);
         this.wagons.clear();
