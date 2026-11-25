@@ -543,14 +543,13 @@ public class TrainLocomotive extends TrainCar {
                     continue;
                 }
                 if (station != null) {
-                    // Put the rider on the track itself, not on the platform side: the board
-                    // point can sit over a sunken square, and the track is always built.
+                    // The board point is the outer platform row, clear of the consist's body.
                     int safeY = level.getHeight(
                             net.minecraft.world.level.levelgen.Heightmap.Types
                                     .MOTION_BLOCKING_NO_LEAVES,
-                            station.x(), station.z()) + 1;
-                    player.teleportTo(level, station.x() + 0.5, safeY,
-                            station.z() + 0.5, java.util.Set.of(), player.getYRot(),
+                            station.boardX(), station.boardZ()) + 1;
+                    player.teleportTo(level, station.boardX() + 0.5, safeY,
+                            station.boardZ() + 0.5, java.util.Set.of(), player.getYRot(),
                             player.getXRot(), false);
                     int fare = Math.max(0, com.sanchous98.eldritchhorror.core.ModConfig
                             .TRAIN_FARE.get());
