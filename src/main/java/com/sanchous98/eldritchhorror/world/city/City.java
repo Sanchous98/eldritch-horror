@@ -1,5 +1,7 @@
 package com.sanchous98.eldritchhorror.world.city;
 
+import java.util.Map;
+
 
 /**
  * A curated city: real name, world coordinates and real population (from
@@ -11,8 +13,23 @@ package com.sanchous98.eldritchhorror.world.city;
  */
 public record City(String id, String name, int x, int z, int population) {
 
-    /** Footprint radius in blocks, from real population (Tokyo ~40, Nairobi ~12). */
+    /**
+     * Radii supplied by a map package, keyed by city id. A prebuilt 1:1 city declares its own
+     * footprint (kilometres, not a few chunks), so the population-derived default does not apply.
+     */
+    private static volatile Map<String, Integer> radiusOverrides = Map.of();
+
+    /** Installs the per-city radii of the current map package (empty map restores the default). */
+    public static void setRadiusOverrides(Map<String, Integer> radii) {
+        radiusOverrides = Map.copyOf(radii);
+    }
+
+    /** Footprint radius in blocks: the map package's value, else the population estimate. */
     public int radius() {
+        Integer override = radiusOverrides.get(this.id);
+        if (override != null) {
+            return override;
+        }
         int r = (int) Math.round(Math.sqrt(Math.max(population, 1)) / 150.0);
         return Math.clamp(r, 10, 44);
     }

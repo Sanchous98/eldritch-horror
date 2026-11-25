@@ -302,6 +302,10 @@ public final class EldritchCommands {
                                         .executes(EldritchCommands::setCityTaint)))));
         // The player's local contract in the nearest curated city (design/21).
         eh.then(Commands.literal("cityquest").executes(EldritchCommands::cityQuest));
+        eh.then(Commands.literal("questchain")
+                .requires(GAMEMASTER)
+                .then(Commands.argument("city", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .executes(EldritchCommands::questChain)));
         // Debug: reset the one-time prologue and return to the Threshold.
         eh.then(Commands.literal("prologue")
                 .then(Commands.literal("reset").requires(GAMEMASTER)
@@ -331,6 +335,10 @@ public final class EldritchCommands {
         // "board" is a debug ride hook: it calls the same fare interaction right-click uses.
         eh.then(Commands.literal("ports")
                 .executes(EldritchCommands::portsInfo));
+        eh.then(Commands.literal("trees")
+                .executes(ctx -> trees(ctx, 3))
+                .then(Commands.argument("radius", IntegerArgumentType.integer(0, 8))
+                        .executes(ctx -> trees(ctx, IntegerArgumentType.getInteger(ctx, "radius")))));
         eh.then(Commands.literal("ship")
                 .executes(EldritchCommands::shipInfo)
                 .then(Commands.literal("board").executes(EldritchCommands::boardShip)));
@@ -339,6 +347,24 @@ public final class EldritchCommands {
         eh.then(Commands.literal("train")
                 .executes(EldritchCommands::trainInfo)
                 .then(Commands.literal("board").executes(EldritchCommands::boardTrain)));
+        // Station kit: a continuous straight track with a platform, laid where the caller looks.
+        eh.then(Commands.literal("station")
+                .requires(GAMEMASTER)
+                .executes(EldritchCommands::stationHere)
+                .then(Commands.argument("city", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            for (var entry : com.sanchous98.eldritchhorror.world.city.MapPackage.entries()) {
+                                builder.suggest(entry.city().id());
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(ctx -> stationAt(ctx,
+                                com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "city")))));
+        eh.then(Commands.literal("railkit")
+                .requires(GAMEMASTER)
+                .executes(ctx -> railKit(ctx, 60))
+                .then(Commands.argument("length", IntegerArgumentType.integer(16, 400))
+                        .executes(ctx -> railKit(ctx, IntegerArgumentType.getInteger(ctx, "length")))));
         // One-shot world pre-generation for cities and rail corridors (tick-sliced).
         eh.then(Commands.literal("pregen")
                 .requires(GAMEMASTER)
@@ -494,12 +520,166 @@ public final class EldritchCommands {
         return 1;
     }
 
+    /** {@code /eh station <city>}: builds the package station anchor for a city. */
+    private static int stationAt(CommandContext<CommandSourceStack> ctx, String cityId)
+            throws CommandSyntaxException {
+        com.sanchous98.eldritchhorror.world.city.MapPackage.Entry entry =
+                com.sanchous98.eldritchhorror.world.city.MapPackage.entry(cityId);
+        if (entry == null) {
+            ctx.getSource().sendFailure(Component.literal("no such city in the map package: " + cityId));
+            return 0;
+        }
+        com.sanchous98.eldritchhorror.world.city.MapPackage.Anchor station = entry.station();
+        if (station == null) {
+            ctx.getSource().sendFailure(Component.literal(cityId + " has no station anchor"));
+            return 0;
+        }
+        // A sprawled city (Tokyo, Mumbai, Lagos) can have its main station outside the 11 km
+        // box that was generated; clamp to the edge in the station's direction instead of
+        // building on wilderness a dozen kilometres away.
+        int dx = Math.clamp(station.dx(), -4800, 4800);
+        int dz = Math.clamp(station.dz(), -4800, 4800);
+        int x = entry.city().x() + dx;
+        int z = entry.city().z() + dz;
+        boolean alongX = station.axis().contains("east_west");
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        int laid = buildStation(level, x, z, alongX, 120);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "Station of " + cityId + " at " + x + ", " + z + ": " + laid + " blocks."), false);
+        return 1;
+    }
+
+    /** {@code /eh station} without a city: builds one where the caller stands. */
+    private static int stationHere(CommandContext<CommandSourceStack> ctx)
+            throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        boolean alongX = player.getDirection().getAxis() == net.minecraft.core.Direction.Axis.X;
+        int laid = buildStation(player.level(), player.blockPosition().getX(),
+                player.blockPosition().getZ(), alongX, 120);
+        int count = laid;
+        ctx.getSource().sendSuccess(() -> Component.literal("Station kit: " + count + " blocks."), false);
+        return 1;
+    }
+
+    /**
+     * Lays a straight station: rails, a 3-wide platform on both sides, a canopy course, lanterns
+     * and a buffer stop at the far end.
+     */
+    private static int buildStation(ServerLevel level, int x, int z, boolean alongX, int length) {
+        var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        var stone = net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState();
+        var bricks = net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState();
+        var lantern = net.minecraft.world.level.block.Blocks.LANTERN.defaultBlockState();
+        var rail = net.minecraft.world.level.block.Blocks.RAIL.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.RAIL_SHAPE,
+                        alongX ? net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST
+                                : net.minecraft.world.level.block.state.properties.RailShape.NORTH_SOUTH);
+        int laid = 0;
+        for (int i = 0; i < length; i++) {
+            int bx = alongX ? x + i : x;
+            int bz = alongX ? z : z + i;
+            int ground = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
+            int y = Math.max(ground, level.getSeaLevel() + 1);
+            for (int dy = -1; dy <= 5; dy++) {
+                level.setBlock(new net.minecraft.core.BlockPos(bx, y + dy, bz), air, 2);
+            }
+            level.setBlock(new net.minecraft.core.BlockPos(bx, y - 1, bz), bricks, 2);
+            level.setBlock(new net.minecraft.core.BlockPos(bx, y, bz), rail, 2);
+            for (int side = -1; side <= 1; side += 2) {
+                for (int w = 1; w <= 3; w++) {
+                    int px = alongX ? bx : bx + side * w;
+                    int pz = alongX ? bz + side * w : bz;
+                    level.setBlock(new net.minecraft.core.BlockPos(px, y - 1, pz), bricks, 2);
+                    level.setBlock(new net.minecraft.core.BlockPos(px, y, pz), stone, 2);
+                }
+                int cx = alongX ? bx : bx + side * 3;
+                int cz = alongX ? bz + side * 3 : bz;
+                level.setBlock(new net.minecraft.core.BlockPos(cx, y + 4, cz), bricks, 2);
+                if (i % 8 == 0) {
+                    level.setBlock(new net.minecraft.core.BlockPos(cx, y + 1, cz), lantern, 2);
+                }
+            }
+            if (i % 8 == 0) {
+                int cx = alongX ? bx : bx + 3;
+                int cz = alongX ? bz + 3 : bz;
+                level.setBlock(new net.minecraft.core.BlockPos(cx, y + 3, cz), lantern, 2);
+            }
+            laid++;
+        }
+        // buffer stop at the far end
+        int ex = alongX ? x + length : x;
+        int ez = alongX ? z : z + length;
+        int ground = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ex, ez);
+        int ey = Math.max(ground, level.getSeaLevel() + 1);
+        for (int dy = 0; dy <= 2; dy++) {
+            level.setBlock(new net.minecraft.core.BlockPos(ex, ey + dy, ez), bricks, 2);
+        }
+        return laid;
+    }
+
+    /**
+     * {@code /eh railkit [length]}: lays a continuous straight railway with a platform, so a
+     * prebuilt city's station has a usable track instead of the disconnected OSM fragments.
+     */
+    private static int railKit(CommandContext<CommandSourceStack> ctx, int length)
+            throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ServerLevel level = player.level();
+        net.minecraft.core.Direction facing = player.getDirection();
+        boolean alongX = facing.getAxis() == net.minecraft.core.Direction.Axis.X;
+        net.minecraft.core.BlockPos start = player.blockPosition();
+        net.minecraft.world.level.block.state.BlockState rail =
+                net.minecraft.world.level.block.Blocks.RAIL.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.RAIL_SHAPE,
+                                alongX ? net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST
+                                        : net.minecraft.world.level.block.state.properties.RailShape.NORTH_SOUTH);
+        int laid = 0;
+        for (int i = 0; i < length; i++) {
+            net.minecraft.core.BlockPos base = alongX
+                    ? start.offset(i, 0, 0) : start.offset(0, 0, i);
+            int ground = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    base.getX(), base.getZ());
+            int y = Math.max(ground, level.getSeaLevel() + 1);
+            for (int dy = -1; dy <= 4; dy++) {
+                level.setBlock(base.atY(y + dy), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            level.setBlock(base.atY(y - 1), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 2);
+            level.setBlock(base.atY(y), rail, 2);
+            // platform on the left of the direction of travel, two blocks wide
+            net.minecraft.core.BlockPos platform = alongX
+                    ? base.offset(0, 0, -1) : base.offset(-1, 0, 0);
+            for (int dy = -1; dy <= 0; dy++) {
+                level.setBlock(platform.atY(y + dy),
+                        net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 2);
+            }
+            if (i % 16 == 0) {
+                level.setBlock(platform.atY(y + 1),
+                        net.minecraft.world.level.block.Blocks.LANTERN.defaultBlockState(), 2);
+            }
+            laid++;
+        }
+        int finalLaid = laid;
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "Rail kit: " + finalLaid + " blocks of track with a platform."), false);
+        return 1;
+    }
+
     /** {@code /eh ship}: nearest port, line state, next departure and live hull positions. */
     private static int shipInfo(CommandContext<CommandSourceStack> ctx) {
         ServerLevel overworld = ctx.getSource().getServer().overworld();
         net.minecraft.world.phys.Vec3 at = ctx.getSource().getPosition();
         for (String line : com.sanchous98.eldritchhorror.world.transport.ShipService.describe(
                 overworld, at.x, at.z)) {
+            ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        }
+        return 1;
+    }
+
+    /** {@code /eh trees [radius]}: diagnostic for leftover biome trees in an authored city. */
+    private static int trees(CommandContext<CommandSourceStack> ctx, int radius) {
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        for (String line : com.sanchous98.eldritchhorror.world.city.CityVegetation.diagnose(
+                level, BlockPos.containing(ctx.getSource().getPosition()), radius)) {
             ctx.getSource().sendSuccess(() -> Component.literal(line), false);
         }
         return 1;
@@ -796,6 +976,28 @@ public final class EldritchCommands {
         }
         ctx.getSource().sendSuccess(() -> Component.literal(
                 city.name() + ": taint " + value + " -> " + state), true);
+        return 1;
+    }
+
+    /** {@code /eh questchain <city>}: prints the scripted route, one line per step. */
+    private static int questChain(CommandContext<CommandSourceStack> ctx) {
+        String id = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "city");
+        var city = com.sanchous98.eldritchhorror.world.city.Cities.all().stream()
+                .filter(c -> c.id().equals(id)).findFirst().orElse(null);
+        if (city == null) {
+            ctx.getSource().sendFailure(Component.literal("no city " + id));
+            return 0;
+        }
+        var chain = com.sanchous98.eldritchhorror.world.city.quest.CityQuests.chain(city);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "quest chain for " + city.id() + " (" + chain.steps().size() + " steps)"), false);
+        int index = 0;
+        for (var step : chain.steps()) {
+            index++;
+            String line = index + ". " + step.kind() + " — " + step.place()
+                    + " @ " + step.x() + ", " + step.z();
+            ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        }
         return 1;
     }
 

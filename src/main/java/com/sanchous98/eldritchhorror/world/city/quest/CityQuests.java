@@ -8,7 +8,10 @@ import com.sanchous98.eldritchhorror.registry.ModAttachments;
 import com.sanchous98.eldritchhorror.world.city.Cities;
 import com.sanchous98.eldritchhorror.world.city.City;
 import com.sanchous98.eldritchhorror.world.loc.city.CityLocation;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.ChatFormatting;
@@ -78,9 +81,55 @@ public final class CityQuests {
     private CityQuests() {
     }
 
-    /** The chain for {@code city} (cached). */
+    /**
+     * The chain for {@code city} (cached). A map package may script the chain; without one the
+     * chain is derived from the city's authored plan anchors, exactly as before.
+     */
     public static CityQuestChain chain(City city) {
-        return CHAINS.computeIfAbsent(city.id(), id -> CityQuestChain.of(city));
+        return CHAINS.computeIfAbsent(city.id(), id -> {
+            java.util.List<com.sanchous98.eldritchhorror.world.city.MapPackage.QuestSpec> pack =
+                    com.sanchous98.eldritchhorror.world.city.MapPackage.quests(id);
+            return pack.isEmpty() ? CityQuestChain.of(city) : fromPack(city, pack.get(0));
+        });
+    }
+
+    /** Forgets the cached chains, so a new map package (or world) is picked up. */
+    public static void clear() {
+        CHAINS.clear();
+    }
+
+    /** Builds a chain from a map package script, skipping steps this version does not know. */
+    private static CityQuestChain fromPack(
+            City city, com.sanchous98.eldritchhorror.world.city.MapPackage.QuestSpec spec) {
+        List<CityQuestChain.Step> steps = new ArrayList<>();
+        int index = 0;
+        for (com.sanchous98.eldritchhorror.world.city.MapPackage.StepSpec step : spec.steps()) {
+            index++;
+            CityQuestChain.Kind kind = switch (step.type().toLowerCase(Locale.ROOT)) {
+                case "talk", "return" -> CityQuestChain.Kind.TALK;
+                case "board" -> CityQuestChain.Kind.BOARD;
+                case "gather" -> CityQuestChain.Kind.GATHER;
+                case "hunt" -> CityQuestChain.Kind.HUNT;
+                case "travel", "discover", "secret" -> CityQuestChain.Kind.SECRET;
+                case "visit", "market", "museum", "temple", "underground", "vantage" ->
+                        CityQuestChain.Kind.VISIT;
+                default -> null;
+            };
+            if (kind == null) {
+                EldritchHorror.LOGGER.warn("quest pack: {} step {} has unknown type '{}'",
+                        spec.id(), index, step.type());
+                continue;
+            }
+            int x = city.x() + (step.dx() == null ? 0 : step.dx());
+            int z = city.z() + (step.dz() == null ? 0 : step.dz());
+            steps.add(new CityQuestChain.Step(kind,
+                    step.id() == null ? "step" + index : step.id(), x, z,
+                    step.item() == null ? "" : step.item(),
+                    step.entity() == null ? "" : step.entity(),
+                    Math.max(1, step.count()),
+                    step.place() == null ? "" : step.place(), ""));
+        }
+        return new CityQuestChain(city, List.copyOf(steps));
     }
 
     /** The player's completed step count in {@code city} (0 when the chain has not started). */
@@ -283,7 +332,7 @@ public final class CityQuests {
     private static boolean satisfied(ServerPlayer player, City city, CityQuestChain.Step step,
                                      Map<String, Integer> data) {
         return switch (step.kind()) {
-            case BOARD, TALK, SECRET -> {
+            case BOARD, TALK, SECRET, VISIT -> {
                 double dx = player.getX() - (step.x() + 0.5);
                 double dz = player.getZ() - (step.z() + 0.5);
                 yield dx * dx + dz * dz <= (double) REACH * REACH;
@@ -374,14 +423,30 @@ public final class CityQuests {
             case SECRET -> Component.translatableWithFallback(
                     "cityquest.eldritch_horror.secret", "look for the hidden place: the %s",
                     place(step));
+            case VISIT -> visitObjective(step);
         };
+    }
+
+    /** Objective text for a typed place: what the player is meant to do there. */
+    private static Component visitObjective(CityQuestChain.Step step) {
+        String type = step.anchor();
+        String key = switch (type) {
+            case "market" -> "cityquest.eldritch_horror.market";
+            case "museum" -> "cityquest.eldritch_horror.museum";
+            case "temple" -> "cityquest.eldritch_horror.temple";
+            case "underground" -> "cityquest.eldritch_horror.underground";
+            case "vantage" -> "cityquest.eldritch_horror.vantage";
+            default -> "cityquest.eldritch_horror.visit";
+        };
+        return Component.translatableWithFallback(key, "reach %s", place(step));
     }
 
     /** Whether a step asks the player to stand somewhere (the kinds the dot and beacon track). */
     private static boolean isReach(CityQuestChain.Kind kind) {
         return kind == CityQuestChain.Kind.BOARD
                 || kind == CityQuestChain.Kind.TALK
-                || kind == CityQuestChain.Kind.SECRET;
+                || kind == CityQuestChain.Kind.SECRET
+                || kind == CityQuestChain.Kind.VISIT;
     }
 
     /** The place name, or the city centre when the plan has no anchor for the step. */

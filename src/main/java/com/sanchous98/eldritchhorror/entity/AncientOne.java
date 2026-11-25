@@ -2,6 +2,7 @@ package com.sanchous98.eldritchhorror.entity;
 
 import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
+import com.sanchous98.eldritchhorror.entity.combat.BossAbilities;
 import com.sanchous98.eldritchhorror.entity.combat.BossCombat;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -255,6 +256,7 @@ public abstract class AncientOne extends Monster implements DreadAura {
         // Ability selection needs AI, so it lives in the AI step; stagger/summon maintenance lives in
         // tick() because a staggered boss is deliberately NoAI for 40 ticks.
         this.combat.tickAbilities(level);
+        this.tickStomp(level);
         this.steerGiant(level);
     }
 
@@ -266,7 +268,7 @@ public abstract class AncientOne extends Monster implements DreadAura {
      * wanted position after the vanilla goals, so a melee goal still owns the attack itself.
      */
     private void steerGiant(ServerLevel level) {
-        if (this.isNoAi() || this.isSolved() || this.isPassenger()) {
+        if (this.isNoAi() || this.isSolved() || this.isPassenger() || this.stompWindup > 0) {
             return;
         }
         LivingEntity target = this.getTarget();
@@ -283,11 +285,34 @@ public abstract class AncientOne extends Monster implements DreadAura {
             return;
         }
         this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        if (this.isCityScale() && this.blockedAhead(level, target)) {
+            this.setSpeed(0.0F);
+            this.getMoveControl().setWantedPosition(this.getX(), this.getY(), this.getZ(), 0.0);
+            this.getNavigation().stop();
+            if (this.tickCount % 20 == 0) {
+                this.smashAhead(level, target);
+            }
+            return;
+        }
         this.setSpeed(1.0F);
         this.getMoveControl().setWantedPosition(target.getX(), this.getY(), target.getZ(), 1.0);
     }
 
     /** Step height ignores kerbs and staircases but never turns a 68-block body into a climber. */
+    /** A city-scale presence never lands an instant hit; its close-range damage is the stomp. */
+    @Override
+    public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
+        if (this.isCityScale()) {
+            return false;
+        }
+        return super.doHurtTarget(level, target);
+    }
+
+    /** A stomp wind-up freezes the body, like an ability telegraph. */
+    public boolean isWindingUp() {
+        return this.stompWindup > 0;
+    }
+
     @Override
     public float maxUpStep() {
         return Math.max(1.0F, Math.min(6.0F, (float) (this.getBbHeight() * 0.05)));
@@ -310,6 +335,188 @@ public abstract class AncientOne extends Monster implements DreadAura {
         Vec3 motion = this.isNoAi() || this.combat.isTelegraphing() ? Vec3.ZERO : input;
         super.travel(motion);
         this.snapToGround();
+    }
+
+    /** Blocks a presence cannot break, so a giant never tunnels out of the world. */
+    private static final java.util.Set<net.minecraft.world.level.block.Block> UNBREAKABLE =
+            java.util.Set.of(net.minecraft.world.level.block.Blocks.BEDROCK,
+                    net.minecraft.world.level.block.Blocks.BARRIER,
+                    net.minecraft.world.level.block.Blocks.COMMAND_BLOCK,
+                    net.minecraft.world.level.block.Blocks.CHAIN_COMMAND_BLOCK,
+                    net.minecraft.world.level.block.Blocks.REPEATING_COMMAND_BLOCK,
+                    net.minecraft.world.level.block.Blocks.STRUCTURE_BLOCK,
+                    net.minecraft.world.level.block.Blocks.JIGSAW,
+                    net.minecraft.world.level.block.Blocks.END_PORTAL,
+                    net.minecraft.world.level.block.Blocks.END_PORTAL_FRAME,
+                    net.minecraft.world.level.block.Blocks.END_GATEWAY,
+                    net.minecraft.world.level.block.Blocks.LIGHT);
+
+    /** Ticks left in the stomp wind-up; 0 means idle. */
+    private int stompWindup;
+    /** Where the last stomp was aimed. */
+    private @Nullable Vec3 stompCentre;
+    /** Ticks until the next stomp may start. */
+    private int stompCooldown;
+
+    /** City-scale presences (48+ blocks) break what they attack; farm bosses never do. */
+    public boolean isCityScale() {
+        return this.getBbHeight() >= 48.0;
+    }
+
+    /**
+     * The close-range attack of a giant: it does not hit instantly, it raises a foot. A ring on the
+     * ground marks the impact area for two seconds; a player who leaves the ring takes nothing.
+     * This is what makes melee against a 96-block body survivable.
+     */
+    private void tickStomp(ServerLevel level) {
+        if (!this.isCityScale() || this.isNoAi() || this.isSolved() || this.isPassenger()) {
+            return;
+        }
+        if (this.stompCooldown > 0) {
+            this.stompCooldown--;
+        }
+        double radius = Math.max(4.0, Math.min(20.0, this.getBbWidth() * 0.5));
+        if (this.stompWindup > 0) {
+            this.stompWindup--;
+            if (this.stompCentre != null) {
+                BossAbilities.ring(this, level, this.stompCentre, radius + 0.5,
+                        net.minecraft.core.particles.ParticleTypes.CRIT, 32);
+            }
+            if (this.stompWindup == 0 && this.stompCentre != null) {
+                Vec3 centre = this.stompCentre;
+                this.stompCentre = null;
+                this.stompCooldown = 90;
+                float damage = (float) Math.max(4.0, this.getBbHeight() * 0.25);
+                for (net.minecraft.world.entity.player.Player player : BossAbilities.playersAround(this, level, centre, radius)) {
+                    BossAbilities.hit(this, level, player, damage);
+                }
+                smashArea(level, centre, radius, 12);
+                level.playSound(null, centre.x, centre.y, centre.z,
+                        net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE,
+                        net.minecraft.sounds.SoundSource.HOSTILE, 2.0F, 0.5F);
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER,
+                        centre.x, centre.y + 1.0, centre.z, 2, 0.5, 0.2, 0.5, 0.0);
+            }
+            return;
+        }
+        LivingEntity target = this.getTarget();
+        if (target == null || !target.isAlive() || this.stompCooldown > 0) {
+            return;
+        }
+        double reach = Math.max(8.0, Math.min(24.0, this.getBbWidth() * 0.6));
+        if (this.distanceToSqr(target) > reach * reach) {
+            return;
+        }
+        this.stompWindup = 40;
+        this.stompCentre = target.position();
+        level.playSound(null, this.getX(), this.getY() + 2.0, this.getZ(),
+                net.minecraft.sounds.SoundEvents.RAVAGER_ROAR,
+                net.minecraft.sounds.SoundSource.HOSTILE, 1.4F, 0.6F);
+    }
+
+    /** Breaks every breakable block in a short cylinder; used by the stomp impact. */
+    private void smashArea(ServerLevel level, Vec3 centre, double radius, int height) {
+        int cx = Mth.floor(centre.x);
+        int cz = Mth.floor(centre.z);
+        int feet = Mth.floor(centre.y);
+        int r = Mth.ceil(radius);
+        int budget = 160;
+        for (int y = feet - 1; y <= feet + height && budget > 0; y++) {
+            for (int dx = -r; dx <= r && budget > 0; dx++) {
+                for (int dz = -r; dz <= r && budget > 0; dz++) {
+                    if (dx * dx + dz * dz > r * r) {
+                        continue;
+                    }
+                    BlockPos pos = new BlockPos(cx + dx, y, cz + dz);
+                    if (!level.isLoaded(pos)) {
+                        continue;
+                    }
+                    BlockState state = level.getBlockState(pos);
+                    if (state.isAir() || !state.getFluidState().isEmpty()
+                            || UNBREAKABLE.contains(state.getBlock())) {
+                        continue;
+                    }
+                    level.destroyBlock(pos, false, this);
+                    budget--;
+                }
+            }
+        }
+    }
+
+    /** @return true when the body cannot advance because built blocks are in the way. */
+    private boolean blockedAhead(ServerLevel level, LivingEntity target) {
+        double dx = target.getX() - this.getX();
+        double dz = target.getZ() - this.getZ();
+        double length = Math.sqrt(dx * dx + dz * dz);
+        if (length < 1.0e-4) {
+            return false;
+        }
+        double ux = dx / length;
+        double uz = dz / length;
+        int feet = Mth.floor(this.getY());
+        int ahead = Math.max(3, Mth.ceil(this.getBbWidth() * 0.6));
+        int layers = Math.min(10, Math.max(2, Mth.ceil(this.getBbHeight() / 6.0)));
+        for (int step = 2; step <= ahead; step++) {
+            int cx = Mth.floor(this.getX() + ux * step);
+            int cz = Mth.floor(this.getZ() + uz * step);
+            for (int layer = 0; layer < layers; layer++) {
+                BlockPos pos = new BlockPos(cx, feet + 1 + layer * 3, cz);
+                if (!level.isLoaded(pos)) {
+                    continue;
+                }
+                BlockState state = level.getBlockState(pos);
+                if (!state.isAir() && state.getFluidState().isEmpty()
+                        && !UNBREAKABLE.contains(state.getBlock())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The presence stops at the obstruction and smashes it: a short wind-up ring on the ground,
+     * then the blocks in front of the body are destroyed. This is an attack, not a passive aura —
+     * the body never walks through a house without breaking it first.
+     */
+    private void smashAhead(ServerLevel level, LivingEntity target) {
+        double dx = target.getX() - this.getX();
+        double dz = target.getZ() - this.getZ();
+        double length = Math.max(1.0e-4, Math.sqrt(dx * dx + dz * dz));
+        double centreX = this.getX() + dx / length * this.getBbWidth() * 0.5;
+        double centreZ = this.getZ() + dz / length * this.getBbWidth() * 0.5;
+        int feet = Mth.floor(this.getY());
+        int radius = Math.max(2, Mth.ceil(this.getBbWidth() * 0.45));
+        int top = feet + Math.min(40, Mth.ceil(this.getBbHeight() * 0.5));
+        BossAbilities.ring(this, level, new Vec3(centreX, feet + 0.2, centreZ), radius + 1,
+                net.minecraft.core.particles.ParticleTypes.CLOUD, 28);
+        int budget = 220;
+        for (int y = feet + 1; y <= top && budget > 0; y++) {
+            for (int dxs = -radius; dxs <= radius && budget > 0; dxs++) {
+                for (int dzs = -radius; dzs <= radius && budget > 0; dzs++) {
+                    if (dxs * dxs + dzs * dzs > radius * radius) {
+                        continue;
+                    }
+                    BlockPos pos = new BlockPos(Mth.floor(centreX) + dxs, y,
+                            Mth.floor(centreZ) + dzs);
+                    if (!level.isLoaded(pos)) {
+                        continue;
+                    }
+                    BlockState state = level.getBlockState(pos);
+                    if (state.isAir() || !state.getFluidState().isEmpty()
+                            || UNBREAKABLE.contains(state.getBlock())) {
+                        continue;
+                    }
+                    level.destroyBlock(pos, false, this);
+                    budget--;
+                }
+            }
+        }
+        level.playSound(null, centreX, feet, centreZ,
+                net.minecraft.sounds.SoundEvents.WITHER_BREAK_BLOCK,
+                net.minecraft.sounds.SoundSource.HOSTILE, 1.6F, 0.55F);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION,
+                centreX, feet + 2.0, centreZ, 6, radius * 0.4, 1.0, radius * 0.4, 0.0);
     }
 
     private void snapToGround() {

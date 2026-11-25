@@ -63,6 +63,7 @@ services:
     command: ["./gradlew", "runServer", "--no-daemon", "--console=plain"]
     ports:
       - "${SERVER_PORT:-25565}:25565"
+      - "${RCON_PORT:-25575}:25575"
     environment:
       GRADLE_USER_HOME: /home/dev/.gradle
       JAVA_TOOL_OPTIONS: "${DEV_JAVA_XMX:--Xmx1g}"

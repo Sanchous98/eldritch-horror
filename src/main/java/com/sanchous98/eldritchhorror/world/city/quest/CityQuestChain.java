@@ -38,7 +38,9 @@ public record CityQuestChain(City city, List<Step> steps) {
         TALK,
         GATHER,
         HUNT,
-        SECRET
+        SECRET,
+        /** Reach a typed point of interest and do what its type implies (trade, descend, climb). */
+        VISIT
     }
 
     /**
@@ -69,6 +71,12 @@ public record CityQuestChain(City city, List<Step> steps) {
 
     /** Builds the chain for {@code city} from its authored plan (or a centre-only fallback). */
     public static CityQuestChain of(City city) {
+        // A map package can script the route through interesting places. Without one, the chain
+        // is derived from the authored plan as before.
+        var entry = com.sanchous98.eldritchhorror.world.city.MapPackage.entry(city.id());
+        if (entry != null && !entry.places().isEmpty()) {
+            return fromPlaces(city, entry);
+        }
         CityPlan plan = CityPlans.forCity(city.name());
         List<CityPoi> pois = plan == null ? List.of() : plan.pois();
         CityPoi board = first(pois, CityPoi.Kind.QUEST_BOARD);
@@ -99,6 +107,54 @@ public record CityQuestChain(City city, List<Step> steps) {
             steps.add(reach(Kind.SECRET, "secret", secret, city, secret.id(), pois));
         }
         return new CityQuestChain(city, List.copyOf(steps));
+    }
+
+    /**
+     * Builds a route through the city's typed places: the station or contact first, then the
+     * places a player would actually visit — market, museum, underground, vantage — and a hidden
+     * place at the end. A hunt is added only where the type implies a threat (underground, cult).
+     */
+    private static CityQuestChain fromPlaces(City city,
+            com.sanchous98.eldritchhorror.world.city.MapPackage.Entry entry) {
+        List<Step> steps = new ArrayList<>(6);
+        steps.add(reachPlace(city, "contact", "station", "the stationmaster", "#contact"));
+        java.util.Set<String> used = new java.util.HashSet<>();
+        for (String type : List.of("market", "museum", "temple", "underground", "vantage")) {
+            for (var place : entry.places()) {
+                if (!place.type().equals(type) || !used.add(place.name())) {
+                    continue;
+                }
+                steps.add(new Step(Kind.VISIT, type, city.x() + place.dx(), city.z() + place.dz(),
+                        "", "", 1, place.name(), type));
+                if (type.equals("underground")) {
+                    steps.add(new Step(Kind.HUNT, "hunt", city.x() + place.dx(),
+                            city.z() + place.dz(), "", HUNT_POOL[Math.abs(city.id().hashCode()) % HUNT_POOL.length],
+                            2, place.name(), ""));
+                }
+                break;
+            }
+        }
+        if (steps.size() == 1) {
+            // No typed places survived: fall back to the farthest landmark as the destination.
+            var landmark = entry.landmarks().isEmpty() ? null
+                    : entry.landmarks().get(entry.landmarks().size() - 1);
+            String name = landmark == null ? city.name() : landmark.name();
+            int x = landmark == null ? city.x() : city.x() + landmark.dx();
+            int z = landmark == null ? city.z() : city.z() + landmark.dz();
+            steps.add(new Step(Kind.VISIT, "visit", x, z, "", "", 1, name, "vantage"));
+        }
+        return new CityQuestChain(city, List.copyOf(steps));
+    }
+
+    private static Step reachPlace(City city, String id, String type, String name, String anchor) {
+        var entry = com.sanchous98.eldritchhorror.world.city.MapPackage.entry(city.id());
+        int x = city.x();
+        int z = city.z();
+        if (entry != null && entry.station() != null) {
+            x += Math.clamp(entry.station().dx(), -4800, 4800);
+            z += Math.clamp(entry.station().dz(), -4800, 4800);
+        }
+        return new Step(Kind.TALK, id, x, z, "", "", 1, name, anchor);
     }
 
     /** The authored anchor of a given kind, or {@code null}. */

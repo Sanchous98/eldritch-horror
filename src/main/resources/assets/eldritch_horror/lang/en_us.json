@@ -1111,5 +1111,11 @@
   "advancement.eldritch_horror.threats.first_ancient_one.title": "That Which Should Not Die",
   "advancement.eldritch_horror.threats.first_ancient_one.description": "Land the killing blow on an Ancient One.",
   "advancement.eldritch_horror.threats.fallen_city.title": "A City Lost",
-  "advancement.eldritch_horror.threats.fallen_city.description": "Stand in a curated city as it Falls."
+  "advancement.eldritch_horror.threats.fallen_city.description": "Stand in a curated city as it Falls.",
+  "cityquest.eldritch_horror.market": "the market at %s",
+  "cityquest.eldritch_horror.museum": "the collection at %s",
+  "cityquest.eldritch_horror.temple": "the shrine at %s",
+  "cityquest.eldritch_horror.underground": "down into %s",
+  "cityquest.eldritch_horror.vantage": "climb to %s and look over the city",
+  "cityquest.eldritch_horror.visit": "reach %s"
 }

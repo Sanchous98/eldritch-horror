@@ -22,6 +22,7 @@ import com.sanchous98.eldritchhorror.world.transport.ShipService;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 /**
@@ -39,6 +40,19 @@ public final class ServerStateReset {
 
     private ServerStateReset() {}
 
+    /**
+     * Install the map package before any world is loaded, so the very first chunk generated (or
+     * the first pregen batch) already sees the package city list.
+     */
+    @SubscribeEvent
+    public static void onServerStarting(ServerStartingEvent event) {
+        net.minecraft.world.level.storage.LevelResource root =
+                net.minecraft.world.level.storage.LevelResource.ROOT;
+        com.sanchous98.eldritchhorror.world.city.MapPackage.load(
+                net.neoforged.fml.loading.FMLPaths.CONFIGDIR.get(),
+                event.getServer().getWorldPath(root));
+    }
+
     /** A new world starts with empty caches; anything left over is from the previous one. */
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
@@ -49,6 +63,7 @@ public final class ServerStateReset {
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         clearAll();
+        com.sanchous98.eldritchhorror.world.city.MapPackage.clear();
     }
 
     private static void clearAll() {
@@ -67,6 +82,7 @@ public final class ServerStateReset {
         SanityTicker.clear();
         CorruptionTicker.clear();
         TrainService.clear();
+        com.sanchous98.eldritchhorror.world.city.quest.CityQuests.clear();
         RiftGates.clear();
         CitySigns.clear();
         PregenService.stop();

@@ -23,6 +23,15 @@ public final class Cities {
     private Cities() {
     }
 
+    /**
+     * Replaces the city list (map package) or restores the baked table with {@code null}.
+     *
+     * @param installed cities from the package, or {@code null} to reload {@code settlements.json}
+     */
+    public static synchronized void install(@Nullable List<City> installed) {
+        cached = installed == null ? null : List.copyOf(installed);
+    }
+
     public static List<City> all() {
         List<City> local = cached;
         if (local == null) {

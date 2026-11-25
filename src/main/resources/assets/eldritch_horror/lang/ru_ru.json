@@ -1111,5 +1111,11 @@
   "advancement.eldritch_horror.threats.first_ancient_one.title": "То, что не должно умирать",
   "advancement.eldritch_horror.threats.first_ancient_one.description": "Нанесите смертельный удар Древнему.",
   "advancement.eldritch_horror.threats.fallen_city.title": "Потерянный город",
-  "advancement.eldritch_horror.threats.fallen_city.description": "Окажитесь в курируемом городе, когда он падёт."
+  "advancement.eldritch_horror.threats.fallen_city.description": "Окажитесь в курируемом городе, когда он падёт.",
+  "cityquest.eldritch_horror.market": "рынок у %s",
+  "cityquest.eldritch_horror.museum": "коллекция в %s",
+  "cityquest.eldritch_horror.temple": "святилище у %s",
+  "cityquest.eldritch_horror.underground": "спуск в %s",
+  "cityquest.eldritch_horror.vantage": "подняться на %s и оглядеть город",
+  "cityquest.eldritch_horror.visit": "дойти до %s"
 }

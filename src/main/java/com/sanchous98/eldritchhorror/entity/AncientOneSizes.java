@@ -87,10 +87,14 @@ public final class AncientOneSizes {
             return this.height * 6.0;
         }
 
-        /** Abilities scale against the old 8-block major baseline; farm bosses stay local. */
+        /**
+         * Abilities scale against the old 8-block major baseline, but the fight must stay local:
+         * a 96-block body that multiplied every range by twelve threatened the whole district and
+         * killed players without moving. Capped at 3x, farm bosses at 2.5x.
+         */
         public double abilityScale() {
             double raw = this.height / DESIGN_BASELINE_HEIGHT;
-            return this.tier == Tier.LESSER ? Math.min(raw, 2.5) : raw;
+            return this.tier == Tier.LESSER ? Math.min(raw, 2.5) : Math.min(raw, 3.0);
         }
 
         /** Action-bar warning range: the presence's voice carries about 1.5 body heights. */

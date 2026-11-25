@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.world.EarthMap;
 import com.sanchous98.eldritchhorror.world.EarthMaps;
 import com.sanchous98.eldritchhorror.world.ElevationCurve;
 import com.sanchous98.eldritchhorror.world.city.City;
+import com.sanchous98.eldritchhorror.world.city.MapPackage;
 import com.sanchous98.eldritchhorror.world.loc.Builder;
 import com.sanchous98.eldritchhorror.world.loc.CityWrite;
 import com.sanchous98.eldritchhorror.world.loc.Location;
@@ -220,6 +221,11 @@ public final class CityLocation implements Location {
 
     @Override
     public void build(StructureBuilder b) {
+        // A map package city is prebuilt: its chunks arrive already generated (Arnis + merge), so
+        // the plan must never stamp over them. Runtime queries (surfaceOf, radius) still work.
+        if (MapPackage.present() && MapPackage.entry(this.city.id()) != null) {
+            return;
+        }
         int cx = this.city.x();
         int cz = this.city.z();
         int district = Math.min(radius(), DISTRICT_CAP);

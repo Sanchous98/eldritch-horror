@@ -308,6 +308,12 @@ public final class BossCombat {
     }
 
     private void proximityAura(ServerLevel level, ServerPlayer player, int rank, boolean major) {
+        // The whole city feels a city-scale presence; how hard depends on how close it is and how
+        // dangerous the presence is. A cosmic one at arm's length is a sanity emergency, the same
+        // one across the river is a slow unease.
+        double dread = Math.max(1.0, this.boss.dreadRadius());
+        double distance = Math.sqrt(player.distanceToSqr(this.boss));
+        double closeness = Math.clamp(1.0 - distance / dread, 0.0, 1.0);
         ParticleOptions particle = switch (rank) {
             case 0 -> ParticleTypes.SMOKE;
             case 1 -> ParticleTypes.SOUL;
@@ -315,8 +321,11 @@ public final class BossCombat {
         };
         Vec3 eye = player.getEyePosition();
         Vec3 front = eye.add(player.getLookAngle().scale(2.5));
-        level.sendParticles(particle, front.x, front.y, front.z, 1 + rank, 0.5, 0.35, 0.5, 0.0);
-        if (major && this.boss.phase() == AncientOne.Phase.ENRAGED) {
+        int count = 1 + rank + (int) Math.round(closeness * 3.0);
+        level.sendParticles(particle, front.x, front.y, front.z, count, 0.5, 0.35, 0.5, 0.0);
+        double drain = (0.05 + 0.35 * closeness) * (1.0 + rank * 0.5) * (major ? 1.4 : 1.0);
+        com.sanchous98.eldritchhorror.sanity.SanitySystem.add(player, -drain);
+        if (major && closeness > 0.35 && this.boss.phase() == AncientOne.Phase.ENRAGED) {
             BossAbilities.effect(player, MobEffects.SLOWNESS, 40, 0);
             BossAbilities.effect(player, MobEffects.DARKNESS, 30, 0);
         }
