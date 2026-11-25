@@ -4,56 +4,106 @@ Art and passenger layout for the scheduled public-transport vehicles. Schedules,
 lifecycle and fares stay in `docs/TRANSPORT.md` and `design/30-transport.md`; this file records
 the physical vehicle.
 
-## Coastal packet (ship)
+## Ocean liner (ship)
 
-A real deck-and-cabin hull, not a scaled vanilla boat. Client model:
-`client/model/CoastalPacketModel` (Java `ModelPart` cubes, one renderer:
-`client/CoastalPacketRenderer`). Texture:
-`textures/entity/coastal_packet.png`, generated deterministically by
-`tools/generate_ship_texture.py` (1024x1024, one painted rectangle per material).
+A real 91-block vessel — a location that moves — not a boat and not a scaled dinghy. Client model:
+`client/model/CoastalPacketModel` (one renderer: `client/CoastalPacketRenderer`, one 2048x2048
+texture: `textures/entity/coastal_packet.png`, generated deterministically by
+`tools/generate_ship_texture.py`). The entity id stays `coastal_packet`; the physical layout lives
+in `entity/ShipGeometry` and `entity/ShipSeats`, which the entity, the collision parts, the model
+and the tests all read.
 
 ### Dimensions (blocks)
 
 | Part | Size |
 |---|---|
-| Overall model length | 19.5 including the bowsprit (17.75 hull) |
-| Beam | 5.5 |
-| Walkable deck | 5.0 wide; 0.75 above the entity origin, rendered about 1.3 above the sea |
-| Bulwark + cap rail | 0.875 above the deck |
-| Cabin | 4.25 long, 4.5 wide, roof/poop deck 2.75 above the origin |
-| Mast | 7.75 above the origin (6.25 above the deck), two yards and two square sails |
-| Funnel | 4.5 above the origin, on the cabin roof |
-| Entity hitbox | 5.5 x 3.6 (`ModEntities.COASTAL_PACKET`) |
+| Deck length (stem to stern counter) | 91.0 |
+| Beam | 18.0 |
+| Hull depth (keel to deck) | 9.15 (deck 7.25 above the sea) |
+| Walkable main deck | open foredeck and aft deck, 18 wide, ~22 long each |
+| Bulwark + cap rail | 1.15 above the deck |
+| Cabin block (deckhouse) | 44 long, 16 wide, 7.2 tall |
+| Promenade / boat deck | the cabin roof, 13.6 above the origin |
+| Navigation bridge | 10 x 14, roof at 16.6 above the origin |
+| Funnels | three, 4 x 4, tops 20.6 above the origin |
+| Masts | fore and aft, 18 blocks above the deck |
+| Lifeboats | eight, hanging at the promenade deck edge |
+| Gangway | 7 steps + landing on each beam amidships, 7 blocks out from the deck edge |
+| Entity hitbox | the 18 x 1 deck-planking slab (`ModEntities.COASTAL_PACKET`), expanded per heading |
 
-The hull is built from fourteen 16-unit strake segments, a stepped bow and stern counter, a
-keel, rudder, sheer strake, six portholes, a raised forecastle with its own rail, deck cargo,
-an anchor and a stepping bowsprit. The cabin has four windows per side (plus front/rear
-windows and a door), a railed poop deck on the roof, and a ship's wheel on the front bulkhead.
-Six lanterns sit on a second baked layer and are drawn with the eyes render type, so they stay
-lit at night without making the whole ship full-bright.
+### One AABB, and why it is the deck
+
+An entity can only own one axis-aligned box. The hull's box is built by
+`CoastalPacket.makeBoundingBox` from `ShipGeometry.hullBox(...)`:
+
+* its top is exactly `DECK_Y = 6.4` above the origin (7.25 above the sea) — **the deck the player
+  stands on is the top face of the hull box**, never a 10-block-tall box whose roof is mislabelled
+  a deck;
+* it is one block thick, the planking itself. A tall solid box would be a 77 x 77 wall at a
+  diagonal heading and would trap players standing on a quay inside it; the floor slab keeps the
+  ship's collision where the deck actually is;
+* the 91 x 18 rectangle is enclosed at the *current heading*, so the box always contains the whole
+  deck as the ship turns (the box is the smallest axis-aligned enclosure of the rotated deck).
+
+The solid cabin block and bridge are carried by nine invisible `ShipCollisionPart` entities (a
+2 x 4 tiling of the 16 x 44 deckhouse plus one bridge). Each part is the axis-aligned enclosure of
+its rotated local box; the chunks overlap so the cabin wall has no seam at a diagonal heading, and
+the narrow beam strips keep the invisible enclosure from swallowing the open decks. Parts
+never save, never take damage, are not pickable, are not pushable, and are moved by the hull after
+it moves itself, so they are never a tick behind. There is exactly one vessel entity; the parts
+are collision-only and have no renderer.
+
+### Walkable deck while moving
+
+The hull and every part return `canBeCollidedWith = true`, so players collide with them and stand
+on the deck/roofs. Every server tick `CoastalPacket` captures each non-riding player standing on a
+walkable surface (feet within 0.2 of the surface, inside the hull-local footprint) together with
+their hull-local position, moves the vessel, then re-seats those players at `hull position +
+rotate(local)`. Keeping the *local* coordinate (rather than a world delta) makes the carry correct
+through turns and through the longitude seam. Riders are true passengers: their attachment points
+come from `ShipSeats`, so they cannot fall through the deck while it moves.
+
+Surface heights (`ShipGeometry.surfaceY`): main deck 6.4, promenade 13.6, bridge roof 16.6.
+
+### Boarding from the pier
+
+The gangways are modelled as seven-step approaches with landings on both beams amidships,
+from the deck edge down to about one block above the waterline, so the vessel reads as reachable
+from a quay instead of something to jump into. While boarding, the vessel lies broadside to the quay (`ShipGeometry.dockedYaw`): her length runs
+along the shore and the starboard gangway faces the land, so a 91-block ship does not bury her
+stern in the beach. On departure she swings her head toward the course at four degrees per tick
+instead of snapping. Boarding itself is unchanged: the fare interaction (`CoastalPacket.tryBoard`,
+shared with `/eh ship board`) checks the window, a free seat and the fare, then seats the player;
+no parkour is involved. The white cabin parts are pickable and forward their interaction to the
+hull, so the ship is a large click target from the pier. A rider dismounts beside their own seat
+on the deck.
 
 ### Passenger layout
 
-`CoastalPacket.SEATS = 14`. Seat offsets are entity-local `{x, z}`, with +Z toward the bow
-(the model's +X). Two benches run along the bulwarks; two more are inside the cabin.
+`CoastalPacket.SEATS = 32`, sixteen on the foredeck and sixteen on the aft deck, four across on
+each of four rows per side. Seat offsets are entity-local `{x, attachmentY, z}` with +Z toward the
+bow; the attachment is `deck - 0.3 + 0.6` so the rider's feet sit 0.3 blocks into the planking
+and the eye clears the bulwark by about one block.
 
-| Seats | Where | Offset `{x, z}` |
+| Seats | Where | Local `{x, z}` |
 |---|---|---|
-| 1-10 | Port/starboard railing benches | `{+/-2.06, 3.25 .. -3.25}`, five per side |
-| 11-14 | Cabin side benches, under the roof | `{+/-1.55, -4.4}` and `{+/-1.55, -6.0}` |
+| 1-16 | Foredeck, four rows | `{6.2, 2.2, -2.2, -6.2}` at `z = 25, 30, 35, 40` |
+| 17-32 | Aft deck, four rows | the same mirrored at `z = -25, -30, -35, -40` |
 
-Rider feet sit at `RIDE_HEIGHT = 3.23` above the entity origin: that is the renderer's 2.9-block
-buoyancy lift plus 0.33, so the deck is at 3.65 and a rider sits 0.42 into it (legs hidden inside
-the hull, the vanilla-boat illusion). The eye is about 1.2 above the planking: 0.33 above the cap
-rail, so a seated passenger sees the sea over the rail. The cabin roof underside is 0.55 above
-the eyeline, so no head or camera is inside the roof.
+Config: `shipSeats` defaults to 32 (range 1-32). The fare, boarding window, timetable, ports,
+lifecycle, immunity, never-saved and never-pushable rules and the chunk-ticket machinery are
+unchanged. The ticket radius grew to 3 chunks (7 x 7 = 112 blocks) because the vessel's half
+diagonal is 46.4 blocks; a radius-2 ticket would leave the bow or stern in an unloaded chunk.
 
-The lift exists because an `AbstractBoat` floats with 65% of its hitbox height below the surface;
-with a 3.6-block hitbox that is 2.34 blocks, so `CoastalPacketRenderer` translates the model by
-2.9 blocks to give the hull visible freeboard and the seat heights include the same offset.
+### Model contents
 
-Config: `shipSeats` defaults to 14 (range 1-14). Boarding, dismount, empty-hull despawn and
-chunk tickets are unchanged from the original packet.
+Stepped dark hull with a red boot topping, a planked main deck and promenade, a solid bulwark with
+stanchions and a cap rail, a 44 x 16 white deckhouse with two window bands and forward/aft window
+bays, a promenade deck with rail, a bridge with wrap-around windows and wings, three funnels with
+red bands and steam pipes, two masts with yards and stays, eight lifeboats on davits, 48 portholes,
+32 deck chairs, a striped canvas awning over the aft deck, cargo cranes, ventilators, a binnacle,
+hawse pipes and the gangway. Eight lanterns are a separate baked layer drawn with the eyes render
+type, so they stay lit at night without making the whole ship full-bright.
 
 ## Train
 

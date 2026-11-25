@@ -33,12 +33,15 @@ The occult branch stays the rift gate (`26-rituals-and-occult.md`) — fast, tai
   side of the city.
 - **Sea lane**: an A* path over the baked landmask at a coarse resolution, kept off the coast by a
   safety margin, smoothed into waypoints. Cached per route; no per-tick pathfinding.
-- **The ship** is a boat-derived entity with a long hull (placeholder: a scaled vanilla boat model
-  until the art exists), 6–8 seats, no item drop, and server-driven movement along the lane at a
-  configured speed. Buoyancy keeps it on the water surface; it turns to face the next waypoint.
-- **Boarding**: right-click the ship while it is docked in the boarding window. Pay the fare, take a
-  seat. At departure the ship sails; at arrival riders disembark at the destination port and the
-  ship despawns.
+- **The ship** is a 91-block ocean liner: one plain entity (no boat buoyancy, no item drop) whose
+  hull AABB is the deck floor at 7.25 blocks above the sea, with an invisible collision part per
+  deckhouse chunk and one bridge part above it. The main deck (and the promenade roof) is walkable
+  while under way, and standing players are carried with the hull. 32 deck seats, a stepped gangway
+  on the starboard side, three funnels, two masts and a large custom model/texture. Server-driven
+  movement along the lane at a configured speed; it turns to face the next waypoint.
+- **Boarding**: right-click the ship (or the gangway) while it is docked in the boarding window.
+  Pay the fare, take a seat. At departure the ship sails; at arrival riders disembark at the
+  destination port and the ship despawns.
 - **Schedule**: each line departs daily at configured times; a line exists only between two ports
   with a valid sea lane.
 
