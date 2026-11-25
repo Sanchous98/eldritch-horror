@@ -157,9 +157,14 @@ public abstract class AncientOne extends Monster implements DreadAura {
         return this.isCityScale() ? Math.min(value, 40.0) : value;
     }
 
-    /** Melee reach from the centre: about half the body height. */
+    /**
+     * Melee reach from the centre. A city-scale body has to close in to hit at all: its long
+     * reach kept the AI standing still and killing from across the square. Close range is the
+     * telegraphed stomp's job now, so the attack goal only needs a few blocks.
+     */
     public final double meleeReach() {
-        return this.size().meleeReach();
+        double reach = this.size().meleeReach();
+        return this.isCityScale() ? Math.min(8.0, reach) : reach;
     }
 
     /**
