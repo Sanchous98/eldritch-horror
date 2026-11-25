@@ -120,6 +120,46 @@ Dungeons are the "dubious reward" layer:
 The deal the portal offers is deliberately bad on average and excellent occasionally: the player
 gambles time, sanity and gear for a chance at something the city cannot give.
 
+## Entrances embedded in the cities
+
+Dungeons are not placed in the wilderness. At session start the mod embeds a small number of
+entrances into **hidden places of the curated cities**, and each session chooses different ones.
+
+### Candidates
+
+Every city package carries a list of hidden anchors: crypt, cellar, ossuary, sewer junction,
+service tunnel, locked back room, abandoned platform. These are real interiors of the 1:1 city, not
+new geometry in the open street. A frame is only ever built inside such an enclosed cell, never on
+a facade, never in a quest-critical doorway, never within the spawn safe zone.
+
+### Session bootstrap
+
+- A seeded pass (`hash(sessionSeed, cityId)`) picks **1–3 anchors per city**, weighted by city size
+  and state; a Fallen city gets more.
+- Each chosen anchor gets a family (Catacombs, Drowned, Tomb, Vault) by city/terrain theme; the
+  Whisper family is never placed by the pass — only a whisper can reveal it.
+- The frame is built once at the anchor (a 4×5 frame in the room, hidden behind the door/hatch) and
+  recorded in world data, so the next boot can tear down or reuse it. A crash therefore never
+  leaves an untracked portal.
+- The plane stays unlit until the session lights it, so a player who finds the frame still has to
+  decide whether to open it.
+
+### Discovery
+
+- No locator dot until something points at it: a whisper below FRAYING, a cult rumour, a city NPC,
+  or plain exploration.
+- The entrance is deliberately easy to miss: a hatch behind crates, a door in a cellar, a gap in a
+  sewer wall. That is the point of embedding it in a real city rather than a dungeon hub.
+- Once lit, the plane's colour is visible through the doorway: the city block itself becomes the
+  warning.
+
+### Density and cost
+
+- Total active entrances are bounded (a few per city, tens per world), because every one is a
+  client-visible block edit and a possible instance dimension slice.
+- An instance behind an entrance is only allocated when a player actually enters; unlit frames cost
+  nothing but the blocks.
+
 ## Constraints
 
 - No permanent block edits in the world from instance content.
