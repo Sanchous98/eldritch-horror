@@ -159,9 +159,32 @@ public abstract class AncientOne extends Monster implements DreadAura {
         return this.size().meleeReach();
     }
 
-    /** How far the non-damaging dread presence is felt: six body heights. */
+    /**
+     * How far the dread presence is felt: six body heights, but never less than the city it stands
+     * in. A presence in Paris is felt across Paris — faint at the edge, crushing at its feet — not
+     * only within a kilometre of the body.
+     */
     public final double dreadRadius() {
-        return this.size().dreadRadius();
+        double base = this.size().dreadRadius();
+        com.sanchous98.eldritchhorror.world.city.City nearest = null;
+        double best = Double.MAX_VALUE;
+        for (com.sanchous98.eldritchhorror.world.city.City city
+                : com.sanchous98.eldritchhorror.world.city.Cities.all()) {
+            double dx = com.sanchous98.eldritchhorror.world.EarthMap.wrapDelta(city.x(), this.getX());
+            double dz = city.z() - this.getZ();
+            double distance = dx * dx + dz * dz;
+            if (distance < best) {
+                best = distance;
+                nearest = city;
+            }
+        }
+        if (nearest != null) {
+            double radius = nearest.radius();
+            if (best <= radius * radius * 2.25) {
+                base = Math.max(base, radius * 1.1);
+            }
+        }
+        return base;
     }
 
     /** Range of the action-bar warning: the voice carries about 1.5 body heights. */
