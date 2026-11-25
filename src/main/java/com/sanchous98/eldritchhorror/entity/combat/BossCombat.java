@@ -258,6 +258,7 @@ public final class BossCombat {
     private void tickDread(ServerLevel level, long now) {
         int rank = this.boss.phase().ordinal();
         boolean major = this.boss.majorPresence();
+        double dread = this.boss.dreadRadius();
         if (now % DREAD_AURA_PERIOD == 0L) {
             Set<UUID> online = new HashSet<>();
             for (ServerPlayer onlinePlayer : level.players()) {
@@ -271,9 +272,7 @@ public final class BossCombat {
             }
             UUID uuid = player.getUUID();
             double distanceSqr = player.distanceToSqr(this.boss);
-            double dread = this.boss.dreadRadius();
-            boolean inside = distanceSqr <= dread * dread;
-            if (!inside) {
+            boolean inside = distanceSqr <= dread * dread;            if (!inside) {
                 this.nearby.remove(uuid);
             } else if (this.nearby.add(uuid)) {
                 // Entering, not every tick: first sighting is an event, not a repeating pulse.

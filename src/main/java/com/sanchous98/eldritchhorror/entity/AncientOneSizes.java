@@ -112,11 +112,6 @@ public final class AncientOneSizes {
         public float shadow(float base) {
             return (float) (base * Math.min(8.0, (double) this.height / this.baseHeight));
         }
-
-        /** Does this presence need the giant movement/collision treatment? */
-        public boolean giant() {
-            return this.height >= 24.0F;
-        }
     }
 
     private static final Map<String, Size> BY_ID = new LinkedHashMap<>();

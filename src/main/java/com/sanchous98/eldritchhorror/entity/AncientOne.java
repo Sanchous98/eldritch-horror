@@ -139,12 +139,12 @@ public abstract class AncientOne extends Monster implements DreadAura {
 
     /** Whether this presence is a farm boss: local abilities, no arena-wide reach. */
     public final boolean farmable() {
-        return this.getBbHeight() <= AncientOneSizes.FARMABLE_MAX_HEIGHT;
+        return this.bodyHeight() <= AncientOneSizes.FARMABLE_MAX_HEIGHT;
     }
 
     /** Distance multiplier for ability ranges and area radii against the old 8-block baseline. */
     public final double abilityScale() {
-        double raw = this.getBbHeight() / AncientOneSizes.DESIGN_BASELINE_HEIGHT;
+        double raw = this.bodyHeight() / AncientOneSizes.DESIGN_BASELINE_HEIGHT;
         return this.farmable() ? Math.min(raw, 2.5) : raw;
     }
 
@@ -369,6 +369,12 @@ public abstract class AncientOne extends Monster implements DreadAura {
         if (!(entity instanceof Player)) {
             super.push(entity);
         }
+    }
+
+    /** No riders: there is no safe seat on a 64-128 block body, and no suffocation path. */
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return false;
     }
 
     /** Melee reach is half the body height, measured from the centre; the hitbox still starts at the feet. */
