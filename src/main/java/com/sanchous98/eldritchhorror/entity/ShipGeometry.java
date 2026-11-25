@@ -66,9 +66,9 @@ public final class ShipGeometry {
     public static final double BRIDGE_TOP_Y = 16.6;
 
     /** Deck length that stays at full beam before the bow/stern counters taper. */
-    public static final double FULL_BEAM_Z = 38.0;
+    public static final double FULL_BEAM_Z = 40.0;
     /** Half beam at the very tip of the bow/stern counter. */
-    public static final double TIP_BEAM = 4.0;
+    public static final double TIP_BEAM = 2.5;
 
     /** Passenger seats: sixteen on the foredeck, sixteen on the aft deck. */
     public static final int SEATS = 32;

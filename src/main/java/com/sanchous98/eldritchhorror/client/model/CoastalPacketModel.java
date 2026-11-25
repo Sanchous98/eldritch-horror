@@ -82,11 +82,11 @@ public final class CoastalPacketModel extends EntityModel<CoastalPacketRenderSta
     private static final int PORTHOLE_V = 1560;
 
     // Hull and deck, in model units. These mirror ShipGeometry, converted to 1/16 blocks and y-down.
-    private static final float DECK_Y = -102.4F;
-    private static final float KEEL_Y = 44.0F;
-    private static final float ROOF_Y = -217.6F;
-    private static final float BRIDGE_TOP_Y = -265.6F;
-    private static final float BEAM = 144.0F;
+    private static final float DECK_Y = (float) (-ShipGeometry.DECK_Y * 16.0);
+    private static final float KEEL_Y = (float) (-ShipGeometry.HULL_BOTTOM_Y * 16.0);
+    private static final float ROOF_Y = (float) (-ShipGeometry.ROOF_Y * 16.0);
+    private static final float BRIDGE_TOP_Y = (float) (-ShipGeometry.BRIDGE_TOP_Y * 16.0);
+    private static final float BEAM = (float) (ShipGeometry.HALF_BEAM * 16.0);
     private static final float STRAIGHT = 640.0F;
     /** Hull sides stop one block below the walk surface; the deck slab covers the gap. */
     private static final float HULL_TOP_Y = DECK_Y + 16.0F;
@@ -96,7 +96,7 @@ public final class CoastalPacketModel extends EntityModel<CoastalPacketRenderSta
     private static final float BRIDGE_HALF_Z = (float) ShipGeometry.BRIDGE_Z_HALF * 16.0F;
     private static final float BRIDGE_HALF_X = (float) ShipGeometry.BRIDGE_X_HALF * 16.0F;
     private static final float BRIDGE_CENTRE_X = (float) ShipGeometry.BRIDGE_Z_CENTER * 16.0F;
-    private static final float BULWARK_TOP = DECK_Y - 18.0F;
+    private static final float BULWARK_TOP = (float) (-ShipGeometry.BULWARK_TOP_Y * 16.0);
     private static final float SUPERSTRUCTURE_HEIGHT = DECK_Y - ROOF_Y;
 
     public CoastalPacketModel(ModelPart root) {
@@ -214,9 +214,9 @@ public final class CoastalPacketModel extends EntityModel<CoastalPacketRenderSta
             float x = -STRAIGHT + i * 160.0F;
             // Waist-high solid bulwark, a little inboard of the sheer.
             cube(rail, "wall_r_" + i, RAIL_U, RAIL_V, x, BULWARK_TOP, BEAM - 5.0F,
-                    160.0F, 18.0F, 5.0F);
+                    160.0F, DECK_Y - BULWARK_TOP, 5.0F);
             cube(rail, "wall_l_" + i, RAIL_U, RAIL_V, x, BULWARK_TOP, -BEAM,
-                    160.0F, 18.0F, 5.0F);
+                    160.0F, DECK_Y - BULWARK_TOP, 5.0F);
             // Cap rail with a square section, the line a passenger sees the sea over.
             cube(rail, "cap_r_" + i, TRIM_U, TRIM_V, x, BULWARK_TOP - 4.0F, BEAM - 6.0F,
                     160.0F, 4.0F, 7.0F);
