@@ -94,6 +94,23 @@ A direction's timetable is a list of **24-hour clock hours**, not a single pair 
 The clock is the vanilla day clock: raw `0` is 06:00, so the timetable moves with `/time set`.
 Voyages run on real ticks once started.
 
+### Consists and chunk tickets
+
+A consist is spawned only when a player is within **256 blocks** of its origin station. Previously
+every line spawned an empty consist twice a service day: with 49 lines that filled `maxTrains`
+with cities nobody was in, and a station that did have a waiting player got no train at all. The
+gate is only for spawning; a consist already under way is unaffected if its riders leave the area.
+
+Trains rely on vanilla chunk tickets, and vanilla **deduplicates identical tickets instead of
+reference-counting them**. Two consequences shaped this code:
+
+- The station hold is counted per chunk (`TrainService.HELD`). Several lines can leave from one
+  terminal, and the first line to release its hold must not unload the chunk for the others.
+- The station hold and the consist's own hold use different ticket radii (5 and 4), so they are
+  distinct tickets. The locomotive keeps a 5×5 ticket on the middle carriage for the whole voyage;
+  a chunk is entity-ticking only when its ticket level is at most 31, and a radius-2 ticket ticked
+  the middle chunk alone, leaving the locomotive and wagons frozen in the neighbouring chunks.
+
 ### Stagger
 
 Each line **and direction** shifts its hour list by a stable phase derived from

@@ -45,6 +45,13 @@ public final class TrainService {
     private static final int TICK_INTERVAL = 20;
     /** Players within this many blocks of a station hear the boarding call. */
     private static final double BOARDING_CALL_RADIUS = 192.0;
+    /**
+     * A consist is only spawned when a player waits this close to its origin station. Without this
+     * gate every one of the 49 lines spawned an empty consist twice a day, filled the
+     * {@code maxTrains} cap with cities nobody was in, and left stations that do have a player
+     * without a train at all.
+     */
+    private static final double SPAWN_PLAYER_RADIUS = 256.0;
     /** Don't spawn a second consist on top of a lingering one at the same station. */
     private static final double STATION_CLEARANCE = 32.0;
     /**
@@ -146,6 +153,10 @@ public final class TrainService {
                     continue;
                 }
                 RailStation origin = line.origin(direction);
+                if (!playerWaiting(level, origin)) {
+                    releasePending(level, key);
+                    continue;
+                }
                 if (stationOccupied(level, origin)) {
                     releasePending(level, key);
                     continue;
@@ -261,6 +272,18 @@ public final class TrainService {
         } else {
             HELD.put(chunk, count - 1);
         }
+    }
+
+    /** @return true when a player is close enough to the station to board a consist there. */
+    private static boolean playerWaiting(ServerLevel level, RailStation station) {
+        for (ServerPlayer player : level.players()) {
+            if (EarthMap.horizontalDistanceSqr(player.getX(), player.getZ(),
+                    station.boardX() + 0.5, station.boardZ() + 0.5)
+                    <= SPAWN_PLAYER_RADIUS * SPAWN_PLAYER_RADIUS) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean stationOccupied(ServerLevel level, RailStation station) {
