@@ -313,6 +313,10 @@ public abstract class AncientOne extends Monster implements DreadAura {
     }
 
     private void snapToGround() {
+        // Water and lava presences swim: vanilla buoyancy owns the vertical axis there.
+        if (this.isInWater() || this.isInLava()) {
+            return;
+        }
         int x = Mth.floor(this.getX());
         int z = Mth.floor(this.getZ());
         int baseY = Mth.floor(this.getY());
