@@ -3077,8 +3077,8 @@ public final class ModConfig {
 
     /** Number of deck seats. */
     public static final ModConfigSpec.IntValue SHIP_SEATS =
-            BUILDER.comment("Passenger seats on a packet (the hull has 14).")
-                    .defineInRange("shipSeats", 14, 1, 14);
+            BUILDER.comment("Passenger seats on a liner (the deck has 32).")
+                    .defineInRange("shipSeats", 32, 1, 32);
 
     /** Fare in black obols, charged once on boarding. */
     public static final ModConfigSpec.IntValue SHIP_FARE =
@@ -3105,7 +3105,7 @@ public final class ModConfig {
 
     /** Hard cap on simultaneously live packets. */
     public static final ModConfigSpec.IntValue MAX_SHIPS =
-            BUILDER.comment("Maximum simultaneously active packets.")
+            BUILDER.comment("Maximum simultaneously active liners.")
                     .defineInRange("maxShips", 8, 1, 16);
 
     // --- Trains (design/30, stage 2) ----------------------------------------------------------

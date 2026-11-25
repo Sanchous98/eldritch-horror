@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Generate the coastal packet's entity texture.
+"""Generate the liner's entity texture.
 
-One 1024x1024 RGB sheet holds every material the ship model samples: tarred hull
-planks, a pale deck, painted cabin boards, a slate roof, canvas sails, an iron
-funnel, dark rigging, benches, lantern glass and portholes.  Each material lives
-in its own rectangle, and every model cube is given a ``texOffs`` at that
-rectangle (see ``client/model/CoastalPacketModel``).
+One 2048x2048 RGB sheet holds every material the 91-block ship model samples:
+tarred hull strakes, a pale planked main deck and promenade, white cabin panels,
+repeated window bands, an iron funnel, a red boot top and funnel band, spars,
+rails, benches, lifeboats, a striped awning, lantern glass and portholes. Each
+material lives in its own rectangle, and every model cube is given a ``texOffs``
+at that rectangle (see ``client/model/CoastalPacketModel``).
 
 The script is deterministic: the RNG is seeded from the texture name, so running
 it again always produces byte-identical pixels.
@@ -25,31 +26,35 @@ import sys
 import zlib
 from pathlib import Path
 
-SIZE = 1024
+SIZE = 2048
 NAME = "coastal_packet"
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEXTURE_DIR = (REPO_ROOT / "src" / "main" / "resources" / "assets"
                / "eldritch_horror" / "textures" / "entity")
 
-# Region rectangles (x, y, w, h). The model's texOffs constants mirror these.
-HULL_A = (0, 0, 208, 128)
-HULL_B = (0, 132, 208, 128)
-DECK = (0, 264, 196, 84)
-ROOF = (0, 352, 200, 84)
-SAIL = (0, 440, 188, 138)
-CABIN = (256, 0, 80, 40)
-WINDOW = (256, 48, 30, 8)
-WINDOW_TALL = (290, 48, 30, 21)
-BENCH = (400, 160, 130, 11)
-KEEL = (256, 80, 168, 72)
-MAST = (440, 0, 40, 100)
-YARD = (440, 104, 68, 34)
-FUNNEL = (256, 160, 72, 28)
-TRIM = (340, 176, 64, 64)
-FOREDECK = (256, 240, 192, 80)
-LANTERN = (460, 140, 24, 14)
-PORTHOLE = (490, 140, 16, 8)
+# Region rectangles (x, y, w, h). The model's texOffs constants mirror these. A region is
+# painted as generic material so every box face sampled from it reads correctly; its width and
+# height must be at least the largest cube's 2*(w+d) x (h+d) UV footprint.
+HULL_A = (0, 0, 832, 448)
+HULL_B = (832, 0, 832, 448)
+DECK = (0, 456, 896, 320)
+WHITE = (896, 456, 688, 376)
+ROOF = (0, 784, 832, 320)
+WINDOW = (1584, 456, 464, 32)
+WINDOW_TALL = (1584, 496, 464, 96)
+LIFEBOAT = (0, 1112, 176, 40)
+FUNNEL = (176, 1112, 256, 160)
+MAST = (432, 1112, 64, 336)
+YARD = (496, 1112, 432, 216)
+RAIL = (0, 1456, 336, 32)
+BENCH = (344, 1456, 336, 33)
+TRIM = (688, 1456, 336, 96)
+RED = (1032, 1456, 336, 96)
+CANVAS = (0, 1560, 336, 96)
+KEEL = (0, 1664, 664, 288)
+LANTERN = (344, 1560, 64, 32)
+PORTHOLE = (680, 1560, 34, 17)
 
 
 class Canvas:
@@ -252,25 +257,86 @@ def paint_sail(canvas, rect, rng):
     canvas.ellipse(cx, cy, r * 0.16, r * 0.16, (142, 48, 40), 0.30)
 
 
-def paint_window(canvas, rect, rng):
+def paint_window_band(canvas, rect, rng, panes=12, inset=4):
+    """A repeated row of lit cabin windows, so any long window cube reads as a band."""
     x0, y0, w, h = rect
-    for y in range(y0, y0 + h):
-        t = (y - y0) / max(1, h - 1)
-        color = (int(9 + 10 * t), int(18 + 18 * t), int(28 + 24 * t))
-        canvas.rect(x0, y, w, 1, color, 1.0)
-    # Glare.
-    for x in range(x0, x0 + w, 17):
-        canvas.line(x, y0, x + 6, y0 + h - 1, (120, 150, 166), 0.18)
-    # Mullions.
-    canvas.line(x0 + w // 2, y0, x0 + w // 2, y0 + h, (24, 30, 32), 0.75)
-    canvas.line(x0, y0 + h // 2, x0 + w, y0 + h // 2, (24, 30, 32), 0.6)
-    # Frame.
+    canvas.rect(x0, y0, w, h, (196, 190, 172))
+    pane_w = max(6, w // panes)
+    for i in range(panes):
+        px = x0 + i * pane_w + inset
+        pw = max(2, pane_w - 2 * inset)
+        for y in range(y0 + inset, y0 + h - inset):
+            t = (y - (y0 + inset)) / max(1, h - 2 * inset - 1)
+            color = (int(10 + 12 * t), int(20 + 20 * t), int(32 + 26 * t))
+            canvas.rect(px, y, pw, 1, color, 1.0)
+        canvas.line(px + 1, y0 + inset, px + max(2, pw // 3),
+                    y0 + h - inset - 1, (116, 150, 166), 0.16)
+        canvas.line(px + pw // 2, y0 + inset, px + pw // 2,
+                    y0 + h - inset, (30, 34, 36), 0.5)
+        if i % 4 == 0:
+            canvas.rect(px, y0 + inset, max(2, pw // 4), h - 2 * inset,
+                        (154, 122, 96), 0.32)
     for x in range(x0, x0 + w):
         canvas.blend(x, y0, (52, 44, 30), 0.9)
         canvas.blend(x, y0 + h - 1, (52, 44, 30), 0.9)
     for y in range(y0, y0 + h):
         canvas.blend(x0, y, (52, 44, 30), 0.9)
         canvas.blend(x0 + w - 1, y, (52, 44, 30), 0.9)
+
+
+def paint_white(canvas, rect, rng):
+    """Painted steel superstructure: near-white panels, seams, rivets, faint grime."""
+    x0, y0, w, h = rect
+    base = (228, 224, 212)
+    canvas.rect(x0, y0, w, h, base)
+    jitter(canvas, rect, rng, 4)
+    for x in range(x0, x0 + w, 22):
+        canvas.line(x, y0, x, y0 + h, (190, 186, 176), 0.32)
+    for y in range(y0, y0 + h, 40):
+        canvas.line(x0, y, x0 + w, y, (206, 202, 192), 0.24)
+    for x in range(x0 + 6, x0 + w, 22):
+        for y in range(y0 + 8, y0 + h, 18):
+            canvas.ellipse(x, y, 0.8, 0.8, (182, 178, 166), 0.5)
+    for _ in range(max(8, w * h // 1400)):
+        canvas.ellipse(rng.uniform(x0, x0 + w), rng.uniform(y0, y0 + h),
+                       rng.uniform(2, 8), rng.uniform(1, 4), (168, 164, 150), 0.09)
+    canvas.rect(x0, y0 + 2, w, 3, (198, 186, 148), 0.8)
+
+
+def paint_lifeboat(canvas, rect, rng):
+    x0, y0, w, h = rect
+    canvas.rect(x0, y0, w, h, (232, 228, 216))
+    jitter(canvas, rect, rng, 3)
+    canvas.rect(x0, y0, w, 4, (176, 170, 158), 0.8)
+    canvas.rect(x0, y0 + h - 3, w, 3, (168, 66, 50), 0.75)
+    for x in range(x0, x0 + w, 24):
+        canvas.line(x, y0 + 4, x, y0 + h - 4, (196, 190, 176), 0.35)
+
+
+def paint_canvas(canvas, rect, rng):
+    """Cream and madder-red awning stripes."""
+    x0, y0, w, h = rect
+    canvas.rect(x0, y0, w, h, (206, 196, 168))
+    for x in range(x0, x0 + w, 28):
+        canvas.rect(x, y0, 14, h, (150, 72, 58), 0.75)
+    jitter(canvas, rect, rng, 4)
+    for x in range(x0, x0 + w, 8):
+        canvas.line(x, y0, x, y0 + h, (176, 166, 142), 0.2)
+
+
+def paint_red(canvas, rect, rng):
+    x0, y0, w, h = rect
+    canvas.rect(x0, y0, w, h, (132, 36, 30))
+    jitter(canvas, rect, rng, 5)
+    for x in range(x0, x0 + w, 14):
+        canvas.line(x, y0, x, y0 + h, (80, 20, 18), 0.5)
+        for y in range(y0 + 3, y0 + h, 9):
+            canvas.blend(x + 2, y, (168, 80, 66), 0.4)
+
+
+def paint_keel(canvas, rect, rng):
+    paint_wood(canvas, rect, (58, 24, 22), (20, 10, 8), (96, 48, 38), rng,
+               row_h=8, plank_w=44)
 
 
 def paint_funnel(canvas, rect, rng):
@@ -337,25 +403,27 @@ def paint_porthole(canvas, rect, rng):
 def paint(canvas):
     rng = random.Random(zlib.crc32(NAME.encode("utf-8")))
     canvas.rect(0, 0, SIZE, SIZE, (20, 18, 16))
-    paint_hull(canvas, HULL_A, (62, 46, 32), rng)
-    paint_hull(canvas, HULL_B, (58, 43, 30), rng)
+    paint_hull(canvas, HULL_A, (58, 44, 32), rng)
+    paint_hull(canvas, HULL_B, (54, 40, 29), rng)
     paint_deck(canvas, DECK, rng)
-    paint_roof(canvas, ROOF, rng)
-    paint_sail(canvas, SAIL, rng)
-    paint_cabin(canvas, CABIN, rng)
-    paint_window(canvas, WINDOW, rng)
-    paint_window(canvas, WINDOW_TALL, rng)
+    paint_deck(canvas, ROOF, rng)
+    paint_white(canvas, WHITE, rng)
+    paint_window_band(canvas, WINDOW, rng, panes=12, inset=4)
+    paint_window_band(canvas, WINDOW_TALL, rng, panes=10, inset=7)
+    paint_lifeboat(canvas, LIFEBOAT, rng)
     paint_wood(canvas, BENCH, (100, 72, 42), (44, 30, 18), (146, 116, 76), rng,
                row_h=5, plank_w=34)
-    paint_wood(canvas, KEEL, (36, 28, 22), (14, 10, 8), (74, 60, 46), rng,
-               row_h=9, plank_w=30)
+    paint_keel(canvas, KEEL, rng)
     paint_wood(canvas, MAST, (52, 38, 26), (20, 14, 10), (92, 70, 46), rng,
                row_h=40, plank_w=9, horizontal=False, nails=False)
     paint_wood(canvas, YARD, (50, 37, 26), (20, 14, 10), (90, 68, 46), rng,
                row_h=10, plank_w=13, horizontal=False, nails=False)
     paint_funnel(canvas, FUNNEL, rng)
     paint_trim(canvas, TRIM, rng)
-    paint_deck(canvas, FOREDECK, rng)
+    paint_red(canvas, RED, rng)
+    paint_canvas(canvas, CANVAS, rng)
+    paint_wood(canvas, RAIL, (62, 48, 34), (24, 18, 12), (104, 82, 56), rng,
+               row_h=8, plank_w=26, nails=False)
     paint_lantern(canvas, LANTERN, rng)
     paint_porthole(canvas, PORTHOLE, rng)
     return canvas

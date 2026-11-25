@@ -26,18 +26,19 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The stage-1 ship timetable ({@code design/30-transport.md}): one docked packet per line and
+ * The stage-1 ship timetable ({@code design/30-transport.md}): one docked liner per line and
  * direction while its gangway is open, then a real voyage under {@link CoastalPacket}'s own tick.
  *
  * <p>The service is a small lifecycle manager, not a per-tick pathfinder. It wakes every second,
- * finds the next departure for each line/direction from {@link TransportMath}, and spawns the packet
+ * finds the next departure for each line/direction from {@link TransportMath}, and spawns the liner
  * when the boarding window opens. Once spawned, the hull owns its movement, tickets, departure,
  * arrival and despawn. An empty service despawns at departure instead of sailing; a hull with no
  * riders left mid-ocean despawns after a short grace.
  *
  * <p>Schedules are read from the overworld clock, so {@code /time set} moves them; a started voyage
- * runs on real ticks. All state is process-local (hulls are never saved): a restart simply cancels
- * the current services and the next boarding window spawns fresh ones.
+ * runs on real ticks. All state is process-local (liners are never saved): a restart simply cancels
+ * the current services and the next boarding window spawns fresh ones. The vessel itself owns its
+ * 7 x 7 chunk ticket, its deck walkers and its invisible superstructure parts.
  */
 @EventBusSubscriber(modid = EldritchHorror.MODID)
 public final class ShipService {
@@ -209,7 +210,7 @@ public final class ShipService {
         CoastalPacket ship = ModEntities.COASTAL_PACKET.get().create(level, EntitySpawnReason.EVENT);
         if (ship == null) {
             CoastalPacket.releaseChunks(level, chunk);
-            EldritchHorror.LOGGER.warn("transport: could not create a packet for {}", line.id());
+            EldritchHorror.LOGGER.warn("transport: could not create a liner for {}", line.id());
             return null;
         }
         // The berth's own water surface, not the world sea level: an authored inland basin (Mexico

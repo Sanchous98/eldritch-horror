@@ -6,6 +6,7 @@ import com.sanchous98.eldritchhorror.registry.ModEntities;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
@@ -100,6 +101,8 @@ public final class ClientEntityRenderers {
         event.registerEntityRenderer(ModEntities.CHOIR_LEVIATHAN.get(), ChoirLeviathanRenderer::new);
         event.registerEntityRenderer(ModEntities.THE_HORROR.get(), TheHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.COASTAL_PACKET.get(), CoastalPacketRenderer::new);
+        // Collision-only superstructure boxes: present on the client for collision, never drawn.
+        event.registerEntityRenderer(ModEntities.SHIP_COLLISION_PART.get(), NoopRenderer::new);
         event.registerEntityRenderer(ModEntities.TRAIN_LOCOMOTIVE.get(),
                 context -> new TrainCarRenderer<>(context,
                         new TrainCarModel(context.bakeLayer(TrainCarModel.LOCOMOTIVE_LAYER)),
