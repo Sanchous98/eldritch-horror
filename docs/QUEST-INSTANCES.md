@@ -59,17 +59,34 @@ if they are the same world for everyone. Instances are therefore additive, quest
 - Loot from instances is the reward for the random layer; it must not be required for world
   progression, so a bad roll never soft-locks a chain.
 
-## Dungeons instead of underground world content
+## Dungeons as portals
 
-A dungeon is a **separate dimension**, not a hole under the city. The world keeps its real
-underground only where the city has one (metro, catacombs, cellars) and those become *entrances*,
-not the dungeon itself:
+A dungeon is a **separate dimension**, and its entrance is a **portal built like a Nether portal**:
+a frame of themed blocks, ignited once, opening a plane of coloured portal blocks. The Nether
+portal is the right mental model — players already know how to read a frame and a lit plane — but
+each dungeon family has its own materials, colour and igniter, so the frame itself tells the player
+what lies behind it and how bad an idea this is.
 
-- The real catacombs door in Paris stays a real place in the city; behind it is a generated
-  instance, so the layout is new every session.
-- The world never needs a hand-built 1:1 maze, and a dungeon cannot leak into city blocks, taint or
-  the map.
-- An instance dungeon is optional content: no quest chain may *require* a specific dungeon roll.
+| Portal | Frame | Plane | Igniter | Dungeon |
+|---|---|---|---|---|
+| Catacombs | mossy stone bricks + bone blocks | pale green | funerary candle | crypts, ossuaries; low tier |
+| Drowned | prismarine + sea lanterns | cyan | briny pearl | flooded temple; mid tier |
+| Tomb | sandstone + chiselled sandstone | amber | sun scarab | desert tomb; low tier |
+| Vault | deepslate tiles + amethyst | violet | void shard | sealed vault; high tier |
+| Whisper | blackstone + crying obsidian | indigo, dim | whisper sigil | dream archive; high tier, only hinted by whispers |
+
+- Frame shape and ignition reuse the Nether-portal reading: a rectangular frame (4×5 minimum,
+  larger frames open a larger plane), lit with the family's igniter, extinguished by breaking the
+  frame. No coordinates are ever shown.
+- The portal plane is its own block per family, with the family's colour and animation. Standing in
+  it for the usual portal delay teleports a player (only players; no mobs, no trains, no ships) to
+  the session instance for that family.
+- The return plane is placed at the instance's entrance and returns to the frame the player used.
+- Some frames exist in the world already (the real catacombs under Paris, a drowned gate on a
+  shore); others are craftable from the family's materials plus a rare igniter. Ill-advised, but
+  allowed.
+- Instances stay session-scoped: the portal is permanent, the dungeon behind it is rerolled every
+  session, and closing the instance leaves the frame intact.
 
 ### Whispers
 
@@ -77,15 +94,17 @@ The sanity system already plays `AMBIENT_WHISPER` at the MARKED band. That becom
 hint channel:
 
 - A player below the FRAYING band starts hearing **actionable** whispers: a place name and a
-  direction to a dungeon entrance ("the door under the church at Les Halles…"), shown as the usual
+  direction to a portal ("the black gate behind the church at Les Halles…"), shown as the usual
   locator-bar dot, never coordinates.
 - Whispers are **unreliable by design**: a share of them are true, some are stale, some point at a
   hazard. The lower the sanity, the more whispers and the higher the chance one is true — madness
   makes you useful and dangerous at the same time.
-- A sane player can still find an entrance by exploring; whispers are a shortcut with a price, not
-  the only path.
+- The Whisper-family portal (indigo) is only ever found through whispers; its frame is not placed
+  in the world otherwise.
+- A sane player can still find the other frames by exploring; whispers are a shortcut with a price,
+  not the only path.
 - Whisper text is generated from the dungeon seed, so within a session the same whisper always
-  names the same door.
+  names the same portal.
 
 ### Risk and reward
 
@@ -93,12 +112,12 @@ Dungeons are the "dubious reward" layer:
 
 | | |
 |---|---|
-| Danger | generated traps and enemies scaled to the city tier; a local dread that drains sanity inside the instance |
+| Danger | generated traps and enemies scaled to the family tier; a local dread that drains sanity inside the instance |
 | Reward | rare reagents/artefacts and lore, rolled from a table with a real chance of a poor or empty haul |
 | Cost | the trip costs sanity and supplies; leaving early is always allowed |
 | Guardrail | nothing required for world/quest progression is dungeon-only, and no Ancient One spawns inside |
 
-The deal the whisper offers is deliberately bad on average and excellent occasionally: the player
+The deal the portal offers is deliberately bad on average and excellent occasionally: the player
 gambles time, sanity and gear for a chance at something the city cannot give.
 
 ## Constraints
