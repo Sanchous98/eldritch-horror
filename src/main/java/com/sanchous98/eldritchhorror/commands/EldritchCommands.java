@@ -360,6 +360,19 @@ public final class EldritchCommands {
                         })
                         .executes(ctx -> stationAt(ctx,
                                 com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "city")))));
+        // Sea pier: a plank walkway from the shore to the harbour water point, so a player can
+        // reach a docked hull instead of swimming under it.
+        eh.then(Commands.literal("port")
+                .requires(GAMEMASTER)
+                .then(Commands.argument("city", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            for (var port : com.sanchous98.eldritchhorror.world.transport.Ports.all()) {
+                                builder.suggest(port.cityId());
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(ctx -> portAt(ctx, com.mojang.brigadier.arguments.StringArgumentType
+                                .getString(ctx, "city")))));
         eh.then(Commands.literal("railkit")
                 .requires(GAMEMASTER)
                 .executes(ctx -> railKit(ctx, 60))
@@ -619,6 +632,62 @@ public final class EldritchCommands {
             level.setBlock(new net.minecraft.core.BlockPos(ex, ey + dy, ez), bricks, 2);
         }
         return laid;
+    }
+
+
+    /**
+     * {@code /eh port <city>}: lays a plank walkway from the port's shore point to its water point
+     * at one block above the sea, with fences and lanterns, so boarding a liner is not a swim.
+     */
+    private static int portAt(CommandContext<CommandSourceStack> ctx, String cityId) {
+        var port = com.sanchous98.eldritchhorror.world.transport.Ports.byCity(cityId);
+        if (port == null) {
+            ctx.getSource().sendFailure(Component.literal(cityId + " has no sea port"));
+            return 0;
+        }
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        int x0 = port.shoreX();
+        int z0 = port.shoreZ();
+        int dx = port.waterX() - x0;
+        int dz = port.waterZ() - z0;
+        int steps = Math.max(1, Math.max(Math.abs(dx), Math.abs(dz)));
+        double length = Math.max(1.0, Math.sqrt((double) dx * dx + (double) dz * dz));
+        double px = -dz / length;
+        double pz = dx / length;
+        int y = port.waterY() + 1;
+        var planks = net.minecraft.world.level.block.Blocks.SPRUCE_PLANKS.defaultBlockState();
+        var fence = net.minecraft.world.level.block.Blocks.SPRUCE_FENCE.defaultBlockState();
+        var lantern = net.minecraft.world.level.block.Blocks.LANTERN.defaultBlockState();
+        int laid = 0;
+        for (int i = 0; i <= steps; i++) {
+            double t = i / (double) steps;
+            int x = x0 + (int) Math.round(dx * t);
+            int z = z0 + (int) Math.round(dz * t);
+            for (int w = -1; w <= 1; w++) {
+                int bx = x + (int) Math.round(px * w);
+                int bz = z + (int) Math.round(pz * w);
+                for (int dy = 1; dy <= 4; dy++) {
+                    level.setBlock(new net.minecraft.core.BlockPos(bx, y + dy, bz),
+                            net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                }
+                level.setBlock(new net.minecraft.core.BlockPos(bx, y - 1, bz), planks, 2);
+                level.setBlock(new net.minecraft.core.BlockPos(bx, y, bz), planks, 2);
+                laid++;
+            }
+            for (int side = -1; side <= 1; side += 2) {
+                int fx = x + (int) Math.round(px * 2 * side);
+                int fz = z + (int) Math.round(pz * 2 * side);
+                level.setBlock(new net.minecraft.core.BlockPos(fx, y, fz), planks, 2);
+                level.setBlock(new net.minecraft.core.BlockPos(fx, y + 1, fz), fence, 2);
+                if (i % 8 == 0) {
+                    level.setBlock(new net.minecraft.core.BlockPos(fx, y + 2, fz), lantern, 2);
+                }
+            }
+        }
+        int total = laid;
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                port.cityId() + ": pier laid (" + total + " deck blocks)"), false);
+        return 1;
     }
 
     /**
