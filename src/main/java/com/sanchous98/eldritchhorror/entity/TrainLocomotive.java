@@ -415,7 +415,13 @@ public class TrainLocomotive extends TrainCar {
         }
         BlockState rail = level.getBlockState(pos);
         if (!rail.is(BlockTags.RAILS)) {
-            return "missing rail (" + rail.getBlock().getName().getString() + ")";
+            // The corridor is stamped only into chunks that generate after the network exists.
+            // A city that was generated before its line has no rails yet, so the planned polyline
+            // is the authority there: air and ground are passable, a solid block is not.
+            if (rail.getCollisionShape(level, pos).isEmpty()) {
+                return null;
+            }
+            return "blocked by " + rail.getBlock().getName().getString();
         }
         for (int dy = 1; dy <= 2; dy++) {
             BlockPos above = pos.above(dy);
