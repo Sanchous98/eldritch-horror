@@ -114,7 +114,7 @@ public final class IthaqualShade extends AncientOne {
                         .warning("Killing frost — keep moving!")
                         .sound(SoundEvents.SNOW_GOLEM_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 4, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SNOWFLAKE, 4, 1.0);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SNOWFLAKE, 3);
                         })
                         .onExecute((boss, level, target) -> {

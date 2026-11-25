@@ -238,7 +238,7 @@ public final class ChoirLeviathan extends AncientOne {
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SPLASH, 4);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 3, 1.1);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.BUBBLE, 3, 1.1);
                         })
                         .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
                             BossAbilities.knockAway(boss, player, 1.0, 0.3);

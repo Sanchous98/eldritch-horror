@@ -95,8 +95,8 @@ public final class AtlachNacha extends AncientOne {
                         .warning("The web tightens — cut free!")
                         .sound(SoundEvents.SPIDER_HURT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.ITEM_COBWEB, 4, 1.0);
-                            BossAbilities.ring(level, target.position(), 2.5, ParticleTypes.ITEM_COBWEB, 10);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.ITEM_COBWEB, 4, 1.0);
+                            BossAbilities.ring(boss, level, target.position(), 2.5, ParticleTypes.ITEM_COBWEB, 10);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.effect(target, MobEffects.SLOWNESS, 100, 3);

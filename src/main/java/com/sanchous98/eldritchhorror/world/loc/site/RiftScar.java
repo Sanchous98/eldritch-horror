@@ -25,7 +25,7 @@ public final class RiftScar implements Location {
     /** Half-length of the fissure along Z (blocks). */
     private static final int LENGTH = 20;
     /** Radius of the levelled plateau (blocks); the trench stays well inside it. */
-    private static final int FIELD = 22;
+    private static final int FIELD = 34;
     /** Maximum centreline wander of the trench (blocks). */
     private static final int MEANDER = 7;
 
@@ -55,8 +55,8 @@ public final class RiftScar implements Location {
 
     @Override
     public int renderRadius() {
-        // The built footprint is the FIELD-sized plateau (±18) with the rim monolith at +16; a
-        // 60-radius render would shrink it to a speck. Frame just past the levelled edge.
+        // The built footprint is the FIELD-sized plateau (now wide enough for a 56-block Azathoth)
+        // with the rim monolith at +16; frame just past the levelled edge.
         return FIELD + 12;
     }
 

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.NephrenKaModel;
 import com.sanchous98.eldritchhorror.entity.NephrenKa;
@@ -13,7 +14,9 @@ public final class NephrenKaRenderer extends BossRenderer<NephrenKa, NephrenKaMo
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/nephren_ka.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("nephren_ka");
+
     public NephrenKaRenderer(EntityRendererProvider.Context context) {
-        super(context, new NephrenKaModel(context.bakeLayer(NephrenKaModel.LAYER)), 1.4F, TEXTURE, 1.75F);
+        super(context, new NephrenKaModel(context.bakeLayer(NephrenKaModel.LAYER)), SIZE.shadow(1.4F), TEXTURE, SIZE.renderScale());
     }
 }

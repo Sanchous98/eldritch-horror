@@ -91,13 +91,13 @@ public final class Azathoth extends AncientOne {
                         .warning("A blind flare — close your eyes and move!")
                         .sound(SoundEvents.WARDEN_SONIC_CHARGE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.END_ROD, 4, 1.2);
-                            BossAbilities.ring(level, target.position(), 5.0, ParticleTypes.ELECTRIC_SPARK, 12);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.END_ROD, 4, 1.2);
+                            BossAbilities.ring(boss, level, target.position(), 5.0, ParticleTypes.ELECTRIC_SPARK, 12);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 6.0, 6.0F);
-                            BossAbilities.effectAround(level, target.position(), 6.0, MobEffects.BLINDNESS, 100, 0);
-                            BossAbilities.effectAround(level, target.position(), 6.0, MobEffects.NAUSEA, 140, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 6.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 6.0, MobEffects.NAUSEA, 140, 0);
                         })
                         .build(),
                 SimpleBossAbility.builder("unmade_will")
@@ -109,12 +109,12 @@ public final class Azathoth extends AncientOne {
                         .sound(SoundEvents.WARDEN_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.WITCH, 4);
-                            BossAbilities.ring(level, boss.position(), 7.0, ParticleTypes.SCULK_SOUL, 18);
+                            BossAbilities.ring(boss, level, boss.position(), 7.0, ParticleTypes.SCULK_SOUL, 18);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, boss.position(), 8.0, 5.0F);
-                            BossAbilities.effectAround(level, boss.position(), 8.0, MobEffects.WEAKNESS, 140, 0);
-                            BossAbilities.effectAround(level, boss.position(), 8.0, MobEffects.NAUSEA, 160, 0);
+                            BossAbilities.effectAround(boss, level, boss.position(), 8.0, MobEffects.WEAKNESS, 140, 0);
+                            BossAbilities.effectAround(boss, level, boss.position(), 8.0, MobEffects.NAUSEA, 160, 0);
                         })
                         .build(),
                 SimpleBossAbility.builder("idiot_gods_wail")
@@ -125,13 +125,13 @@ public final class Azathoth extends AncientOne {
                         .warning("Azathoth wails — get out of the centre!")
                         .sound(SoundEvents.WARDEN_SONIC_BOOM)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 6.0, ParticleTypes.SONIC_BOOM, 1);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.END_ROD, 5, 1.5);
+                            BossAbilities.ring(boss, level, target.position(), 6.0, ParticleTypes.SONIC_BOOM, 1);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.END_ROD, 5, 1.5);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 7.0, 9.0F);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.DARKNESS, 120, 0);
-                            for (var player : BossAbilities.playersAround(level, target.position(), 7.0)) {
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.DARKNESS, 120, 0);
+                            for (var player : BossAbilities.playersAround(boss, level, target.position(), 7.0)) {
                                 BossAbilities.knockAway(boss, player, 1.0, 0.4);
                             }
                         })

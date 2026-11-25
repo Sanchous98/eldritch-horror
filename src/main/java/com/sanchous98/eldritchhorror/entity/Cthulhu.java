@@ -139,7 +139,7 @@ public final class Cthulhu extends AncientOne {
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SPLASH, 5);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 3, 1.1);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.BUBBLE, 3, 1.1);
                         })
                         .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 14.0, 70.0, player -> {
                             BossAbilities.knockAway(boss, player, 0.9, 0.25);
@@ -155,7 +155,7 @@ public final class Cthulhu extends AncientOne {
                         .warning("The dream grips you — move!")
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SQUID_INK, 4, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SQUID_INK, 4, 1.0);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.BUBBLE, 3);
                         })
                         .onExecute((boss, level, target) -> {
@@ -173,13 +173,13 @@ public final class Cthulhu extends AncientOne {
                         .warning("Cthulhu wakes — get clear of the dream!")
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 6.0, ParticleTypes.SQUID_INK, 18);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.WITCH, 4, 1.4);
+                            BossAbilities.ring(boss, level, target.position(), 6.0, ParticleTypes.SQUID_INK, 18);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.WITCH, 4, 1.4);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 7.0, 9.0F);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.DARKNESS, 120, 0);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.NAUSEA, 160, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.DARKNESS, 120, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.NAUSEA, 160, 0);
                         })
                         .build()
         );

@@ -148,7 +148,7 @@ public final class ShubNiggurath extends AncientOne {
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SPORE_BLOSSOM_AIR, 5);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.CRIMSON_SPORE, 3, 1.1);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.CRIMSON_SPORE, 3, 1.1);
                         })
                         .onExecute((boss, level, target) ->
                                 boss.bossCombat().summon(level, ModEntities.LESSER_SWARM.get(), 3, target))
@@ -161,11 +161,11 @@ public final class ShubNiggurath extends AncientOne {
                         .warning("Roots take your feet — break free!")
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SPORE_BLOSSOM_AIR, 14);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.WARPED_SPORE, 3, 0.9);
+                            BossAbilities.ring(boss, level, target.position(), 4.5, ParticleTypes.SPORE_BLOSSOM_AIR, 14);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.WARPED_SPORE, 3, 0.9);
                         })
                         .onExecute((boss, level, target) -> {
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.SLOWNESS, 120, 3);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.SLOWNESS, 120, 3);
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 6.0F);
                         })
                         .build(),
@@ -177,13 +177,13 @@ public final class ShubNiggurath extends AncientOne {
                         .warning("The woods breathe in — get clear!")
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 6.5, ParticleTypes.SPORE_BLOSSOM_AIR, 18);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.ASH, 4, 1.4);
+                            BossAbilities.ring(boss, level, target.position(), 6.5, ParticleTypes.SPORE_BLOSSOM_AIR, 18);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.ASH, 4, 1.4);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 7.0, 8.0F);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.POISON, 120, 0);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.NAUSEA, 140, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.POISON, 120, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.NAUSEA, 140, 0);
                         })
                         .build()
         );

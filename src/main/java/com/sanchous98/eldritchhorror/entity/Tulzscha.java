@@ -95,11 +95,11 @@ public final class Tulzscha extends AncientOne {
                         .sound(SoundEvents.BLAZE_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SOUL_FIRE_FLAME, 4);
-                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SMALL_FLAME, 12);
+                            BossAbilities.ring(boss, level, target.position(), 4.5, ParticleTypes.SMALL_FLAME, 12);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 6.0F);
-                            for (var player : BossAbilities.playersAround(level, target.position(), 5.0)) {
+                            for (var player : BossAbilities.playersAround(boss, level, target.position(), 5.0)) {
                                 BossAbilities.burn(player, 4.0F);
                             }
                         })
@@ -112,10 +112,10 @@ public final class Tulzscha extends AncientOne {
                         .warning("Memory burns — look away!")
                         .sound(SoundEvents.BLAZE_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) ->
-                                BossAbilities.telegraphAt(level, target, ParticleTypes.SOUL_FIRE_FLAME, 4, 1.0))
+                                BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SOUL_FIRE_FLAME, 4, 1.0))
                         .onExecute((boss, level, target) -> {
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.NAUSEA, 120, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.NAUSEA, 120, 0);
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 4.0F);
                         })
                         .build()

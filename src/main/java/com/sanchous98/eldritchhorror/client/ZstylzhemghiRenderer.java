@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.ZstylzhemghiModel;
 import com.sanchous98.eldritchhorror.entity.Zstylzhemghi;
@@ -13,7 +14,9 @@ public final class ZstylzhemghiRenderer extends BossRenderer<Zstylzhemghi, Zstyl
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/zstylzhemghi.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("zstylzhemghi");
+
     public ZstylzhemghiRenderer(EntityRendererProvider.Context context) {
-        super(context, new ZstylzhemghiModel(context.bakeLayer(ZstylzhemghiModel.LAYER)), 1.8F, TEXTURE, 1.45F);
+        super(context, new ZstylzhemghiModel(context.bakeLayer(ZstylzhemghiModel.LAYER)), SIZE.shadow(1.8F), TEXTURE, SIZE.renderScale());
     }
 }

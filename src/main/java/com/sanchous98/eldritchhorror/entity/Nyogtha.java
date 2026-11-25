@@ -93,8 +93,8 @@ public final class Nyogtha extends AncientOne {
                         .warning("Tendrils rise from below — move!")
                         .sound(SoundEvents.WARDEN_SONIC_CHARGE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SQUID_INK, 4, 1.0);
-                            BossAbilities.ring(level, target.position(), 2.5, ParticleTypes.SCULK_SOUL, 10);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SQUID_INK, 4, 1.0);
+                            BossAbilities.ring(boss, level, target.position(), 2.5, ParticleTypes.SCULK_SOUL, 10);
                         })
                         .onExecute((boss, level, target) -> {
                             target.push(0.0, -0.8, 0.0);

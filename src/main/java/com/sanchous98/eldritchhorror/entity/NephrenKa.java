@@ -94,7 +94,7 @@ public final class NephrenKa extends AncientOne {
                         .warning("The king remembers — break his gaze!")
                         .sound(SoundEvents.HUSK_AMBIENT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.ASH, 4, 0.9);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.ASH, 4, 0.9);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SOUL, 4);
                         })
                         .onExecute((boss, level, target) -> {
@@ -112,7 +112,7 @@ public final class NephrenKa extends AncientOne {
                         .sound(SoundEvents.HUSK_AMBIENT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.ASH, 6);
-                            BossAbilities.ring(level, boss.position(), 6.0, ParticleTypes.ASH, 14);
+                            BossAbilities.ring(boss, level, boss.position(), 6.0, ParticleTypes.ASH, 14);
                         })
                         .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
                             BossAbilities.knockAway(boss, player, 0.9, 0.3);

@@ -102,7 +102,7 @@ public final class Abhoth extends AncientOne {
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.ITEM_SLIME, 4);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 2, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.BUBBLE, 2, 1.0);
                         })
                         .onExecute((boss, level, target) ->
                                 boss.bossCombat().summon(level, ModEntities.SHAMBLER_OOZE.get(), 2, target))
@@ -115,8 +115,8 @@ public final class Abhoth extends AncientOne {
                         .warning("The pool surges — step back!")
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SQUID_INK, 4, 1.0);
-                            BossAbilities.ring(level, target.position(), 3.0, ParticleTypes.BUBBLE, 10);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SQUID_INK, 4, 1.0);
+                            BossAbilities.ring(boss, level, target.position(), 3.0, ParticleTypes.BUBBLE, 10);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.pull(boss, target, 0.8, 0.15);

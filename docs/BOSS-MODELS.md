@@ -34,44 +34,66 @@ code depends on the models.
 
 ## Scale and hitboxes
 
-The geometry is authored at a readable design size (roughly 2-5 blocks) and scaled in the renderer to
-the canonical presence size. `ModEntities` carries the same width/height, so the body fills the
-hitbox and pathfinding uses the correct footprint. Eye height is vanilla's `0.85 * height`.
+The world is 1:1 (1 block = 1 m): Paris is 11 km across, ordinary buildings are 20–30 blocks tall
+and the Eiffel Tower is 330. The presences are therefore city-scale, not pet-scale. Every size lives
+in **one place**, `entity/AncientOneSizes.java`, and the entity registry, the renderers, the combat
+layer and the tests all read it. Nothing hardcodes a boss size.
 
-- Major presences: 6-9 blocks tall.
-- Roaming nine: 4-6 blocks.
-- Lesser/site presences: 3-4 blocks (the Choir Leviathan is a deliberately long 5).
+| Tier | Presences | Height | Width |
+| --- | --- | --- | --- |
+| Cosmic | Azathoth, Yog-Sothoth, Shub-Niggurath, Nyarlathotep | 112–128 | 40–56 |
+| Major | Cthulhu, Hastur, The Horror, Ithaqua, Yig, Rhan-Tegoth, Choir Leviathan, Glaaki, Nyogtha, Atlach-Nacha, Dunwich Horror, Nephren-Ka | 64–96 | 24–40 |
+| Lesser / farmable | Chaugnar Faugn, Cthugha, Tulzscha, Hydra, Ithaqual Shade, Abhoth, Zstylzhemghi | 24–32 | 10–16 |
 
-| Entity | Hitbox W x H | Renderer scale | Family | Silhouette |
+Eye height is pinned to `0.85 × height` in the registry (vanilla's default, kept explicit so the
+test can hold it). The hitbox starts at the feet, so a player at ground level can hit the body; the
+eye height is where the aim ray lands.
+
+| Entity | Hitbox W x H | Renderer scale | Tier | Silhouette |
 | --- | --- | --- | --- | --- |
-| Cthulhu | 3.5 x 8.0 | 1.85 | major | winged humanoid, tentacle beard, horns |
-| Azathoth | 3.2 x 6.5 | 1.20 | major | blind bubbling nucleus, orbiting bubbles, bone flutes |
-| Yog-Sothoth | 3.5 x 8.0 | 1.45 | major | two rotating gate-rings around a golden core |
-| Hastur | 3.5 x 7.0 | 2.20 | major | hooded yellow robe, pale mask, jagged crown |
-| Shub-Niggurath | 3.4 x 8.0 | 1.60 | major | tree-thick mass, three goat necks, tentacle curtain |
-| The Horror | 3.5 x 9.0 | 1.55 | major | accumulated mass, many eyes/mouths, two tentacle crowns |
-| Dunwich Horror | 2.8 x 4.5 | 1.50 | roaming | bloated body, tentacle crown, four thin legs |
-| Glaaki | 3.2 x 4.2 | 1.90 | roaming | spined drowned shell on a tendril skirt |
-| Ithaqua | 1.6 x 5.5 | 1.85 | roaming | gaunt giant, long arms, wind ring, ice claws |
-| Yig | 2.4 x 4.5 | 2.30 | roaming | coiled serpent, upright S-neck, hooded head |
-| Cthugha | 2.2 x 4.5 | 1.65 | roaming | flame column, orbiting embers, floating eyes |
-| Hydra | 2.6 x 4.5 | 1.50 | roaming | low body, six fanning necks, four stumpy legs |
-| Nyogtha | 3.0 x 4.0 | 1.60 | roaming | tar pool with a dozen rearing tendrils |
-| Rhan-Tegoth | 2.4 x 5.0 | 1.60 | roaming | domed crab-idol, eight legs, two pincers |
-| Chaugnar Faugn | 3.2 x 4.0 | 1.45 | lesser | elephantine humanoid idol, trunk, tusks, heavy arms |
-| Atlach-Nacha | 3.2 x 3.4 | 1.40 | lesser | wide spider, eight legs, pale web crown |
-| Nyarlathotep | 1.6 x 3.5 | 1.45 | lesser | slim masked figure, ragged cloak, second mask |
-| Tulzscha | 2.0 x 3.6 | 1.25 | lesser | narrow green flame column inside an ember halo |
-| Zstylzhemghi | 3.0 x 3.8 | 1.45 | lesser | dark core inside an orbiting insect swarm |
-| Abhoth | 3.4 x 3.6 | 1.80 | lesser | filth pool, budding spawn, thick arms, mouths |
-| Nephren-Ka | 1.8 x 3.6 | 1.75 | lesser | bandaged king, double crown, staff |
-| Choir Leviathan | 3.5 x 5.0 | 1.70 | lesser | drowned whale, head of eyes, belly mouths, flukes |
-| Ithaqual Shade | 1.4 x 3.8 | 1.27 | lesser | hooded ghost, tattered lower body, long arms |
+| Azathoth | 56 x 128 | 23.63 | cosmic | blind bubbling nucleus, orbiting bubbles, bone flutes |
+| Shub-Niggurath | 52 x 120 | 24.00 | cosmic | tree-thick mass, three goat necks, tentacle curtain |
+| Yog-Sothoth | 48 x 116 | 21.02 | cosmic | two rotating gate-rings around a golden core |
+| Nyarlathotep | 40 x 112 | 46.40 | cosmic | slim masked figure, ragged cloak, second mask |
+| The Horror | 40 x 96 | 16.53 | major | accumulated mass, many eyes/mouths, two tentacle crowns |
+| Cthulhu | 40 x 96 | 22.20 | major | winged humanoid, tentacle beard, horns |
+| Hastur | 36 x 88 | 27.66 | major | hooded yellow robe, pale mask, jagged crown |
+| Ithaqua | 30 x 80 | 30.55 | major | gaunt giant, long arms, wind ring, ice claws |
+| Yig | 28 x 72 | 36.80 | major | coiled serpent, upright S-neck, hooded head |
+| Rhan-Tegoth | 32 x 72 | 23.04 | major | domed crab-idol, eight legs, two pincers |
+| Choir Leviathan | 36 x 72 | 24.48 | major | drowned whale, head of eyes, belly mouths, flukes |
+| Glaaki | 30 x 68 | 30.76 | major | spined drowned shell on a tendril skirt |
+| Nyogtha | 36 x 68 | 27.20 | major | tar pool with a dozen rearing tendrils |
+| Atlach-Nacha | 40 x 64 | 26.35 | major | wide spider, eight legs, pale web crown |
+| Dunwich Horror | 26 x 64 | 21.33 | major | bloated body, tentacle crown, four thin legs |
+| Nephren-Ka | 24 x 64 | 31.11 | major | bandaged king, double crown, staff |
+| Chaugnar Faugn | 14 x 30 | 10.88 | lesser | elephantine humanoid idol, trunk, tusks, heavy arms |
+| Cthugha | 12 x 28 | 10.27 | lesser | flame column, orbiting embers, floating eyes |
+| Tulzscha | 12 x 28 | 9.72 | lesser | narrow green flame column inside an ember halo |
+| Hydra | 16 x 26 | 8.67 | lesser | low body, six fanning necks, four stumpy legs |
+| Ithaqual Shade | 10 x 26 | 8.69 | lesser | hooded ghost, tattered lower body, long arms |
+| Abhoth | 14 x 24 | 12.00 | lesser | filth pool, budding spawn, thick arms, mouths |
+| Zstylzhemghi | 12 x 24 | 9.16 | lesser | dark core inside an orbiting insect swarm |
 
-Model origins sit on the ground: the design rig places feet at model y=24 (1.5 blocks), which is
-exactly the fixed `-1.501` translation `LivingEntityRenderer` applies in model space, so scaling the
-model in `BossRenderer` keeps the feet on the floor without a separate offset. Shadows are passed
-per renderer and kept proportional.
+Renderer scale is derived as `baseScale × height / baseHeight`, so the visible model keeps the same
+top-to-hitbox relationship it had at the design size while the body becomes 12–37× larger. Model
+origins sit on the ground: the design rig places feet at model y=24 (1.5 blocks), exactly the fixed
+`-1.501` translation `LivingEntityRenderer` applies in model space, so scaling keeps the feet on the
+floor. Shadows scale with the body, capped at 8× so they stay readable. Textures tile; no new sheets
+were needed.
+
+### Movement and collision
+
+A 40–56 block footprint cannot use vanilla block collision — it would intersect every street and
+doorway — so an Ancient One sets `noPhysics` and keeps itself on the ground in `AncientOne.travel`:
+after the normal AI walk it snaps its feet to the highest floor within its step band (at most 6
+blocks, at least 1). Kerbs, rails and rubble are stepped over; a drop is a fall caught on the next
+tick; a body can never fall through the thin city crust (there is also a bottom-of-world clamp).
+It walks straight at its target (`steerGiant`) rather than asking `GroundPathNavigation` to find a
+56-block-wide path. It is not pushable, and it never shoves players, so the hitbox cannot eject
+anyone out of the world; ordinary mobs are still displaced. There are no riders, and `noPhysics`
+means the body cannot suffocate anything inside it.
+
 
 ## Animation
 
@@ -156,8 +178,9 @@ encoder; the pixels are the same. The script prints each written file, size and 
 4. Replace the renderer with a `BossRenderer<YourBoss, YourBossModel>` subclass passing texture,
    shadow and the renderer scale.
 5. Keep the renderer registration in `ClientEntityRenderers` (the class name is unchanged).
-6. Set the matching `.sized(width, height)` in `ModEntities` (keep widths at or below ~3.5) and add
-   the row to the table above.
+6. Add one row to `entity/AncientOneSizes.java` with the tier and hitbox; `ModEntities` builds
+   `.sized(...)` and the eye height from it, and the test fails until the row exists. `BossRenderer`
+   takes `SIZE.renderScale()`/`SIZE.shadow(base)` from the same row. Add the row to the table above.
 
 Names are checked at construction time (`ModelPart#getChild` throws), so the build gate is the
 compile plus a quick client spawn of the boss.

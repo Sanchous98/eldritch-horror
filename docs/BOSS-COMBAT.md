@@ -66,9 +66,33 @@ are pre-armour. The target is a full iron kit: roughly 40–60% is absorbed, so 
 strike is about 4–5 hearts, and a player survives two or three committed hits but cannot ignore the
 boss. Farm bosses deliberately sit at the lower end (4–7 damage, 20–24 tick telegraphs).
 
-**Hitbox-aware reach.** The model pass scales Ancient Ones to roughly 4–9 blocks tall, so teleports
-clear the boss's full height (`BossAbilities.bossHeight`) and adjacent cones start at 10–12 blocks
-rather than hugging an invisible small hitbox. Long-range calls stay at 14–24 blocks.
+**Hitbox-aware reach.** The 1:1 resize makes every presence 24–128 blocks tall, so the authored
+ability table is interpreted as *design distances* and scaled at runtime by
+`AncientOne.abilityScale()` (body height ÷ the old 8-block major baseline). Teleports clear the
+full body (`BossAbilities.bossHeight` now caps at 160), cones widen with the body, and summon
+counts rise with scale (base × scale, capped at 24; farm bosses use ×1.5 and cap at 6). Telegraph
+ticks do **not** scale: they stay 20–44 so the counterplay window is unchanged.
+
+**Melee.** `AncientOne.meleeReach()` is `0.5 × height` from the centre (Cthulhu 48, Azathoth 64,
+a farm boss 12–16), applied through `getAttackBoundingBox`, so the player can hit the body at ground
+level and the boss can hit a player who is beside its feet.
+
+**Dread and sound.** The non-damaging presence scales to `6 × height` (the first sighting and the
+5-second proximity pulse share it), and the action-bar warning reaches `max(32, 1.5 × height)`.
+Wind-up/sting volume is `clamp(height / 16, 1.4, 8.0)`, so a 128-block body is heard across a
+district. Farm bosses keep the same non-damaging dread formula but their **damaging** ranges are
+capped at ×2.5 and 32 blocks, so they never gain arena-wide attacks.
+
+| Tier | Height | Ability scale | Melee | Dread |
+| --- | --- | --- | --- | --- |
+| Cosmic | 112–128 | 14.0–16.0× | 56–64 | 672–768 |
+| Major | 64–96 | 8.0–12.0× | 32–48 | 384–576 |
+| Lesser / farmable | 24–32 | 2.5× (capped) | 12–16 | 144–180 |
+
+The per-entity table below keeps the authored `R`/`r` values (the numbers a designer edits); the
+effective radius at runtime is `R × abilityScale` for ranges and `r × abilityScale` for effect
+radii. Summon counts are base × scale as described above.
+
 
 ## Dread presence
 
@@ -78,8 +102,8 @@ stacks permanently: every effect is a short refresh with a floor on how often it
 
 | Layer | Radius | Cadence | DORMANT | STIRRING | ENRAGED |
 |---|---|---|---|---|---|
-| **First sighting** | 40 | on entering range; at most once per player per boss per **5 minutes** | deep sting (boss ambient/hurt, pitch 0.5), Darkness 3s, whispered action bar with the name | Darkness 4s, same sting/whisper | Darkness 5s, same sting/whisper |
-| **Proximity aura** | 24 | every 5s | 1 faint smoke particle at the player's eye line, just ahead of their gaze | 2 soul particles | 3 sculk-soul particles |
+| **First sighting** | 6 × height (144–768) | on entering range; at most once per player per boss per **5 minutes** | deep sting (boss ambient/hurt, pitch 0.5), Darkness 3s, whispered action bar with the name | Darkness 4s, same sting/whisper | Darkness 5s, same sting/whisper |
+| **Proximity aura** | 6 × height (144–768) | every 5s | 1 faint smoke particle at the player's eye line, just ahead of their gaze | 2 soul particles | 3 sculk-soul particles |
 
 **Major presences** (Cthulhu, Azathoth, Yog-Sothoth, Hastur, Nyarlathotep, Shub-Niggurath, The
 Horror) add brief **Nausea** to the first sighting (2s / 3s / 4s by phase) and, while **ENRAGED**,

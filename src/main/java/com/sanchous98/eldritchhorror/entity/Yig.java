@@ -155,7 +155,7 @@ public final class Yig extends AncientOne {
                         .warning("Yig's curse coils around you — break the line!")
                         .sound(SoundEvents.SPIDER_HURT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.ITEM_SLIME, 3, 0.9);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.ITEM_SLIME, 3, 0.9);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.WITCH, 3);
                         })
                         .onExecute((boss, level, target) -> {
@@ -172,12 +172,12 @@ public final class Yig extends AncientOne {
                         .warning("An ash cloud rises — move!")
                         .sound(SoundEvents.BLAZE_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.ASH, 5, 1.3);
-                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.ASH, 12);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.ASH, 5, 1.3);
+                            BossAbilities.ring(boss, level, target.position(), 4.5, ParticleTypes.ASH, 12);
                         })
                         .onExecute((boss, level, target) -> {
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.WITHER, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.WITHER, 100, 0);
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 4.0F);
                         })
                         .build()

@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.RhanTegothModel;
 import com.sanchous98.eldritchhorror.entity.RhanTegoth;
@@ -13,7 +14,9 @@ public final class RhanTegothRenderer extends BossRenderer<RhanTegoth, RhanTegot
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/rhan_tegoth.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("rhan_tegoth");
+
     public RhanTegothRenderer(EntityRendererProvider.Context context) {
-        super(context, new RhanTegothModel(context.bakeLayer(RhanTegothModel.LAYER)), 1.8F, TEXTURE, 1.6F);
+        super(context, new RhanTegothModel(context.bakeLayer(RhanTegothModel.LAYER)), SIZE.shadow(1.8F), TEXTURE, SIZE.renderScale());
     }
 }

@@ -95,7 +95,7 @@ public final class ChaugnarFaugn extends AncientOne {
                         .warning("The trunk reaches for you — move!")
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMOKE, 3, 0.9);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SMOKE, 3, 0.9);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.ITEM_SLIME, 3);
                         })
                         .onExecute((boss, level, target) -> {

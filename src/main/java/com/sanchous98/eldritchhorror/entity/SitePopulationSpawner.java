@@ -119,7 +119,7 @@ public final class SitePopulationSpawner {
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
                 // Nyarlathotep wears a face you trust inside the stronghold (design/28): one
                 // loaded-only presence, capped, zeroed when its toggle is off.
-                BestiarySupport.topUp(level, cache, player, ModEntities.NYARLATHOTEP.get(), Nyarlathotep.class, radius,
+                BestiarySupport.topUpGiant(level, cache, player, ModEntities.NYARLATHOTEP.get(), Nyarlathotep.class, radius,
                         ModConfig.SITE_NYARLATHOTEP_CAP.get(),
                         ModConfig.ENABLE_SITE_NYARLATHOTEP.get() ? ModConfig.SITE_NYARLATHOTEP_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
@@ -143,7 +143,7 @@ public final class SitePopulationSpawner {
                 // The gate on the observatory plateau (design/28): the order_vault is the existing
                 // site that stands on that plateau, so Yog-Sothoth attaches to it. It is
                 // stationary-ish by attributes, one loaded-only presence inside the footprint.
-                BestiarySupport.topUp(level, cache, player, ModEntities.YOG_SOTHOTH.get(), YogSothoth.class, radius,
+                BestiarySupport.topUpGiant(level, cache, player, ModEntities.YOG_SOTHOTH.get(), YogSothoth.class, radius,
                         ModConfig.SITE_YOG_SOTHOTH_CAP.get(),
                         ModConfig.ENABLE_SITE_YOG_SOTHOTH.get() ? ModConfig.SITE_YOG_SOTHOTH_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
@@ -159,21 +159,21 @@ public final class SitePopulationSpawner {
                 // The scar's two Ancient Ones (design/28): Azathoth at the centre (no melee) and
                 // Atlach-Nacha weaving the tear wider. Both are one loaded-only presence per player;
                 // each keeps its own count config but zeroes its budget when the toggle is off.
-                BestiarySupport.topUp(level, cache, player, ModEntities.AZATHOTH.get(), Azathoth.class, radius,
+                BestiarySupport.topUpGiant(level, cache, player, ModEntities.AZATHOTH.get(), Azathoth.class, radius,
                         ModConfig.SITE_AZATHOTH_CAP.get(),
                         ModConfig.ENABLE_SITE_AZATHOTH.get() ? ModConfig.SITE_AZATHOTH_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
-                BestiarySupport.topUp(level, cache, player, ModEntities.ATLACH_NACHA.get(), AtlachNacha.class, radius,
+                BestiarySupport.topUpGiant(level, cache, player, ModEntities.ATLACH_NACHA.get(), AtlachNacha.class, radius,
                         ModConfig.SITE_ATLACH_NACHA_CAP.get(),
                         ModConfig.ENABLE_SITE_ATLACH_NACHA.get() ? ModConfig.SITE_ATLACH_NACHA_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
                 // Two more Ancient Ones attach to the same tear (design/28): Tulzscha, the green
                 // flame at the centre, and Zstylzhemghi, whose forgotten name erodes the court.
-                BestiarySupport.topUp(level, cache, player, ModEntities.TULZSCHA.get(), Tulzscha.class, radius,
+                BestiarySupport.topUpGiant(level, cache, player, ModEntities.TULZSCHA.get(), Tulzscha.class, radius,
                         ModConfig.SITE_TULZSCHA_CAP.get(),
                         ModConfig.ENABLE_SITE_TULZSCHA.get() ? ModConfig.SITE_TULZSCHA_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
-                BestiarySupport.topUp(level, cache, player, ModEntities.ZSTYLZHEMGHI.get(), Zstylzhemghi.class,
+                BestiarySupport.topUpGiant(level, cache, player, ModEntities.ZSTYLZHEMGHI.get(), Zstylzhemghi.class,
                         radius, ModConfig.SITE_ZSTYLZHEMGHI_CAP.get(),
                         ModConfig.ENABLE_SITE_ZSTYLZHEMGHI.get() ? ModConfig.SITE_ZSTYLZHEMGHI_COUNT.get() : 0,
                         tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
@@ -196,22 +196,22 @@ public final class SitePopulationSpawner {
             // The four batch-4 Ancient Ones each keep their own site (design/28). Like
             // Nyarlathotep, each is a single loaded-only presence held by its site; every count
             // config is zeroed when its toggle is off.
-            case "eldritch_horror:site/yellow_court" -> BestiarySupport.topUp(level, cache, player,
+            case "eldritch_horror:site/yellow_court" -> BestiarySupport.topUpGiant(level, cache, player,
                     ModEntities.HASTUR.get(), Hastur.class, radius,
                     ModConfig.SITE_HASTUR_CAP.get(),
                     ModConfig.ENABLE_SITE_HASTUR.get() ? ModConfig.SITE_HASTUR_COUNT.get() : 0,
                     tick, siteGate(cx, cz, reach, SitePopulationSpawner::anywhere));
-            case "eldritch_horror:site/black_pyramid" -> BestiarySupport.topUp(level, cache, player,
+            case "eldritch_horror:site/black_pyramid" -> BestiarySupport.topUpGiant(level, cache, player,
                     ModEntities.NEPHREN_KA.get(), NephrenKa.class, radius,
                     ModConfig.SITE_NEPHREN_KA_CAP.get(),
                     ModConfig.ENABLE_SITE_NEPHREN_KA.get() ? ModConfig.SITE_NEPHREN_KA_COUNT.get() : 0,
                     tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
-            case "eldritch_horror:site/spawning_pool" -> BestiarySupport.topUp(level, cache, player,
+            case "eldritch_horror:site/spawning_pool" -> BestiarySupport.topUpGiant(level, cache, player,
                     ModEntities.ABHOTH.get(), Abhoth.class, radius,
                     ModConfig.SITE_ABHOTH_CAP.get(),
                     ModConfig.ENABLE_SITE_ABHOTH.get() ? ModConfig.SITE_ABHOTH_COUNT.get() : 0,
                     tick, siteGate(cx, cz, reach, SitePopulationSpawner::darkOrTainted));
-            case "eldritch_horror:site/temple_of_the_feaster" -> BestiarySupport.topUp(level, cache, player,
+            case "eldritch_horror:site/temple_of_the_feaster" -> BestiarySupport.topUpGiant(level, cache, player,
                     ModEntities.CHAUGNAR_FAUGN.get(), ChaugnarFaugn.class, radius,
                     ModConfig.SITE_CHAUGNAR_FAUGN_CAP.get(),
                     ModConfig.ENABLE_SITE_CHAUGNAR_FAUGN.get()

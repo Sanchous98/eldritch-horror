@@ -70,6 +70,29 @@ public final class BestiarySupport {
                                              EntityType<T> type, Class<T> typeClass,
                                              int radius, int cap, int perPass, int tick,
                                              SpawnGate gate) {
+        topUpSpots(level, cache, player, type, typeClass, radius, cap, perPass, tick, gate,
+                (lvl, x, z, tainted) -> surfaceSpot(lvl, x, z, tainted));
+    }
+
+    /**
+     * The same pass for a city-scale presence: the spot must fit the boss's footprint and its lower
+     * body (32 blocks), not just a two-block body. A roaming 128-block Ancient One spawned into a
+     * hillside or a wall is simply skipped, and the next deterministic sample near the player is
+     * tried. Its head is free to tower above the tree line.
+     */
+    public static <T extends Mob> void topUpGiant(ServerLevel level, ServerChunkCache cache, ServerPlayer player,
+                                                  EntityType<T> type, Class<T> typeClass,
+                                                  int radius, int cap, int perPass, int tick,
+                                                  SpawnGate gate) {
+        topUpSpots(level, cache, player, type, typeClass, radius, cap, perPass, tick, gate,
+                (lvl, x, z, tainted) -> bossSpot(lvl, type, x, z, tainted));
+    }
+
+    private static <T extends Mob> void topUpSpots(ServerLevel level, ServerChunkCache cache,
+                                                   ServerPlayer player, EntityType<T> type,
+                                                   Class<T> typeClass, int radius, int cap,
+                                                   int perPass, int tick, SpawnGate gate,
+                                                   SpotFinder finder) {
         if (cap <= 0 || perPass <= 0) {
             return;
         }
@@ -97,7 +120,7 @@ public final class BestiarySupport {
                 continue; // never load/generate a chunk just to spawn
             }
             boolean tainted = CorruptionSystem.getTaint(chunk) >= ModConfig.TAINT_SPREAD_THRESHOLD.get();
-            BlockPos spot = surfaceSpot(level, x, z, tainted);
+            BlockPos spot = finder.find(level, x, z, tainted);
             if (spot == null) {
                 continue;
             }
@@ -114,6 +137,39 @@ public final class BestiarySupport {
         }
     }
 
+    /** How a candidate column is validated; {@link #topUp} uses the ordinary body, giants use both. */
+    @FunctionalInterface
+    public interface SpotFinder {
+        @Nullable BlockPos find(ServerLevel level, int x, int z, boolean tainted);
+    }
+
+    /**
+     * A standing spot that actually fits an Ancient One's body: the centre column needs its full
+     * height clear, and the footprint ring must be flat (within 3 blocks) on every sampled edge, so
+     * a 56-block body does not intersect a hillside, a temple wall or a city block.
+     */
+    public static @Nullable BlockPos bossSpot(ServerLevel level, EntityType<?> type, int x, int z,
+                                              boolean allowUnderground) {
+        // Clear the lower body of trees, walls and city blocks; the upper body is meant to tower
+        // above them, so requiring all 128 blocks of sky would make a forest spawn impossible.
+        int clearHeight = Math.min(32, Math.max(2, (int) Math.ceil(type.getHeight())));
+        BlockPos centre = surfaceSpot(level, x, z, allowUnderground, clearHeight);
+        if (centre == null) {
+            return null;
+        }
+        int radius = Math.max(1, (int) Math.ceil(type.getWidth() * 0.5));
+        for (int i = 0; i < 8; i++) {
+            double angle = Math.PI * 2.0 * i / 8.0;
+            int px = x + (int) Math.round(Math.cos(angle) * radius);
+            int pz = z + (int) Math.round(Math.sin(angle) * radius);
+            BlockPos edge = surfaceSpot(level, px, pz, false, 3);
+            if (edge == null || Math.abs(edge.getY() - centre.getY()) > 3) {
+                return null;
+            }
+        }
+        return centre;
+    }
+
     /**
      * A valid standing spot at {@code (x,z)}: ground below (solid or path), two air blocks of body
      * space and no fluid. On open surface it must see the sky; if {@code allowUnderground} (a
@@ -121,6 +177,17 @@ public final class BestiarySupport {
      * dark. Same conservative gate as {@code CityPopulation.surfaceSpot}.
      */
     public static @Nullable BlockPos surfaceSpot(ServerLevel level, int x, int z, boolean allowUnderground) {
+        return surfaceSpot(level, x, z, allowUnderground, 2);
+    }
+
+    /**
+     * As {@link #surfaceSpot(ServerLevel, int, int, boolean)}, but requiring {@code clearHeight}
+     * replaceable blocks above the floor. Ordinary mobs pass 2; a giant passes its lower body
+     * (capped at 32) so it is never spawned inside a hillside, a wall or a city block, while its
+     * head is still free to rise above the tree line.
+     */
+    public static @Nullable BlockPos surfaceSpot(ServerLevel level, int x, int z, boolean allowUnderground,
+                                                 int clearHeight) {
         if (!level.hasChunkAt(x, z)) {
             return null;
         }
@@ -137,9 +204,50 @@ public final class BestiarySupport {
             boolean ground = below.isSolidRender() || below.getBlock() instanceof PathBlock;
             if (ground && below.getFluidState().isEmpty()
                     && level.getBlockState(candidate).isAir()
-                    && level.getBlockState(candidate.above()).isAir()) {
+                    && hasHeadroom(level, candidate, clearHeight)) {
                 if (allowUnderground || level.canSeeSky(candidate)) {
                     return candidate;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasHeadroom(ServerLevel level, BlockPos base, int clearHeight) {
+        for (int dy = 0; dy < clearHeight; dy++) {
+            BlockPos pos = base.above(dy);
+            if (!level.isLoaded(pos)) {
+                return false;
+            }
+            if (!level.getBlockState(pos).canBeReplaced()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Searches outward from {@code (cx, cz)} for a spot that fits the boss: the centre first, then
+     * eight directions per ring. Used by the once-only site trigger, whose exact centre is often the
+     * shrine the boss should be standing beside rather than inside.
+     */
+    public static @Nullable BlockPos bossSpotNear(ServerLevel level, EntityType<?> type, int cx, int cz,
+                                                  int searchRadius, boolean allowUnderground) {
+        for (int step = 0; step <= searchRadius; step += 4) {
+            if (step == 0) {
+                BlockPos centre = bossSpot(level, type, cx, cz, allowUnderground);
+                if (centre != null) {
+                    return centre;
+                }
+                continue;
+            }
+            for (int i = 0; i < 8; i++) {
+                double angle = Math.PI * 2.0 * i / 8.0;
+                int x = cx + (int) Math.round(Math.cos(angle) * step);
+                int z = cz + (int) Math.round(Math.sin(angle) * step);
+                BlockPos spot = bossSpot(level, type, x, z, allowUnderground);
+                if (spot != null) {
+                    return spot;
                 }
             }
         }

@@ -142,7 +142,7 @@ public final class AncientOneSpawner {
 
     /** Dark or tainted ground; the horror stalks the wild edge of a settlement. */
     private static void spawnDunwich(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.DUNWICH_HORROR.get(), DunwichHorror.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.DUNWICH_HORROR.get(), DunwichHorror.class,
                 ModConfig.DUNWICH_HORROR_SPAWN_RADIUS.get(),
                 ModConfig.DUNWICH_HORROR_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> dark || tainted);
@@ -150,7 +150,7 @@ public final class AncientOneSpawner {
 
     /** Tainted ground only: the woods must already be wrong for it to be there at all. */
     private static void spawnShub(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.SHUB_NIGGURATH.get(), ShubNiggurath.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.SHUB_NIGGURATH.get(), ShubNiggurath.class,
                 ModConfig.SHUB_NIGGURATH_SPAWN_RADIUS.get(),
                 ModConfig.SHUB_NIGGURATH_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> tainted);
@@ -158,7 +158,7 @@ public final class AncientOneSpawner {
 
     /** Ithaqua walks the cold: it appears only on cold, loaded ground (the polar edge / highlands). */
     private static void spawnIthaqua(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.ITHAQUA.get(), Ithaqua.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.ITHAQUA.get(), Ithaqua.class,
                 ModConfig.ITHAQUA_SPAWN_RADIUS.get(),
                 ModConfig.ITHAQUA_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) ->
@@ -167,7 +167,7 @@ public final class AncientOneSpawner {
 
     /** Yig is drawn to tainted ground: the ashen waste must already be wrong for it to be there. */
     private static void spawnYig(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.YIG.get(), Yig.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.YIG.get(), Yig.class,
                 ModConfig.YIG_SPAWN_RADIUS.get(),
                 ModConfig.YIG_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> tainted);
@@ -175,7 +175,7 @@ public final class AncientOneSpawner {
 
     /** Cthugha watches the ashen waste: tainted loaded ground only, like Yig's country. */
     private static void spawnCthugha(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.CTHUGHA.get(), Cthugha.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.CTHUGHA.get(), Cthugha.class,
                 ModConfig.CTHUGHA_SPAWN_RADIUS.get(),
                 ModConfig.CTHUGHA_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> tainted);
@@ -183,14 +183,14 @@ public final class AncientOneSpawner {
 
     /** Glaaki and the Hydra are the drowned_marsh: water within a few blocks of loaded ground. */
     private static void spawnGlaaki(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.GLAAKI.get(), Glaaki.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.GLAAKI.get(), Glaaki.class,
                 ModConfig.GLAAKI_SPAWN_RADIUS.get(),
                 ModConfig.GLAAKI_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> BestiarySupport.nearWater(lvl, spot));
     }
 
     private static void spawnHydra(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.HYDRA.get(), Hydra.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.HYDRA.get(), Hydra.class,
                 ModConfig.HYDRA_SPAWN_RADIUS.get(),
                 ModConfig.HYDRA_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) -> BestiarySupport.nearWater(lvl, spot));
@@ -207,7 +207,7 @@ public final class AncientOneSpawner {
 
     /** Rhan-Tegoth is the idol at the cold edge: cold, untainted loaded ground, like Ithaqua's. */
     private static void spawnRhanTegoth(ServerLevel level, ServerChunkCache cache, ServerPlayer player, int tick) {
-        BestiarySupport.topUp(level, cache, player, ModEntities.RHAN_TEGOTH.get(), RhanTegoth.class,
+        BestiarySupport.topUpGiant(level, cache, player, ModEntities.RHAN_TEGOTH.get(), RhanTegoth.class,
                 ModConfig.RHAN_TEGOTH_SPAWN_RADIUS.get(),
                 ModConfig.RHAN_TEGOTH_SPAWN_CAP.get(),
                 1, tick, (lvl, spot, dark, tainted) ->

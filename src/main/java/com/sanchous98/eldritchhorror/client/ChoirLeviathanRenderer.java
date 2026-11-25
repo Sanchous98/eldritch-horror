@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.ChoirLeviathanModel;
 import com.sanchous98.eldritchhorror.entity.ChoirLeviathan;
@@ -13,7 +14,9 @@ public final class ChoirLeviathanRenderer extends BossRenderer<ChoirLeviathan, C
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/choir_leviathan.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("choir_leviathan");
+
     public ChoirLeviathanRenderer(EntityRendererProvider.Context context) {
-        super(context, new ChoirLeviathanModel(context.bakeLayer(ChoirLeviathanModel.LAYER)), 2.6F, TEXTURE, 1.7F);
+        super(context, new ChoirLeviathanModel(context.bakeLayer(ChoirLeviathanModel.LAYER)), SIZE.shadow(2.6F), TEXTURE, SIZE.renderScale());
     }
 }

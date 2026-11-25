@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.IthaqualShadeModel;
 import com.sanchous98.eldritchhorror.entity.IthaqualShade;
@@ -13,7 +14,9 @@ public final class IthaqualShadeRenderer extends BossRenderer<IthaqualShade, Ith
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/ithaqual_shade.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("ithaqual_shade");
+
     public IthaqualShadeRenderer(EntityRendererProvider.Context context) {
-        super(context, new IthaqualShadeModel(context.bakeLayer(IthaqualShadeModel.LAYER)), 1.0F, TEXTURE, 1.27F);
+        super(context, new IthaqualShadeModel(context.bakeLayer(IthaqualShadeModel.LAYER)), SIZE.shadow(1.0F), TEXTURE, SIZE.renderScale());
     }
 }

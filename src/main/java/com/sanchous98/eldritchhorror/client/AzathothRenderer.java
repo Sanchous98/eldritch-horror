@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.AzathothModel;
 import com.sanchous98.eldritchhorror.entity.Azathoth;
@@ -13,7 +14,9 @@ public final class AzathothRenderer extends BossRenderer<Azathoth, AzathothModel
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/azathoth.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("azathoth");
+
     public AzathothRenderer(EntityRendererProvider.Context context) {
-        super(context, new AzathothModel(context.bakeLayer(AzathothModel.LAYER)), 2.0F, TEXTURE, 1.2F);
+        super(context, new AzathothModel(context.bakeLayer(AzathothModel.LAYER)), SIZE.shadow(2.0F), TEXTURE, SIZE.renderScale());
     }
 }

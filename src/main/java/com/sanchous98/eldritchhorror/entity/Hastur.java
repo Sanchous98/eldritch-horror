@@ -101,12 +101,12 @@ public final class Hastur extends AncientOne {
                         .warning("Do not say the name — look away!")
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.NOTE, 4, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.NOTE, 4, 1.0);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.ENCHANT, 4);
                         })
                         .onExecute((boss, level, target) -> {
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.NAUSEA, 120, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.NAUSEA, 120, 0);
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 4.0F);
                         })
                         .build(),
@@ -118,8 +118,8 @@ public final class Hastur extends AncientOne {
                         .warning("The Yellow Sign is shown — move!")
                         .sound(SoundEvents.EVOKER_CAST_SPELL)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 3.5, ParticleTypes.ENCHANT, 12);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.WITCH, 3, 1.0);
+                            BossAbilities.ring(boss, level, target.position(), 3.5, ParticleTypes.ENCHANT, 12);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.WITCH, 3, 1.0);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.effect(target, MobEffects.GLOWING, 160, 0);

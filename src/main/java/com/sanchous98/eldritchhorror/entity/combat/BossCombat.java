@@ -16,6 +16,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -66,15 +67,9 @@ public final class BossCombat {
     /** Minimum pause after an ability, so the fight is not a pure ability turret. */
     private static final int RECOVERY_MIN_TICKS = 20;
     private static final int RECOVERY_SPAN_TICKS = 21;
-    /** Every player this close to the boss sees the action-bar warning. */
-    private static final double WARNING_RADIUS = 32.0;
-    /** First sighting: how close a player must come for the deep sting. */
-    private static final double SIGHTING_RADIUS = 40.0;
     /** First sighting can repeat at most once every five minutes, per player per boss. */
     private static final long SIGHTING_COOLDOWN_TICKS = 6000L;
-    /** The quiet proximity aura's radius. */
-    private static final double DREAD_AURA_RADIUS = 24.0;
-    /** The proximity aura pulses once every five seconds, never per tick. */
+    /** The quiet proximity aura pulses once every five seconds, never per tick. */
     private static final int DREAD_AURA_PERIOD = 100;
 
     private final AncientOne boss;
@@ -215,7 +210,7 @@ public final class BossCombat {
         this.readyAt.put(ability.id(), now + cooldown);
         this.boss.getNavigation().stop();
         this.boss.getLookControl().setLookAt(target, 30.0F, 30.0F);
-        this.boss.playSound(ability.warningSound(), 1.4F, 0.8F);
+        this.boss.playSound(ability.warningSound(), this.boss.soundVolume(), 0.8F);
         this.warn(level, ability.warning());
     }
 
@@ -276,7 +271,8 @@ public final class BossCombat {
             }
             UUID uuid = player.getUUID();
             double distanceSqr = player.distanceToSqr(this.boss);
-            boolean inside = distanceSqr <= SIGHTING_RADIUS * SIGHTING_RADIUS;
+            double dread = this.boss.dreadRadius();
+            boolean inside = distanceSqr <= dread * dread;
             if (!inside) {
                 this.nearby.remove(uuid);
             } else if (this.nearby.add(uuid)) {
@@ -289,7 +285,7 @@ public final class BossCombat {
                     continue;
                 }
             }
-            if (distanceSqr <= DREAD_AURA_RADIUS * DREAD_AURA_RADIUS
+            if (distanceSqr <= dread * dread
                     && now % DREAD_AURA_PERIOD == 0L) {
                 this.proximityAura(level, player, rank, major);
             }
@@ -302,7 +298,7 @@ public final class BossCombat {
             BossAbilities.effect(player, MobEffects.NAUSEA, 40 + rank * 20, 0);
         }
         level.playSound(null, player.blockPosition(), this.boss.dreadSound(),
-                SoundSource.AMBIENT, 2.0F, 0.5F);
+                SoundSource.AMBIENT, this.boss.soundVolume(), 0.5F);
         Component name = this.boss.getDisplayName().copy().withStyle(ChatFormatting.DARK_PURPLE);
         Component whisper = Component.empty()
                 .append(Component.literal("You feel "))
@@ -355,8 +351,10 @@ public final class BossCombat {
         this.vulnerableTicks = VULNERABLE_TICKS;
         this.boss.getNavigation().stop();
         this.boss.setNoAi(true);
-        this.boss.playSound(SoundEvents.RAVAGER_STUNNED, 1.4F, 0.6F);
-        BossAbilities.ring(level, this.boss.position().add(0.0, 0.6, 0.0), 2.6, ParticleTypes.CRIT, 18);
+        this.boss.playSound(SoundEvents.RAVAGER_STUNNED, this.boss.soundVolume(), 0.6F);
+        double ring = Math.min(24.0, this.boss.scaled(2.6));
+        BossAbilities.ring(this.boss, level, this.boss.position().add(0.0, 0.6, 0.0), ring,
+                ParticleTypes.CRIT, 18);
         BossAbilities.telegraphBurst(level, this.boss, ParticleTypes.ENCHANTED_HIT, 10);
         this.warn(level, Component.literal("The presence is staggered — strike now!"));
     }
@@ -377,7 +375,8 @@ public final class BossCombat {
     public <T extends Mob> void summon(ServerLevel level, EntityType<T> type, int count,
                                        @Nullable Player target) {
         RandomSource random = this.random(level, 0xC0FFEE);
-        for (int i = 0; i < count; i++) {
+        int amount = this.boss.summonCount(count);
+        for (int i = 0; i < amount; i++) {
             BlockPos spot = this.summonSpot(level, random);
             if (spot == null) {
                 continue;
@@ -397,9 +396,11 @@ public final class BossCombat {
     }
 
     private @Nullable BlockPos summonSpot(ServerLevel level, RandomSource random) {
+        // Adds appear at the rim of the body, not under a 40-56 block foot.
+        int spread = Math.max(3, Math.min(48, (int) Math.ceil(this.boss.getBbWidth() * 0.75)));
         for (int attempt = 0; attempt < 16; attempt++) {
-            int dx = random.nextInt(7) - 3;
-            int dz = random.nextInt(7) - 3;
+            int dx = random.nextInt(spread * 2 + 1) - spread;
+            int dz = random.nextInt(spread * 2 + 1) - spread;
             int dy = random.nextInt(3) - 1;
             BlockPos pos = this.boss.blockPosition().offset(dx, dy, dz);
             if (!level.isLoaded(pos) || !level.isLoaded(pos.above())) {
@@ -451,7 +452,9 @@ public final class BossCombat {
     /** All abilities this boss declares; resolved lazily so subclass fields are fully built. */
     public List<BossAbility> abilities() {
         if (this.abilities == null) {
-            this.abilities = List.copyOf(this.boss.abilityList());
+            this.abilities = this.boss.abilityList().stream()
+                    .map(ability -> (BossAbility) new ScaledAbility(ability, this.boss))
+                    .toList();
         }
         return this.abilities;
     }
@@ -465,8 +468,9 @@ public final class BossCombat {
     }
 
     private void warn(ServerLevel level, Component message) {
+        double radius = this.boss.warningRadius();
         for (ServerPlayer player : level.players()) {
-            if (player.distanceToSqr(this.boss) <= WARNING_RADIUS * WARNING_RADIUS) {
+            if (player.distanceToSqr(this.boss) <= radius * radius) {
                 player.sendOverlayMessage(message);
             }
         }
@@ -479,5 +483,72 @@ public final class BossCombat {
                 ^ level.getGameTime() * 0x9E3779B97F4A7C15L
                 ^ salt;
         return RandomSource.create(seed);
+    }
+
+    /**
+     * Distance-only view of an ability: range scales with the body, while telegraph ticks, cooldown,
+     * phase gates, interrupt window and damage stay exactly as authored. This keeps the whole
+     * per-boss ability table intact and makes the giant reach a property of its size.
+     */
+    private static final class ScaledAbility implements BossAbility {
+        private final BossAbility delegate;
+        private final double range;
+
+        private ScaledAbility(BossAbility delegate, AncientOne boss) {
+            this.delegate = delegate;
+            double scaled = delegate.range() * boss.abilityScale();
+            // Farm bosses stay local: even a 24-32 block body never gains an arena-wide opener.
+            this.range = boss.farmable() ? Math.min(32.0, scaled) : scaled;
+        }
+
+        @Override
+        public String id() {
+            return this.delegate.id();
+        }
+
+        @Override
+        public int cooldownTicks() {
+            return this.delegate.cooldownTicks();
+        }
+
+        @Override
+        public int telegraphTicks() {
+            return this.delegate.telegraphTicks();
+        }
+
+        @Override
+        public double range() {
+            return this.range;
+        }
+
+        @Override
+        public AncientOne.Phase minPhase() {
+            return this.delegate.minPhase();
+        }
+
+        @Override
+        public boolean canUse(AncientOne boss, ServerLevel level, Player target) {
+            return this.delegate.canUse(boss, level, target);
+        }
+
+        @Override
+        public void telegraphTick(AncientOne boss, ServerLevel level, Player target, int ticksLeft) {
+            this.delegate.telegraphTick(boss, level, target, ticksLeft);
+        }
+
+        @Override
+        public void execute(AncientOne boss, ServerLevel level, Player target) {
+            this.delegate.execute(boss, level, target);
+        }
+
+        @Override
+        public Component warning() {
+            return this.delegate.warning();
+        }
+
+        @Override
+        public SoundEvent warningSound() {
+            return this.delegate.warningSound();
+        }
     }
 }

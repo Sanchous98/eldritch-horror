@@ -109,7 +109,7 @@ public final class Nyarlathotep extends AncientOne {
                         .warning("A trusted face turns — watch your back!")
                         .sound(SoundEvents.ILLUSIONER_CAST_SPELL)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.PORTAL, 4, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.PORTAL, 4, 1.0);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.WITCH, 3);
                         })
                         .onExecute((boss, level, target) -> {
@@ -129,7 +129,7 @@ public final class Nyarlathotep extends AncientOne {
                                 BossAbilities.telegraphBurst(level, boss, ParticleTypes.PORTAL, 6))
                         .onExecute((boss, level, target) -> {
                             boss.bossCombat().summon(level, ModEntities.NIGHT_HAG.get(), 2, target);
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.BLINDNESS, 100, 0);
                         })
                         .build(),
                 SimpleBossAbility.builder("betrayal")

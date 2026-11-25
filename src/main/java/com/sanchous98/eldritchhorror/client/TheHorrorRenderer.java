@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.TheHorrorModel;
 import com.sanchous98.eldritchhorror.entity.TheHorror;
@@ -13,7 +14,9 @@ public final class TheHorrorRenderer extends BossRenderer<TheHorror, TheHorrorMo
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/the_horror.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("the_horror");
+
     public TheHorrorRenderer(EntityRendererProvider.Context context) {
-        super(context, new TheHorrorModel(context.bakeLayer(TheHorrorModel.LAYER)), 2.8F, TEXTURE, 1.55F);
+        super(context, new TheHorrorModel(context.bakeLayer(TheHorrorModel.LAYER)), SIZE.shadow(2.8F), TEXTURE, SIZE.renderScale());
     }
 }

@@ -29,28 +29,37 @@ public final class BossAbilities {
     private BossAbilities() {
     }
 
-    /** A small puff at the boss, used by the default telegraph. */
+    /** A small puff at the boss, used by the default telegraph. Scales with the body. */
     public static void telegraphBurst(ServerLevel level, AncientOne boss, ParticleOptions particle, int count) {
-        level.sendParticles(particle, boss.getX(), boss.getEyeY(), boss.getZ(), count,
-                1.1, 0.8, 1.1, 0.01);
+        double factor = boss.abilityScale();
+        int scaledCount = Math.min(48, Math.max(count, (int) Math.round(count * Math.min(factor, 4.0))));
+        double spread = Math.min(12.0, 1.1 * factor);
+        level.sendParticles(particle, boss.getX(), boss.getEyeY(), boss.getZ(), scaledCount,
+                spread, Math.min(8.0, 0.8 * factor), spread, 0.01);
     }
 
     /** A puff at the target, for abilities that visibly gather over the player. */
-    public static void telegraphAt(ServerLevel level, Player target, ParticleOptions particle,
+    public static void telegraphAt(AncientOne boss, ServerLevel level, Player target, ParticleOptions particle,
                                    int count, double spread) {
-        level.sendParticles(particle, target.getX(), target.getY() + 1.0, target.getZ(), count,
-                spread, 0.5, spread, 0.01);
+        double factor = boss.abilityScale();
+        int scaledCount = Math.min(48, Math.max(count, (int) Math.round(count * Math.min(factor, 4.0))));
+        double scaledSpread = Math.min(6.0, boss.scaled(spread));
+        level.sendParticles(particle, target.getX(), target.getY() + 1.0, target.getZ(), scaledCount,
+                scaledSpread, 0.5, scaledSpread, 0.01);
     }
 
     /** A flat ring of particles, for area attacks that need a readable footprint. */
-    public static void ring(ServerLevel level, Vec3 centre, double radius, ParticleOptions particle,
-                            int points) {
-        for (int i = 0; i < points; i++) {
-            double angle = Math.PI * 2.0 * i / points;
+    public static void ring(AncientOne boss, ServerLevel level, Vec3 centre, double radius,
+                            ParticleOptions particle, int points) {
+        double scaledRadius = boss.scaled(radius);
+        int scaledPoints = Math.min(256, Math.max(points,
+                (int) Math.round(points * Math.sqrt(boss.abilityScale()))));
+        for (int i = 0; i < scaledPoints; i++) {
+            double angle = Math.PI * 2.0 * i / scaledPoints;
             level.sendParticles(particle,
-                    centre.x + Math.cos(angle) * radius,
+                    centre.x + Math.cos(angle) * scaledRadius,
                     centre.y,
-                    centre.z + Math.sin(angle) * radius,
+                    centre.z + Math.sin(angle) * scaledRadius,
                     1, 0.0, 0.0, 0.0, 0.0);
         }
     }
@@ -63,8 +72,16 @@ public final class BossAbilities {
         }
     }
 
-    /** Living, non-creative players in a sphere around {@code centre}. */
-    public static List<Player> playersAround(ServerLevel level, Vec3 centre, double radius) {
+    /** Living, non-creative players in a sphere around {@code centre}, scaled with the body. */
+    public static List<Player> playersAround(AncientOne boss, ServerLevel level, Vec3 centre, double radius) {
+        double scaled = boss.scaled(radius);
+        AABB box = new AABB(centre.x - scaled, centre.y - scaled, centre.z - scaled,
+                centre.x + scaled, centre.y + scaled, centre.z + scaled);
+        return level.getEntitiesOfClass(Player.class, box, BossAbilities::isValidTarget);
+    }
+
+    /** Unscaled variant for internal callers that already applied the body factor. */
+    private static List<Player> playersWithin(ServerLevel level, Vec3 centre, double radius) {
         AABB box = new AABB(centre.x - radius, centre.y - radius, centre.z - radius,
                 centre.x + radius, centre.y + radius, centre.z + radius);
         return level.getEntitiesOfClass(Player.class, box, BossAbilities::isValidTarget);
@@ -88,7 +105,7 @@ public final class BossAbilities {
         }
         Vec3 unit = facing.normalize();
         double threshold = Math.cos(Math.toRadians(halfAngleDegrees));
-        for (Player player : playersAround(level, boss.position(), range)) {
+        for (Player player : playersWithin(level, boss.position(), boss.scaled(range))) {
             Vec3 to = new Vec3(player.getX() - boss.getX(), 0.0, player.getZ() - boss.getZ());
             if (to.lengthSqr() < 1.0E-4 || unit.dot(to.normalize()) >= threshold) {
                 action.accept(player);
@@ -106,7 +123,7 @@ public final class BossAbilities {
     /** Soft area damage around a point, skipping the boss itself. */
     public static void damageAround(AncientOne boss, ServerLevel level, Vec3 centre, double radius,
                                     float damage) {
-        for (Player player : playersAround(level, centre, radius)) {
+        for (Player player : playersAround(boss, level, centre, radius)) {
             hit(boss, level, player, damage);
         }
     }
@@ -137,8 +154,8 @@ public final class BossAbilities {
     }
 
     /** Freezes every valid player in a sphere (the cold presences' area slow). */
-    public static void freezeAround(ServerLevel level, Vec3 centre, double radius, int ticks) {
-        for (Player player : playersAround(level, centre, radius)) {
+    public static void freezeAround(AncientOne boss, ServerLevel level, Vec3 centre, double radius, int ticks) {
+        for (Player player : playersAround(boss, level, centre, radius)) {
             freeze(player, ticks);
         }
     }
@@ -150,7 +167,7 @@ public final class BossAbilities {
         if (behind.lengthSqr() < 1.0E-4) {
             behind = new Vec3(0.0, 0.0, 1.0);
         }
-        double distance = Math.max(2.0, boss.getBbWidth() + 1.0);
+        double distance = Math.max(2.0, boss.getBbWidth() * 0.5 + 1.0);
         Vec3 spot = target.position().add(behind.normalize().scale(distance));
         BlockPos pos = BlockPos.containing(spot.x, target.getY(), spot.z);
         if (isStandable(level, pos, bossHeight(boss))) {
@@ -166,7 +183,7 @@ public final class BossAbilities {
         if (side.lengthSqr() < 1.0E-4) {
             side = new Vec3(1.0, 0.0, 0.0);
         }
-        double distance = Math.max(2.5, boss.getBbWidth() + 1.5);
+        double distance = Math.max(2.5, boss.getBbWidth() * 0.5 + 1.5);
         Vec3 spot = target.position().add(side.normalize().scale(distance));
         BlockPos pos = BlockPos.containing(spot.x, target.getY(), spot.z);
         if (isStandable(level, pos, bossHeight(boss))) {
@@ -196,9 +213,9 @@ public final class BossAbilities {
         return true;
     }
 
-    /** The number of blocks a boss's hitbox needs, capped so a bug cannot scan the whole column. */
+    /** The number of blocks a boss's hitbox needs; capped so a bug cannot scan the whole column. */
     public static int bossHeight(AncientOne boss) {
-        return Math.min(12, Math.max(2, (int) Math.ceil(boss.getBbHeight())));
+        return Math.min(160, Math.max(2, (int) Math.ceil(boss.getBbHeight())));
     }
 
     /** Applies a vanilla effect with ambient=false, visible particles, for readability. */
@@ -207,9 +224,9 @@ public final class BossAbilities {
     }
 
     /** Applies one effect to every valid player in a sphere (area fear, darkness, poison). */
-    public static void effectAround(ServerLevel level, Vec3 centre, double radius, Holder<MobEffect> effect,
-                                    int ticks, int amplifier) {
-        for (Player player : playersAround(level, centre, radius)) {
+    public static void effectAround(AncientOne boss, ServerLevel level, Vec3 centre, double radius,
+                                    Holder<MobEffect> effect, int ticks, int amplifier) {
+        for (Player player : playersAround(boss, level, centre, radius)) {
             effect(player, effect, ticks, amplifier);
         }
     }
@@ -231,7 +248,8 @@ public final class BossAbilities {
     }
 
     /** Convenience for the telegraphed area marker used by rings and novas. */
-    public static void areaMarker(ServerLevel level, Vec3 centre, double radius) {
-        ring(level, centre, radius, ParticleTypes.SMOKE, Math.max(8, (int) (radius * 6.0)));
+    public static void areaMarker(AncientOne boss, ServerLevel level, Vec3 centre, double radius) {
+        ring(boss, level, centre, radius, ParticleTypes.SMOKE,
+                Math.max(8, (int) (radius * 6.0)));
     }
 }

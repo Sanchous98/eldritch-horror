@@ -117,7 +117,13 @@ public final class CthulhuSiteTrigger {
                 new AABB(centre).inflate(ModConfig.BOSS_SITE_TRIGGER_RADIUS.get())).isEmpty()) {
             return true; // already awake here; keep the guard set
         }
-        BlockPos spot = BestiarySupport.surfaceSpot(level, cx, cz, true);
+        BlockPos spot = BestiarySupport.bossSpotNear(level, ModEntities.CTHULHU.get(), cx, cz,
+                Math.max(16, ModConfig.BOSS_SITE_TRIGGER_RADIUS.get() / 2), true);
+        if (spot == null) {
+            // The temple centre is a walled, roofed shrine: fall back to its standing floor so the
+            // once-only encounter still wakes. bossSpotNear already tried every roomy platform spot.
+            spot = BestiarySupport.surfaceSpot(level, cx, cz, true);
+        }
         if (spot == null) {
             return false;
         }

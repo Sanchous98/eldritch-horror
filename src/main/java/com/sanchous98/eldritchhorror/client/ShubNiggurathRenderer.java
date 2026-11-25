@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.ShubNiggurathModel;
 import com.sanchous98.eldritchhorror.entity.ShubNiggurath;
@@ -13,7 +14,9 @@ public final class ShubNiggurathRenderer extends BossRenderer<ShubNiggurath, Shu
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/shub_niggurath.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("shub_niggurath");
+
     public ShubNiggurathRenderer(EntityRendererProvider.Context context) {
-        super(context, new ShubNiggurathModel(context.bakeLayer(ShubNiggurathModel.LAYER)), 2.6F, TEXTURE, 1.6F);
+        super(context, new ShubNiggurathModel(context.bakeLayer(ShubNiggurathModel.LAYER)), SIZE.shadow(2.6F), TEXTURE, SIZE.renderScale());
     }
 }

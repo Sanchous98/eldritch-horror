@@ -4,6 +4,7 @@ import com.sanchous98.eldritchhorror.core.ModConfig;
 import com.sanchous98.eldritchhorror.entity.combat.BossAbility;
 import com.sanchous98.eldritchhorror.entity.combat.BossCombat;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
@@ -15,8 +16,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -31,8 +34,11 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -101,6 +107,8 @@ public abstract class AncientOne extends Monster implements DreadAura {
     private Solve solve = Solve.NONE;
     /** Game tick at which {@link Solve#STILLED} lapses; {@code 0} for the other solves. */
     private long solveUntil;
+    /** Cached size row; fixed for the life of the entity. */
+    private final AncientOneSizes.Size size;
 
     protected AncientOne(EntityType<? extends AncientOne> type, Level level,
                          BossEvent.BossBarColor color, Component title) {
@@ -110,6 +118,69 @@ public abstract class AncientOne extends Monster implements DreadAura {
         this.bossEvent = new ServerBossEvent(Mth.createInsecureUUID(this.random), title, color,
                 BossEvent.BossBarOverlay.PROGRESS);
         this.combat = new BossCombat(this);
+        this.size = AncientOneSizes.of(EntityType.getKey(type).getPath());
+        // A city-scale body cannot use vanilla block collision: a 40-56 block box intersects every
+        // street and building, and a 128 block box cannot fit a normal doorway. Like the Ender
+        // Dragon, giants ignore block collisions and are kept on the ground by travel() instead.
+        this.noPhysics = true;
+    }
+
+    // --- Size and scale (single source: AncientOneSizes) ---------------------------------------
+
+    /** The canonical size row for this presence. */
+    public final AncientOneSizes.Size size() {
+        return this.size;
+    }
+
+    /** Body height in blocks; every distance below is derived from it. */
+    public final double bodyHeight() {
+        return this.getBbHeight();
+    }
+
+    /** Whether this presence is a farm boss: local abilities, no arena-wide reach. */
+    public final boolean farmable() {
+        return this.getBbHeight() <= AncientOneSizes.FARMABLE_MAX_HEIGHT;
+    }
+
+    /** Distance multiplier for ability ranges and area radii against the old 8-block baseline. */
+    public final double abilityScale() {
+        double raw = this.getBbHeight() / AncientOneSizes.DESIGN_BASELINE_HEIGHT;
+        return this.farmable() ? Math.min(raw, 2.5) : raw;
+    }
+
+    /** Scales a designed distance (ability range, AoE radius, telegraph spread). */
+    public final double scaled(double designed) {
+        return designed * this.abilityScale();
+    }
+
+    /** Melee reach from the centre: about half the body height. */
+    public final double meleeReach() {
+        return this.size().meleeReach();
+    }
+
+    /** How far the non-damaging dread presence is felt: six body heights. */
+    public final double dreadRadius() {
+        return this.size().dreadRadius();
+    }
+
+    /** Range of the action-bar warning: the voice carries about 1.5 body heights. */
+    public final double warningRadius() {
+        return this.size().warningRadius();
+    }
+
+    /** Loudness of the wind-up/sting; vanilla scales the audible radius by this. */
+    public final float soundVolume() {
+        return this.size().soundVolume();
+    }
+
+    /** How many minions a summon ability should raise at this scale. */
+    public final int summonCount(int base) {
+        if (base <= 0) {
+            return 0;
+        }
+        double factor = this.farmable() ? 1.5 : this.abilityScale();
+        int cap = this.farmable() ? 6 : 24;
+        return Math.min(cap, Math.max(base, (int) Math.round(base * factor)));
     }
 
     /** The ability controller; used by abilities that summon tracked minions. */
@@ -184,6 +255,124 @@ public abstract class AncientOne extends Monster implements DreadAura {
         // Ability selection needs AI, so it lives in the AI step; stagger/summon maintenance lives in
         // tick() because a staggered boss is deliberately NoAI for 40 ticks.
         this.combat.tickAbilities(level);
+        this.steerGiant(level);
+    }
+
+    // --- Giant movement and collision -----------------------------------------------------------
+
+    /**
+     * A city-scale presence cannot path through streets with a 40-56 block footprint, so it walks
+     * straight at its target instead of using {@code GroundPathNavigation}. The AI step sets the
+     * wanted position after the vanilla goals, so a melee goal still owns the attack itself.
+     */
+    private void steerGiant(ServerLevel level) {
+        if (this.isNoAi() || this.isSolved() || this.isPassenger()) {
+            return;
+        }
+        LivingEntity target = this.getTarget();
+        if (target == null || !target.isAlive()) {
+            return;
+        }
+        double reach = Math.max(2.0, this.getBbWidth() * 0.5);
+        double dx = target.getX() - this.getX();
+        double dz = target.getZ() - this.getZ();
+        if (dx * dx + dz * dz <= reach * reach) {
+            this.setSpeed(0.0F);
+            this.getMoveControl().setWantedPosition(this.getX(), this.getY(), this.getZ(), 0.0);
+            this.getNavigation().stop();
+            return;
+        }
+        this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        this.setSpeed(1.0F);
+        this.getMoveControl().setWantedPosition(target.getX(), this.getY(), target.getZ(), 1.0);
+    }
+
+    /** Step height ignores kerbs and staircases but never turns a 68-block body into a climber. */
+    @Override
+    public float maxUpStep() {
+        return Math.max(1.0F, Math.min(6.0F, (float) (this.getBbHeight() * 0.05)));
+    }
+
+    /**
+     * Movement for a no-physics giant: the AI walks normally, then the body is snapped to the
+     * highest floor within its step band. A ledge below the band is stepped over; a floor further
+     * down is a fall, and the next tick catches it. This is what keeps a 128-block body out of the
+     * thin city crust while letting it cross kerbs, rails and rubble.
+     */
+    @Override
+    public void travel(Vec3 input) {
+        if (this.isPassenger()) {
+            super.travel(input);
+            return;
+        }
+        // A stagger (NoAI), a solve or a wind-up freezes the body: input is dropped, but gravity and
+        // the ground snap still keep its feet on the terrain.
+        Vec3 motion = this.isNoAi() || this.combat.isTelegraphing() ? Vec3.ZERO : input;
+        super.travel(motion);
+        this.snapToGround();
+    }
+
+    private void snapToGround() {
+        int x = Mth.floor(this.getX());
+        int z = Mth.floor(this.getZ());
+        int baseY = Mth.floor(this.getY());
+        int step = Mth.ceil(this.maxUpStep());
+        int floorY = Integer.MIN_VALUE;
+        for (int dy = step; dy >= -8; dy--) {
+            BlockPos pos = new BlockPos(x, baseY + dy, z);
+            if (!this.level().isLoaded(pos)) {
+                break;
+            }
+            BlockState state = this.level().getBlockState(pos);
+            if (!state.getCollisionShape(this.level(), pos).isEmpty()) {
+                floorY = pos.getY() + 1;
+                break;
+            }
+        }
+        if (floorY != Integer.MIN_VALUE && Math.abs(floorY - this.getY()) <= Math.max(step, 2)) {
+            this.setPos(this.getX(), floorY, this.getZ());
+            this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.0, 1.0));
+            this.setOnGround(true);
+            this.resetFallDistance();
+        }
+        // Absolute safety net: a body must never fall out of the bottom of the world.
+        if (this.getY() < this.level().getMinY() + 1) {
+            this.setPos(this.getX(), this.level().getMinY() + 1, this.getZ());
+            this.setDeltaMovement(Vec3.ZERO);
+        }
+    }
+
+    /**
+     * An Ancient One is effectively immovable: a small mob cannot shove a building-sized body, and
+     * the body must never nudge a player out of the world. Player pushes are skipped entirely; the
+     * boss still displaces ordinary mobs so a crowd does not stand inside its feet.
+     */
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+
+    @Override
+    protected void doPush(Entity entity) {
+        if (!(entity instanceof Player)) {
+            super.doPush(entity);
+        }
+    }
+
+    /** A player leaning on a building-sized body must never be displaced by it. */
+    @Override
+    public void push(Entity entity) {
+        if (!(entity instanceof Player)) {
+            super.push(entity);
+        }
+    }
+
+    /** Melee reach is half the body height, measured from the centre; the hitbox still starts at the feet. */
+    @Override
+    protected AABB getAttackBoundingBox(double horizontalExpansion) {
+        double expansion = Math.max(horizontalExpansion,
+                this.meleeReach() - this.getBbWidth() * 0.5);
+        return super.getAttackBoundingBox(expansion);
     }
 
     @Override

@@ -272,13 +272,13 @@ public final class TheHorror extends AncientOne {
                         .warning("Reality tears — move!")
                         .sound(SoundEvents.WARDEN_SONIC_CHARGE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 5.5, ParticleTypes.SCULK_SOUL, 16);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMOKE, 4, 1.2);
+                            BossAbilities.ring(boss, level, target.position(), 5.5, ParticleTypes.SCULK_SOUL, 16);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SMOKE, 4, 1.2);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 6.0, 7.0F);
-                            BossAbilities.effectAround(level, target.position(), 6.0, MobEffects.DARKNESS, 100, 0);
-                            BossAbilities.effectAround(level, target.position(), 6.0, MobEffects.NAUSEA, 140, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 6.0, MobEffects.DARKNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 6.0, MobEffects.NAUSEA, 140, 0);
                         })
                         .build(),
                 SimpleBossAbility.builder("answering_swarm")
@@ -301,7 +301,7 @@ public final class TheHorror extends AncientOne {
                         .warning("It reaches for you — break away!")
                         .sound(SoundEvents.WARDEN_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SCULK_SOUL, 5, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SCULK_SOUL, 5, 1.0);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SONIC_BOOM, 1);
                         })
                         .onExecute((boss, level, target) -> {

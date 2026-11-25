@@ -81,7 +81,7 @@ public final class DunwichHorror extends AncientOne {
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SMOKE, 5);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.CRIT, 3, 0.8);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.CRIT, 3, 0.8);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.teleportBehind(boss, level, target);
@@ -98,7 +98,7 @@ public final class DunwichHorror extends AncientOne {
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.GUST, 4);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMOKE, 2, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SMOKE, 2, 1.0);
                         })
                         .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
                             BossAbilities.knockAway(boss, player, 0.8, 0.3);

@@ -104,11 +104,11 @@ public final class Cthugha extends AncientOne {
                         .sound(SoundEvents.BLAZE_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.FLAME, 4);
-                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SMALL_FLAME, 12);
+                            BossAbilities.ring(boss, level, target.position(), 4.5, ParticleTypes.SMALL_FLAME, 12);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 6.0F);
-                            for (var player : BossAbilities.playersAround(level, target.position(), 5.0)) {
+                            for (var player : BossAbilities.playersAround(boss, level, target.position(), 5.0)) {
                                 BossAbilities.burn(player, 4.0F);
                             }
                         })
@@ -122,7 +122,7 @@ public final class Cthugha extends AncientOne {
                         .sound(SoundEvents.BLAZE_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.FLAME, 5);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SMALL_FLAME, 3, 1.0);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SMALL_FLAME, 3, 1.0);
                         })
                         .onExecute((boss, level, target) -> {
                             boss.bossCombat().summon(level, ModEntities.ASHEN_WISP.get(), 2, target);

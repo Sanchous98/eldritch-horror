@@ -95,12 +95,12 @@ public final class RhanTegoth extends AncientOne {
                         .sound(SoundEvents.SNOW_GOLEM_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SNOWFLAKE, 5);
-                            BossAbilities.ring(level, boss.position(), 5.0, ParticleTypes.SNOWFLAKE, 14);
+                            BossAbilities.ring(boss, level, boss.position(), 5.0, ParticleTypes.SNOWFLAKE, 14);
                         })
                         .onExecute((boss, level, target) -> {
                             boss.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 100, 0));
                             BossAbilities.damageAround(boss, level, boss.position(), 6.0, 6.0F);
-                            BossAbilities.effectAround(level, boss.position(), 6.0, MobEffects.SLOWNESS, 100, 1);
+                            BossAbilities.effectAround(boss, level, boss.position(), 6.0, MobEffects.SLOWNESS, 100, 1);
                         })
                         .build(),
                 SimpleBossAbility.builder("leap")
@@ -111,7 +111,7 @@ public final class RhanTegoth extends AncientOne {
                         .warning("The idol moves — it is coming down!")
                         .sound(SoundEvents.RAVAGER_ROAR)
                         .onTelegraph((boss, level, target, ticksLeft) ->
-                                BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 4, 0.8))
+                                BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SNOWFLAKE, 4, 0.8))
                         .onExecute((boss, level, target) -> {
                             BossAbilities.teleportBeside(boss, level, target);
                             BossAbilities.hit(boss, level, target, 9.0F);

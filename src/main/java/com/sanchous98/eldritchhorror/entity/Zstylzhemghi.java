@@ -97,7 +97,7 @@ public final class Zstylzhemghi extends AncientOne {
                         .sound(SoundEvents.ENDERMAN_SCREAM)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.WARPED_SPORE, 4);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.INFESTED, 3, 0.9);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.INFESTED, 3, 0.9);
                         })
                         .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 70.0, player -> {
                             BossAbilities.effect(player, MobEffects.WITHER, 80, 0);

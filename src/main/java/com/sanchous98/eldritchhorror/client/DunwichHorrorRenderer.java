@@ -1,6 +1,7 @@
 package com.sanchous98.eldritchhorror.client;
 
 import com.sanchous98.eldritchhorror.EldritchHorror;
+import com.sanchous98.eldritchhorror.entity.AncientOneSizes;
 import com.sanchous98.eldritchhorror.client.model.BossRenderer;
 import com.sanchous98.eldritchhorror.client.model.boss.DunwichHorrorModel;
 import com.sanchous98.eldritchhorror.entity.DunwichHorror;
@@ -13,7 +14,9 @@ public final class DunwichHorrorRenderer extends BossRenderer<DunwichHorror, Dun
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(EldritchHorror.MODID, "textures/entity/dunwich_horror.png");
 
+    private static final AncientOneSizes.Size SIZE = AncientOneSizes.of("dunwich_horror");
+
     public DunwichHorrorRenderer(EntityRendererProvider.Context context) {
-        super(context, new DunwichHorrorModel(context.bakeLayer(DunwichHorrorModel.LAYER)), 1.6F, TEXTURE, 1.50F);
+        super(context, new DunwichHorrorModel(context.bakeLayer(DunwichHorrorModel.LAYER)), SIZE.shadow(1.6F), TEXTURE, SIZE.renderScale());
     }
 }

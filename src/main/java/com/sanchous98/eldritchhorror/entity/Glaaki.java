@@ -111,7 +111,7 @@ public final class Glaaki extends AncientOne {
                         .warning("Glaaki's servitors reach for you — move!")
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.BUBBLE, 3, 0.9);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.BUBBLE, 3, 0.9);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.SQUID_INK, 2);
                         })
                         .onExecute((boss, level, target) -> {
@@ -140,14 +140,14 @@ public final class Glaaki extends AncientOne {
                         .warning("The dream closes over your eyes — break away!")
                         .sound(SoundEvents.ELDER_GUARDIAN_CURSE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.WITCH, 2, 1.2);
-                            BossAbilities.ring(level, target.position(), 3.0, ParticleTypes.SQUID_INK, 10);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.WITCH, 2, 1.2);
+                            BossAbilities.ring(boss, level, target.position(), 3.0, ParticleTypes.SQUID_INK, 10);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 4.0, 5.0F);
-                            BossAbilities.effectAround(level, target.position(), 4.0, MobEffects.BLINDNESS, 100, 0);
-                            BossAbilities.effectAround(level, target.position(), 4.0, MobEffects.DARKNESS, 80, 0);
-                            BossAbilities.effectAround(level, target.position(), 4.0, MobEffects.NAUSEA, 160, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 4.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 4.0, MobEffects.DARKNESS, 80, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 4.0, MobEffects.NAUSEA, 160, 0);
                         })
                         .build()
         );

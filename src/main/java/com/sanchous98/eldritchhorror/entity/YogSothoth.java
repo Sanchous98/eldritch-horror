@@ -104,7 +104,7 @@ public final class YogSothoth extends AncientOne {
                         .warning("The gate opens beside you — move!")
                         .sound(SoundEvents.ENDERMAN_SCREAM)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.PORTAL, 5, 1.2);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.PORTAL, 5, 1.2);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.REVERSE_PORTAL, 4);
                         })
                         .onExecute((boss, level, target) -> {
@@ -121,8 +121,8 @@ public final class YogSothoth extends AncientOne {
                         .warning("The gate draws you in — break away!")
                         .sound(SoundEvents.ENDERMAN_SCREAM)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.END_ROD, 4, 1.2);
-                            BossAbilities.ring(level, target.position(), 3.0, ParticleTypes.PORTAL, 12);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.END_ROD, 4, 1.2);
+                            BossAbilities.ring(boss, level, target.position(), 3.0, ParticleTypes.PORTAL, 12);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.pull(boss, target, 0.9, 0.2);
@@ -138,13 +138,13 @@ public final class YogSothoth extends AncientOne {
                         .warning("Yog-Sothoth opens — get clear!")
                         .sound(SoundEvents.WARDEN_SONIC_BOOM)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.ring(level, target.position(), 7.0, ParticleTypes.REVERSE_PORTAL, 20);
+                            BossAbilities.ring(boss, level, target.position(), 7.0, ParticleTypes.REVERSE_PORTAL, 20);
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.END_ROD, 6);
                         })
                         .onExecute((boss, level, target) -> {
                             BossAbilities.damageAround(boss, level, target.position(), 7.0, 10.0F);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.WITHER, 120, 0);
-                            BossAbilities.effectAround(level, target.position(), 7.0, MobEffects.BLINDNESS, 100, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.WITHER, 120, 0);
+                            BossAbilities.effectAround(boss, level, target.position(), 7.0, MobEffects.BLINDNESS, 100, 0);
                         })
                         .build()
         );

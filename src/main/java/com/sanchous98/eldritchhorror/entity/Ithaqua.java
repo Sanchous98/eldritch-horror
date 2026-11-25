@@ -95,7 +95,7 @@ public final class Ithaqua extends AncientOne {
                         .sound(SoundEvents.WARDEN_SONIC_CHARGE)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
                             BossAbilities.telegraphBurst(level, boss, ParticleTypes.GUST, 3);
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 3, 0.8);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SNOWFLAKE, 3, 0.8);
                         })
                         .onExecute((boss, level, target) -> BossAbilities.cone(level, boss, 12.0, 65.0, player -> {
                             BossAbilities.knockAway(boss, player, 0.9, 0.35);
@@ -112,12 +112,12 @@ public final class Ithaqua extends AncientOne {
                         .warning("The cold takes your hands — move!")
                         .sound(SoundEvents.SNOW_GOLEM_SHOOT)
                         .onTelegraph((boss, level, target, ticksLeft) -> {
-                            BossAbilities.telegraphAt(level, target, ParticleTypes.SNOWFLAKE, 5, 1.4);
-                            BossAbilities.ring(level, target.position(), 4.5, ParticleTypes.SNOWFLAKE, 12);
+                            BossAbilities.telegraphAt(boss, level, target, ParticleTypes.SNOWFLAKE, 5, 1.4);
+                            BossAbilities.ring(boss, level, target.position(), 4.5, ParticleTypes.SNOWFLAKE, 12);
                         })
                         .onExecute((boss, level, target) -> {
-                            BossAbilities.freezeAround(level, target.position(), 5.0, 140);
-                            BossAbilities.effectAround(level, target.position(), 5.0, MobEffects.WEAKNESS, 120, 0);
+                            BossAbilities.freezeAround(boss, level, target.position(), 5.0, 140);
+                            BossAbilities.effectAround(boss, level, target.position(), 5.0, MobEffects.WEAKNESS, 120, 0);
                             BossAbilities.damageAround(boss, level, target.position(), 5.0, 5.0F);
                         })
                         .build()
