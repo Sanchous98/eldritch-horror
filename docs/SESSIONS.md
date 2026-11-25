@@ -26,8 +26,12 @@ template world (pristine, never played)
   `max-players`, its own log, its own world.
 - **Player cap**: `max-players` on the session's own port. A full session refuses further joins;
   players connect to another port.
-- **No proxy required**: each session is reachable directly at `host:<port>`. A proxy can be added
-  later for a single entry point and routing, but it is not needed for isolation.
+- **One address (Velocity)**: the public address is the proxy (`host:25565`); sessions listen on
+  loopback ports behind it (`s1 = 25566`, `s2 = 25567`). The proxy authenticates the player once
+  and forwards the profile with modern forwarding; backends run `online-mode=false` and trust only
+  the proxy secret. Players switch sessions with Velocity's built-in `/server <name>`.
+- Without a proxy each session is also reachable directly at its port, but direct joins to an
+  `online-mode=false` backend are rejected unless the proxy's forwarding data is present.
 
 ## Session seed and randomness
 
@@ -56,6 +60,15 @@ Current host (2 vCPU / 12 GB / 200 GB, Ampere A1 free tier):
 
 So the free-tier host runs **two** concurrent sessions. More sessions need more RAM and disk (a paid
 shape or a second host); the mod does not change.
+
+## Forwarding on NeoForge 26.3
+
+Velocity's modern forwarding needs a server-side bridge. The released Proxy Compatible Forge
+supports up to 26.2; a **26.3 build is produced from its source** (version trampoline copied to
+`v26_3`, `ModConfig.Type.LOCAL` replacing the removed `COMMON`, NeoForge `26.3.0.115`) and lives in
+every session's `run/mods`. The proxy secret is shared through `forwarding.secret` and
+`config/proxy-compatible-forge.toml`. A failed mixin would crash the backend at boot, so after any
+PCF rebuild boot one session and read `Done (` before switching the proxy over.
 
 ## Provisioning a session
 
